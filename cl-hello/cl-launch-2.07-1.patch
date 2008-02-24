@@ -1,0 +1,33 @@
+clisp below 2.39 doesn't support :script, sbcl below 0.9.10
+doesn't support :executable.
+
+You don't require this patch if you use new clisp or sbcl.
+
+--- cl-launch.orig	2007-05-18 10:39:14.000000000 +0800
++++ cl-launch	2008-02-24 18:58:03.000000000 +0800
+@@ -1,6 +1,6 @@
+ #!/bin/sh
+ #| cl-launch.sh -- shell wrapper generator for Common Lisp software -*- Lisp -*-
+-CL_LAUNCH_VERSION='2.07'
++CL_LAUNCH_VERSION='2.07-1'
+ license_information () {
+ AUTHOR_NOTE="\
+ # Please send your improvements to the author:
+@@ -2301,7 +2301,7 @@
+    :executable executable
+    :init-function (when executable #'resume)
+    ;; :parse-options (not executable) ;--- requires a patch to clisp
+-   :script t
++   ;; :script t
+    :quiet t
+    :norc t
+    :start-package package
+@@ -2311,7 +2311,7 @@
+     ;;(sb-pcl::precompile-random-code-segments) ;--- it is ugly slow at compile-time (!) when the initial core is a big CLOS program. If you want it, do it yourself
+    (setf sb-ext::*gc-run-time* 0)
+    (apply 'sb-ext:save-lisp-and-die filename
+-    :executable executable
++    ;;:executable executable
+     (when executable (list :toplevel #'resume))))
+   #+cmu
+   (progn
