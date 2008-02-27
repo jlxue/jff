@@ -1,0 +1,7 @@
+MAILTO=cvs2svn
+
+# m h  dom mon dow   command
+
+# run five minutes after midnight, every day
+5 0 * * * /home/cvs2svn/do-svk-cvs2svn-cron.sh
+
