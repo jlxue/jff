@@ -1,0 +1,174 @@
+"===================================BEGIN========================================
+
+"------------------------------------from default .vimrc of GVIM 6.4 for Win32 --
+language en
+
+source $VIMRUNTIME/vimrc_example.vim
+
+set diffexpr=MyDiff()
+function MyDiff()
+  let opt = '-a --binary '
+  if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
+  if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
+  let arg1 = v:fname_in
+  if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
+  let arg2 = v:fname_new
+  if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
+  let arg3 = v:fname_out
+  if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
+  silent execute '!' . $VIMRUNTIME . '/diff ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
+endfunction
+
+"-------------------------------------key mappings-------------------------------
+nn j gj
+nn k gk
+
+"   :help :caddexpr
+"   :help :laddexpr
+"   see Tip #1063 below.
+nmap <F2> :g//laddexpr expand("%") . ":" . line(".") . ":" . getline(".")<CR>:lopen<CR>
+
+nmap <F3>  :redir @a<CR>:g//<CR>:redir END<CR>:new<CR>:put! a<CR><CR>
+"	Tip #1063 Send results of a g// to a new window
+"	http://www.vim.org/tips/tip.php?tip_id=1063
+"	
+"	How to Use:-
+"	perfect your g/regexp/
+"	The when you are satisfied hit <F3>
+"	
+"	Explanation:-
+"	:redir @a            redirect output to register a
+"	:g//                    repeat last global command
+"	:redir END          end redirection
+"	:new                  create new window
+"	:put! a                paste register a into new window
+"	
+"	Idea  by Peppe (map by me zzapper)
+"	
+
+" when `paste' is set, filetype indent and autoindent don't work
+nmap <F4> :set paste<CR>"+p:set nopaste<CR>
+nmap <F5> :set paste<CR>"*p:set nopaste<CR>
+imap <F4> <ESC>:set paste<CR>"+p:set nopaste<CR>i
+imap <F5> <ESC>:set paste<CR>"*p:set nopaste<CR>i
+
+" copy to CLIPBOARD selection
+vmap <F6> "+y
+
+" Let F7 to show buf explorer(bufexplorer plugin)
+map <F7> <ESC>\be
+
+" mru.vim
+nnoremap <silent> <S-F7> :MRU<CR>
+
+" Define g:qb_hotkey before source qbuf.vim
+let g:qb_hotkey="<F8>"
+
+"Taglist plugin
+nnoremap <silent> <F9> :TlistToggle<CR>
+
+
+"--------------------------------------for plugins-------------------------------
+
+" incompatibility between vim 6.x and 7.0
+" :help incompatible-7
+" :help ft-tex-plugin
+let g:tex_flavor = "latex"        " plaintex, context, latex
+
+
+" for taglist plugin
+let Tlist_Show_Menu = 1
+let Tlist_Ctags_Cmd = $VIMRUNTIME . '/ctags'
+
+" for mru.vim
+let MRU_Max_Entries = 50
+
+"--------------------------------------misc settings-----------------------------
+"set tags+=/home/dieken/Work/usr_include_tags
+
+set nu
+
+set ignorecase smartcase
+
+set sidescrolloff=10
+"set scrolloff=5
+" to keep the cursor centered in the window
+" set scrolloff=999
+" set sidescrolloff=999
+
+if has("gui_running")
+	colorscheme peachpuff
+    set cursorline
+    hi CursorLine guibg=LightGreen
+else
+"	colorscheme murphy
+"	hi link String Comment
+	colorscheme darkblue
+	set cursorline
+	hi MatchParen ctermbg=Blue
+endif
+
+set showmatch
+" set time to 0.5 second
+"set matchtime=5
+
+set writebackup
+set nobackup
+
+set wildmode=list:full
+set wildmenu
+
+" text auto formation mode.
+" r -> <ENTER> then add comment leader
+" o -> o/O then add comment leader
+set formatoptions+=tcrqvmMB
+
+set textwidth=72
+set expandtab
+set tabstop=4
+set shiftwidth=4
+"set cinoptions=t0,:0,(0,g0,j1
+set cinoptions=t0,:0,g0,j1
+
+"set guifont=Bitstream\ Vera\ Sans\ Mono\ 10,Monospace\ 10,Courier\ New\ 11
+
+" always show status line
+set laststatus=2
+set statusline=%F%*\ %y[%{&fenc}]\ %2*%r%m%*\ %l,%c\ %=%l/%L\ (%p%%)%*\ %{strftime('%Y-%m-%d-%H:%M')}
+
+set virtualedit=block
+
+set fileformat=dos
+
+set fencs=ucs-bom,utf-8,prc
+set encoding=utf-8
+
+set nowrap
+set nowrapscan
+
+set more
+
+" no beep or flash
+"set vb t_vb=
+
+set display=lastline
+
+set backupcopy+=breakhardlink
+
+"--------------------------------------for autocmd and filetype------------------
+filetype on
+filetype plugin on
+filetype indent on
+syntax on
+
+" backup last search pattern for each window
+au WinEnter * :if exists("w:blsp") && w:blsp != '' | let @/=w:blsp | endif
+au WinLeave * :let w:blsp=@/
+
+" au BufNewFile,BufRead *.c,*.cpp
+"     \   :setlocal equalprg=d:\program\astyle\bin\AStyle.exe\ --style=kr\ -l
+
+" au VimEnter * :Vexplore | :vertical resize 20 | :wincmd l
+
+"===================================END==========================================
+

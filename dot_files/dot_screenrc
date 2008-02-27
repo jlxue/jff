@@ -1,0 +1,41 @@
+vbell off
+defescape ^Jj
+escape ^Jj
+
+startup_message off
+
+# define a bigger scrollback, default is 100 lines, I like large scrollback
+defscrollback 2048
+
+# An alternative hardstatus to display a bar at the bottom listing the
+# windownames and highlighting the current windowname in blue. (This is only
+# enabled if there is no hardstatus setting for your terminal)
+hardstatus on
+hardstatus alwayslastline
+hardstatus string "%{.bW}%-w%{.rW}%n %t%{-}%+w %=%{..G} %H %{..Y} %m/%d %C%a "
+
+# key bingdings
+# remove some stupid/dangerous key bindings
+bind k
+bind ^k
+bind .
+bind ^\
+bind \\
+bind ^h
+bind h
+bind l windowlist
+bindkey ^[, prev
+bindkey ^[. next
+
+# some useful keys for resizing
+bind = resize =
+bind + resize +1
+bind - resize -1
+bind _ resize max
+
+# bind some keys for moving between split windows
+bind j focus down
+bind k focus up
+bind t focus top
+bind b focus bottom
+
