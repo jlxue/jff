@@ -1,0 +1,41 @@
+% vim:ts=2 sw=2 et
+% nobmp.tex : test for full support of LaTeX CJK.
+% Edward G.J. Lee (02/10/06)
+\documentclass[12pt,a4paper]{article}
+\usepackage{CJKutf8,array}
+\usepackage{ccmap}
+\usepackage[T1]{fontenc}
+\parindent=0pt
+\renewcommand\CJKglue{\hskip -0.3pt plus 0.08\baselineskip}
+\linespread{1.382}
+\parskip=1.618ex
+%\renewcommand{\arraystretch}{1.2}
+\begin{document}
+\begin{CJK}{UTF8}{songext}
+\begin{center}
+\section*{\LaTeX\ CJK full Unicode support test}
+
+\begin{tabular}{>{\tt }p{2cm}p{1cm}>{\tt }p{2cm}p{1cm}>{\tt }p{2cm}p{1cm}}
+\hline
+uni20021 & 𠀡 & uni2003e & 𠀾 & uni20016 & 𠀖     \\
+uni2004e & 𠁎 & uni200ee & 𠃮 & uni20017 & 𠀗    \\
+uni201c1 & 𠇁 & uni201d4 & 𠇔 & uni20053 & 𠁓 \\
+uni2020c & 𠈌 & uni202bf & 𠊿 & uni2006d & 𠁭 \\
+uni204a3 & 𠒣 & uni204fe & 𠓾 & uni201e6 & 𠇦 \\
+uni20547 & 𠕇 & uni20acd & 𠫍 & uni20407 & 𠐇 \\
+uni21305 & 𡌅 & uni21398 & 𡎘 & uni205ef & 𠗯 \\
+uni21619 & 𡘙 & uni217b4 & 𡞴 & uni206b4 & 𠚴 \\
+uni21980 & 𡦀 & uni21a4b & 𡩋 & uni20ad0 & 𠫐 \\
+uni21dba & 𡶺 & uni22c38 & 𢰸 & uni20c8e & 𠲎 \\
+\hline
+\end{tabular}
+\end{center}
+
+這是關於 \LaTeX\ CJK 擴增 Unicode 碼位至 \texttt{U+10FFFF} 的測試，這些包括了 CJK Unified Ideographs Extension B 的罕用字。例如：𠀡𠀢𠀣𠀤𠀥𠀻𠀼𠀽𠀾𠁁𠁍𠁛𠁜𠁘𠁞𠁠𠂁𠂃𠁷𠂅𠂕𠂐𠂏𠃃𠃂𠃙𠃈𠃇𠃬𠃦𠃭𠃻𠃺𠄣𠄷𠅠𠆆𠇁𠇀𠇂𠈿𠈾……等等。
+
+這些字平常不見得用得到，但有時候為了一、二個字就得去造字，非常麻煩，現在有支援的話，只要使用大字集的字型就可以取用得到。
+
+而且，我們中文有些字其實也是滿常用的，只不過是後來才在 CJK Unified Ideographs Extension B 收錄，這時候就顯得非常實用了，例如：𠃮𠆧𠇁𠊿及香港字集所增加的：𪎩𧜵𧀎𡷊𠗐𠱂𢳆𠳔𠸉𠸎𠹭𠺪𠼱𠼻𠽌𡁵𡃁等等。
+
+\end{CJK}
+\end{document}
