@@ -1,0 +1,55 @@
+#! /usr/bin/perl -w
+use strict;
+use warnings;
+
+use Encode;
+
+binmode(STDERR, ":utf8");
+
+my $repos = $ARGV[0];
+my $txn = $ARGV[1];
+my $retval = 0;
+
+
+my %messages = (
+	"TooShort" => "Log message too short after leading and trailing white characters removed.\n",
+	"NoDefault" => "You shouldn't use default log provided by TortoiseSVN.\n" .
+		       "Please input sensible log message.\n"
+		);
+
+my $info = `/usr/bin/svnlook info $repos -t $txn`;
+if ($? != 0) {
+	print STDERR "svnlook not found or 'svnlook info' failed!\n";
+	exit 1;
+}
+$info = nativeToInternal($info);
+exit 1 if (! $info);
+
+my ($author, $date, $logsize, $log) = split /\n/, $info, 4;
+
+$log =~ s/^\s*(.*?)\s*$/$1/s;
+
+if (length($log) < 2) { 
+	print STDERR $messages{"TooShort"};
+	$retval = 1;
+} elsif (($log eq "Added a file remotely") || ($log eq "Added a folder remotely") ||
+		($log eq "Removed file/folder") || ($log eq "Renamed remotely")) {
+	print STDERR $messages{"NoDefault"};
+	$retval = 1;
+}
+
+exit $retval;
+
+# ------------------------------------------SUBROUTINES------------------------------------
+sub nativeToInternal {
+	#if ((@_ < 1) || (ref(\$_[0]) ne 'SCALAR')) { print STDERR "Invalid arg\n"; return undef; }
+	my $string = $_[0];
+	eval {
+		no warnings 'all';
+		local $SIG{'__DIE__'} = sub {};
+		local $SIG{'__WARN__'} = sub {};
+		$string = decode("utf-8", $string, Encode::FB_CROAK);
+	};
+	return $@ ? undef : $string;
+}
+
