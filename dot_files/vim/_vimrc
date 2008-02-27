@@ -1,7 +1,7 @@
 "===================================BEGIN========================================
 
 "------------------------------------from default .vimrc of GVIM 6.4 for Win32 --
-language en
+" language en
 
 source $VIMRUNTIME/vimrc_example.vim
 
