@@ -16,7 +16,8 @@ function MyDiff()
   if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
   let arg3 = v:fname_out
   if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
-  silent execute '!' . $VIMRUNTIME . '/diff ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
+  "silent execute '!' . $VIMRUNTIME . '/diff ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
+  silent execute '! diff ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
 endfunction
 
 "-------------------------------------key mappings-------------------------------
@@ -78,14 +79,14 @@ let g:tex_flavor = "latex"        " plaintex, context, latex
 
 " for taglist plugin
 let Tlist_Show_Menu = 1
-let Tlist_Ctags_Cmd = $VIMRUNTIME . '/ctags'
+"let Tlist_Ctags_Cmd = $VIMRUNTIME . '/ctags'
+let Tlist_File_Fold_Auto_Close = 1
+
 
 " for mru.vim
 let MRU_Max_Entries = 50
 
 "--------------------------------------misc settings-----------------------------
-"set tags+=/home/dieken/Work/usr_include_tags
-
 set nu
 
 set ignorecase smartcase
@@ -139,8 +140,6 @@ set laststatus=2
 set statusline=%F%*\ %y[%{&fenc}]\ %2*%r%m%*\ %l,%c\ %=%l/%L\ (%p%%)%*\ %{strftime('%Y-%m-%d-%H:%M')}
 
 set virtualedit=block
-
-set fileformat=dos
 
 set fencs=ucs-bom,utf-8,prc
 set encoding=utf-8
