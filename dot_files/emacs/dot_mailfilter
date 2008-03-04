@@ -1,0 +1,238 @@
+# - maildrop mailinglist.
+#   http://lists.sourceforge.net/lists/listinfo/courier-maildrop
+
+# - Please browse the mailinglist archives for more examples.
+#   http://sourceforge.net/mailarchive/forum.php?forum=courier-maildrop
+
+# - Save this file as .mailfilter in your home directory and do
+#   chmod 600 .mailfilter
+
+# - Do not edit your .mailfilter file with a DOS or WINDOWS
+#   texteditor!!
+
+
+# - Linebreaking doesn't work inside a pattern. So the following
+#   rule cannot work:
+#
+#if (/^Subject:.*(exim|sendmail| \
+#    gdm|xdm|imap|cgi)/)
+#
+#   and must be in one line:
+#
+# if (/^Subject:.*(exim|sendmail|gdm|xdm|imap|cgi)/)
+#
+#
+# - Linebreaking only works for quotet text and between patterns:
+#
+#  "Imagine this is as a \
+#                   long text string"
+#
+#
+#if (/^To:.*mutt/ \
+#  || /^[Cc][Cc]:.*mutt/)
+#
+
+SHELL       = "/bin/bash"
+DEFAULT     = "$HOME/maildirs/default"
+MAILDIRS    = "$HOME/maildirs"
+
+MAILDIR_JUNK    = "$MAILDIRS/junk"
+
+# the server where mails come from, for example, gmail
+SERVER          = "$1"
+
+logfile "$HOME/.maildrop.log"
+
+########################
+#   Maildir                             To or Cc address
+#   =============================       ====================================
+#   local                               @tsg
+#   126                                 dieken@126.com
+#   gmail.apr                           dev@apr.apache.org
+#   gmail.bazaar                        bazaar@lists.canonical.com
+#   gmail.debian.bugs                   @bugs.debian.org
+#   gmail.debian.devel                  debian-devel@lists.debian.org
+#   gmail.debian.digest                 debian-devel-digest@lists.debian.org
+#   gmail.debian.dpkg                   debian-dpkg@lists.debian.org
+#   gmail.debian.news                   debian-news@lists.debian.org
+#   gmail.git                           git@vger.kernel.org
+#   gmail.help-gnu-emacs                help-gnu-emacs@gnu.org
+#   gmail.mercurial                     mercurial@selenic.com
+#   gmail.netbsd.current-users          current-users@NetBSD.org
+#   gmail.netbsd.bugs                   netbsd-bugs@netbsd.org
+#   gmail.netbsd.users                  netbsd-users@NetBSD.org
+#   gmail.netbsd.pkgsrc-bugs            pkgsrc-bugs@netbsd.org
+#   gmail.netbsd.pkgsrc-changes         pkgsrc-changes@NetBSD.org
+#   gmail.netbsd.pkgsrc-users           pkgsrc-users@netbsd.org
+#   gmail.netbsd.source                 source@netbsd.org
+#   gmail.netbsd.source_changes         source-changes@NetBSD.org
+#   gmail.netbsd.tech-kern              tech-kern@netbsd.org
+#   gmail.svk-devel                     svk-devel@bestpractical.com
+#   gmail.svk-users                     svk-users@bestpractical.com
+#   gmail.svn-dev                       dev@subversion.tigris.org
+#   gmail.svn-users                     users@subversion.tigris.org
+#   gmail.tsvn-dev                      dev@tortoisesvn.tigris.org
+#   gmail.tsvn-users                    users@tortoisesvn.tigris.org
+#   gmail.vim-dev                       vim_dev@googlegroups.com
+#   gmail.vim-users                     vim_use@googlegroups.com
+#   gmail.xorg                          @lists.freedesktop.org
+########################
+
+
+# if ( /^Delivered-To:\s*.*@gmail\.com/:h )
+if ( "$SERVER" eq "gmail")
+{
+    ADDR = escape("dev@apr.apache.org")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+        to "$MAILDIRS/gmail.apr"
+
+    ADDR = escape("bazaar@lists.canonical.com")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+        to "$MAILDIRS/gmail.bazaar"
+
+    ADDR = escape("debian.org")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+    {
+        ADDR = escape("@bugs.debian.org")
+        if ( $MATCH =~ /^(To|Cc):\s*.*$ADDR/ )
+            to "$MAILDIRS/gmail.debian.bugs"
+
+        ADDR = escape("debian-devel@lists.debian.org")
+        if ( $MATCH =~ /^(To|Cc):\s*.*$ADDR/ )
+            to "$MAILDIRS/gmail.debian.devel"
+
+        ADDR = escape("debian-devel-digest@lists.debian.org")
+        if ( $MATCH =~ /^(To|Cc):\s*.*$ADDR/ )
+            to "$MAILDIRS/gmail.debian.digest"
+
+        ADDR = escape("debian-dpkg@lists.debian.org")
+        if ( $MATCH =~ /^(To|Cc):\s*.*$ADDR/ )
+            to "$MAILDIRS/gmail.debian.dpkg"
+
+        ADDR = escape("debian-news@lists.debian.org")
+        if ( $MATCH =~ /^(To|Cc):\s*.*$ADDR/ )
+            to "$MAILDIRS/gmail.debian.news"
+    }
+
+    ADDR = escape("git@vger.kernel.org")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+        to "$MAILDIRS/gmail.git"
+
+    ADDR = escape("help-gnu-emacs@gnu.org")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+        to "$MAILDIRS/gmail.help-gnu-emacs"
+
+    ADDR = escape("mercurial@selenic.com")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+        to "$MAILDIRS/gmail.mercurial"
+
+    ADDR = escape("netbsd.org")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+    {
+        ADDR = escape("current-users@NetBSD.org")
+        if ( $MATCH =~ /^(To|Cc):\s*.*$ADDR/ )
+            to "$MAILDIRS/gmail.netbsd.current-users"
+
+        ADDR = escape("netbsd-bugs@netbsd.org")
+        if ( $MATCH =~ /^(To|Cc):\s*.*$ADDR/ )
+            to "$MAILDIRS/gmail.netbsd.bugs"
+
+        ADDR = escape("netbsd-users@NetBSD.org")
+        if ( $MATCH =~ /^(To|Cc):\s*.*$ADDR/ )
+            to "$MAILDIRS/gmail.netbsd.users"
+
+        ADDR = escape("pkgsrc-bugs@netbsd.org")
+        if ( $MATCH =~ /^(To|Cc):\s*.*$ADDR/ )
+            to "$MAILDIRS/gmail.netbsd.pkgsrc-bugs"
+
+        ADDR = escape("pkgsrc-changes@NetBSD.org")
+        if ( $MATCH =~ /^(To|Cc):\s*.*$ADDR/ )
+            to "$MAILDIRS/gmail.netbsd.pkgsrc-changes"
+
+        ADDR = escape("pkgsrc-users@netbsd.org")
+        if ( $MATCH =~ /^(To|Cc):\s*.*$ADDR/ )
+            to "$MAILDIRS/gmail.netbsd.pkgsrc-users"
+
+        ADDR = escape("source@netbsd.org")
+        if ( $MATCH =~ /^(To|Cc):\s*.*$ADDR/ )
+            to "$MAILDIRS/gmail.netbsd.source"
+
+        ADDR = escape("source-changes@NetBSD.org")
+        if ( $MATCH =~ /^(To|Cc):\s*.*$ADDR/ )
+            to "$MAILDIRS/gmail.netbsd.source_changes"
+
+        ADDR = escape("tech-kern@netbsd.org")
+        if ( $MATCH =~ /^(To|Cc):\s*.*$ADDR/ )
+            to "$MAILDIRS/gmail.netbsd.tech-kern"
+    }
+
+    ADDR = escape("svk-devel@bestpractical.com")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+        to "$MAILDIRS/gmail.svk-devel"
+
+    ADDR = escape("svk-users@bestpractical.com")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+        to "$MAILDIRS/gmail.svk-users"
+
+    ADDR = escape("dev@subversion.tigris.org")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+        to "$MAILDIRS/gmail.svn-dev"
+
+    ADDR = escape("users@subversion.tigris.org")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+        to "$MAILDIRS/gmail.svn-users"
+
+    ADDR = escape("dev@tortoisesvn.tigris.org")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+        to "$MAILDIRS/gmail.tsvn-dev"
+
+    ADDR = escape("users@tortoisesvn.tigris.org")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+        to "$MAILDIRS/gmail.tsvn-users"
+
+    ADDR = escape("vim_dev@googlegroups.com")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+        to "$MAILDIRS/gmail.vim-dev"
+
+    ADDR = escape("vim_use@googlegroups.com")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+        to "$MAILDIRS/gmail.vim-users"
+
+    ADDR = escape("@lists.freedesktop.org")
+    if ( /^(To|Cc):\s*.*$ADDR/:h )
+        to "$MAILDIRS/gmail.xorg"
+
+    if ( /^(From|To):\s*.*sea-occf/:h )
+        to "$MAILDIR_JUNK"
+}
+else
+{
+    if ( /^X-Spam-(Flag|Status):\s*Yes/:h )
+    {
+        # run sa-learn: Learn as spam
+        if ( /^X-Spam-Level:\s*\*{5,}/:h )
+            cc "| sa-learn --sync --spam"
+        to "$MAILDIR_JUNK"
+    }
+    else
+    {
+        # run sa-learn: learn as ham
+        if ( /^X-Spam-Level:\s*\*{0,5}\s*$/:h )
+            cc "| sa-learn --sync --ham"
+
+        ADDR = escape("@tsg")
+        if ( /^(From|To):\s*.*$ADDR/:h )
+            to "$MAILDIRS/local"
+
+        ADDR = escape("dieken@126.com")
+        if ( /^(To|Cc):\s*.*$ADDR/:h )
+            to "$MAILDIRS/126"
+    }
+}
+
+exception {
+    to "$DEFAULT"
+}
+
+log "ERROR: failed to deliver!"
+

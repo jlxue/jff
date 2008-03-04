@@ -1,0 +1,31 @@
+# Set default values for all following accounts.
+defaults
+tls             on
+tls_trust_file  /etc/ssl/certs/ca-certificates.crt
+logfile         ~/.msmtp.log
+timeout         30
+
+
+account         126
+domain          126.com
+host            smtp.126.com
+from            dieken@126.com
+tls             off
+auth            login
+user            dieken
+password        MYPASSWD
+
+
+account         gmail
+domain          gmail.com
+host            smtp.gmail.com
+from            yubao.liu@gmail.com
+auth            login
+port            587
+user            yubao.liu@gmail.com
+password        MYPASSWD
+
+
+# Set a default account
+account default : gmail
+

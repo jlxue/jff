@@ -1,0 +1,8 @@
+;; -*- lisp -*-
+
+#.(progn
+   (format t "~%; Lispworks init hack in ~A~%" *load-truename*)
+   (load "/home/dieken/.lispworks"))
+
+(("Window Positions:1280x800" (0 27 1270 717) (0 27 1280 721) (0 27 1280 721)))
+

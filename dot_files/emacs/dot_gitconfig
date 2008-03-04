@@ -1,0 +1,27 @@
+# vi: set noet sw=8 ts=8 sts=8 :
+
+[core]
+	logAllRefUpdates = true
+	compression = 9
+
+[color]
+	branch = auto
+	status = auto
+	diff   = auto
+
+[pack]
+	window = 64
+
+[user]
+	email = yubao.liu@gmail.com
+	name = Liu Yubao
+
+[merge]
+	summary = true
+
+[alias]
+	st = status
+	desc = describe
+	commit = ci
+	co = checkout
+	cat = cat-file

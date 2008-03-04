@@ -1,0 +1,24 @@
+[retriever]
+type        = SimplePOP3SSLRetriever
+server      = pop.gmail.com
+port        = 995
+username    = yubao.liu@gmail.com
+password    = MYPASSWD
+# timeout     = 60
+
+[destination]
+type        = MDA_external
+path        = /usr/bin/maildrop
+unixfrom    = true
+arguments   = ("~/.mailfilter", "gmail")
+
+[options]
+read_all    = false
+delete      = false
+max_message_size        = 12000000
+max_message_per_session = 200
+delivered_to            = false
+received                = false
+message_log             = ~/.getmail/gmail.log
+
+

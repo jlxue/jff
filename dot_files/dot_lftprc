@@ -1,0 +1,5 @@
+#debug
+set file:charset UTF-8
+set ftp:charset GBK
+set bmk:save-passwords true
+

@@ -1,0 +1,35 @@
+[retriever]
+type        = SimplePOP3Retriever
+server      = pop.126.com
+username    = dieken
+password    = MYPASSWD
+timeout     = 60
+
+[destination]
+type        = MDA_external
+path        = /usr/bin/maildrop
+unixfrom    = true
+arguments   = ("~/.mailfilter", "126")
+
+[options]
+read_all    = false
+delete      = false
+max_message_size        = 12000000
+max_message_per_session = 200
+delivered_to            = false
+received                = false
+message_log             = ~/.getmail/126.log
+
+[filter-1]
+type = Filter_external
+path = /usr/bin/spamc
+# maximum message size in bytes:
+arguments = ("-s", "11000000")
+
+# [filter-2]
+# type = Filter_classifier
+# path = /usr/bin/clamscan
+# arguments = ("--stdout", "--no-summary",
+#     "--mbox", "--infected", "-")
+# exitcodes_drop = (1,)
+

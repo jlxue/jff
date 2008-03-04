@@ -1,0 +1,29 @@
+##
+##  PLEASE READ /usr/share/doc/mlterm/README.Debian TO USE ANTI-ALIAS.
+##  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+##
+## Anti-aliased font settings for non-UTF8 encodings
+##
+
+ISO8859_1=Bitstream Vera Sans Mono-iso10646-1;
+ISO8859_2=Bitstream Vera Sans Mono-iso10646-1;
+ISO8859_3=Bitstream Vera Sans Mono-iso10646-1;
+ISO8859_4=Bitstream Vera Sans Mono-iso10646-1;
+ISO8859_5=Bitstream Vera Sans Mono-iso10646-1;
+ISO8859_7=Bitstream Vera Sans Mono-iso10646-1;
+ISO8859_9=Bitstream Vera Sans Mono-iso10646-1;
+ISO8859_10=Bitstream Vera Sans Mono-iso10646-1;
+ISO8859_13=Bitstream Vera Sans Mono-iso10646-1;
+ISO8859_14=Bitstream Vera Sans Mono-iso10646-1;
+ISO8859_15=Bitstream Vera Sans Mono-iso10646-1;
+KOI8_R=Bitstream Vera Sans Mono-iso10646-1;
+KOI8_U=Bitstream Vera Sans Mono-iso10646-1;
+JISX0208_1978=Bitstream Vera Sans Mono-iso10646-1;
+JISX0208_1983=Bitstream Vera Sans Mono-iso10646-1;
+JISX0208_1990=Bitstream Vera Sans Mono-iso10646-1;
+KSX1001_1997=Bitstream Vera Sans Mono-iso10646-1;
+BIG5=NSimSun-iso10646-1;
+GB2312_80=NSimSun-iso10646-1;
+GBK=NSimSun-iso10646-1;
+

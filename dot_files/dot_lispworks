@@ -1,0 +1,3 @@
+(load "/usr/share/common-lisp/source/common-lisp-controller/common-lisp-controller.lisp")
+(common-lisp-controller:init-common-lisp-controller-v4 "lispworks")
+
