@@ -1,0 +1,1499 @@
+= POE 服务器的演化 =
+Rocco Captuto
+
+Copyright 2002. All rights reserved. This tutorial is free text.
+It may be distributed(but not modified) under the same terms as
+POE.
+
+2007 年 11 月 24 日， Dieken at newsmth 译，原文见
+link:http://poe.perl.org/?Evolution_of_a_POE_Server[Evolution of a POE
+Server]。
+
+
+== 给急躁的人 ==
+
+这份教程展示了在四种抽象级别上实现同一个 TCP 服务器。如果你已经很
+熟悉 Perl 语言并且了解 POE 的基础知识，那么你应该能从下面的例子清单
+中学到后面所讲的知识：
+
+* xref:select[] 使用 IO::Select 实现 TCP server
+* xref:listenaccept[] 使用 POE::Wheel
+* xref:socketfactory[] 使用 POE::Wheel::SocketFactory
+* xref:component[] 使用 POE::Component::Server::TCP
+
+
+== 第一节 ==
+
+在深入 POE::Component::Server::TCP 的演化过程之前，我们先了解一下
+POE 的一些基本概念。
+
+
+=== 事件和事件处理器 ===
+
+POE 是一个网络和多任务的事件驱动编程框架，为了理解 POE，首先就要
+理解事件和事件驱动编程。
+
+理论上，事件是真实世界中发生的事情：早晨闹铃响起，烤面包机弹出面包，
+茶煮开了。在计算机程序的用户界面中，最普通的真实事件是鼠标移动、鼠标
+点击、按键。
+
+软件的事件(event)就是表示这些抽象事件的标记，他们不仅传达外部
+活动到一个程序中，也表明内部活动何时发生：定时器到期、socket 连接
+成功、下载完成。
+
+在事件驱动的程序中，一个分发器(dispatcher)分发事件到对应的事件处理
+函数，由于这些函数的职责就是处理事件，因此叫它们事件处理器(event
+handler)。
+
+POE 的事件处理器是协作式的，任一时刻只有一个事件处理器被执行，即使
+是 POE 的分发器也在事件处理器运行时被挂起。因此事件处理器能独占一个
+程序的所有资源，无需担心互斥问题。每个事件处理器只执行一个很短的时间片，
+尽可能快的返回，以让其它处理器执行，以此达到多个事件处理器协作的目的。
+
+
+=== POE 程序的组成 ===
+
+最简单的 POE 程序由两个模块以及一些自定义代码组成：POE::Kernel，
+POE::Session，以及事件处理器。
+
+
+==== 关于 POE::Kernel ====
+
+POE::Kernel 封装了 OS 内核服务中的事件模型：I/O 事件、定时器、
+信号(signal)等等。这些事件通知通过 POE::Kernel 的各种方法设置，
+比如 `select_read()`, `delay()` 和 `sig()` 。
+
+POE::Kernel 记录事件源和关心这些事件的任务之间的联系，每个任务
+调用 POE::Kernel 的各种方法注册事件。当 POE::Kernel 探测到一个
+任务没有事件处理后，它就自动结束这个任务。当所有任务都结束是，
+POE::Kernel 也就结束运行。
+
+
+==== 关于 POE::Session ====
+
+POE::Session 表示 POE::Kernel 管理的任务，它模拟了 UNIX 中的进程。
+每一个会话(session)有它自己的私有存储空间 ── 堆(heap)。存储在一个
+会话的堆里的数据不能轻易的被其它会话访问到。
+
+每一个会话拥有它自己的资源，处理它自己的事件，资源(比如 socket)
+产生的事件只被分发给拥有它们的会话。举例来说，多个会话可以设置各自
+的定时器，各自收到自己的定时器到期事件，每个会话都不知道在自己
+之外发生了什么事情。
+
+
+==== 关于事件处理器 ====
+
+事件处理器只是普通的 Perl 函数。使得它们特殊的是 POE::Kernel 传给
+它们的参数。
+
+POE::Kernel 跟调用函数一样通过 `@\_` 传递参数，这个数组的前七个
+元素定义了被分发事件的会话上下文(类似 OS 的进程上下文)，包括：
+当前运行的 POE::Kernel 示例的引用，事件本身的名字(以便一个事件
+处理器能处理多个事件)，当前会话私有堆的引用，事件来源会话的引用
+(参考 `perldoc POE::Session`)。
+
+`@\_` 的其它元素是事件自身的参数，它们的含义取决于当前分发的事件，
+比如 I/O 事件包含两个参数：文件句柄、事件类型(读、写、异常，参考
+select(2))。
+
+POE 不要求每个事件处理器都要编写 `my ($var1, $var2, $var3) = @\_;`
+这样的代码，通常 `@\_` 中的大部分元素都不被使用，因此 POE::Session
+定义了一些常量指代 `@\_` 中每个元素的偏移，这样能方便的将需要的
+元素提取出来(利用数组的 slice 语法)，也能允许 POE::Session 改变这些
+元素的顺序而不破坏兼容性。
+
+例如，KERNEL, HEAP, ARG0 分别是对 POE::Kernel 单实例的引用、当前
+会话私有堆的引用、此事件的第一个自定义参数，它们有两种赋值方式：
+
+.分别赋值
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+my $kernel = $_[KERNEL];
+my $heap   = $_[HEAP];
+my $thingy = $_[ARG0];
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.一次性赋值
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+my ( $kernel, $heap, $thingy ) = @_[ KERNEL, HEAP, ARG0 ];
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+当然，在事件处理器中也可以直接使用 $\_[KERNEL]， $\_[HEAP]， $\_[ARG0]，
+但对于自定义参数，ARG0 这样的名字含义太不明了。
+
+上面的三种参数使用情况中，我们都假装其它五个或更多的不需要的参数
+根本不存在。
+
+
+== 第二节 ==
+
+现在你知道了 POE 编程的基本概念，是时候深入一个现实的例子看它如何
+编写的了，这将为第三节打下基础。
+
+
+=== 如何编写一个 POE 程序 ===
+
+简单的 POE 程序包含三部分：
+
+* 导言区，加载模块
+* 主体，实例化一个或多个 POE::Session 对象，并运行它们
+* 定义事件处理器
+
+下面逐步讲解这个最简单的 POE 程序，完整代码代码见
+xref:single[]。
+
+
+==== 导言区 ====
+
+导言区是非常直白的，我们需要写一个 #! 行，并加载一些模块
+
+.POE preamble
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+use POE;
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+POE 模块暗地里做了些手脚，它会加载其它 POE 模块，包括 POE::Kernel、
+POE::Session，这两个模块是必需的。
+
+POE::Kernel 模块也不老实，它第一次被加载时会创建 POE::Kernel 的单
+实例(singleton)，这个单实例被整个程序使用。
+
+POE::Session 也不例外，它为每个事件处理器导出了一些常量：KERNEL、
+HEAP、ARG0 等等。
+
+因此一个简单的 `use POE;` 就为我们做了相当多的初始化工作。
+
+
+==== 创建并运行会话 ====
+
+在初始化完毕后我们就能开始创建会话了，在 POE::Kernel->run() 被调用
+前，至少得创建了一个会话，否则 POE::Kernel->run() 无事可做。
+
+在下面的例子中，我们创建一个会话处理三个事件： `_start`，_`stop` 和
+`count` 。POE::Session 的构造函数把每一个事件和对应的事件处理器关联
+起来：
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+POE::Session->create(
+    inline_states => {
+        _start => \&session_start,
+        _stop  => \&session_stop,
+        count  => \&session_count,
+      }
+);
+
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+前面两个事件是 POE::Kernel 提供的，用于通知程序一个会话已经被创建
+以及一个会话即将被结束。最后一个是一个自定义事件，待会我们再讨论它。
+
+你会注意到上面的代码并没有保存一份刚创建的 POE::Session 对象的引用，
+这是因为 POE::Session 实例会自己向 POE::Kernel 注册，POE::Kernel 单
+实例会管理它们，因此程序中很少需要再保存 POE::Session 对象的引用。
+
+实际上，额外保存对 POE::Session 对象的引用是有害的，这会导致 Perl
+不去销毁(调用 DESTROY())一个结束了的 Session 对象并收回它的内存，
+因为程序中某处还在引用它。
+
+接下来我们启动 POE::Kernel，这会开始主循环以探测并分发事件。由于
+这只是个例子，我们在 POE::Kernel 开始和结束的时候输出消息：
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+print "Starting POE::Kernel.\n";
+POE::Kernel->run();
+print "POE::Kernel's run() method returned.\n";
+exit;
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+POE::Kernel->run() 直到所有会话结束后才返回，之后我们调用了 exit()，
+因为程序实际上已经结束了。其实，这个 exit() 调用并不必要，它只是
+醒目的提醒我们程序在 POE::Kernel->run() 返回后不再继续运行。
+
+
+==== 实现事件处理器 ====
+
+现在我们开始讲解 `_start` 对应的事件处理器，这个事件处理器在会话
+对象实例化之后被调用，常被用来初始化资源以及准备后续的事件处理。
+
+在这个例子里，我们创建一个累加器来计数，并向事件队列发送一个事件
+以调度下一次的事件处理：
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub session_start {
+    print "Session ", $_[SESSION]->ID, " has started.\n";
+    $_[HEAP]->{count} = 0;
+    $_[KERNEL]->yield("count");
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+熟悉多线程编程的读者可能会被这里的 `yield()` 弄糊涂。这个调用并
+不是挂起当前会话，而是向事件队列末尾插入一个新事件，当这个事件
+前面的事件被分发处理完后，这个事件又被分发给之前调用 `yield()`
+的会话，并触发对应的事件处理器，这一点待会我们讲到多任务时会更
+清楚。
+
+上面代码在 *最末尾* 调用 `yield()` ，其效果类似经典多线程编程中的
+`yield()`, 因为那个事件处理器马上返回，POE::Kernel 转而执行下一个
+会话的某个事件处理器。
+
+接下来是 `_stop` 事件处理器，POE::Kernel 在一个会话没有待处理事件
+并且即将被销毁之前分发这个事件，在 `_stop` 对应的事件处理器里不能
+阻止一个会话被销毁。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub session_stop {
+    print "Session ", $_[SESSION]->ID, " has stopped.\n";
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+在 `_stop` 事件处理器里发送事件是没用的，会话被销毁时会回收所有
+跟它相关的资源，包括事件，因此任何在 `_stop` 事件处理器中创建的
+事件在被分发之前就会被销毁，很多粗心的人都在这点栽过。
+
+最后来看 `count` 事件的处理器。这个函数累加这个会话的累加器并
+输出它的值，我们可以用一个循环实现它，但我们避免了这个做法，原因
+待会会变得很明显(见"多任务" 一节，因为会话之间是协作的，不能在一个
+事件处理器内耗费太多时间──当然这个例子里循环不会耗时很长)。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub session_count {
+    my ( $kernel, $heap ) = @_[ KERNEL, HEAP ];
+    my $session_id = $_[SESSION]->ID;
+
+    my $count = ++$heap->{count};
+    print "Session $session_id has counted to $count.\n";
+
+    $kernel->yield("count") if $count < 10;
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+session_count() 最后一行在累加器的值小于 10 时再次发送 `count`
+事件，这会使这个会话存活，因为新事件导致下一次 session_count()
+再被调用。
+
+当 session_count() 不再调用 yield() 时，会话就停止了，POE::Kernel
+探测到这个会话没有更多事件待处理，就会销毁这个会话(之前会分发
+`_stop` 事件)。
+
+
+下面是单个计数器情况下的程序输出：
+
+---------------------------------------------------------------
+Session 2 has started.
+Starting POE::Kernel.
+Session 2 has counted to 1.
+Session 2 has counted to 2.
+Session 2 has counted to 3.
+Session 2 has counted to 4.
+Session 2 has counted to 5.
+Session 2 has counted to 6.
+Session 2 has counted to 7.
+Session 2 has counted to 8.
+Session 2 has counted to 9.
+Session 2 has counted to 10.
+Session 2 has stopped.
+POE::Kernel's run() method returned.
+---------------------------------------------------------------
+
+输出中有些需要注意的东西：
+
+* 会话 ID 从 2 开始，POE::Kernel 自身有一个会话，它的 ID 是 1,
+因为它是最早被创建的(译注：创建 POE::Kernel 单实例的时候)。
+
+* `_start` 的事件处理器在 POE::Kernel->run() 之前被调用，这是
+因为 POE::Session->create() 的副作用是调用其 `_start` 事件
+处理器。
+
+* `_start` 事件处理器中发出的第一个 `count` 事件并没有被马上处理，
+它被放入队列，直到 POE::Kernel->run() 执行时才被分发。
+
+* 当没有更多事件触发时会话就停止了。会话也能被终止信号停止，但这里
+我们不涉及这个。
+
+* POE::Kernel->run() 在最后一个会话停止后才返回。
+
+
+=== 多任务 ===
+
+
+我们可以写多任务的计时器，每个会话在它们的私有堆里保存各自的累加器。
+每个会话的事件进入 POE::Kernel 的队列，按照先进先出的顺序被分发，
+这样强制每个会话轮流运行。
+
+为了描述所发生的事情，我们修改上面的代码，同时运行两个会话，程序的
+其余部分保持不变，完整的例子见 xref:multiple[]。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+for ( 1 .. 2 ) {
+    POE::Session->create(
+        inline_states => {
+            _start => \&session_start,
+            _stop  => \&session_stop,
+            count  => \&session_count,
+          }
+    );
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+下面是修改后的程序的输出：
+
+---------------------------------------------------------------
+Session 2 has started.
+Session 3 has started.
+Starting POE::Kernel.
+Session 2 has counted to 1.
+Session 3 has counted to 1.
+Session 2 has counted to 2.
+Session 3 has counted to 2.
+Session 2 has counted to 3.
+Session 3 has counted to 3.
+Session 2 has counted to 4.
+Session 3 has counted to 4.
+Session 2 has counted to 5.
+Session 3 has counted to 5.
+Session 2 has counted to 6.
+Session 3 has counted to 6.
+Session 2 has counted to 7.
+Session 3 has counted to 7.
+Session 2 has counted to 8.
+Session 3 has counted to 8.
+Session 2 has counted to 9.
+Session 3 has counted to 9.
+Session 2 has counted to 10.
+Session 2 has stopped.
+Session 3 has counted to 10.
+Session 3 has stopped.
+POE::Kernel's run() method returned.
+---------------------------------------------------------------
+
+从上面输出可以看出：
+
+* 每一个会话在它们的 $\_[HEAP] 中维护自己的计数，不关有多少个会话
+都是这样。
+
+* POE 轮流执行每个事件处理器。同一时刻只有一个事件处理器被执行，
+因此加锁和同步问题就自然不存在了(译注：在不使用多线程的情况下)。
+
+* 每个会话的事件都被放入一个事件队列中。事件从队列头部开始分发，
+新事件被添加到队列末尾，这保证了会话轮流执行。
+
+* POE::Kernel->run() 在所有会话都结束后才返回。
+
+
+== 第三节 ==
+
+现在我们将使用 IO::Select 实现一个不使用 `fork()` 的 echo 服务器
+(译注：把客户端传来的数据原样返回的服务器)，并随着抽象级别提高，
+移植出多个 POE 版本。基于 IO::Select 的服务器是个很好的示例，因为
+POE 本身就是一个不使用 `fork()` 的框架。
+
+
+=== 一个简单的 select() 服务器 ===
+
+首先，我们借用 ``Perl Cookbook'' 第 17.13 号食谱中的非 fork 服务器，
+为了紧凑以及方便移植到 POE 做了些小修改，为了增加趣味性，我们也给
+这个服务器加了一些小特性，完整的代码见 xref:select[]。
+
+如往常一样，一开始我们加载必要的模块，初始化全局数据。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+use IO::Socket;
+use IO::Select;
+use Tie::RefHash;
+
+my %inbuffer  = ();
+my %outbuffer = ();
+my %ready     = ();
+
+tie %ready, "Tie::RefHash";
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+接下来我们创建服务端 socket，并将它设置为非阻塞模式，这样其上的
+操作不会阻塞整个单进程服务器。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+my $server = IO::Socket::INET->new
+  ( LocalPort => 12345,
+    Listen => 10,
+  ) or die "can't make server socket: $@\n";
+
+$server->blocking(0);
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+然后是主循环。我们创建一个 IO::Select 对象以监视我们的 socket，
+探测其上的事件，当有任何有趣的事情发生时，我们调用一个函数处理它。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+my $select = IO::Select->new($server);
+
+while (1) {
+
+    # Process sockets that are ready for reading.
+    foreach my $client ( $select->can_read(1) ) {
+        handle_read($client);
+    }
+
+    # Process any complete requests.  Echo the data back to the client,
+    # by putting the ready lines into the client's output buffer.
+    foreach my $client ( keys %ready ) {
+        foreach my $request ( @{ $ready{$client} } ) {
+            print "Got request: $request";
+            $outbuffer{$client} .= $request;
+        }
+        delete $ready{$client};
+    }
+
+    # Process sockets that are ready for writing.
+    foreach my $client ( $select->can_write(1) ) {
+        handle_write($client);
+    }
+}
+
+exit
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+这就是主循环了，接下来我们定义一些函数处理 socket 上的各种事件。
+
+第一个事件处理函数处理 socket 可读的情形。如果就绪的 socket
+是主服务器的，我们在其上接受一个新连接并向 IO::Select 对象注册。
+如果它是一个客户端 socket，我们从它读取数据，解析它，把完整的
+行存入 `%ready` 中。主循环会从 `%ready` 中获取数据发送给客户端。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub handle_read {
+    my $client = shift;
+
+    if ( $client == $server ) {
+        my $new_client = $server->accept();
+        $new_client->blocking(0);
+        $select->add($new_client);
+        return;
+    }
+
+    my $data = "";
+    my $rv   = $client->recv( $data, POSIX::BUFSIZ, 0 );
+
+    unless ( defined($rv) and length($data) ) {
+        handle_error($client);
+        return;
+    }
+
+    $inbuffer{$client} .= $data;
+    while ( $inbuffer{$client} =~ s/(.*\n)// ) {
+        push @{ $ready{$client} }, $1;
+    }
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+接下来我们定义一个函数处理可写的 socket，待发送给客户端的数据
+被写入这个 socket 并从它的输出缓存中删除。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub handle_write {
+    my $client = shift;
+
+    return unless exists $outbuffer{$client};
+
+    my $rv = $client->send( $outbuffer{$client}, 0 );
+    unless ( defined $rv ) {
+        warn "I was told I could write, but I can't.\n";
+        return;
+    }
+
+    if ( $rv == length( $outbuffer{$client} ) or
+        $! == POSIX::EWOULDBLOCK
+      ) {
+        substr( $outbuffer{$client}, 0, $rv ) = "";
+        delete $outbuffer{$client} unless length $outbuffer{$client};
+        return;
+    }
+
+    handle_error($client);
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+最后再定义一个函数处理客户端 socket 上的读写错误，它回收资源并确保
+socket 被关闭。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub handle_error {
+    my $client = shift;
+
+    delete $inbuffer{$client};
+    delete $outbuffer{$client};
+    delete $ready{$client};
+
+    $select->remove($client);
+    close $client;
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+在写了大约 130 行代码后，我们实现了一个 echo 服务器，干的不赖，但是
+我们能做的更好。
+
+
+=== 移植到 POE ===
+
+现在我们把上面的服务器代码移植到 POE 上。我们使用 POE 的一些最低层
+的特性，这样不会帮我们省多少力气，但会使得程序结构更清晰。
+
+不管你信不信，上面基于 IO::Select 的服务器已经是事件驱动型的了。
+它包含了一个主循环探测事件并分发它们，它有一系列函数处理这些事件。
+
+一开始我们先搭个 POE 程序的框架，待会再填充上面的服务器代码片段。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+use POSIX;
+use IO::Socket;
+use POE;
+
+POE::Session->create
+  ( inline_states =>
+      {
+      }
+  );
+
+POE::Kernel->run();
+exit;
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+在继续下一步前，我们需要决定程序中有哪些重要事件，这会勾勒出
+程序的整体框架。
+
+* 服务器已经启动，初始化。
+* 服务端 socket 就绪，用它接受客户端连接。
+* 客户端 socket 准备好读取，从它读取数据并处理。
+* 客户端 socket 准备好写入，向它写入数据。
+* 客户端 socket 出错，关闭它。
+
+一旦我们清楚要做什么，我们就能完成 POE::Session 对象的构建。
+我们为每个事件起名，并定义对应的事件处理器，如下：
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+POE::Session->create
+  ( inline_states =>
+      { _start => \&server_start,
+        event_accept => \&server_accept,
+        event_read   => \&client_read,
+        event_write  => \&client_write,
+        event_error  => \&client_error,
+      }
+  );
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+现在是时候开始移植上面的 echo 服务器了。我们仍然需要记录每个客户端
+连接上的输入、输出缓冲区，但我们不使用 `%ready` 哈希表。每个客户端
+的数据不互相干扰，因为它们以 socket 句柄作为键保存在哈希表中，不
+会冲突：
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+my %inbuffer  = ();
+my %outbuffer = ();
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+接下来是抽取 echo 服务器中的事件处理代码到各个事件对应的事件处理器中。
+
+首先，剩余的初始化代码进入 `_start` 处理器中，这个处理器创建服务端
+socket 并用 `select_read()` 分配它的事件产生器。POE::Kernel 的
+`select_read()` 方法接受两个参数：待监视的 socket 句柄，当句柄准备
+好被读取时所需分发的事件。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub server_start {
+    my $server = IO::Socket::INET->new
+      ( LocalPort => 12345,
+        Listen => 10,
+        Reuse  => "yes",
+      ) or die "can't make server socket: $@\n";
+
+    $_[KERNEL]->select_read( $server, "event_accept" );
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+注意我们并没有保存服务端 socket，POE::Kernel 会记录它，并把它作为
+参数传递给 `event_accpet` 的事件处理器。只有当我们需要对这个 socket
+作些特别的事情时才有必要保存对它的一份引用。
+
+从上面 POE::Session 的构造函数中可以看出， `event_accept` 是被
+`server_accept()` 处理的，这个处理器接受新的客户端 socket 并为之
+分配监视器。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub server_accept {
+    my ( $kernel, $server ) = @_[ KERNEL, ARG0 ];
+
+    my $new_client = $server->accept();
+    $kernel->select_read( $new_client, "event_read" );
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+接下来在 `client_read()` 中处理客户端的输入，这个函数在 `select_read()`
+监测到的输入事件(译注：其实是 IO::Select 监测的)被分发给这个会话时
+被调用。这个事件的第一个参数(ARG0)是待读取的 socket 句柄，这样我们
+能从这个 socket 中读取数据而无需一直保存它的一份拷贝。
+
+新的 `client_read()` 几乎跟上面 echo 服务器中的 `handle_read()` 一样，
+`accept()` 相关代码被移到其它事件处理器中了，因此我们无需 `%ready` 了。
+
+socket 出错的事件通过 POE::Kernel 的 `yield()` 方法传递到 `event_error()`
+事件处理器。 在 `client_read()` 中需要显示的给 `yield()` 指定 socket
+句柄参数，这个参数作为 ARG0 传递给 `event_error`  的事件处理器。
+
+最后，如果有任何输出被缓存好了，我们就通知这个客户端 socket 等待写，
+`event_write` 的事件处理器在客户端 socket 可写时会被调用。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub client_read {
+    my ( $kernel, $client ) = @_[ KERNEL, ARG0 ];
+
+    my $data = "";
+    my $rv   = $client->recv( $data, POSIX::BUFSIZ, 0 );
+
+    unless ( defined($rv) and length($data) ) {
+        $kernel->yield( event_error => $client );
+        return;
+    }
+
+    $inbuffer{$client} .= $data;
+    while ( $inbuffer{$client} =~ s/(.*\n)// ) {
+        $outbuffer{$client} .= $1;
+    }
+
+    if ( exists $outbuffer{$client} ) {
+        $kernel->select_write( $client, "event_write" );
+    }
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+接下来定义 `event_write` 的事件处理器 `client_write()` ，它的
+第一个参数 ARG0 仍然是 socket 句柄。
+
+如果客户端 socket 的输出缓冲是空的，我们停止监测其上的可读性并
+理解从 `client_write()` 中返回，否则我们尝试向此 socket 写出整个
+输出缓冲区，未写完的数据留在缓冲区中等待下一次可写事件。如果
+所有数据都写出了，我们直接把输出缓冲销毁掉。
+
+`client_write()` 处理错误的方式跟 `client_read()` 一样。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub client_write {
+    my ( $kernel, $client ) = @_[ KERNEL, ARG0 ];
+
+    unless ( exists $outbuffer{$client} ) {
+        $kernel->select_write($client);
+        return;
+    }
+
+    my $rv = $client->send( $outbuffer{$client}, 0 );
+    unless ( defined $rv ) {
+        warn "I was told I could write, but I can't.\n";
+        return;
+    }
+
+    if ( $rv == length( $outbuffer{$client} ) or
+        $! == POSIX::EWOULDBLOCK
+      ) {
+        substr( $outbuffer{$client}, 0, $rv ) = "";
+        delete $outbuffer{$client} unless length $outbuffer{$client};
+        return;
+    }
+
+    $kernel->yield( event_error => $client );
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+最后来处理错误事件，在对应的事件处理器中删除客户端 socket 的
+输入输出缓冲区，停止监视其上的读、写、异常事件，并确保 socket
+被关闭，这样就关闭了这个客户端连接。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub client_error {
+    my ( $kernel, $client ) = @_[ KERNEL, ARG0 ];
+
+    delete $inbuffer{$client};
+    delete $outbuffer{$client};
+
+    $kernel->select($client);
+    close $client;
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Ok，我们的第一个 POE 移植版本大功告成。
+
+
+=== Wheels (第一部分) ===
+
+我们刚实现的基于 POE 的服务器仍然需要不少编码，更糟糕的是，
+其内有很多代码在各种服务器程序中都是重复的。监听一个服务端
+socket 并接受连接是服务器实现中很普遍的代码，类似的，在非
+阻塞 socket 上进行缓冲式操作也是很普遍的，为每个服务器程序
+重造这些轮子会浪费很多时间。
+
+因此我们在 POE::Wheel 名字空间下创建了一组类，封装了这些标准
+算法，每个 Wheel 都包含了一些初始化代码以设置事件产生器，并
+实现了这些事件的事件处理器。
+
+Wheel 对象的创建和销毁在其使用中是非常重要的。在创建的时候，
+wheel 对象把自己的事件处理器插入所属的 Session 对象中，在销毁
+的时候，这些事件处理器被去除，对应的事件产生器被关闭。这种关闭
+绑定(译注：没明白...)防止一个 Session 把 wheel 对象传递给另
+一个 Session。
+
+POE::Kernel 并不管理 wheel 对象，因此需要把它们保存在安全的
+地方，一般都是在所属会话的堆中。
+
+Wheel 对象产生的事件通常都比它们内部处理的事件更高级。比如
+POE::Wheel::ReadWrite 发出的 `input` 事件包含了解析过的字符串
+(以行为单位)而不是原始的字节块，这是因为 ReadWrite 对象在读写
+socket 时解析数据。
+
+POE::Wheel::ListenAccept 封装了监听服务端 socket 并接受连接的
+模式，它使用三个参数：待监听的服务端 socket，当有客户端连接时
+应发出的事件名字，当有错误发生时应发出的事件名字。
+
+在下面的例子中，我们创建一个 ListenAccept wheel 对象来监听先前
+创建的服务端 socket，当客户端连接到来时，它发出一个 `event_accepted`
+事件并把接受的客户端 socket 作为 ARG0。如果有任何错误发生，它
+发出一个 `event_error` 事件。我们假设这些事件的处理器在别处已经
+实现了。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$_[HEAP]->{server} = POE::Wheel::ListenAccept->new
+  ( Handle => $server_socket,
+    AcceptEvent => "event_accepted",
+    ErrorEvent  => "event_error",
+  );
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+POE::Wheel::ReadWrite 实现了在非阻塞 socket 上进行缓冲式 I/O 的
+通用算法。它有很多特性，这里我们只讨论它的一小部分参数。
+
+在这个例子中，一个 ReadWrite wheel 对象工作在先前接受的客户端 socket
+上。缺省情况下它把输入解析成行，因此每一次 `client_input` 事件
+代表一行输入。 在发生错误时它发出 `event_error` 事件。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$_[HEAP]->{client} = POE::Wheel::ReadWrite->new
+  ( Handle => $client_socket,
+    InputEvent => "client_input",
+    ErrorEvent => "client_error",
+  );
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+这个例子有点误导，后续创建的 ReadWrite wheel 对象会覆盖前面
+的，导致连接被破坏，后面我们会修正这个问题，完整的例子见
+xref:listenaccept[]。
+
+首先我们加载需要的模块。最后一行的语法有点怪异，它不是导入
+符号到当前包中，而是加载额外的模块，这种做法能省去 POE:: 前缀，
+少敲几个字。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+use POSIX;
+use IO::Socket;
+use POE qw(Wheel::ListenAccept Wheel::ReadWrite);
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+如果你觉得 ``use POE'' 那行太怪异，你完全可以用下面的四行代替它：
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+use POE::Kernel;
+use POE::Session;
+use POE::Wheel::ListenAccept;
+use POE::Wheel::ReadWrite;
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+接下来是主循环。跟以前一样，我们创建服务器会话，运行，然后在事情
+做完后退出。它跟之前的例子几乎一样，只是事件以及事件处理器的名字
+改变了。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+POE::Session->create
+  ( inline_states =>
+      { _start => \&server_start,
+        server_accepted => \&server_accepted,
+        server_error    => \&server_error,
+        client_input    => \&client_input,
+        client_error    => \&client_error,
+      }
+  );
+
+POE::Kernel->run();
+exit;
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+接下来在 `_start` 事件的处理器中创建服务端 socket，并创建一个
+ListenAccept wheel 对象接管它。跟以前一样，我们不需要保存服务端
+socket 的拷贝，但我们需要保存 ListenAccept wheel 对象，否则在
+退出局部作用域时这个对象会自动销毁，这个服务器程序因此会变的很
+短命。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub server_start {
+    my $server = IO::Socket::INET->new
+      ( LocalPort => 12345,
+        Listen => 10,
+        Reuse  => "yes",
+      ) or die "can't make server socket: $@\n";
+
+    $_[HEAP]->{server} = POE::Wheel::ListenAccept->new
+      ( Handle => $server,
+        AcceptEvent => "server_accepted",
+        ErrorEvent  => "server_error",
+      );
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ListenAccept 为每一个接受的连接发出 `server_accepted` 事件，每个
+事件将新接受的客户端 socket 作为 ARG0。对应的 `server_accepted`
+事件处理器将这个客户端 socket 对象传递给一个 POE::Wheel::ReadWrite
+对象。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub server_accepted {
+    my $client_socket = $_[ARG0];
+
+    my $wheel = POE::Wheel::ReadWrite->new
+      ( Handle => $client_socket,
+        InputEvent => "client_input",
+        ErrorEvent => "client_error",
+      );
+    $_[HEAP]->{client}->{ $wheel->ID() } = $wheel;
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+我们上面提到保存 POE::Wheel::ReadWrite 对象的方式有问题，这里
+`server_accepted` 利用每个 wheel 对象独一无二的 ID 来避免互相
+干扰，否则每个新连接会覆盖先前连接的 wheel 对象。
+
+接下来我们用 `client_input()` 处理 ReadWrite 的输入事件。
+缺省情况下，ReadWrite 将输入解析成行，并为每一行发出一个
+输入事件。这些事件包含两个参数：从输入解析得到的行，解析
+数据的 wheel 对象的 ID。
+
+`client_input` 事件处理器使用 wheel ID 来得到对应的输入数据。
+一旦创建了合适的 wheel 对象，就能用它的 `put()` 方法缓存要
+返回给客户端的输入数据(译注：我们在实现一个 echo 服务器)。
+ReadWrite wheel 对象自动处理所有的缓冲和发送。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub client_input {
+    my ( $heap, $input, $wheel_id ) = @_[ HEAP, ARG0, ARG1 ];
+    $heap->{client}->{$wheel_id}->put($input);
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+最后用 `client_error()` 和 `server_error()` 处理客户端 socket
+和服务端 socket 上的错误。处理办法只是简单的删除对应的 wheel
+对象，这会销毁所有与之关联的缓冲区，并关闭对应的 socket。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub client_error {
+    my ( $heap, $wheel_id ) = @_[ HEAP, ARG3 ];
+    delete $heap->{client}->{$wheel_id};
+}
+
+sub server_error {
+    delete $_[HEAP]->{server};
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+有些重点需要注意：
+
+* 如果我们保存了这些 socket 的额外拷贝，那么在它们所属的 wheel
+对象销毁时这些 socket 不会被关闭，我们需要自己负责关闭它们。
+
+* 如果 `server_error` 事件发生，比如创建 socket 导致用完了文件
+句柄，服务端 socket 会关闭，但已有的客户端连接仍然存活，如果
+我们需要在这个时候也关闭客户端连接，只需要在 `server_error` 中
+调用 `delete $\_[HEAP]->{client}` 即可，由于应用再没有对所有
+ReadWrite wheel 对象的引用，这些 wheel 对象会自动销毁，从而
+关闭客户端连接。
+
+
+=== Wheels (第二部分) ===
+
+通过 wheel 对象，我们少写了大约 45 行代码，如果将 ListenAccept
+替换成 POE::Wheel::SocketFactory，我们还能少些几行代码。
+SocketFactory 将创建服务端 socket 和在其上监听新连接的逻辑
+封装在一起。其实它的特性还不止如此，这里我们不再深入。
+
+为了节约文字，我们只展示替换后的 `_start` 事件的处理器，
+程序的其余部分跟上一小节中的完全一致，完整代码见
+xref:socketfactory[]。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub server_start {
+    $_[HEAP]->{server} = POE::Wheel::SocketFactory->new
+      ( BindPort => 12345,
+        SuccessEvent => "server_accepted",
+        FailureEvent => "server_error",
+      );
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+这又节约了六行代码，但是我们仍然能做的更好！
+
+
+=== Components ===
+
+在这个简单的 echo 服务器演化期间，我们成功的将代码从大约 130
+行减少到 75 行，削减了主循环和大量处理 socket 的代码，对应的
+我们增加了管理 POE::Wheel 对象的代码。
+
+但是使用 POE::Wheel 对象比普通的服务器程序写法好不了多少，我们
+的服务器仍然需要创建 SocketFactory 实例来监听 socket，仍然必需
+创建 ReadWrite wheel 对象与客户端交互，仍然必需处理错误。即使
+有了 wheel 对象，这些处理对于每一种服务器程序都是相当类似的，
+这些都是坐下来编写有意思的东西时额外的编码负担。
+
+
+有了 wheel 对象，我们能在更高层次抽取出重复性的工作。对于上面
+所描述的情况，Ann Barcomb 为我们设计了一个服务器组件(component)
+来管理 wheels 对象以及其它细节问题，这下几乎所有的乏味负担都
+没了。
+
+利用组件的完整 echo 服务器代码见 xref:component[]。
+与往常一样，在 Perl 程序开头我们加载需要的模块：
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+use POE qw(Component::Server::TCP);
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+接下来我们创建并运行这个 TCP 服务器组件，它监听 12345 端口，
+处理所有烦人的任务：接受连接，管理 wheel 对象，等等。
+
+POE::Component::Server::TCP 通过回调函数定制，最简单情况下
+我们只需要提供处理输入的函数。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+POE::Component::Server::TCP->new
+  ( Port => 12345,
+    ClientInput => \&client_input,
+  );
+
+POE::Kernel->run();
+exit;
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+最后我们定义输入处理器。
+
+
+每一个客户端连接都会分配一个 POE::Session 对象，这样每一个连接
+就有各自的堆存储数据。这简化了代码，因为它们的堆记录各自的连接，
+而不是所有连接。每个连接的 ReadWrite wheel 对象已经被放入
+`$heap->{client}` 中了。
+
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub client_input {
+    my ( $heap, $input ) = @_[ HEAP, ARG0 ];
+    $heap->{client}->put($input);
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+功德圆满，现在我们的简单 echo 服务器不到 20 行了，绝大部分代码
+都是处理特定于这个 echo 服务器的问题！
+
+
+== 后记 ==
+
+我们把一个 128 行的服务器程序演化成了 20 行几乎独一无二的代码。
+在这个过程中每一步我们都能更集中于手头的任务，而不是编写服务器
+程序必需的基础代码。
+
+每一步都模仿了 POE 开发中的各种阶段，所有乏味的部分依然存在，
+它们被更高层的代码方便的封装起来，如果一个程序需要比高层次类
+所能提供的更多的控制，开发者不难利用能满足要求的更低层次的类
+实现之。
+
+底层次和高层次的代码都适用于编写多任务以及网络应用，因为所有
+层次都共享同样的基础。
+
+
+== 关于作者 ==
+
+Rocco Caputo 是 POE 项目的最早开发者以及首席程序员，他从
+1978 年开始就设计和编写软件。
+
+Socko 是 Rocco 的良师益友，他是一个大型短袜傀儡阴谋的发起者
+以及领导者，这个团体计划用 POE 做些事情，但目前他们对此不置可否。
+
+
+== 代码清单 ==
+
+anchor:select[listing.evolution.select]
+
+.listing.evolution.select
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+use POSIX;
+use IO::Socket;
+use IO::Select;
+use Tie::RefHash;
+
+### Create the server socket.
+
+my $server = IO::Socket::INET->new
+  ( LocalPort => 12345,
+    Listen => 10,
+  ) or die "can't make server socket: $@\n";
+
+$server->blocking(0);
+
+### Set up structures to track input and output data.
+
+my %inbuffer  = ();
+my %outbuffer = ();
+my %ready     = ();
+
+tie %ready, "Tie::RefHash";
+
+### The select loop itself.
+
+my $select = IO::Select->new($server);
+
+while (1) {
+
+    # Process sockets that are ready for reading.
+    foreach my $client ( $select->can_read(1) ) {
+        handle_read($client);
+    }
+
+    # Process any complete requests.  Echo the data back to the client,
+    # by putting the ready lines into the client's output buffer.
+    foreach my $client ( keys %ready ) {
+        foreach my $request ( @{ $ready{$client} } ) {
+            print "Got request: $request";
+            $outbuffer{$client} .= $request;
+        }
+        delete $ready{$client};
+    }
+
+    # Process sockets that are ready for writing.
+    foreach my $client ( $select->can_write(1) ) {
+        handle_write($client);
+    }
+}
+
+exit;
+
+### Handle a socket that's ready to be read from.
+
+sub handle_read {
+    my $client = shift;
+
+    # If it's the server socket, accept a new client connection.
+    if ( $client == $server ) {
+        my $new_client = $server->accept();
+        $new_client->blocking(0);
+        $select->add($new_client);
+        return;
+    }
+
+    # Read from an established client socket.
+    my $data = "";
+    my $rv   = $client->recv( $data, POSIX::BUFSIZ, 0 );
+
+    # Handle socket errors.
+    unless ( defined($rv) and length($data) ) {
+        handle_error($client);
+        return;
+    }
+
+    # Successful read.  Buffer the data we got, and parse it into lines.
+    # Place the lines into %ready, where they will be processed later.
+    $inbuffer{$client} .= $data;
+    while ( $inbuffer{$client} =~ s/(.*\n)// ) {
+        push @{ $ready{$client} }, $1;
+    }
+}
+
+### Handle a socket that's ready to be written to.
+
+sub handle_write {
+    my $client = shift;
+
+    # Skip this client if there's nothing to write.
+    return unless exists $outbuffer{$client};
+
+    # Attempt to write pending data to the client.
+    my $rv = $client->send( $outbuffer{$client}, 0 );
+    unless ( defined $rv ) {
+        warn "I was told I could write, but I can't.\n";
+        return;
+    }
+
+    # Successful write.  Remove what was sent from the output buffer.
+    if ( $rv == length( $outbuffer{$client} ) or
+        $! == POSIX::EWOULDBLOCK
+      ) {
+        substr( $outbuffer{$client}, 0, $rv ) = "";
+        delete $outbuffer{$client} unless length $outbuffer{$client};
+        return;
+    }
+
+    # Otherwise there was an error.
+    handle_error($client);
+}
+
+### Handle client errors.  Clean up after the dead socket.
+
+sub handle_error {
+    my $client = shift;
+
+    delete $inbuffer{$client};
+    delete $outbuffer{$client};
+    delete $ready{$client};
+
+    $select->remove($client);
+    close $client;
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+anchor:listenaccept[listing.evolution.listenaccept]
+
+.listing.evolution.listenaccept
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+use IO::Socket;
+use POE qw(Wheel::ListenAccept Wheel::ReadWrite);
+
+### Start the server session.  Map events to the functions that will
+### handle them.  Run all the sessions until they stop, and then exit.
+
+POE::Session->create
+  ( inline_states =>
+      { _start => \&server_start,
+        server_accepted => \&server_accepted,
+        server_error    => \&server_error,
+        client_input    => \&client_input,
+        client_error    => \&client_error,
+      }
+  );
+
+POE::Kernel->run();
+exit;
+
+### Initialize the newly created server.  Create the server socket,
+### and then create the wheel to listen on it and accept connections.
+
+sub server_start {
+    my $server = IO::Socket::INET->new
+      ( LocalPort => 12345,
+        Listen => 10,
+        Reuse  => "yes",
+      ) or die "can't make server socket: $@\n";
+
+    $_[HEAP]->{server} = POE::Wheel::ListenAccept->new
+      ( Handle => $server,
+        AcceptEvent => "server_accepted",
+        ErrorEvent  => "server_error",
+      );
+}
+
+### Handle new connections from the ListenAccept wheel.  Create
+### ReadWrite wheels to interact with them.  Store them by each
+### wheel's unique ID so they don't clobber each other.
+
+sub server_accepted {
+    my $client_socket = $_[ARG0];
+
+    my $wheel = POE::Wheel::ReadWrite->new
+      ( Handle => $client_socket,
+        InputEvent => "client_input",
+        ErrorEvent => "client_error",
+      );
+    $_[HEAP]->{client}->{ $wheel->ID() } = $wheel;
+}
+
+### Handle input from a ReadWrite wheel.  Echo it back to the client.
+### Each wheel event comes with the wheel's ID, so we can match the
+### input back to the wheel for resending.
+
+sub client_input {
+    my ( $heap, $input, $wheel_id ) = @_[ HEAP, ARG0, ARG1 ];
+    $heap->{client}->{$wheel_id}->put($input);
+}
+
+### Handle client errors.  Delete the ReadWrite wheel associated with
+### the client.
+
+sub client_error {
+    my ( $heap, $wheel_id ) = @_[ HEAP, ARG3 ];
+    delete $heap->{client}->{$wheel_id};
+}
+
+### Handle server socket errors.  Delete the ListenAccept wheel,
+### shutting down the server.
+
+sub server_error {
+    delete $_[HEAP]->{server};
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+anchor:socketfactory[listing.evolution.socketfactory]
+
+.listing.evolution.socketfactory
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+use POE qw(Wheel::SocketFactory Wheel::ReadWrite);
+
+### Start the server session.  Map events to the functions that will
+### handle them.  Run all the sessions until they stop, and then exit.
+
+POE::Session->create
+  ( inline_states =>
+      { _start => \&server_start,
+        server_accepted => \&server_accepted,
+        server_error    => \&server_error,
+        client_input    => \&client_input,
+        client_error    => \&client_error,
+      }
+  );
+
+POE::Kernel->run();
+exit;
+
+### Initialize the newly created server.  Create the server socket,
+### and then create the wheel to listen on it and accept connections.
+
+sub server_start {
+    $_[HEAP]->{server} = POE::Wheel::SocketFactory->new
+      ( BindPort => 12345,
+        SuccessEvent => "server_accepted",
+        FailureEvent => "server_error",
+      );
+}
+
+### Handle new connections from the ListenAccept wheel.  Create
+### ReadWrite wheels to interact with them.  Store them by each
+### wheel's unique ID so they don't clobber each other.
+
+sub server_accepted {
+    my $client_socket = $_[ARG0];
+
+    my $wheel = POE::Wheel::ReadWrite->new
+      ( Handle => $client_socket,
+        InputEvent => "client_input",
+        ErrorEvent => "client_error",
+      );
+    $_[HEAP]->{client}->{ $wheel->ID() } = $wheel;
+}
+
+### Handle input from a ReadWrite wheel.  Echo it back to the client.
+### Each wheel event comes with the wheel's ID, so we can match the
+### input back to the wheel for resending.
+
+sub client_input {
+    my ( $heap, $input, $wheel_id ) = @_[ HEAP, ARG0, ARG1 ];
+    $heap->{client}->{$wheel_id}->put($input);
+}
+
+### Handle client errors.  Delete the ReadWrite wheel associated with
+### the client.
+
+sub client_error {
+    my ( $heap, $wheel_id ) = @_[ HEAP, ARG3 ];
+    delete $heap->{client}->{$wheel_id};
+}
+
+### Handle server socket errors.  Delete the ListenAccept wheel,
+### shutting down the server.
+
+sub server_error {
+    delete $_[HEAP]->{server};
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+anchor:component[listing.evolution.component]
+
+.listing.evolution.component
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+use POE qw(Component::Server::TCP);
+
+POE::Component::Server::TCP->new
+  ( Port => 12345,
+    ClientInput => \&client_input,
+  );
+
+POE::Kernel->run();
+exit;
+
+sub client_input {
+    my ( $heap, $input ) = @_[ HEAP, ARG0 ];
+    $heap->{client}->put($input);
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+anchor:single[listing.evolution.single]
+
+.listing.evolution.single
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+use POE;
+
+POE::Session->create
+  ( inline_states =>
+      { _start => \&session_start,
+        _stop => \&session_stop,
+        count => \&session_count,
+      }
+  );
+
+print "Starting POE::Kernel.\n";
+POE::Kernel->run();
+print "POE::Kernel's run() method returned.\n";
+exit;
+
+sub session_start {
+    print "Session ", $_[SESSION]->ID, " has started.\n";
+    $_[HEAP]->{count} = 0;
+    $_[KERNEL]->yield("count");
+}
+
+sub session_stop {
+    print "Session ", $_[SESSION]->ID, " has stopped.\n";
+}
+
+sub session_count {
+    my ( $kernel, $heap ) = @_[ KERNEL, HEAP ];
+    my $session_id = $_[SESSION]->ID;
+
+    my $count = ++$heap->{count};
+    print "Session $session_id has counted to $count.\n";
+
+    $kernel->yield("count") if $count < 10;
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+anchor:multiple[listing.evolution.multiple]
+
+.listing.evolution.multiple
+[perl]
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+use POE;
+
+for ( 1 .. 2 ) {
+    POE::Session->create
+      ( inline_states =>
+          { _start => \&session_start,
+            _stop => \&session_stop,
+            count => \&session_count,
+          }
+      );
+}
+
+print "Starting POE::Kernel.\n";
+POE::Kernel->run();
+print "POE::Kernel's run() method returned.\n";
+exit;
+
+sub session_start {
+    print "Session ", $_[SESSION]->ID, " has started.\n";
+    $_[HEAP]->{count} = 0;
+    $_[KERNEL]->yield("count");
+}
+
+sub session_stop {
+    print "Session ", $_[SESSION]->ID, " has stopped.\n";
+}
+
+sub session_count {
+    my ( $kernel, $heap ) = @_[ KERNEL, HEAP ];
+    my $session_id = $_[SESSION]->ID;
+
+    my $count = ++$heap->{count};
+    print "Session $session_id has counted to $count.\n";
+
+    $kernel->yield("count") if $count < 10;
+}
+source~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
