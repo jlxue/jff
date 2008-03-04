@@ -1,0 +1,2897 @@
+From 7a81b521395c6544c1420360ea88238b57210016 Mon Sep 17 00:00:00 2001
+From: Liu Yubao <yubao.liu@gmail.com>
+Date: Mon, 3 Dec 2007 20:07:56 +0800
+Subject: [PATCH 5/6] add rtems-i386 platform for cldc_hi
+
+Now I can build it successfully, but haven't tried to
+link with rtems-4.8.
+
+Signed-off-by: Liu Yubao <yubao.liu@gmail.com>
+---
+ cldc/build/rtems_i386/Makefile                     |   34 +
+ cldc/build/rtems_i386/rtems_i386.cfg               |   71 ++
+ cldc/build/share/jvm.make                          |   13 +
+ cldc/src/anilib/rtems/os_port.cpp                  |  148 +++
+ cldc/src/anilib/rtems/os_port.h                    |   69 ++
+ cldc/src/anilib/share/ani_bsd_socket.cpp           |    2 +-
+ cldc/src/anilib/share/anilib_impl.h                |    2 +-
+ cldc/src/vm/os/rtems/BuildFlags_rtems.hpp          |   62 ++
+ cldc/src/vm/os/rtems/Globals_rtems.hpp             |   51 +
+ cldc/src/vm/os/rtems/JVM_rtems.cpp                 |   68 ++
+ cldc/src/vm/os/rtems/JVM_rtems.hpp                 |   29 +
+ cldc/src/vm/os/rtems/Main_rtems.cpp                |  132 +++
+ cldc/src/vm/os/rtems/OS_rtems.cpp                  | 1113 ++++++++++++++++++++
+ cldc/src/vm/os/rtems/OS_rtems.hpp                  |   93 ++
+ cldc/src/vm/os/rtems/OsFile_rtems.cpp              |  274 +++++
+ cldc/src/vm/os/rtems/OsFile_rtems.hpp              |   44 +
+ cldc/src/vm/os/rtems/OsMemory_rtems.cpp            |  228 ++++
+ cldc/src/vm/os/rtems/OsMemory_rtems.hpp            |   29 +
+ cldc/src/vm/os/rtems/OsMisc_rtems.cpp              |   86 ++
+ cldc/src/vm/os/rtems/OsMisc_rtems.hpp              |   29 +
+ cldc/src/vm/os/rtems/OsSocket_rtems.cpp            |   34 +
+ cldc/src/vm/share/natives/BSDSocket.cpp            |   20 +-
+ .../vm/share/utilities/GlobalDefinitions_gcc.hpp   |    4 +-
+ 23 files changed, 2630 insertions(+), 5 deletions(-)
+ create mode 100644 cldc/build/rtems_i386/Makefile
+ create mode 100644 cldc/build/rtems_i386/rtems_i386.cfg
+ create mode 100644 cldc/src/anilib/rtems/os_port.cpp
+ create mode 100644 cldc/src/anilib/rtems/os_port.h
+ create mode 100644 cldc/src/vm/os/rtems/BuildFlags_rtems.hpp
+ create mode 100644 cldc/src/vm/os/rtems/Globals_rtems.hpp
+ create mode 100644 cldc/src/vm/os/rtems/JVM_rtems.cpp
+ create mode 100644 cldc/src/vm/os/rtems/JVM_rtems.hpp
+ create mode 100644 cldc/src/vm/os/rtems/Main_rtems.cpp
+ create mode 100644 cldc/src/vm/os/rtems/OS_rtems.cpp
+ create mode 100644 cldc/src/vm/os/rtems/OS_rtems.hpp
+ create mode 100644 cldc/src/vm/os/rtems/OsFile_rtems.cpp
+ create mode 100644 cldc/src/vm/os/rtems/OsFile_rtems.hpp
+ create mode 100644 cldc/src/vm/os/rtems/OsMemory_rtems.cpp
+ create mode 100644 cldc/src/vm/os/rtems/OsMemory_rtems.hpp
+ create mode 100644 cldc/src/vm/os/rtems/OsMisc_rtems.cpp
+ create mode 100644 cldc/src/vm/os/rtems/OsMisc_rtems.hpp
+ create mode 100644 cldc/src/vm/os/rtems/OsSocket_rtems.cpp
+
+diff --git a/cldc/build/rtems_i386/Makefile b/cldc/build/rtems_i386/Makefile
+new file mode 100644
+index 0000000..423bc54
+--- /dev/null
++++ b/cldc/build/rtems_i386/Makefile
+@@ -0,0 +1,34 @@
++#
++#   
++#
++# Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++# DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++# 
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License version
++# 2 only, as published by the Free Software Foundation.
++# 
++# This program is distributed in the hope that it will be useful, but
++# WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++# General Public License version 2 for more details (a copy is
++# included at /legal/license.txt).
++# 
++# You should have received a copy of the GNU General Public License
++# version 2 along with this work; if not, write to the Free Software
++# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++# 02110-1301 USA
++# 
++# Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++# Clara, CA 95054 or visit www.sun.com if you need additional
++# information or have any questions.
++#
++
++# Master Makefile for rtems_i386 build, modified from linux_i386.
++
++# See ../../docs/HowToBuild.txt for build instructions. See
++# ../share/README for an explanation of the build system and how to
++# create a build system for a new configuration.
++
++IsSelfHosted = false
++include ../share/root.make
+diff --git a/cldc/build/rtems_i386/rtems_i386.cfg b/cldc/build/rtems_i386/rtems_i386.cfg
+new file mode 100644
+index 0000000..3a6db2c
+--- /dev/null
++++ b/cldc/build/rtems_i386/rtems_i386.cfg
+@@ -0,0 +1,71 @@
++#
++#   
++#
++# Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++# DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++# 
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License version
++# 2 only, as published by the Free Software Foundation.
++# 
++# This program is distributed in the hope that it will be useful, but
++# WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++# General Public License version 2 for more details (a copy is
++# included at /legal/license.txt).
++# 
++# You should have received a copy of the GNU General Public License
++# version 2 along with this work; if not, write to the Free Software
++# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++# 02110-1301 USA
++# 
++# Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++# Clara, CA 95054 or visit www.sun.com if you need additional
++# information or have any questions.
++#
++
++# Build configuration for rtems_i386. This is not a self hosted build
++# (see definition of IsSelfHosted in ./Makefile), modified from
++# linux_i386 and wince_i386.
++#
++
++host_os   = linux
++host_arch = i386
++arch      = i386
++compiler  = gcc
++
++
++LOOP_GEN_FLAGS = +GenerateGNUCode
++ROM_GEN_FLAGS  = +GenerateGNUCode
++
++
++ifeq ($(IsLoopGen),true)
++ 	os_family = linux
++endif
++
++ifeq ($(IsRomGen),true)
++	os_family = linux
++endif
++
++ifeq ($(IsTarget),true)
++	os_family = rtems
++    CPP_DEF_FLAGS   += -I"$(GNU_TOOLS_DIR)/include"     \
++        -I"$(GNU_TOOLS_DIR)/pc386/lib/include" -DRTEMS
++    SKIP_JVM_EXE_LINK = true
++endif
++
++
++ifndef ENABLE_TIMER_THREAD
++ENABLE_TIMER_THREAD = true
++export ENABLE_TIMER_THREAD__BY = rtems_i386.cfg
++endif
++
++ifndef MERGE_SOURCE_FILES
++MERGE_SOURCE_FILES  = true
++endif
++
++ifndef SOURCE_MERGER_SIZE
++SOURCE_MERGER_SIZE  = 35
++endif
++
++export BUILD_ANI_LIB := true
+diff --git a/cldc/build/share/jvm.make b/cldc/build/share/jvm.make
+index d57df88..db2a734 100644
+--- a/cldc/build/share/jvm.make
++++ b/cldc/build/share/jvm.make
+@@ -137,6 +137,7 @@ endif
+ MakeDepsMain_win32    = WinGammaPlatform
+ MakeDepsMain_wince    = WinCEGammaPlatform
+ MakeDepsMain_linux    = UnixPlatform
++MakeDepsMain_rtems    = UnixPlatform
+ ifneq ($(MakeDepsMain_$(os_family)_$(compiler)),)
+ MakeDepsMain          = $(MakeDepsMain_$(os_family)_$(compiler))
+ else
+@@ -154,6 +155,7 @@ endif
+ MakeDepsOpts_win32    = -resolveVpath true
+ MakeDepsOpts_wince    = -resolveVpath true
+ MakeDepsOpts_linux    = -resolveVpath true
++MakeDepsOpts_rtems    = -resolveVpath true
+ MakeDepsOpts         += -gendir $(GEN_DIR) -workspace $(WorkSpace)
+ MakeDepsOpts         += $(MakeDepsOpts_$(os_family))
+ 
+@@ -1441,6 +1443,11 @@ GCC_PREFIX_arm     = $(GNU_TOOLS_DIR)/bin/
+ GCC_PREFIX_sh      = $(GNU_TOOLS_DIR)/bin/
+ GCC_PREFIX_mips    = $(GNU_TOOLS_DIR)/bin/
+ GCC_PREFIX_i386    =
++ifeq ($(IsTarget), true)
++    ifneq ($(GNU_TOOLS_DIR)x, x)
++    GCC_PREFIX_i386    = $(GNU_TOOLS_DIR)/bin/
++    endif
++endif
+ GCC_PREFIX_sparc   =
+ GCC_PREFIX_powerpc =
+ GCC_PREFIX_c       = $(GCC_PREFIX_$(target_arch))
+@@ -1845,6 +1852,11 @@ $(ANIX_LIB): $(JVM_LIB) $(ANIX_OBJS)
+ 
+ $(JVM_EXE): $(CLDC_ZIP) $(EXE_OBJS) $(JVM_LIB) $(JVMX_LIB) $(JVMTEST_LIB)
+ 	$(A)echo "linking $@ ... "
++ifeq ($(SKIP_JVM_EXE_LINK), true)
++	$(A)touch $@
++	$(A)echo $(LINK) -o $@ $(EXE_OBJS) $(JVMX_LIB) $(JVMTEST_LIB) $(JVM_LIB) \
++	     $(PCSL_LIBS) $(LINK_FLAGS) > $@.link.cmd
++else
+ 	$(A)$(LINK) -o $@ $(EXE_OBJS) $(JVMX_LIB) $(JVMTEST_LIB) $(JVM_LIB) \
+ 	     $(PCSL_LIBS) $(LINK_FLAGS)
+ 	$(A)if [ "$(ENABLE_MAP_FILE)" != "false" ] &&             \
+@@ -1855,6 +1867,7 @@ $(JVM_EXE): $(CLDC_ZIP) $(EXE_OBJS) $(JVM_LIB) $(JVMX_LIB) $(JVMTEST_LIB)
+ 	     $(JVM_LIB)  $(PCSL_LIBS) $(LINK_FLAGS)               \
+ 	     -Xlinker -M 2> $(JVM_MAP);                           \
+         fi
++endif
+ 	$(A)echo generated `pwd`/$@
+ 
+ PRINT_CONFIG = print_config
+diff --git a/cldc/src/anilib/rtems/os_port.cpp b/cldc/src/anilib/rtems/os_port.cpp
+new file mode 100644
+index 0000000..027f5d1
+--- /dev/null
++++ b/cldc/src/anilib/rtems/os_port.cpp
+@@ -0,0 +1,148 @@
++/*
++ *   
++ *
++ * Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ */
++
++/**
++ * Linux implementation of OS calls required by platform-independent
++ * parts of ANILib.
++ */
++
++#include <anilib_impl.h>
++
++Os_Event Os_CreateEvent(jboolean *status) {
++  Os_Event event = (Os_Event) malloc(sizeof(Os_EventStruct));
++
++  pthread_cond_t temp_cond = PTHREAD_COND_INITIALIZER;
++  pthread_mutex_t temp_mux = PTHREAD_MUTEX_INITIALIZER;
++
++  event->signaled      = 0;
++  event->condition     = temp_cond;
++  event->mutex         = temp_mux;
++
++  pthread_cond_init(&event->condition, NULL);
++  pthread_mutex_init(&event->mutex, NULL);
++
++  /* IMPL_NOTE: check for error conditions */
++  *status = KNI_TRUE;
++  return event;
++}
++
++void Os_WaitForEvent(Os_Event event) {
++  pthread_mutex_lock(&event->mutex);
++  while (event->signaled == 0) {
++    pthread_cond_wait(&event->condition, &event->mutex);
++  }
++  event->signaled--;
++  pthread_mutex_unlock(&event->mutex);
++}
++
++void Os_SignalEvent(Os_Event event) {
++  pthread_mutex_lock(&event->mutex);
++  event->signaled++;
++  pthread_cond_signal(&event->condition);
++  pthread_mutex_unlock(&event->mutex);
++}
++
++jint Os_WaitForEventOrTimeout(Os_Event event, jlong ms) {
++  int result = 0;
++  struct timeval now = {0,0};
++  struct timespec timeout = {0,0};
++
++  if (ms < 0) {
++    /* wait forever */
++    Os_WaitForEvent(event);
++    return OS_SIGNALED;
++  }
++
++  pthread_mutex_lock(&event->mutex);
++  gettimeofday(&now, NULL);
++
++  if (ms == 0) {
++    timeout.tv_sec = now.tv_sec;
++    timeout.tv_nsec = now.tv_usec * 1000;  
++
++    if (ms >= 1000) {
++      timeout.tv_sec += ((signed long) (((ms) >> 32) & 0xffffffff));
++      timeout.tv_sec += ((signed long) (((ms) & 0xffffffff))) / 1000;
++      ms -= (ms/1000)*1000;
++    }
++    timeout.tv_nsec += ((int)ms * 1000000);
++  } else {
++    timeout.tv_sec = 0;
++    timeout.tv_nsec = 0;
++  }
++
++  if (event->signaled == 0) {
++    result =
++      pthread_cond_timedwait(&event->condition, &event->mutex, &timeout);
++  }
++
++  if (result != ETIMEDOUT) {
++    event->signaled--;
++  }
++
++  pthread_mutex_unlock(&event->mutex);
++  if (result == ETIMEDOUT) {
++    return OS_TIMEOUT;
++  } else {
++    return OS_SIGNALED;
++  }
++}
++
++void Os_DisposeEvent(Os_Event event) {
++  pthread_mutex_destroy(&event->mutex);
++  pthread_cond_destroy(&event->condition);
++
++  free((void*)event);
++}
++
++Os_Thread Os_CreateThread(int proc(void *parameter), void *arg, 
++                          jboolean *status) {
++  pthread_attr_t attr;
++  pthread_t os_thread;
++  void* (*routine)(void*) = (void*(*)(void *))proc;
++
++  if (pthread_attr_init(&attr) != 0) {
++    *status = KNI_FALSE;
++    return 0;
++  }
++
++  if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) != 0) {
++    *status = KNI_FALSE;
++    return 0;
++  }
++
++  if (pthread_create(&os_thread, &attr, routine, arg) != 0) {
++    *status = KNI_FALSE;
++    return 0;
++  } else {
++    *status = KNI_TRUE;
++    return os_thread;
++  }
++}
++
++void Os_DisposeThread(Os_Thread thread) {
++  /* IMPL_NOTE: nothing to do? */
++}
+diff --git a/cldc/src/anilib/rtems/os_port.h b/cldc/src/anilib/rtems/os_port.h
+new file mode 100644
+index 0000000..47ce3f7
+--- /dev/null
++++ b/cldc/src/anilib/rtems/os_port.h
+@@ -0,0 +1,69 @@
++/*
++ *   
++ *
++ * Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ */
++
++/**
++ * Linux declarations of OS calls required by platform-independent
++ * parts of ANILib.
++ */
++
++#ifndef _OS_PORT_H_
++#define _OS_PORT_H_
++
++#include <string.h>
++#include <pthread.h>
++#include <sys/time.h>
++#include <sys/times.h>
++#include <errno.h>
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++typedef struct {
++  int signaled;
++  pthread_cond_t condition;
++  pthread_mutex_t mutex;
++} Os_EventStruct;
++
++typedef Os_EventStruct * Os_Event;
++typedef pthread_t        Os_Thread;
++
++extern Os_Event Os_CreateEvent(jboolean *status);
++extern void Os_WaitForEvent(Os_Event event);
++extern jint Os_WaitForEventOrTimeout(Os_Event event, jlong ms);
++extern void Os_SignalEvent(Os_Event event);
++extern void Os_DisposeEvent(Os_Event event);
++
++extern Os_Thread Os_CreateThread(int proc(void *parameter), void *arg, 
++                                 jboolean *status);
++extern void Os_DisposeThread(Os_Thread thread);
++
++extern void Os_DisposeEvent(Os_Event event);
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif /* _OS_PORT_H_ */
+diff --git a/cldc/src/anilib/share/ani_bsd_socket.cpp b/cldc/src/anilib/share/ani_bsd_socket.cpp
+index bfba143..c2eb10e 100644
+--- a/cldc/src/anilib/share/ani_bsd_socket.cpp
++++ b/cldc/src/anilib/share/ani_bsd_socket.cpp
+@@ -37,7 +37,7 @@
+  * suit your platform.
+  */
+ 
+-#if defined(LINUX) || defined (CYGWIN)
++#if defined(LINUX) || defined(RTEMS) || defined (CYGWIN)
+ #define USE_UNISTD_SOCKETS 1
+ #else
+ #if defined(WIN32) || defined(UNDER_CE)
+diff --git a/cldc/src/anilib/share/anilib_impl.h b/cldc/src/anilib/share/anilib_impl.h
+index 45402c4..9a8d699 100644
+--- a/cldc/src/anilib/share/anilib_impl.h
++++ b/cldc/src/anilib/share/anilib_impl.h
+@@ -36,7 +36,7 @@
+ #ifndef _ANILIB_IMPL_H
+ #define _ANILIB_IMPL_H
+ 
+-#ifdef LINUX
++#if defined(LINUX) || defined(RTEMS)
+ #include <stdio.h>
+ #include <stdlib.h>
+ #endif
+diff --git a/cldc/src/vm/os/rtems/BuildFlags_rtems.hpp b/cldc/src/vm/os/rtems/BuildFlags_rtems.hpp
+new file mode 100644
+index 0000000..c914057
+--- /dev/null
++++ b/cldc/src/vm/os/rtems/BuildFlags_rtems.hpp
+@@ -0,0 +1,62 @@
++/*
++ *   
++ *
++ * Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ */
++
++/*
++ * BuildFlags_linux.hpp: compile-time configuration options for the 
++ * Linux platform.
++ */
++
++// We use BSDSocket.cpp to implement sockets on this platform
++#define USE_BSD_SOCKET 1
++
++// Override with -DSUPPORTS_TIMER_THREAD=<value> in your gcc command-line.
++#ifndef SUPPORTS_TIMER_THREAD
++#define SUPPORTS_TIMER_THREAD 1
++#endif
++
++// All Linux builds usual support timer interrupts. To override,
++// pass -DSUPPORTS_TIMER_INTERRUPT=0 in your gcc command-line.
++#ifndef SUPPORTS_TIMER_INTERRUPT 
++#define SUPPORTS_TIMER_INTERRUPT 1
++#endif
++
++// The Linux port support adjustable memory chunks for
++// implementing the Java heap, but uses the default heap size adjustment
++// policy implemented in src/vm/share/runtime/OsMemory.cpp
++
++#ifndef SUPPORTS_ADJUSTABLE_MEMORY_CHUNK
++#define SUPPORTS_ADJUSTABLE_MEMORY_CHUNK 1
++#endif
++
++// In the default the VM Linux port, we don't support custom heap adjustment.
++#define SUPPORTS_CUSTOM_HEAP_ADJUSTMENT  0
++
++// Linux port supports mmap-like interface for mapping files into memory
++// Override with -DSUPPORTS_MEMORY_MAPPED_FILES=<value> in your gcc 
++// command-line.
++#ifndef SUPPORTS_MEMORY_MAPPED_FILES
++#define SUPPORTS_MEMORY_MAPPED_FILES 1
++#endif
+diff --git a/cldc/src/vm/os/rtems/Globals_rtems.hpp b/cldc/src/vm/os/rtems/Globals_rtems.hpp
+new file mode 100644
+index 0000000..8b5a8b2
+--- /dev/null
++++ b/cldc/src/vm/os/rtems/Globals_rtems.hpp
+@@ -0,0 +1,51 @@
++/*
++ *   
++ *
++ * Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ */
++
++/*
++ * Globals_linux.hpp: Command line switches for the Linux platform.
++ */
++
++#define PLATFORM_RUNTIME_FLAGS_GENERIC(develop, product)                      \
++  product(int, TickInterval, 10,                                              \
++          "Set the delay interval for servicing compiler generation")         \
++  product(int, ExecutionLoops, 1,                                             \
++          "the number of times we run the VM (for measuring start-up time)")
++
++#if ENABLE_ARM_VFP
++#define PLATFORM_RUNTIME_FLAGS_VFP(develop, product)                          \
++  product(bool, RunFastMode, false,                                           \
++          "Configure the ARM VFP coprocessor to run in RunFast mode "         \
++          "and execute extra instructions to ensure TCK compilance")
++#else
++#define PLATFORM_RUNTIME_FLAGS_VFP(develop, product)
++#endif
++
++#define PLATFORM_RUNTIME_FLAGS(develop, product)         \
++        PLATFORM_RUNTIME_FLAGS_GENERIC(develop, product) \
++        PLATFORM_RUNTIME_FLAGS_VFP(develop, product)
++
++ 
++#define stricmp strcasecmp
+diff --git a/cldc/src/vm/os/rtems/JVM_rtems.cpp b/cldc/src/vm/os/rtems/JVM_rtems.cpp
+new file mode 100644
+index 0000000..354e660
+--- /dev/null
++++ b/cldc/src/vm/os/rtems/JVM_rtems.cpp
+@@ -0,0 +1,68 @@
++/*
++ *   
++ *
++ * Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ */
++
++/*
++ * JVM_linux.cpp: Linux-specific VM startup and
++ *                  shutdown routines.
++ *
++ * This file provides Linux-specific virtual machine
++ * startup and shutdown routines.  Refer to file
++ * "/src/vm/share/runtime/JVM.hpp" and the Porting
++ * Guide for details.
++ */
++
++#include "incls/_precompiled.incl"
++#include "incls/_JVM_rtems.cpp.incl"
++
++extern "C" int JVM_Start(const JvmPathChar *classpath, 
++                         char *main_class, int argc,
++                         char **argv) {
++  JVM::set_arguments(classpath, main_class, argc, argv);
++
++  int result = 0;
++  for (int i = 0; i < ExecutionLoops; i++) {
++    if (Verbose) {
++      TTY_TRACE_CR(("\t***Starting VM***"));
++    }
++    result = JVM::start();
++  }
++  return result;
++}
++
++extern "C" int JVM_Start2(const JvmPathChar *classpath, 
++                          char *main_class, int argc,
++                          jchar **u_argv) {
++  JVM::set_arguments2(classpath, main_class, argc, NULL, u_argv, true);
++
++  int result = 0;
++  for (int i = 0; i < ExecutionLoops; i++) {
++    if (Verbose) {
++      TTY_TRACE_CR(("\t***Starting VM***"));
++    }
++    result = JVM::start();
++  }
++  return result;
++}
+diff --git a/cldc/src/vm/os/rtems/JVM_rtems.hpp b/cldc/src/vm/os/rtems/JVM_rtems.hpp
+new file mode 100644
+index 0000000..188e98a
+--- /dev/null
++++ b/cldc/src/vm/os/rtems/JVM_rtems.hpp
+@@ -0,0 +1,29 @@
++/*
++ *   
++ *
++ * Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ */
++
++/** \file JVM_linux.hpp
++ * OS-specific definitions for virtual machine startup and shutdown.
++ */
+diff --git a/cldc/src/vm/os/rtems/Main_rtems.cpp b/cldc/src/vm/os/rtems/Main_rtems.cpp
+new file mode 100644
+index 0000000..79621d4
+--- /dev/null
++++ b/cldc/src/vm/os/rtems/Main_rtems.cpp
+@@ -0,0 +1,132 @@
++/*
++ *   
++ *
++ * Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ */
++
++#include "incls/_precompiled.incl"
++#include "incls/_Main_rtems.cpp.incl"
++#include <stdio.h>
++#include <stdlib.h>
++
++#if ENABLE_PCSL
++extern "C" {
++#include <pcsl_memory.h>
++#include <pcsl_print.h>
++}
++#endif
++/*
++ * This file implements the launching of the stand-along VM
++ * on the Linux platform.
++ */
++
++void JVMSPI_PrintRaw(const char* s) {
++#if ENABLE_PCSL
++  pcsl_print(s);
++#else
++  jvm_printf("%s", s);
++  jvm_fflush(stdout);
++#endif
++}
++
++void JVMSPI_Exit(int code) {
++  ::jvm_exit(code);
++}
++
++#if ENABLE_DYNAMIC_RESTRICTED_PACKAGE
++jboolean JVMSPI_IsRestrictedPackage(const char* pkg_name, int name_length) {
++  GUARANTEE(UseROM, "sanity");
++
++  // This is just a sample implementation. Please modify it for
++  // an actual deployment.
++  if (name_length == 8 && strncmp(pkg_name, "com/abcd", 8) == 0) {
++    // Don't allow any class in the package of "com.abcd".
++    return true;
++  }
++  if (name_length > 8  && strncmp(pkg_name, "com/abcd/", 9) == 0) {
++    // Don't allow any class in a subpackage of "com.abcd".
++    return true;
++  }
++  // Note that classes in an related package, such as com.abcdefg.MyClass, 
++  // are allowed.
++  return false;
++}
++#endif
++
++int main(int argc, char **argv) {
++  int code = 0;
++
++#if ENABLE_PCSL
++  pcsl_mem_initialize(NULL, 0);
++#endif
++
++  // Call this before any other Jvm_ functions.
++  JVM_Initialize();
++
++  // Ignore arg[0] -- the name of the program.
++  argc --;
++  argv ++;
++
++  while (true) {
++    int n = JVM_ParseOneArg(argc, argv);
++    if (n < 0) {
++      JVMSPI_DisplayUsage(NULL);
++      code = -1;
++      goto end;
++    } else if (n == 0) {
++      break;
++    }
++    argc -= n;
++    argv += n;
++  }
++
++  if (JVM_GetConfig(JVM_CONFIG_SLAVE_MODE) == KNI_FALSE) {
++    // Run the VM in regular mode -- JVM_Start won't return until
++    // the VM completes execution.
++    code = JVM_Start(NULL, NULL, argc, argv);
++  } else {
++    JVM_Start(NULL, NULL, argc, argv);
++
++    for (;;) {
++      long timeout = JVM_TimeSlice();
++      if (timeout <= -2) {
++        break;
++      } else {
++        int blocked_threads_count;
++        JVMSPI_BlockedThreadInfo * blocked_threads;
++
++        blocked_threads = SNI_GetBlockedThreads(&blocked_threads_count);
++        JVMSPI_CheckEvents(blocked_threads, blocked_threads_count, timeout);
++      }
++    }
++
++    code = JVM_CleanUp();
++  }
++
++end:
++#if ENABLE_PCSL
++  pcsl_mem_finalize();
++#endif
++
++  return code;
++}
+diff --git a/cldc/src/vm/os/rtems/OS_rtems.cpp b/cldc/src/vm/os/rtems/OS_rtems.cpp
+new file mode 100644
+index 0000000..1b66536
+--- /dev/null
++++ b/cldc/src/vm/os/rtems/OS_rtems.cpp
+@@ -0,0 +1,1113 @@
++/*
++ *    
++ *
++ * Portions Copyright  2000-2007 Sun Microsystems, Inc. All Rights
++ * Reserved.  Use is subject to license terms.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ *
++ *!c<
++ * Copyright 2006 Intel Corporation. All rights reserved.
++ *!c>
++ */
++
++/*
++ * OS_linux.cpp: Linux implementation of the VM
++ *               operating system porting interface
++ *
++ * This file defines the Linux-specific implementation
++ * of the OS porting interface (class Os).  Refer to file
++ * "/src/vm/share/runtime/OS.hpp" and the Porting
++ * Guide for details.
++ */
++
++#include "incls/_precompiled.incl"
++#include "incls/_OS_rtems.cpp.incl"
++
++// this flag allows running with Valgrind, advanced memory checker for
++// x86 Linux see http://developer.kde.org/~sewardj/ for more details
++#define ENABLE_VALGRIND 0
++
++#if ENABLE_VALGRIND
++#include <valgrind/memcheck.h>
++#endif
++
++// several meta defines
++#if (ENABLE_PERFORMANCE_COUNTERS || ENABLE_PROFILER || ENABLE_WTK_PROFILER \
++     || ENABLE_TTY_TRACE)
++#define NEED_CLOCK_TICKS 1
++#endif
++
++
++#if defined(__i386) || defined(ARM_EXECUTABLE)
++#define KNOW_REGISTER_NAMES 1
++#endif
++
++#ifdef SOLARIS
++#include <sys/time.h> /* for gethrtime() */
++#endif
++
++#if ENABLE_DYNAMIC_NATIVE_METHODS || ENABLE_JVMPI_PROFILE
++#include <dlfcn.h>
++#endif
++
++// IMPL_NOTE: the offset of PC value in ucontext_t structure
++// is different for every particular platform and OS.
++// Please change the value as suitable for your OS.
++
++#if ARM_EXECUTABLE
++class CPUContext {
++private:
++  address _unused[8];
++  address _regs[16];
++
++public:
++  address* get_regs()         { return _regs;     }
++  address  get_pc()           { return _regs[15]; }
++  void     set_pc(address pc) { _regs[15] = pc;   }
++};
++
++#elif defined(__i386)
++
++class CPUContext {
++private:
++  address _regs[20];
++
++public:
++  address* get_regs()         { return _regs;     }
++  address  get_pc()           { return _regs[19]; }
++  void     set_pc(address pc) { _regs[19] = pc;   }
++};
++
++#else // all other architectures
++
++class CPUContext {
++public:
++  address* get_regs()         { UNIMPLEMENTED(); return NULL; }
++  address  get_pc()           { UNIMPLEMENTED(); return NULL; }
++  void     set_pc(address pc) { UNIMPLEMENTED();              }
++};
++#endif
++
++
++#if USE_LIBC_GLUE
++// will be defined in interpreter loop as stub that can work from both
++// Thumb and ARM
++extern "C" void handle_vtalrm_signal_stub(int no, siginfo_t* inf, void* uc);
++#else
++#define handle_vtalrm_signal_stub handle_vtalrm_signal
++#endif
++extern "C" void init_jvm_chunk_manager();
++
++#if ENABLE_DYNAMIC_NATIVE_METHODS || ENABLE_JVMPI_PROFILE
++#define MAX_PATH 256
++void* Os::loadLibrary(const char* libName) {
++  char full_lib_name[MAX_PATH];
++  char lib_ext[] = {'.','s','o','\0'};
++  if (strlen(libName) + strlen(lib_ext) >= MAX_PATH) {
++#if ENABLE_TTY_TRACE
++    tty->print_cr("Library name is too long. %d chars maximum!", MAX_PATH - strlen(lib_ext) - 1);
++    tty->print_cr("Library name %s",libName);
++#endif
++    return 0;
++  }
++  strcpy(full_lib_name, libName);
++  strcat(full_lib_name, lib_ext);  
++  void* result = dlopen(full_lib_name, RTLD_LAZY);
++#if ENABLE_TTY_TRACE
++  if (result == NULL)  {
++    tty->print_cr("Failed to load library %s !",full_lib_name);
++  }
++#endif
++  return result;
++}
++void* Os::getSymbol(void* handle, const char* name) {
++  return dlsym(handle,name);
++}
++#endif
++
++jlong Os::java_time_millis() {
++    struct timeval tv;
++    ::jvm_gettimeofday(&tv, NULL);
++    /* We adjust to 1000 ticks per second */
++    return (jlong)tv.tv_sec * 1000 + tv.tv_usec/1000;
++}
++
++/*
++ * Sleep for ms Milliseconds, a sleep of 0ms is from the
++ * scheduler requiring a yield, therefore we should call
++ * sched_yield and not really sleep.
++ */
++void Os::sleep(jlong ms) {
++  if (ms == 0) {
++#if ENABLE_TIMER_THREAD
++    // ideally we should use pthread_yield() but it's
++    // not POSIX, and not defined on ARM, so use sched_yield instead.
++    ::sched_yield();
++#endif
++    return;
++  }
++
++  jlong end = Os::java_time_millis() + ms;
++  while (Os::java_time_millis() < end) {
++    ::usleep(1000);  // sleep for 1 ms
++  }
++}
++
++static bool   ticker_running = false;
++static bool   ticker_stopping = false;
++static bool   ticker_stopped = false;
++
++AZZERT_ONLY(static bool is_processing_timer_tick = false;)
++
++#if ENABLE_COMPILER
++static bool   _compiler_timer_has_ticked = false;
++static jlong  _compiler_timer_start;
++#endif
++
++static inline void rt_tick_event();
++
++#if ENABLE_TIMER_THREAD
++
++static sem_t ticker_semaphore;
++static bool ticker_created = false;
++static pthread_t main_thread_handle;
++
++static pthread_t thread_create(int thread_routine(void *parameter),
++                               void *parameter) {
++  pthread_attr_t attr;
++  pthread_t os_thread;
++
++  if (::pthread_attr_init(&attr) != 0) {
++    return 0;
++  }
++
++  // Don't leave thread/stack around after exit for join:
++  if (::pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) != 0) {
++    return 0;
++  }
++
++  // Apparently, it is a different type on Linux.
++  void* (*routine)(void*) = (void*(*)(void *))thread_routine;
++
++  if (::pthread_create(&os_thread, &attr, routine, NULL) != 0) {
++    return 0;
++  }
++  return os_thread;
++}
++
++static int ticker_thread_routine(void *parameter) {
++  ticker_stopped = false;
++  while (!ticker_stopping) {
++    ::usleep(TickInterval * 1000);
++
++    if (ticker_running) {
++      rt_tick_event();
++    } else {
++      ::sem_wait(&ticker_semaphore);
++    }
++  }
++  ticker_stopped = true;
++  return 0;
++}
++
++bool Os::start_ticks() {
++  if (!EnableTicks || Deterministic) {
++    return true;
++  }
++
++  ticker_running = true;
++  ticker_stopping = false;
++  if (ticker_created) {
++    ::sem_post(&ticker_semaphore);
++  } else {
++    ticker_created = true;
++    if (::sem_init(&ticker_semaphore, 0, 0) != 0) {
++      return false;
++    }
++    if (thread_create(ticker_thread_routine, 0) == 0) {
++      return false;
++    }
++  }
++  return true;
++}
++
++void Os::suspend_ticks() {
++  ticker_running = false;
++  Os::sleep(1); // why is this necessary?
++}
++
++void Os::resume_ticks() {
++  start_ticks();
++}
++
++void Os::stop_ticks() {
++  if (ticker_created) {
++    ticker_stopping = true;
++    if (ticker_running) {
++      for (int i=0; i<10 && !ticker_stopped; i++) {
++        ::usleep(TickInterval * 1000);
++      }
++    } else {
++      // ticker is currently suspended on a semaphore
++      ::sem_post(&ticker_semaphore);
++      for (int i=0; i<10 && !ticker_stopped; i++) {
++        ::usleep(TickInterval * 1000);
++      }
++      ::sem_destroy(&ticker_semaphore);
++    }
++    ticker_created = false;
++    ticker_running = false;
++    ticker_stopped = false;
++  }
++}
++
++#else // ENABLE_TIMER_THREAD
++
++bool Os::start_ticks() {
++  if (ticker_running || !EnableTicks || Deterministic) {
++    return true;
++  }
++
++  ticker_running = true;
++
++  struct itimerval interval;
++  interval.it_interval.tv_sec  = TickInterval / 1000;
++  interval.it_interval.tv_usec = (TickInterval % 1000) * 1000;
++  interval.it_value.tv_sec  = interval.it_interval.tv_sec;
++  interval.it_value.tv_usec = interval.it_interval.tv_usec;
++
++  if (::jvm_setitimer(ITIMER_VIRTUAL, &interval, NULL) != 0) {
++    return false;
++  }
++  return true;
++}
++
++void Os::suspend_ticks() {
++  if (ticker_running) {
++    struct itimerval interval = {{0,0}, {0,0}};
++    if (::jvm_setitimer(ITIMER_VIRTUAL, &interval, NULL) != 0) {
++      JVM_FATAL(system_resource_unavailable);
++    }
++    ticker_running = false;
++  }
++}
++
++void Os::resume_ticks() {
++  start_ticks();
++}
++
++void Os::stop_ticks() {
++  suspend_ticks();
++}
++
++#endif // ENABLE_TIMER_THREAD
++
++#if !ENABLE_TIMER_THREAD
++extern "C" void handle_vtalrm_signal(int signo, siginfo_t* sigi, void* uc) {
++  GUARANTEE(!is_processing_timer_tick, "Sanity");
++  AZZERT_ONLY(TemporaryModifyGlobal(&is_processing_timer_tick,
++                                    !is_processing_timer_tick);)
++
++  if (ticker_running) {
++#if ENABLE_CODE_PATCHING
++    if (!VerifyOnly && 
++        !Universe::is_bootstrapping() && 
++        !Compiler::is_active()) {
++      Compiler::patch_checkpoints(((CPUContext*)uc)->get_pc());
++    }
++#endif
++    rt_tick_event();
++  } else {
++    struct itimerval interval;
++    interval.it_interval.tv_sec  = interval.it_value.tv_sec  = 0;
++    interval.it_interval.tv_usec = interval.it_value.tv_usec = 0;
++    if (::jvm_setitimer(ITIMER_VIRTUAL, &interval, NULL) != 0) {
++      JVM_FATAL(system_resource_unavailable);
++    }
++  }
++}
++#endif // !ENABLE_TIMER_THREAD
++
++#if ENABLE_TIMER_THREAD && USE_LIBC_GLUE
++extern "C" void handle_vtalrm_signal(int signo, siginfo_t* sigi, void* uc) {
++  // dummy - do nothing
++}
++#endif
++
++static bool printing_stack = false;
++
++static void handle_other_signals(int sig) {
++#if ENABLE_TIMER_THREAD
++  // ignore signal in all threads, but main
++  if (pthread_self() != main_thread_handle) {
++    // maybe on some Unices (and NPTL-threaded Linux) this should be
++    // uncommented (if signal is sent to only one, random, thread
++    //pthread_kill(main_thread_handle, sig);
++    return;
++  }
++#endif
++  // If we have error inside a pp() call, last_raw_handle, etc, need to be
++  // restored.
++  DebugHandleMarker::restore();
++
++  char *name;
++
++  switch (sig) {
++  case SIGHUP:
++    name = "SIGHUP";
++    break;
++  case SIGQUIT:
++    name = "SIGQUIT";
++    break;
++  case SIGABRT:
++    name = "SIGABRT";
++    break;
++  case SIGTERM:
++    name = "SIGTERM";
++    break;
++  default:
++    name = "??";
++  }
++#ifndef PRODUCT
++  jvm_printf("received signal %s\n", name);
++  if (!printing_stack) {
++    printing_stack = true;
++    pss();
++    printing_stack = false;
++  }
++#endif
++  if (sig == SIGHUP || sig == SIGQUIT || sig == SIGTERM) {
++    return;
++  }
++
++  ::jvm_signal(SIGABRT, NULL);
++  ::jvm_abort();
++}
++
++
++#define HAVE_SIGINFO 1
++#if HAVE_SIGINFO
++
++static void print_siginfo(siginfo_t *si) {
++  const char *name;
++
++  switch (si->si_signo) {
++  case SIGILL:
++    name = "SIGILL";
++    break;
++  case SIGBUS:
++    name = "SIGBUS";
++    break;
++  case SIGSEGV:
++    name = "SIGSEGV";
++    break;
++  default:			// cannot happen
++    name = "-unknown-";
++    break;
++  }
++  jvm_fprintf(stderr,
++	      "Fatal signal %s: signo=%d; code=%d\n",
++	      name, si->si_signo, si->si_code);
++}
++
++static void print_ucontext(void* context) {
++#if defined(__NetBSD__)
++  ucontext_t* uc = (ucontext_t*) context;
++  jvm_fprintf(stderr, "UContext dump follows:\n");
++  jvm_fprintf(stderr, "uc_flags=%x; ss_sp=%p; ss_size=%d, ss_flags=%x\n",
++	      (unsigned int) uc->uc_flags,
++	      uc->uc_stack.ss_sp, uc->uc_stack.ss_size, uc->uc_stack.ss_flags);
++
++  mcontext_t *mc = &uc->uc_mcontext;
++  int cnt = 4;
++
++#define PRINT_REG(r) do {						\
++      jvm_fprintf(stderr, "%7.7s=%08x%s", #r, mc->__gregs[_REG_##r],	\
++		  --cnt ? "    " : "\n");				\
++      if (cnt == 0)							\
++	cnt = 4;							\
++  } while (0);
++
++#if defined(__arm__)
++  PRINT_REG(R0);   PRINT_REG(R1);   PRINT_REG(R2);   PRINT_REG(R3);
++  PRINT_REG(R4);   PRINT_REG(R5);   PRINT_REG(R6);   PRINT_REG(R7);
++  PRINT_REG(R8);   PRINT_REG(R9);   PRINT_REG(R10);  PRINT_REG(R11);
++  PRINT_REG(R12);  PRINT_REG(R13);  PRINT_REG(R14);  PRINT_REG(PC);
++  PRINT_REG(CPSR);
++  jvm_fprintf(stderr, "\n");
++#endif
++
++#if defined(__sh3__)
++  PRINT_REG(R0);   PRINT_REG(R1);   PRINT_REG(R2);   PRINT_REG(R3);
++  PRINT_REG(R4);   PRINT_REG(R5);   PRINT_REG(R6);   PRINT_REG(R7);
++  PRINT_REG(R8);   PRINT_REG(R9);   PRINT_REG(R10);  PRINT_REG(R11);
++  PRINT_REG(R12);  PRINT_REG(R13);  PRINT_REG(R14);  PRINT_REG(SP);
++  PRINT_REG(PC);   PRINT_REG(PR);   PRINT_REG(SR);   PRINT_REG(EXPEVT);
++  PRINT_REG(MACH); PRINT_REG(MACL);
++  jvm_fprintf(stderr, "\n");
++#endif
++
++#endif // __NetBSD__
++}
++
++#if ENABLE_PAGE_PROTECTION
++extern "C" void interpreter_timer_tick();
++extern "C" void compiler_timer_tick();
++extern "C" void vsf_flush(address* regs);
++
++static inline
++bool protected_page_access(int signo, siginfo_t* info, void* context) {
++  const juint offset = (address)info->si_addr - _protected_page;
++  if (TracePageAccess) {
++    TTY_TRACE_CR(("ACCESS_VIOLATION signaled: offset = %d", offset));
++  }
++
++  CPUContext* ctx = (CPUContext*)context;
++  switch (offset) {
++  case COMPILER_TIMER_TICK_SLOT:
++    vsf_flush(ctx->get_regs());
++    ctx->set_pc((address)compiler_timer_tick);
++    return true;
++  case INTERPRETER_TIMER_TICK_SLOT:
++    ctx->set_pc((address)interpreter_timer_tick);
++    return true;
++  }
++  return false;
++}
++
++#else
++
++static inline
++bool protected_page_access(int signo, siginfo_t* info, void* context) {
++  return false;
++}
++#endif // ENABLE_PAGE_PROTECTION
++
++
++static void handle_segv_siginfo(int signo, siginfo_t *info, void *context) {
++  if (protected_page_access(signo, info, context)) {
++    return;
++  }
++
++  print_siginfo(info);
++  print_ucontext(context);
++#ifndef PRODUCT
++  if (!printing_stack) {
++    printing_stack = true;
++    new_pss();
++    printing_stack = false;
++  }
++#endif
++  ::exit(1);
++}
++
++#else  // ! HAVE_SIGINFO
++
++// Solaris doesn't have sigcontext
++#if defined(SOLARIS) || defined(RTEMS)
++struct sigcontext {
++ int dummy;
++};
++#endif
++
++#if KNOW_REGISTER_NAMES && !defined(PRODUCT)
++static void print_regs(int signo, struct sigcontext* sigc) {
++  #define PRINT_REG(str, name)                                   \
++       jvm_fprintf(stderr, "%4s=0x%08lx   ", #str, sigc->name); \
++       if (!--cnt) {  jvm_fprintf(stderr, "\n"); cnt = 4; }
++
++  char* name;
++  int   cnt = 4;
++
++  switch (signo) {
++  case SIGSEGV:
++    name = "SIGSEGV";
++#if ARM_EXECUTABLE
++    {
++      unsigned long fa = 0;
++      jvm_fprintf(stderr, "%s[%ld] fault at address: 0x%08lx\n",
++        (sigc->error_code & 1) ? "Write" : "Read", sigc->error_code, fa);
++    }
++#else
++    jvm_fprintf(stderr, "%s[%ld] fault at address: 0x%08lx\n",
++      (sigc->err & 2) ? "Write" : "Read", sigc->err, sigc->cr2);
++#endif
++    break;
++  case SIGILL:
++    name = "SIGILL";
++    break;
++  case SIGBUS:
++    name = "SIGBUS";
++    break;
++  default:
++    name = "-unknown-";
++  }
++  jvm_fprintf(stderr, "received fatal signal: %s\n", name);
++  jvm_fprintf(stderr, "Full registers dump:\n");
++
++#if ARM_EXECUTABLE
++  jvm_fprintf(stderr, "[some values may be incorrect on ARM]\n");
++  PRINT_REG(IP, arm_ip);
++  PRINT_REG(SP, arm_sp);
++  PRINT_REG(PC, arm_pc);
++  PRINT_REG(LR, arm_lr);
++  PRINT_REG(CPSR, arm_cpsr);
++  PRINT_REG(R0, arm_r0);
++  PRINT_REG(R1, arm_r1);
++  PRINT_REG(R2, arm_r2);
++  PRINT_REG(R3, arm_r3);
++  PRINT_REG(R4, arm_r4);
++  PRINT_REG(R5, arm_r5);
++  PRINT_REG(R6, arm_r6);
++  PRINT_REG(R7, arm_r7);
++  PRINT_REG(R8, arm_r8);
++  PRINT_REG(R9, arm_r9);
++  PRINT_REG(R10, arm_r10);
++#else
++  PRINT_REG(EAX, eax);
++  PRINT_REG(EBX, ebx);
++  PRINT_REG(ECX, ecx);
++  PRINT_REG(EDX, edx);
++  PRINT_REG(EIP, eip);
++  PRINT_REG(ESP, esp);
++  PRINT_REG(ESI, esi);
++  PRINT_REG(EBP, ebp);
++  PRINT_REG(EDI, edi);
++#endif
++  jvm_fprintf(stderr, "\n");
++}
++#else
++static void print_regs(int signo, struct sigcontext* sig) {
++  jvm_fprintf(stderr, "Memory access error, please report the bug\n");
++}
++#endif
++
++static void handle_segv_signal(int signo, struct sigcontext sigc) {
++  print_regs(signo, &sigc);
++
++#ifndef PRODUCT
++  if (!printing_stack) {
++    printing_stack = true;
++    new_pss();
++    printing_stack = false;
++  }
++#endif
++}
++
++#endif // ! HAVE_SIGINFO
++
++#if ( ENABLE_NPCE ||\
++     ( ENABLE_INTERNAL_CODE_OPTIMIZER)) \
++     && ARM_EXECUTABLE
++static void handle_segv_siginfo_npe(int sig, siginfo_t* info, void* ucpPtr) {
++  if (protected_page_access(sig, info, ucpPtr)) {
++    return;
++  }
++
++  struct ucontext* ucp = (struct ucontext *)ucpPtr;
++  unsigned long pc = ucp->uc_mcontext.arm_pc;
++  bool is_npe = true;
++  bool found = false;
++  
++  int default_npce_stub = not_found;
++  int default_array_check_stub = not_found;
++
++  unsigned long heap_high ;
++  unsigned long heap_low  ;
++  if( (unsigned int) _heap_start > (unsigned int) _heap_top ) {
++    heap_high = (unsigned long) _heap_start;
++    heap_low = (unsigned long) _heap_top;
++  } else {
++    heap_high = (unsigned long) _heap_top;
++    heap_low = (unsigned long) _heap_start;
++  }
++
++#ifndef PRODUCT
++  if (VerboseNullPointExceptionThrowing) {
++    TTY_TRACE(("Verbose exception information begin:\n"));	
++    TTY_TRACE(("Heap Status:"));	
++    TTY_TRACE(("[0x%08x,",heap_low));
++    TTY_TRACE(("0x%08x]\n",heap_high));
++  }
++#endif
++
++  if( pc < heap_low || pc > heap_high ) {
++    TTY_TRACE(("Memory access error\nPlease report the bug\n"));
++  }
++  
++  CompiledMethodDesc *cmd = ObjectHeap::method_contain_instruction_of((void *)pc);
++  
++  if( cmd == NULL){
++    TTY_TRACE(("Memory access error\nPlease report the bug\n"));
++    ::exit(1);
++  }
++  
++  CompiledMethod::Raw method = cmd;
++  Method::Raw raw_method = method().method();
++  int code_begin = (int)cmd + CompiledMethod::base_offset();
++  int stub_offset = not_found;
++  int offset = pc - code_begin;
++  int default_stub_offset = not_found;
++
++#ifndef  PRODUCT
++  if (VerboseNullPointExceptionThrowing) {
++    TTY_TRACE(("Method status:\n  name:"));
++    bool renamed;
++    Symbol::Raw n = raw_method().get_original_name(renamed);
++    n().print_symbol_on(tty);
++    TTY_TRACE(("()"));
++    TTY_TRACE((",=>[0x%08x]", code_begin));
++  }
++#endif
++
++  if (VerboseNullPointExceptionThrowing) {
++    TTY_TRACE((",offset[%d]\n", offset));
++  }
++  
++#if ENABLE_NPCE 
++  for (RelocationReader stream(&method); !stream.at_end(); stream.advance()) {
++    if (stream.is_npe_item()) {
++#ifndef  PRODUCT
++      if (VerboseNullPointExceptionThrowing) {
++        TTY_TRACE(("  fail at [%d] should jump to", stream.current(1)));	  	
++        TTY_TRACE(("[%d]\n", stream.code_offset()));
++
++      }
++#endif
++      //if a ldr/str offset is 0 stand for a record of default npe stub
++      if (stream.current(1) == 0) {
++        default_npce_stub = stream.code_offset();
++      }
++
++      //current(1) return the ldr/str offset
++      //if the offset is non zero, the instr must have a correponding 
++      //stub.
++      if (stream.current(1) == offset) {
++        stub_offset = stream.code_offset();
++        if (VerboseNullPointExceptionThrowing) {
++          TTY_TRACE(("  target stub is 0x%08x\n",stub_offset));
++        }
++        break;
++      }
++    }
++  }
++#endif 
++
++#if ENABLE_INTERNAL_CODE_OPTIMIZER        
++  for (RelocationReader stream(&method); !stream.at_end(); stream.advance()) {
++    if (stream.is_pre_load_item()) {
++#ifndef  PRODUCT
++      if (VerboseNullPointExceptionThrowing) {
++        TTY_TRACE((" if  failed at [%d] should jump to", stream.current(1)));	  	
++        TTY_TRACE(("[%d]\t", stream.code_offset()));
++      }
++#endif
++      if (stream.current(1) == 0) {
++        default_array_check_stub = stream.code_offset();
++      }
++      if (!found && (stream.current(1) == offset)) {
++        if (stream.is_pre_load_item()) {
++          is_npe = false;
++        }
++        if (VerboseNullPointExceptionThrowing) {
++          TTY_TRACE_CR(("  found a exception caused index out of bound"))
++        }
++        found = true;
++      }
++    }
++  }
++#endif 
++
++  if (stub_offset != not_found ) {
++    stub_offset = stub_offset + code_begin;
++    ucp->uc_mcontext.arm_pc = (unsigned long) stub_offset;
++#ifndef  PRODUCT
++    if(VerboseNullPointExceptionThrowing) {
++      TTY_TRACE(("  jump to [0x%08x]\n", stub_offset));
++    }
++#endif
++  if(VerboseNullPointExceptionThrowing){
++    TTY_TRACE(("Verbose exception information end\n"));	
++  }	
++    return;
++  }
++
++#if ENABLE_INTERNAL_CODE_OPTIMIZER        
++  if (!is_npe) {
++    if (default_array_check_stub != not_found ) {
++      default_array_check_stub = (int)default_array_check_stub + code_begin;
++      ucp->uc_mcontext.arm_pc = (unsigned long) default_array_check_stub ;	
++      return ;
++    } else {
++      ucp->uc_mcontext.arm_pc = 
++        (unsigned long)gp_compiler_throw_ArrayIndexOutOfBoundsException_ptr; 
++      ucp->uc_mcontext.arm_r0 = raw_method(). max_locals();
++      if(VerboseNullPointExceptionThrowing){	  
++        TTY_TRACE(("Verbose exception information end\n"));		  
++      }
++      return ;
++    }
++  }
++#endif
++
++  if ( default_npce_stub != not_found ) {
++    stub_offset = (int)default_npce_stub + code_begin;
++    ucp->uc_mcontext.arm_pc = (unsigned long) stub_offset;
++#ifndef  PRODUCT
++    if (VerboseNullPointExceptionThrowing) {
++        TTY_TRACE(("  jump to default [0x%08x]\n", stub_offset));
++    }
++#endif
++    if(VerboseNullPointExceptionThrowing){
++      TTY_TRACE(("Verbose exception information end\n"));	
++    }
++    return;
++  }
++
++  int max_locals = raw_method().max_locals();
++  ucp->uc_mcontext.arm_pc = (unsigned long) gp_compiler_throw_NullPointerException_ptr;
++  ucp->uc_mcontext.arm_r0 = max_locals;
++  if (VerboseNullPointExceptionThrowing) {
++    TTY_TRACE(("  jump to fixed stub\n"));
++  }
++  
++  if(VerboseNullPointExceptionThrowing){
++    TTY_TRACE(("Verbose exception information end\n"));	
++  }
++  return;
++
++  TTY_TRACE(("Memory access error\nPlease report the bug\n"));
++  ::exit(1);
++}
++#endif //ENABLE_NPCE
++
++
++#if NEED_CLOCK_TICKS
++static jlong _performance_frequency = 0;
++
++#if NEED_XSCALE_PMU_CYCLE_COUNTER
++// See more information inside internal_misc/xscale (Sun internal)
++static int   pmu_fd          = -1;    /* file descriptor */
++static int   pmu_refcount    = 0;     /* fd reference counter */
++static char *pmu_counter     = "/dev/ixs_ins_counter"; 
++static int   pmu_cpu_clk_mhz = 0;
++
++static inline void ixs_open_ins_counter() {
++  if (pmu_fd < 0 && (pmu_fd = jvm_open(pmu_counter, O_RDWR)) < 0 ) {
++    perror("pmu counter error: unable to open device\n");
++    pmu_fd = -1;
++  } else {
++    ioctl(pmu_fd, PMU_GET_CPU_CLK, &pmu_cpu_clk_mhz);
++    pmu_refcount ++;
++  }
++}
++
++static inline  void ixs_close_ins_counter() {
++  if (pmu_fd >= 0) {
++    if (--pmu_refcount == 0) {
++      jvm_close(pmu_fd); 
++      pmu_fd = -1;
++    }
++  }
++}
++
++static inline jlong ixs_cycles(void) {
++  jlong result;
++  if (pmu_fd >= 0) {
++    ioctl(pmu_fd, PMU_GET_INS_COUNTER, &result);
++  }
++  return result;
++}
++#endif
++
++#ifdef __i386__
++
++static inline jlong get_clock_ticks(void)
++{
++  unsigned long low_time, high_time;
++  asm volatile(
++               "rdtsc \n\t"
++               : "=a" (low_time),
++	         "=d" (high_time));
++  return (jlong)((unsigned long long)high_time << 32) | (low_time);
++}
++
++static inline void init_clock_ticks(void) {
++  jlong t1, t2;
++
++  t1 = get_clock_ticks();
++  // no more to not affect startup time badly
++  Os::sleep(20);
++  t2 = get_clock_ticks();
++
++  _performance_frequency = (t2 - t1) * (1000 / 20);
++}
++
++#elif defined(SOLARIS)
++
++static inline jlong get_clock_ticks(void)
++{
++  return (jlong)gethrtime();
++}
++
++static inline void init_clock_ticks(void) {
++  // gethrtime return nanoseconds
++  _performance_frequency = 1000000000;
++}
++
++#else
++
++static inline jlong get_clock_ticks(void) {
++  struct timeval tv;
++  ::jvm_gettimeofday(&tv, NULL);
++  return jlong(tv.tv_sec) * jlong(1000 * 1000) + jlong(tv.tv_usec);
++}
++
++static inline void init_clock_ticks(void) {
++   // micro seconds
++  _performance_frequency = 1000 * 1000;
++}
++
++#endif
++
++jlong Os::elapsed_counter() {
++#if ENABLE_PERFORMANCE_COUNTERS
++  jvm_perf_count.hrtick_read_count++;
++#endif
++
++#if NEED_XSCALE_PMU_CYCLE_COUNTER
++  return ixs_cycles();
++#else
++  return get_clock_ticks();
++#endif
++}
++
++jlong Os::elapsed_frequency() {
++#if NEED_XSCALE_PMU_CYCLE_COUNTER
++  return pmu_cpu_clk_mhz * 1000 * 1000;
++#else
++  return _performance_frequency;
++#endif
++}
++
++#endif // NEED_CLOCK_TICKS
++
++#if ENABLE_ARM_VFP
++static void ignoreit() {}
++#endif
++
++extern "C" void jvm_set_vfp_fast_mode();
++void Os::initialize() {
++#if ENABLE_ARM_VFP && !CROSS_GENERATOR
++  if (RunFastMode) {
++    // Linux by default does not use RunFast mode. This option makes
++    // it easy to test the VM's compatibility with RunFast mode.
++    jvm_set_vfp_fast_mode();
++  }
++#endif
++
++#if ENABLE_ARM_VFP
++  // For some reason this SIG_IGN doesn't work on Linux 2.6 on ARM.
++  // ::jvm_signal(SIGFPE, SIG_IGN);
++  ::jvm_signal(SIGFPE, (sighandler_t)&ignoreit);
++#endif
++
++  // it better be here so that profiler timings not damaged by
++  // itimer-generted signals, although nanosleep() shouldn't
++  // be heavily affected by signals
++#if NEED_CLOCK_TICKS
++  init_clock_ticks();
++#if NEED_XSCALE_PMU_CYCLE_COUNTER
++  ixs_open_ins_counter();
++#endif
++#endif
++
++#if SUPPORTS_ADJUSTABLE_MEMORY_CHUNK
++  // memory manager is in OsMemory
++  init_jvm_chunk_manager();
++#endif
++
++  int sa_flags = 0; //SA_RESTART;
++
++// #if !defined(ARM)
++#if !defined(ARM) && !defined(RTEMS)    // XXX: Is it safe???
++  // force execution of signals on separate stack, as otherwise
++  // results can be unpredictable if we'll modify stack in
++  // Java heap and VM will not know. We handle signals either when
++  // using SIGVTALRM, or when printing pss() in case of a crash.
++# if defined(PRODUCT)
++# define ALT_STACK_SIZE (MINSIGSTKSZ)
++# else
++# define ALT_STACK_SIZE (MINSIGSTKSZ + 2048)
++# endif
++
++  static char alt_stack_buf[ALT_STACK_SIZE];
++  stack_t alt_stack;
++  alt_stack.ss_sp = alt_stack_buf;
++  alt_stack.ss_size = ALT_STACK_SIZE;
++  alt_stack.ss_flags = 0;
++  ::jvm_sigaltstack(&alt_stack, NULL);
++  sa_flags |= SA_ONSTACK;
++#endif // !defined(ARM)
++
++#if ENABLE_TIMER_THREAD
++  main_thread_handle = pthread_self();
++#else
++  // setup vtalarm signal handler to provide a source of
++  // timer-based interrupts for Java thread switching and dynamical
++  // compilation (Hotspot detection)
++  static struct sigaction vtalrm_action;
++  ::jvm_sigaction (SIGVTALRM, NULL, &vtalrm_action);
++  vtalrm_action.sa_handler = (void (*)(int)) handle_vtalrm_signal_stub;
++  vtalrm_action.sa_flags = sa_flags | SA_SIGINFO;
++  ::jvm_sigaction (SIGVTALRM, &vtalrm_action, NULL);
++#endif // ENABLE_TIMER_THREAD
++
++  // setup handler for SEGV - it prints native registers and Java backtrace
++#if ( ENABLE_NPCE || ( ENABLE_INTERNAL_CODE_OPTIMIZER ) ) && ARM_EXECUTABLE
++  static struct sigaction segv_action;
++  ::jvm_sigaction(SIGSEGV, NULL, &segv_action);
++  segv_action.sa_sigaction = handle_segv_siginfo_npe;
++  segv_action.sa_flags = sa_flags | SA_SIGINFO;
++#elif HAVE_SIGINFO
++  struct sigaction segv_action;
++  segv_action.sa_sigaction = handle_segv_siginfo;
++  segv_action.sa_flags = sa_flags | SA_SIGINFO;
++  sigemptyset(&segv_action.sa_mask);
++#else
++  static struct sigaction segv_action;
++  ::jvm_sigaction(SIGSEGV, NULL, &segv_action);
++  segv_action.sa_handler = (void (*)(int)) handle_segv_signal;
++  segv_action.sa_flags = sa_flags;
++#endif // ENABLE_NPCE
++
++  ::jvm_sigaction(SIGSEGV, &segv_action, NULL);
++  ::jvm_sigaction(SIGILL, &segv_action, NULL);
++  ::jvm_sigaction(SIGBUS, &segv_action, NULL);
++
++  // setup handlers of other signals
++  static struct sigaction other_action;
++  sigemptyset(&other_action.sa_mask);
++  other_action.sa_handler = (void (*)(int)) handle_other_signals;
++  other_action.sa_flags = sa_flags;
++
++  ::jvm_sigaction(SIGABRT, &other_action, NULL);
++  ::jvm_sigaction(SIGQUIT, &other_action, NULL);
++  ::jvm_sigaction(SIGTERM, &other_action, NULL);
++  ::jvm_sigaction(SIGHUP,  &other_action, NULL);
++  ::jvm_signal(SIGPIPE, SIG_IGN);
++}
++
++
++/*
++ * The Os::dispose method needs to correctly clean-up
++ * all threads and other OS related activity to allow
++ * for a clean and complete restart.  This should undo
++ * all the work that initialize does.
++ */
++void Os::dispose() {
++#if NEED_XSCALE_PMU_CYCLE_COUNTER
++  ixs_close_ins_counter();
++#endif
++}
++
++extern "C" void arm_flush_icache(address start, int size);
++extern "C" void brute_force_flush_icache();
++
++void OsMisc_flush_icache(address start, int size) {
++#if ARM_EXECUTABLE
++#if ENABLE_BRUTE_FORCE_ICACHE_FLUSH
++  // This is a brute-force way of flushing the icache. The function
++  // brute_flush_icache() contains 64KB of no-ops.
++  volatile int x;
++  volatile int * ptr = (int*)brute_force_flush_icache;
++  for (int i=0; i<8192; i++) {
++    // need to flush writeback cache, too.
++    x = *ptr++;
++  }
++  brute_force_flush_icache(); // IMPL_NOTE: jump to brute_flush_icache() + xx
++                              // if size is small ...
++#elif defined(__NetBSD__)
++  // arch-specific syscall from libarm
++  arm_sync_icache((unsigned int)start, size);
++#else
++  // This is in assembly language
++  arm_flush_icache(start, size);
++#endif
++#endif // ARM_EXECUTABLE
++
++  // Valgrind deploys VM technology with JITter so when we modify ourselves
++  // we need to let Valgrind know about it
++#if ENABLE_VALGRIND
++  VALGRIND_DISCARD_TRANSLATIONS(start, size);
++#endif
++}
++
++/*
++ * This is an example implementation of compiler timer. We try to base
++ * the compiler timer on real_time_tick, as much as possible. This
++ * way, we can avoid the overhead of Os::java_time_millis(), which
++ * might be significant on actual devices.
++ *
++ * On an actual device, if MaxCompilationTime is a fixed value, it may
++ * be better to use a dedicated OS timer resource to implement the
++ * compiler timer. Alternatively, you can make TickInterval a multiple
++ * of MaxCompilationTime, so that you can use the same OS timer
++ * resource to serve both real_time_tick and the compiler timer.
++ */
++
++void Os::start_compiler_timer() {
++#if ENABLE_COMPILER
++  if (MaxCompilationTime == TickInterval) {
++    // Note: this tend to make the average compilation period to be
++    // 0.5 * MaxCompilationTime.
++    _compiler_timer_start = (jlong)0;
++    _compiler_timer_has_ticked = false;
++  } else {
++    _compiler_timer_start = Os::java_time_millis();
++  }
++#endif
++}
++
++/*
++ * Returns true iff the current compilation has taken too long and
++ * should be suspended and resumed later.
++ */
++bool Os::check_compiler_timer() {
++#if ENABLE_COMPILER
++  if (_compiler_timer_start == (jlong)0) {
++    return _compiler_timer_has_ticked;
++  } else {
++    jint elapsed_ms = (jint)(Os::java_time_millis() - _compiler_timer_start);
++    return (elapsed_ms >= MaxCompilationTime);
++  }
++#else
++  return true;
++#endif
++}
++
++static inline void rt_tick_event() {
++  real_time_tick(TickInterval);
++#if ENABLE_COMPILER
++  _compiler_timer_has_ticked = true;
++#endif
++}
+diff --git a/cldc/src/vm/os/rtems/OS_rtems.hpp b/cldc/src/vm/os/rtems/OS_rtems.hpp
+new file mode 100644
+index 0000000..299d71c
+--- /dev/null
++++ b/cldc/src/vm/os/rtems/OS_rtems.hpp
+@@ -0,0 +1,93 @@
++/*
++ *   
++ *
++ * Portions Copyright  2000-2007 Sun Microsystems, Inc. All Rights
++ * Reserved.  Use is subject to license terms.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ *
++ *!c<
++ * Copyright 2006 Intel Corporation. All rights reserved.
++ *!c>
++ */
++
++/** \file OS_linux.hpp: OS-specific declarations.
++ */
++
++#ifndef  __USE_GNU
++#define __USE_GNU
++#endif
++
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <sys/time.h>
++#include <sys/times.h>
++#include <signal.h>
++#include <sched.h>
++#include <errno.h>
++
++#ifdef SOLARIS
++  // otherwise mmap/munmap has bad signature
++#ifndef  _XPG4_2
++#define _XPG4_2 1
++#endif
++#endif
++
++//#include <sys/mman.h>
++
++#if ( ENABLE_NPCE || ( ENABLE_INTERNAL_CODE_OPTIMIZER ) ) && ARM_EXECUTABLE
++enum {
++  not_found = -1,
++};
++#define ucontext asm_ucontext
++extern "C" {
++  extern address gp_compiler_throw_NullPointerException_ptr;
++  extern address gp_compiler_throw_ArrayIndexOutOfBoundsException_ptr;
++  extern address gp_compiler_throw_NullPointerException_10_ptr;
++  extern address gp_compiler_throw_ArrayIndexOutOfBoundsException_10_ptr;
++}
++#include <asm/ucontext.h>
++#else
++//#include <ucontext.h>
++#endif
++
++#if ARM && defined(__NetBSD__)
++#include <machine/sysarch.h>
++#endif
++
++#if ENABLE_TIMER_THREAD
++#include <pthread.h>
++#include <semaphore.h>
++#endif
++
++#define NEED_XSCALE_PMU_CYCLE_COUNTER \
++        (ENABLE_XSCALE_PMU_CYCLE_COUNTER && ARM_EXECUTABLE)
++
++#if NEED_XSCALE_PMU_CYCLE_COUNTER
++#include <sys/ioctl.h>
++
++#define PMU_GET_INS_COUNTER 21
++#define PMU_GET_CPU_CLK 22
++#endif
++ 
++#undef __USE_GNU
++
++#define SUSPENDSIG SIGUSR1
+diff --git a/cldc/src/vm/os/rtems/OsFile_rtems.cpp b/cldc/src/vm/os/rtems/OsFile_rtems.cpp
+new file mode 100644
+index 0000000..01827e6
+--- /dev/null
++++ b/cldc/src/vm/os/rtems/OsFile_rtems.cpp
+@@ -0,0 +1,274 @@
++/*
++ *   
++ *
++ * Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ */
++
++/** \file OsFile_linux.cpp
++ *
++ */
++
++#include "incls/_precompiled.incl"
++#include "incls/_OsFile_rtems.cpp.incl"
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#if !ENABLE_PCSL
++OsFile_Handle OsFile_open(const char *filename, const char *mode) {
++  return (OsFile_Handle)jvm_fopen(filename, mode);
++}
++
++int OsFile_close(OsFile_Handle handle) {
++  return jvm_fclose(handle);
++}
++
++int OsFile_flush(OsFile_Handle handle) {
++  return jvm_fflush(handle);
++}
++
++size_t OsFile_read(OsFile_Handle handle,
++                   void *buffer, size_t size, size_t count) {
++  return jvm_fread(buffer, size, count, handle);
++}
++
++size_t OsFile_write(OsFile_Handle handle,
++                    const void *buffer, size_t size, size_t count) {
++  return jvm_fwrite(buffer, size, count, handle);
++}
++
++long OsFile_length(OsFile_Handle handle) {
++  jvm_fseek(handle, 0, SEEK_END);
++  long res = jvm_ftell(handle);
++  jvm_fseek(handle, 0, SEEK_SET);// reset file
++  return res;
++}
++
++bool OsFile_exists(const char *name) {
++  struct stat buf;
++  if (jvm_stat(name, &buf) == 0) {
++    if (S_ISREG(buf.st_mode)) {
++       return true;
++    }
++  }
++  return false;
++}
++
++long OsFile_seek(OsFile_Handle handle, long offset, int origin) {
++  return jvm_fseek(handle, offset, origin);
++}
++
++int OsFile_eof(OsFile_Handle handle) {
++  return jvm_feof(handle);
++}
++
++bool OsFile_rename(const char *from, const char *to) {
++  jvm_rename(from, to);
++  return true;
++}
++
++int OsFile_remove(const char *filename) {
++  return jvm_remove(filename);
++}
++#endif // !ENABLE_PCSL
++
++#if USE_IMAGE_MAPPING
++
++struct Linux_MappedImage : public OsFile_MappedImage {
++  size_t  ro_length;
++  address rw_mapped_address;
++  size_t  rw_length;
++};
++
++#define ASSUMED_PAGE_SIZE 4096
++
++address OsFile_ImagePreferredAddress(const JvmPathChar* jar_file_name) {
++  // Change this if this range is usually not free on your port
++  address base = (address)0x44000000;
++
++#if ENABLE_ISOLATES
++  // Use this much of virtual space above the base address for images
++  int reserve_size = 0x04000000; // 64 MB.
++  // usually an image is no larger than 512K (eembc is below 300K)
++  int image_size = 512 * 1024;
++  // The default setting above allow 128 simultaneuos images to be mapped
++  // to their own desired address (if there's no conflict)
++  int num_slots = reserve_size / image_size;
++
++  juint hash = 0;
++  while (*jar_file_name) {
++    JvmPathChar c = *jar_file_name++;
++    hash = 31 * hash + juint(c);
++  }
++
++  base += image_size * (hash % num_slots);
++
++#else
++  // In SVM mode we never load two images at the same time so we just always
++  // use the same base address;
++  (void)jar_file_name;
++#endif
++
++  return base;
++}
++
++OsFile_MappedImageHandle OsFile_MapImage(const PathChar* name,
++                                         address preferrable_destination,
++                                         int length, int rw_offset,
++                                         int rw_length) {
++  GUARANTEE(length == rw_offset + rw_length, "assumption");
++  GUARANTEE((int(preferrable_destination) % ASSUMED_PAGE_SIZE) == 0,
++            "page aligned");
++#if USE_UNICODE_FOR_FILENAMES
++  char ascii_name[256];
++  int len = fn_strlen(name);
++  if (len > 255) {
++    len = 255;
++  }
++  for (int i=0; i<len; i++) {
++    ascii_name[i] = (char)name[i];
++  }
++  ascii_name[len] = 0;
++#else
++  const char *ascii_name = name;
++#endif
++  Linux_MappedImage *img = 
++      (Linux_MappedImage*)jvm_malloc(sizeof(Linux_MappedImage));
++
++  if (img == NULL) {
++    return NULL;
++  }
++
++  if (Verbose) {
++    TTY_TRACE_CR(("Map image desired = 0x%x",int(preferrable_destination))); 
++  }
++  
++  int open_flags = O_RDONLY;
++  int fd = jvm_open(ascii_name, open_flags);
++
++  // Align the RW region down so that the RW region starts at
++  // a page boundary.
++  int ro_length = length - rw_length;
++  ro_length = (int)align_size_down(ro_length, ASSUMED_PAGE_SIZE);
++  rw_offset = ro_length;
++  rw_length = length - ro_length;
++
++  if (ForceImageRelocation) {
++    // For testing purposes, check relocations
++    preferrable_destination += ASSUMED_PAGE_SIZE * 17;
++  }
++
++  address ro_addr = (address)-1;
++  address rw_addr = (address)-1;
++  address ro_preferred = preferrable_destination;
++  address rw_preferred = preferrable_destination + rw_offset;
++
++  if (fd == -1) {
++    goto error;
++  }
++
++
++  if (ro_length > 0 && LoadXIPImage && !ForceImageRelocation) {
++    ro_addr = (address)jvm_mmap(ro_preferred, ro_length, 
++                                PROT_READ, MAP_PRIVATE, fd, 0);
++    rw_addr = (address)jvm_mmap(rw_preferred, rw_length, 
++                                PROT_READ | PROT_WRITE, MAP_PRIVATE, fd,
++                                rw_offset);
++  } else {
++    // The whole image needs to be mapped R/W.
++  }
++
++  if (ro_addr == ro_preferred && rw_preferred == rw_preferred) {
++    if (Verbose) {
++      TTY_TRACE_CR(("Map image actual  = 0x%x [RO] size=%d", int(ro_addr),
++                                                             ro_length));
++      TTY_TRACE_CR(("Map image actual  = 0x%x [RW] size=%d", int(rw_addr),
++                                                             rw_length));
++    }
++  
++    img->mapped_address    = ro_addr;
++    img->ro_length         = ro_length;
++    img->rw_mapped_address = rw_addr;
++    img->rw_length         = rw_length;
++  } else {
++    // Can't get to our preferred location. Relocation of the image content
++    // is needed, so we need to remap the whole thing using RW mapping
++    if (ro_addr != (address) -1) {
++      jvm_munmap(ro_addr, ro_length);
++    }
++    if (rw_addr != (address) -1) {
++      jvm_munmap(rw_addr, rw_length);
++    }
++    ro_addr = (address)jvm_mmap(ro_preferred, length,
++                                PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
++    if (ro_addr == (address)-1) {
++      goto error;
++    }
++
++    if (Verbose) {
++      TTY_TRACE_CR(("Map image actual  = 0x%x [RW] size=%d", int(ro_addr),
++                                                             length));
++    }
++  
++    img->mapped_address    = ro_addr;
++    img->ro_length         = length;
++    img->rw_mapped_address = (address)-1;
++    img->rw_length         = 0;
++  }
++
++  // we don't need fd anymore, mapping is still preserved
++  jvm_close(fd);
++  return img;
++
++error:
++  if (img) {
++    jvm_free(img);
++  }
++  if (fd >= 0) {
++    jvm_close(fd);
++  }
++  return NULL;
++}
++
++bool OsFile_UnmapImage(OsFile_MappedImageHandle mapped_image) {
++  bool ok = true;
++  Linux_MappedImage *img = (Linux_MappedImage*) mapped_image;
++
++  if (jvm_munmap(img->mapped_address, img->ro_length) != 0) {
++    ok = false;
++  }
++  if (img->rw_mapped_address != (address)-1 && 
++      jvm_munmap(img->rw_mapped_address, img->rw_length) != 0) {
++    ok = false;
++  }
++  jvm_free(mapped_image);
++
++  return ok;
++}
++
++#endif // USE_IMAGE_MAPPING
++
++#ifdef __cplusplus
++}
++#endif
+diff --git a/cldc/src/vm/os/rtems/OsFile_rtems.hpp b/cldc/src/vm/os/rtems/OsFile_rtems.hpp
+new file mode 100644
+index 0000000..c6b8075
+--- /dev/null
++++ b/cldc/src/vm/os/rtems/OsFile_rtems.hpp
+@@ -0,0 +1,44 @@
++/*
++ *   
++ *
++ * Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ */
++
++/*
++ * OsFile_linux.hpp:
++ */
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#if !ENABLE_PCSL
++typedef FILE *OsFile_Handle;
++#endif
++
++const char OsFile_separator_char      = '/';
++const char OsFile_path_separator_char = ':';
++
++#ifdef __cplusplus
++}
++#endif
+diff --git a/cldc/src/vm/os/rtems/OsMemory_rtems.cpp b/cldc/src/vm/os/rtems/OsMemory_rtems.cpp
+new file mode 100644
+index 0000000..f3ba539
+--- /dev/null
++++ b/cldc/src/vm/os/rtems/OsMemory_rtems.cpp
+@@ -0,0 +1,228 @@
++/*
++ *   
++ *
++ * Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ */
++
++/*
++ * OsMemory_linux.cpp:
++ */
++
++#include "incls/_precompiled.incl"
++#include "incls/_OsMemory_rtems.cpp.incl"
++
++#if ENABLE_PCSL
++
++extern "C" void init_jvm_chunk_manager() {
++  // PCSL memory initialization/finalization would be done outside of
++  // the VM module (by MIDP start-up code, or Main_linux.cpp)
++}
++
++#else
++// !ENABLE_PCSL
++/*
++ * If PCSL (Portable Common Services Library) is enabled, we use the
++ * memory allocation functions defined in PCSL.
++ */
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++void *OsMemory_allocate(size_t size) {
++  return jvm_malloc(size);
++}
++
++void OsMemory_free(void *p) {
++  jvm_free(p);
++}
++
++#if SUPPORTS_ADJUSTABLE_MEMORY_CHUNK
++
++#if !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
++#define MAP_ANONYMOUS MAP_ANON
++#endif
++
++#if !defined(_SC_PAGE_SIZE) && defined(_SC_PAGESIZE)
++#define _SC_PAGE_SIZE _SC_PAGESIZE
++#endif
++
++#define MAX_CHUNKS 8
++
++typedef struct {
++  address addr;
++  size_t  size, mmaped_size;  
++} ChunkInfo;
++
++static ChunkInfo chunk_info[MAX_CHUNKS];
++static int SysPageSize;
++
++void init_jvm_chunk_manager() {
++  jvm_memset(&chunk_info[0], 0, sizeof(chunk_info));
++  SysPageSize = jvm_sysconf(_SC_PAGE_SIZE);
++}
++
++static inline ChunkInfo* get_chunk_info(address addr) {
++  for (int i=0; i<MAX_CHUNKS; i++) {
++    if (chunk_info[i].addr == addr) {
++      return &chunk_info[i];
++    }
++  }
++
++  return NULL;
++}
++
++static inline ChunkInfo* alloc_chunk(address addr, 
++				     size_t  initial_size,
++				     size_t  max_size) {
++  int i;
++  bool found = false;
++
++  for (i=0; i<MAX_CHUNKS; i++) {
++    if (chunk_info[i].addr == NULL) {
++      found = true; 
++      break;
++    }
++  }
++
++  GUARANTEE(found, "maximal number of chunks exceeded");
++  
++  ChunkInfo* ci = &chunk_info[i];
++  ci->addr = addr;
++  ci->size = initial_size;
++  ci->mmaped_size = max_size;
++
++  return ci;
++}
++
++static inline void release_chunk(address addr) {
++  int i;
++  bool found = false;
++
++  for (i=0; i<MAX_CHUNKS; i++) {
++    if (chunk_info[i].addr == addr) {
++      found = true; 
++      break;
++    }
++  }
++
++  GUARANTEE(found, "release nonexisting chunk");
++  
++  chunk_info[i].addr = NULL;
++}
++
++static inline size_t page_align_up(size_t size) {
++  return align_size_up(size, SysPageSize);
++}
++
++static inline address anon_mmap(address addr, size_t size) {
++  return (address)jvm_mmap(addr, size, 
++			   PROT_EXEC | PROT_WRITE | PROT_READ,
++			   MAP_PRIVATE | MAP_ANONYMOUS | (addr ? MAP_FIXED : 0),
++			   -1, 0);
++}
++
++static inline int protect_area(address ptr, size_t size) { 
++  return mprotect(ptr, size, PROT_NONE);
++}
++
++static inline int unprotect_area(address ptr, size_t size) { 
++  return mprotect(ptr, size, PROT_READ | PROT_WRITE | PROT_EXEC);
++}
++
++address OsMemory_allocate_chunk(size_t initial_size,
++                                size_t max_size, size_t alignment)
++{
++  // make it page aligned
++  max_size = page_align_up(max_size);
++
++  address chunk = anon_mmap(NULL, max_size);
++  
++  if (chunk == MAP_FAILED) {
++    return NULL;
++  }
++
++  GUARANTEE((juint)chunk % alignment == 0, "must be aligned");
++  GUARANTEE((juint)chunk % SysPageSize == 0, "must be page aligned");
++  
++  size_t aligned_size = page_align_up(initial_size);
++  
++  alloc_chunk(chunk, aligned_size, max_size);
++
++  if (max_size > aligned_size) {
++    protect_area(chunk + aligned_size, max_size - aligned_size);
++  }
++
++  return chunk;
++}
++
++// Expand or shrink a chunk returned by allocate_chunk().
++// The chunk is never moved.
++//
++// Returns 0 if fail to expand (shrink will always succeed). Returns old
++// size if successful.
++size_t OsMemory_adjust_chunk(address chunk_ptr, size_t new_committed_size) {
++  ChunkInfo* ci = get_chunk_info(chunk_ptr);
++
++  size_t old_size = ci->size;
++  size_t new_size = page_align_up(new_committed_size);
++
++  if (new_size <= ci->mmaped_size) {
++    int rv;
++    if (new_size < old_size) {
++      rv = protect_area(chunk_ptr + new_size, old_size - new_size);
++    } else {
++      rv = unprotect_area(chunk_ptr, new_size);
++    }
++    GUARANTEE(rv == 0, "mprotect must succeed");
++
++    ci->size = new_size;
++
++    return old_size;
++  }
++
++  new_size = page_align_up(new_size - ci->mmaped_size);
++  if (anon_mmap(chunk_ptr + ci->mmaped_size, new_size) == NULL) {
++    return 0;
++  }
++
++  ci->mmaped_size += new_size; 
++  ci->size = ci->mmaped_size;
++  unprotect_area(chunk_ptr, ci->size);
++  
++  return old_size;
++}
++
++void OsMemory_free_chunk(address chunk_ptr) {
++  ChunkInfo* ci = get_chunk_info(chunk_ptr);
++  jvm_munmap(ci->addr, ci->mmaped_size);
++  release_chunk(chunk_ptr);
++}
++
++#endif // SUPPORTS_ADJUSTABLE_MEMORY_CHUNK
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif // !ENABLE_PCSL
+diff --git a/cldc/src/vm/os/rtems/OsMemory_rtems.hpp b/cldc/src/vm/os/rtems/OsMemory_rtems.hpp
+new file mode 100644
+index 0000000..02b79c8
+--- /dev/null
++++ b/cldc/src/vm/os/rtems/OsMemory_rtems.hpp
+@@ -0,0 +1,29 @@
++/*
++ *   
++ *
++ * Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ */
++
++/*
++ * OsMemory_linux.hpp:
++ */
+diff --git a/cldc/src/vm/os/rtems/OsMisc_rtems.cpp b/cldc/src/vm/os/rtems/OsMisc_rtems.cpp
+new file mode 100644
+index 0000000..40d4fef
+--- /dev/null
++++ b/cldc/src/vm/os/rtems/OsMisc_rtems.cpp
+@@ -0,0 +1,86 @@
++/*
++ *   
++ *
++ * Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ */
++
++/*
++ * OsMisc_linux.cpp:
++ */
++
++#include "incls/_precompiled.incl"
++#include "incls/_OsMisc_rtems.cpp.incl"
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++const JvmPathChar *OsMisc_get_classpath() {
++  // If classpath is allocated, just keep it during the entire lifetime
++  // of the VM (even if VM is restarted). Environment variables won't be
++  // changed during VM execution so classpath won't change.
++  static JvmPathChar* classpath = NULL;
++  if (classpath == NULL) {
++    char *ascii;
++    if ((ascii = getenv("CLASSPATH")) != NULL) {
++      int len = strlen(ascii);
++      classpath = (JvmPathChar*)malloc((len+1) * sizeof(JvmPathChar));
++      for (int i=0; i<len; i++) {
++        classpath[i] = (JvmPathChar)ascii[i];
++      }
++      classpath[len] = 0;
++    }
++  }
++
++  return classpath;
++}
++
++#if !defined(PRODUCT) || USE_DEBUG_PRINTING
++
++const char *OsMisc_jlong_format_specifier() {
++  return "%lld";
++}
++
++const char *OsMisc_julong_format_specifier() {
++  return "%llu";
++}
++
++#endif
++
++#if ENABLE_PAGE_PROTECTION
++void OsMisc_page_protect() {
++  int result = mprotect(_protected_page,
++                        PROTECTED_PAGE_SIZE, PROT_NONE);
++  GUARANTEE(result == 0, "must succeed");
++}
++
++void OsMisc_page_unprotect() {
++  int result = mprotect(_protected_page,
++                        PROTECTED_PAGE_SIZE, PROT_READ | PROT_WRITE);
++  GUARANTEE(result == 0, "must succeed");
++}
++#endif // ENABLE_PAGE_PROTECTION
++
++#ifdef __cplusplus
++}
++#endif
+diff --git a/cldc/src/vm/os/rtems/OsMisc_rtems.hpp b/cldc/src/vm/os/rtems/OsMisc_rtems.hpp
+new file mode 100644
+index 0000000..05a1e6a
+--- /dev/null
++++ b/cldc/src/vm/os/rtems/OsMisc_rtems.hpp
+@@ -0,0 +1,29 @@
++/*
++ *   
++ *
++ * Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ */
++
++/*
++ * OsMisc_linux.hpp:
++ */
+diff --git a/cldc/src/vm/os/rtems/OsSocket_rtems.cpp b/cldc/src/vm/os/rtems/OsSocket_rtems.cpp
+new file mode 100644
+index 0000000..4511fa6
+--- /dev/null
++++ b/cldc/src/vm/os/rtems/OsSocket_rtems.cpp
+@@ -0,0 +1,34 @@
++/*
++ *   
++ *
++ * Copyright  1990-2007 Sun Microsystems, Inc. All Rights Reserved.
++ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
++ * 
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License version
++ * 2 only, as published by the Free Software Foundation.
++ * 
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++ * General Public License version 2 for more details (a copy is
++ * included at /legal/license.txt).
++ * 
++ * You should have received a copy of the GNU General Public License
++ * version 2 along with this work; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
++ * 02110-1301 USA
++ * 
++ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa
++ * Clara, CA 95054 or visit www.sun.com if you need additional
++ * information or have any questions.
++ */
++
++/*
++ * OsSocket_linux.cpp: 
++ *
++ *
++ */
++
++#include "incls/_precompiled.incl"
++#include "incls/_OsSocket_rtems.cpp.incl"
+diff --git a/cldc/src/vm/share/natives/BSDSocket.cpp b/cldc/src/vm/share/natives/BSDSocket.cpp
+index 60afc78..9d454a7 100644
+--- a/cldc/src/vm/share/natives/BSDSocket.cpp
++++ b/cldc/src/vm/share/natives/BSDSocket.cpp
+@@ -45,7 +45,7 @@ extern "C" {
+ 
+ #if USE_BSD_SOCKET
+ 
+-#if defined(LINUX) || defined (CYGWIN)
++#if defined(LINUX) || defined(RTEMS) || defined (CYGWIN)
+ #define USE_UNISTD_SOCKETS 1
+ #else
+ #if defined(WIN32) || defined(UNDER_CE)
+@@ -62,7 +62,25 @@ extern "C" {
+ #include <sys/time.h>
+ #include <errno.h>
+ #include <sys/socket.h>
++
++#ifdef RTEMS
++    #include <sys/select.h>
++
++    /* 
++     * There is a "typedef void* Thread" in RTEMS's header file,
++     * and GlobalDefinition.hpp has a "#define Thread JVMThread".
++     */
++    #ifdef Thread
++    #define TMP_THREAD  Thread
++    #undef Thread
++    #include <netinet/in.h>
++    #define Thread TMP_THREAD
++    #undef TMP_THREAD
++    #endif
++#else
+ #include <netinet/in.h>
++#endif
++
+ #include <netdb.h>
+ #include <fcntl.h>
+ 
+diff --git a/cldc/src/vm/share/utilities/GlobalDefinitions_gcc.hpp b/cldc/src/vm/share/utilities/GlobalDefinitions_gcc.hpp
+index 8d1c969..654d5d6 100644
+--- a/cldc/src/vm/share/utilities/GlobalDefinitions_gcc.hpp
++++ b/cldc/src/vm/share/utilities/GlobalDefinitions_gcc.hpp
+@@ -34,7 +34,7 @@
+ 
+ # include <ctype.h>
+ # include <string.h>
+-#if defined(LINUX) && !defined(SOLARIS)
++#if ( defined(LINUX) || defined(RTEMS) ) &&  !defined(SOLARIS)
+ # include <stdint.h>
+ #endif
+ # include <stdarg.h>
+@@ -176,7 +176,7 @@ const jlong max_jlong = (min_jlong - 1);
+ //---------------------------------------------------------------------------
+ 
+ // Portability macros
+-#ifdef LINUX
++#if defined(LINUX) || defined(RTEMS)
+ #define __cdecl
+ #define _cdecl
+ #endif
+-- 
+1.5.4.rc0.67.gf9c5
+

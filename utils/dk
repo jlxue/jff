@@ -1,0 +1,503 @@
+#!/usr/bin/perl -w
+#
+# 	Another "porcelain" for GIT.
+#
+# This GIT wrapper attempts to emulate some features of Subversion and
+# simplify the concept to use GIT.
+#
+# I find the best way to learn GIT is to investigate my workflow and
+# habit, imagine what a perfect VCS should be, then dig GIT suite to
+# see how it can help me. It's difficult to accustom me to some "GIT
+# workflow", I think there is no "GIT workflow" at all as GIT provides
+# you only mechanism, no policy, so this little script bends GIT for me,
+# it may not fit your taste.
+#
+# Terminology:
+# 	revision	a state of source tree, can be referred by a
+# 			decimal number(revision number), a string (tag)
+# 			or a SHA1 digest(GIT's commit).
+#	WT		working tree, working directory, working copy
+#	repos		repository, .git direcotory
+#	base		xxx
+#
+# Copyright:
+# 	GPL v2
+#
+# Author:
+# 	Liu Yubao <yubao.liu@gmail.com>
+#
+# ChangeLog:
+#
+# TODO:
+# *	在init中检查shell的输入缓冲区最大长度，保存到.git/dkrc中, 这个
+# 	设置会覆盖~/.dkrc。
+# *	每一个子命令执行前检查是否有事务需要回滚，每一个子命令执行完后如
+#	果处于新手模式则提示下一步可能的操作。
+# *	dk help中增加dk intro介绍一些基本概念以及推荐的工作流, 
+#	dk tutor则是5分钟基本教程。
+# *	每个子命令的帮助里再加一段详细描述。
+# *	--force 和 --ignore-miss, --silent | --quiet
+# *	version or revision ??
+# *     在每个子命令执行前读取~/.dkrc，里面保存了每个命令的缺省选项，在执行
+#	子命令前将这些参数unshift到@ARGV中。
+# *	用多线程加快递归操作──google map-reduce算法?
+#
+use strict;
+use warnings;
+use diagnostics;
+use Getopt::Long;
+
+use constant {
+	CMD_IDX		=> 0,	# \&dk_subcmd,
+	CMD_NAME_IDX	=> 1,	# [name, alias...]
+	CMD_DESC_IDX	=> 2,	# description
+	CMD_HELP_IDX	=> 3	# help document
+};
+
+
+my @dk_commands = (
+	my $dk_init_cmd = [
+		\&dk_init,
+		["init"],
+		"create an empty git repository",
+"usage: init [--template=<template_directory>] [--shared] [TOP_DIR]\n
+options:
+    --template=<template_directory>
+        Provide the directory in from which templates will be used.
+    --shared
+        Specify that the git repository is to be shared amongst several users.\n\n"
+	],
+
+	my $dk_add_cmd = [
+		\&dk_add,
+		["add"],
+		"put files under version control, scheduling to be added in next commit",
+"usage: add [--norecursive] [--dry-run] [--include pattern]...  [--exclude pattern]... 
+       [--from list|-] [file|directory]...\n
+options:
+    --norecursive
+        don't operate on directory recursively.
+    --dry-run
+        don't add files actually, just list them on stdout.
+    --include pattern
+        this option can occur more than one time, the relative paths of files to be added
+	must match one of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --exclude pattern
+        this option can occur more than one time, the relative paths of files to be added
+	mustn't match any of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --from list|-
+        read list of files to be removed from file, one file per line. \"-\" stands for stdin.\n\n"
+	],
+
+	my $dk_remove_cmd = [
+		\&dk_remove,
+		["remove", "delete", "rm", "del"],
+		"remove files from version control, scheduling to be removed in next commit",
+"usage: remove [--norecursive] [--dry-run] [--include pattern]...  [--exclude pattern]...
+       [--from list|-] [--force] [file|directory]...\n
+options:
+    --norecursive
+        don't operate on directory recursively.
+    --dry-run
+        don't remove files actually, just list them on stdout.
+    --include pattern
+        this option can occur more than one time, the relative paths of files to be removed
+        must match one of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --exclude pattern
+        this option can occur more than one time, the relative paths of files to be removed
+	mustn't match any of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --from list|-
+        read list of files to be removed from file, one file per line. \"-\" stands for stdin.
+    --force
+        remove files and directories even if they are unversioned or modified.\n\n"
+	],
+
+	my $dk_copy_cmd = [
+		\&dk_copy,
+		["copy", "cp"],
+		"duplicate something in working tree, scheduling to be added in next commit",
+		"help doc"
+	],
+
+	my $dk_move_cmd = [
+       		\&dk_move,
+       		["move", "rename", "mv", "ren"],
+       		"description",
+       		"help doc"
+       	],
+
+	my $dk_commit_cmd = [
+		\&dk_commit,
+		["commit", "checkin", "ci"],
+		"send changes from your working tree to repository",
+"usage: commit [--norecursive] [--dry-run] [--include pattern]...  [--exclude pattern]...
+       [--from list|-] [--message message | --msgfile file|-]
+       [--allow-branch] [file|directory]...\n
+options:
+    --norecursive
+        don't operate on directory recursively.
+    --dry-run
+        don't commit files actually, just list them on stdout.
+    --include pattern
+        this option can occur more than one time, the relative paths of files to be committed
+        must match one of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --exclude pattern
+        this option can occur more than one time, the relative paths of files to be committed
+	mustn't match any of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --from list|-
+        read list of files to be committed from file, one file per line. \"-\" stands for stdin.
+    --message message | --msgfile file|-
+        use the given message as commit message or read it from file.  \"-\" stands for stdin.
+    --allow-branch
+        allow to create branch when commit to a non-head revision.\n\n"
+	],
+
+	my $dk_merge_cmd = [
+		\&dk_merge,
+		["merge"],
+		"apply differences between two revision to working tree",
+"usage: merge [--norecursive] [--dry-run] [--include pattern]... [--exclude pattern]...
+       [--from list|-] --revision [fromREV:]toREV [URL|file|directory] [file|directory]\n
+options:
+    --norecursive
+        don't operate on directory recursively.
+    --dry-run
+        don't merge changes actually, just list them on stdout.
+    --include pattern
+        this option can occur more than one time, the relative paths of involved files
+	must match one of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --exclude pattern
+        this option can occur more than one time, the relative paths of involved files
+    --from list|-
+        read list of involved files from file, one file per line. \"-\" stands for stdin.
+    --revision [fromREV:]toREV
+        specify the revision range for caculating differences, fromREV is the youngest 
+	common parent revision of toREV and working tree if omitted.\n\n"
+	],
+
+	my $dk_checkout_cmd = [
+		\&dk_checkout,
+		["checkout", "co"],
+		"checkout a revision, switch branch if no file or directory specified",
+"usage: checkout [--norecursive] [--dry-run] [--include pattern]... [--exclude pattern]...
+       [--from list|-] --revision REV [URL|file|directory] [file|directory]
+options:
+    --norecursive
+        don't operate on directory recursively.
+    --dry-run
+        don't checkout actually, just list them on stdout.
+    --include pattern
+        this option can occur more than one time, the relative paths of files to be checked out
+	must match one of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --exclude pattern
+        this option can occur more than one time, the relative paths of files to be checked out
+	mustn't match any of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --from list|-
+        read list of files to be checked out from file, one file per line. \"-\" stands for stdin.
+    --revision REV
+        specify the revision to be checked out.\n\n"
+	],
+
+	my $dk_revert_cmd = [
+		\&dk_revert,
+		["revert", "undo"],
+		"revert modified files or dirs back to their unmodified states",
+"usage: revert [--norecursive] [--include pattern]... [--exclude pattern]...
+       [--from list|-] [file|directory]...\n
+options:
+    --norecursive
+        don't operate on directory recursively.
+    --include pattern
+        this option can occur more than one time, the relative paths of files to be reverted
+	must match one of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --exclude pattern
+        this option can occur more than one time, the relative paths of files to be reverted
+	mustn't match any of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --from list|-
+    	read list of files to be reverted from file, one file per line. \"-\" stands for stdin.\n\n"
+	],
+
+	my $dk_status_cmd = [
+		\&dk_status,
+		["status", "stat", "st"],
+		"show the status of files in working tree",
+"usage: status [--norecursive] [--include pattern]... [--exclude pattern]...
+       [--from list|-] [file|directory]...\n
+options:
+    --norecursive
+        don't operate on directory recursively.
+    --include pattern
+        this option can occur more than one time, the relative paths of files to be examined
+	must match one of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --exclude pattern
+        this option can occur more than one time, the relative paths of files to be examined
+	mustn't match any of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --from list|-
+    	read list of files to be examined from file, one file per line. \"-\" stands for stdin.\n\n"
+	],
+
+	my $dk_info_cmd = [
+		\&dk_info,
+		["info"],
+		"show information about files in working tree or repository",
+"usage: info [--norecursive] [--include pattern]... [--exclude pattern]...
+       [--from list|-] [--revision REV] [URL|file|directory]...\n
+options:
+    --norecursive
+        don't operate on directory recursively.
+    --include pattern
+        this option can occur more than one time, the relative paths of files to be queried
+	must match one of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --exclude pattern
+        this option can occur more than one time, the relative paths of files to be queried
+	mustn't match any of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --from list|-
+        read list of files to be queried from file, one file per line.  \"-\" stands for stdin.\n\n
+    --revision REV
+        specify the revision to be queried, default is the working tree.\n\n"
+	],
+
+	my $dk_log_cmd = [
+		\&dk_log,
+		["log"],
+		"show logs with difference each commit introdues.",
+"usage: log [--norecursive] [--include pattern]... [--exclude pattern]...
+       [--from list|-] [--nodiff] [--revision [fromREV:]toREV] [URL|file|directory]...\n
+options:
+    --norecursive
+        don't operate on directory recursively
+    --include pattern
+        this option can occur more than one time, the relative paths of files to be examined
+	must match one of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --exclude pattern
+        this option can occur more than one time, the relative paths of files to be examined
+	mustn't match any of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --from list|-
+        read list of files to be examined from file, one file per line. \"-\" stands for stdin.
+    --nodiff
+        don't show list of modified files.
+    --revision [fromREV:]toREV
+        specify revision range to be examined, toREV must derive from fromREV. defaultly fromREV
+       	is root revision and toREV is base revision.\n\n"
+	],
+
+	my $dk_blame_cmd = [
+		\&dk_blame,
+		["blame", "annotate", "praise", "ann"],
+		"description",
+		"help doc"
+	],
+
+	my $dk_diff_cmd = [
+		\&dk_diff,
+		["diff"],
+		"show changes between two revisions",
+		"help doc"
+	],
+
+	my $dk_patch_cmd = [
+		\&dk_patch,
+		["patch"],
+		"description",
+		"help doc"
+	],
+
+	my $dk_sync_cmd = [
+		\&dk_sync,
+		["sync"],
+		"transfer revisions between local and remote repository",
+"usage: sync [--norecursive] [--dry-run] [--include pattern]... [--exclude pattern]...
+       [--from list|-] [--revision [fromREV:]toREV] fromURL toURL\n
+options:
+    --norecursive
+    	don't operate on directory recursively
+    --dry-run
+        don't transfer actually, just list them on stdout.
+    --include pattern
+    	this option can occur more than one time, the relative paths of files to be transfered
+	must match one of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --exclude pattern
+        this option can occur more than one time, the relative paths of files to be transfered
+	mustn't match any of these patterns. NOTE: it's Perl pattern, not shell pattern.
+    --from list|-
+        read list of files to be transfered from file, one file per line. \"-\" stands for stdin.
+    --revision [fromREV:]toREV]
+        specify revision range to be transfered, toREV must derive from fromREV. if fromREV omitted
+	all parent revisions of toREV will be transfered. if this option omitted entirely, then
+	the youngest revision on the remote master branch and all its parent revisions will be transfered.\n\n"
+	],
+
+	my $dk_tag_cmd = [
+		\&dk_tag,
+		["tag"],
+		"description",
+		"help doc"
+	],
+
+	my $dk_serve_cmd = [
+		\&dk_serve,
+		["serve", "server", "serv", "srv"],
+		"description",
+		"help doc"
+	]
+);
+
+
+# ---------------------------------------------------------------------
+sub summary_help {
+	print <<HELP;
+usage: dk <subcommand> [options] [args]
+dk - another porcelain for GIT, version 1.0.
+Type 'dk help <subcommand>' for help on a specific subcommand.
+
+Most subcommands take file and/or directory arguments, recursing
+on the directories. If no arguments are supplied to such a
+command, it recurses on the current directory (inclusive) by default.
+
+Available subcommands:
+HELP
+
+	foreach my $cmd (sort {$a->[CMD_NAME_IDX][0] cmp $b->[CMD_NAME_IDX][0]} @dk_commands) {
+		printf "  %-12s%s\n", $cmd->[CMD_NAME_IDX][0], $cmd->[CMD_DESC_IDX];
+	}
+
+	print <<HELP;
+
+dk is a wrapper for GIT attempting to emulate some features of Subversion
+and simplify the concept to use GIT.
+For additional information about GIT, see http://git.xxxx/
+HELP
+}
+
+sub detailed_help {
+	my $cmd = shift;
+	my @cmd_names = @{$cmd->[CMD_NAME_IDX]};
+	print "$cmd_names[0]: $cmd->[CMD_DESC_IDX]\n";
+	print "alias: ", join(', ', @cmd_names[1..$#cmd_names]), "\n"
+		if $#cmd_names > 0;
+
+	print $cmd->[CMD_HELP_IDX];
+}
+
+
+# ---------------------------------------------------------------------
+
+sub dk_init {
+	return system("git-init-db", @ARGV) >> 8;
+}
+
+sub dk_add {
+	return 0;
+}
+
+sub dk_remove {
+	return 0;
+}
+
+sub dk_copy {
+	return 0;
+}
+
+sub dk_move {
+	return 0;
+}
+
+sub dk_commit {
+	return 0;
+}
+
+sub dk_merge {
+	return 0;
+}
+
+sub dk_checkout {
+	return 0;
+}
+
+sub dk_revert {
+	return 0;
+}
+
+sub dk_status {
+	return 0;
+}
+
+sub dk_info {
+	return 0;
+}
+
+sub dk_sync {
+	return 0;
+}
+
+sub dk_log {
+	return 0;
+}
+
+sub dk_diff {
+	return 0;
+}
+
+sub dk_patch {
+	return 0;
+}
+
+sub dk_blame {
+	return 0;
+}
+
+sub dk_tag {
+	return 0;
+}
+
+sub dk_serve {
+	return 0;
+}
+
+
+# ---------------------------------------------------------------------
+
+if (@ARGV == 0) {
+	print "Type 'dk help' for usage.\n";
+	exit 0;
+}
+
+
+my $ret = 0;
+my $subcmd = shift;
+my %dk_commands_hash = ();
+my $cmd;
+
+foreach $cmd (@dk_commands) {
+	map { $dk_commands_hash{$_} = $cmd } @{$cmd->[CMD_NAME_IDX]};
+}
+
+
+$cmd = $dk_commands_hash{$subcmd};
+if (defined $cmd) {
+	$ret = $cmd->[CMD_IDX]();
+} elsif ($subcmd eq "help" || $subcmd eq "-h" || $subcmd eq "--help") {
+	if (@ARGV > 0) {
+		$subcmd = shift;
+		$cmd = $dk_commands_hash{$subcmd};
+		if (defined $cmd) {
+			detailed_help($cmd);
+		} else {
+			print "Unknown subcommand, type 'dk help' for usage.\n";
+			$ret = 1;
+		}
+	} else {
+		summary_help();
+	}
+} elsif ($subcmd eq "--version" || $subcmd eq "--ver") {
+	print "1.0\n";
+} else {
+	print "Unknown subcommand, type 'dk help' for usage.\n";
+}
+
+exit $ret;
+
+
+
+# vim: set enc=utf-8 ff=unix ft=perl nowrap tw=0 ts=8 sts=0 sw=8 noet:
+

@@ -1,0 +1,61 @@
+#include <stdio.h>
+
+static char classdata [] = {
+(char)202, (char)254, (char)186, (char)190, (char)0, (char)0, (char)0, (char)46, (char)0, (char)32, 
+(char)10, (char)0, (char)6, (char)0, (char)15, (char)9, (char)0, (char)16, (char)0, (char)17, 
+(char)8, (char)0, (char)18, (char)10, (char)0, (char)19, (char)0, (char)20, (char)7, (char)0, 
+(char)22, (char)7, (char)0, (char)23, (char)1, (char)0, (char)6, (char)60, (char)105, (char)110, 
+(char)105, (char)116, (char)62, (char)1, (char)0, (char)3, (char)40, (char)41, (char)86, (char)1, 
+(char)0, (char)4, (char)67, (char)111, (char)100, (char)101, (char)1, (char)0, (char)15, (char)76, 
+(char)105, (char)110, (char)101, (char)78, (char)117, (char)109, (char)98, (char)101, (char)114, (char)84, 
+(char)97, (char)98, (char)108, (char)101, (char)1, (char)0, (char)4, (char)109, (char)97, (char)105, 
+(char)110, (char)1, (char)0, (char)22, (char)40, (char)91, (char)76, (char)106, (char)97, (char)118, 
+(char)97, (char)47, (char)108, (char)97, (char)110, (char)103, (char)47, (char)83, (char)116, (char)114, 
+(char)105, (char)110, (char)103, (char)59, (char)41, (char)86, (char)1, (char)0, (char)10, (char)83, 
+(char)111, (char)117, (char)114, (char)99, (char)101, (char)70, (char)105, (char)108, (char)101, (char)1, 
+(char)0, (char)9, (char)77, (char)97, (char)105, (char)110, (char)46, (char)106, (char)97, (char)118, 
+(char)97, (char)12, (char)0, (char)7, (char)0, (char)8, (char)7, (char)0, (char)24, (char)12, 
+(char)0, (char)25, (char)0, (char)26, (char)1, (char)0, (char)12, (char)104, (char)101, (char)108, 
+(char)108, (char)111, (char)32, (char)119, (char)111, (char)114, (char)108, (char)100, (char)10, (char)7, 
+(char)0, (char)27, (char)12, (char)0, (char)28, (char)0, (char)29, (char)7, (char)0, (char)31, 
+(char)1, (char)0, (char)4, (char)77, (char)97, (char)105, (char)110, (char)1, (char)0, (char)16, 
+(char)106, (char)97, (char)118, (char)97, (char)47, (char)108, (char)97, (char)110, (char)103, (char)47, 
+(char)79, (char)98, (char)106, (char)101, (char)99, (char)116, (char)1, (char)0, (char)16, (char)106, 
+(char)97, (char)118, (char)97, (char)47, (char)108, (char)97, (char)110, (char)103, (char)47, (char)83, 
+(char)121, (char)115, (char)116, (char)101, (char)109, (char)1, (char)0, (char)3, (char)111, (char)117, 
+(char)116, (char)1, (char)0, (char)21, (char)76, (char)106, (char)97, (char)118, (char)97, (char)47, 
+(char)105, (char)111, (char)47, (char)80, (char)114, (char)105, (char)110, (char)116, (char)83, (char)116, 
+(char)114, (char)101, (char)97, (char)109, (char)59, (char)1, (char)0, (char)19, (char)106, (char)97, 
+(char)118, (char)97, (char)47, (char)105, (char)111, (char)47, (char)80, (char)114, (char)105, (char)110, 
+(char)116, (char)83, (char)116, (char)114, (char)101, (char)97, (char)109, (char)1, (char)0, (char)7, 
+(char)112, (char)114, (char)105, (char)110, (char)116, (char)108, (char)110, (char)1, (char)0, (char)21, 
+(char)40, (char)76, (char)106, (char)97, (char)118, (char)97, (char)47, (char)108, (char)97, (char)110, 
+(char)103, (char)47, (char)83, (char)116, (char)114, (char)105, (char)110, (char)103, (char)59, (char)41, 
+(char)86, (char)1, (char)0, (char)8, (char)83, (char)116, (char)97, (char)99, (char)107, (char)77, 
+(char)97, (char)112, (char)1, (char)0, (char)19, (char)91, (char)76, (char)106, (char)97, (char)118, 
+(char)97, (char)47, (char)108, (char)97, (char)110, (char)103, (char)47, (char)83, (char)116, (char)114, 
+(char)105, (char)110, (char)103, (char)59, (char)0, (char)33, (char)0, (char)5, (char)0, (char)6, 
+(char)0, (char)0, (char)0, (char)0, (char)0, (char)2, (char)0, (char)1, (char)0, (char)7, 
+(char)0, (char)8, (char)0, (char)1, (char)0, (char)9, (char)0, (char)0, (char)0, (char)29, 
+(char)0, (char)1, (char)0, (char)1, (char)0, (char)0, (char)0, (char)5, (char)42, (char)183, 
+(char)0, (char)1, (char)177, (char)0, (char)0, (char)0, (char)1, (char)0, (char)10, (char)0, 
+(char)0, (char)0, (char)6, (char)0, (char)1, (char)0, (char)0, (char)0, (char)1, (char)0, 
+(char)9, (char)0, (char)11, (char)0, (char)12, (char)0, (char)1, (char)0, (char)9, (char)0, 
+(char)0, (char)0, (char)87, (char)0, (char)2, (char)0, (char)2, (char)0, (char)0, (char)0, 
+(char)23, (char)3, (char)60, (char)27, (char)16, (char)10, (char)162, (char)0, (char)17, (char)178, 
+(char)0, (char)2, (char)18, (char)3, (char)182, (char)0, (char)4, (char)132, (char)1, (char)1, 
+(char)167, (char)255, (char)239, (char)177, (char)0, (char)0, (char)0, (char)2, (char)0, (char)10, 
+(char)0, (char)0, (char)0, (char)18, (char)0, (char)4, (char)0, (char)0, (char)0, (char)3, 
+(char)0, (char)8, (char)0, (char)4, (char)0, (char)16, (char)0, (char)3, (char)0, (char)22, 
+(char)0, (char)6, (char)0, (char)30, (char)0, (char)0, (char)0, (char)22, (char)0, (char)2, 
+(char)0, (char)2, (char)0, (char)2, (char)7, (char)0, (char)21, (char)1, (char)0, (char)0, 
+(char)0, (char)22, (char)0, (char)2, (char)7, (char)0, (char)21, (char)1, (char)0, (char)0, 
+(char)0, (char)1, (char)0, (char)13, (char)0, (char)0, (char)0, (char)2, (char)0, (char)14, 
+};
+
+int main(void) {
+    printf("sizeof(javaclass)=%d\n", sizeof(classdata));
+    return 0;
+}
+
+

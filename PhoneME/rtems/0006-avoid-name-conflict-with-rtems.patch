@@ -1,0 +1,36 @@
+From 782505235701234fec5f7a1f84d28dcfed594a54 Mon Sep 17 00:00:00 2001
+From: Liu Yubao <yubao.liu@gmail.com>
+Date: Tue, 4 Dec 2007 20:58:11 +0800
+Subject: [PATCH 6/6] avoid name conflict with rtems
+
+
+Signed-off-by: Liu Yubao <yubao.liu@gmail.com>
+---
+ cldc/src/vm/share/utilities/GlobalDefinitions.hpp |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/cldc/src/vm/share/utilities/GlobalDefinitions.hpp b/cldc/src/vm/share/utilities/GlobalDefinitions.hpp
+index 34572eb..6a79c81 100644
+--- a/cldc/src/vm/share/utilities/GlobalDefinitions.hpp
++++ b/cldc/src/vm/share/utilities/GlobalDefinitions.hpp
+@@ -1752,7 +1752,7 @@ enum {
+   template(x, OopDesc**, compaction_top)            \
+   template(x, int,       heap_min)                  \
+   template(x, int,       heap_capacity)             \
+-  template(x, size_t,    heap_size)                 \
++  template(x, size_t,    jvm_heap_size)             \
+                                                     \
+   template(x, OopDesc**, compiler_area_start)       \
+   template(x, OopDesc**, compiler_area_top)         \
+@@ -1817,7 +1817,7 @@ struct JVMFastGlobals {
+ #define _compaction_top               jvm_fast_globals.compaction_top
+ #define _heap_min                     jvm_fast_globals.heap_min
+ #define _heap_capacity                jvm_fast_globals.heap_capacity
+-#define _heap_size                    jvm_fast_globals.heap_size
++#define _heap_size                    jvm_fast_globals.jvm_heap_size
+ 
+ #define _compiler_area_start          jvm_fast_globals.compiler_area_start
+ #define _compiler_area_top            jvm_fast_globals.compiler_area_top
+-- 
+1.5.4.rc0.67.gf9c5
+

@@ -1,0 +1,85 @@
+#!/bin/bash
+#
+# 使用办法：./dbtool hello.xml
+# 依赖 xmllint, tidy, xsltproc, fop, jdk, docbook-xml, docbook-xsl
+# 装好这些后记得修正 dbtool 脚本开头部分的变量。
+# 
+# fop 使用的 userconfig.xml 在 http://code.google.com/p/i18n-zh 的
+# 代码库有:
+# /lib/fop/1.x/conf/{msyhbd,msyh,userconfig}.xml
+# /lib/fonts/{msyhbd,msyh}.ttf
+# /doc/subversion/style/zh_CN/fo.xsl (不需要了，其内参数已写入 dbtool 中)
+# 
+# 将这三个 xml 文件和两个 ttf 文件放到 hello.xml 所在目录中�
+
+DBTOOLS_ROOT=/opt/for_dieken/docbook/dbtools
+DOCBOOK_XML_ROOT=$DBTOOLS_ROOT/docbook-xml/4.5
+DOCBOOK_XSL_ROOT=$DBTOOLS_ROOT/docbook-xsl/1.73.2
+FOP_ROOT=$DBTOOLS_ROOT/fo-processors/fop/fop-0.94
+
+# zh_CN/fo.xsl: (from http://code.google.com/p/i18n-zh)
+#
+# <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version='1.0'>
+# 
+#   <xsl:import href="../fo.xsl"/>
+# 
+#   <xsl:param name="l10n.gentext.language" select="'zh_cn'"/>
+# 
+#   <xsl:param name="hyphenate">false</xsl:param>
+# 
+#   <!-- Font related Settings -->
+#   <xsl:param name="body.font.family">simsun</xsl:param>
+#   <xsl:param name="dingbat.font.family">simhei</xsl:param>
+#   <xsl:param name="monospace.font.family">simsun</xsl:param>
+#   <xsl:param name="title.font.family">simhei</xsl:param>
+# 
+# </xsl:stylesheet>
+
+XSLTPROC_FO_PARAMS="--stringparam use.extensions 0  \
+    --stringparam fop1.extensions       1           \
+    --stringparam l10n.gentext.language zh_cn       \
+    --stringparam hyphenate false                   \
+    --stringparam body.font.family      simsun      \
+    --stringparam monospace.font.family simsun      \
+    --stringparam dingbat.font.family   simhei      \
+    --stringparam title.font.family     simhei      \
+    --stringparam paper.type            A4"
+
+
+XSLTPROC_XHTML_PARAMS="--stringparam use.extensions 0   \
+    --stringparam l10n.gentext.language zh_cn"
+
+#----------------------------------------------------------------
+[ -d $DBTOOLS_ROOT ] || echo "Please adjust some variables in this file!"
+[ -z "$1" -o ! -f "$1" ] && echo "Usage: dbtool your_docbook.xml" && exit 1
+
+SRC=${1%.xml}
+
+XML_CATALOG_FILES="$DOCBOOK_XML_ROOT/catalog.xml $DOCBOOK_XSL_ROOT/catalog.xml"
+XML_CATALOG_FILES="$XML_CATALOG_FILES /etc/xml/catalog"
+export XML_CATALOG_FILES
+
+SGML_CATALOG_FILES="$DOCBOOK_XML_ROOT/docbook.cat:$DOCBOOK_XSL_ROOT/catalog"
+SGML_CATALOG_FILES="$SGML_CATALOG_FILES:/etc/sgml/catalog"
+export SGML_CATALOG_FILES
+
+
+xmllint --catalogs --valid --noout --nonet $SRC.xml || exit 1
+
+xsltproc --output $SRC.html                         \
+         $XSLTPROC_XHTML_PARAMS                     \
+         $DOCBOOK_XSL_ROOT/xhtml/docbook.xsl        \
+         $SRC.xml      || exit 1
+
+tidy -quiet -utf8 -indent -modify $SRC.html
+
+
+xsltproc --output $SRC.fo                           \
+         $XSLTPROC_FO_PARAMS                        \
+         $DOCBOOK_XSL_ROOT/fo/docbook.xsl           \
+         $SRC.xml      || exit 1
+
+tidy -quiet -utf8 -indent -modify -xml $SRC.fo
+
+$FOP_ROOT/fop -c userconfig.xml $SRC.fo $SRC.pdf
+

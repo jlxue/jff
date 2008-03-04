@@ -1,0 +1,16 @@
+title   iostream
+kernel  (fd0)/boot/iostream.exe.gz
+boot
+
+title   hello
+kernel  (fd0)/boot/hello.exe.gz
+boot
+
+title   fileio
+kernel  (fd0)/boot/fileio.exe.gz
+boot
+
+title   semaphore
+kernel  (fd0)/boot/psxsem01.exe.gz
+boot
+

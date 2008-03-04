@@ -1,0 +1,150 @@
+From 7a30c811b9b1a08d3cedf1974627604c07ed521b Mon Sep 17 00:00:00 2001
+From: Liu Yubao <yubao.liu@gmail.com>
+Date: Sun, 2 Dec 2007 04:45:28 +0800
+Subject: [PATCH 1/6] add building script for linux-i386 target
+
+
+Signed-off-by: Liu Yubao <yubao.liu@gmail.com>
+---
+ build-linux-i386.sh |  129 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 129 insertions(+), 0 deletions(-)
+ create mode 100755 build-linux-i386.sh
+
+diff --git a/build-linux-i386.sh b/build-linux-i386.sh
+new file mode 100755
+index 0000000..857a5c2
+--- /dev/null
++++ b/build-linux-i386.sh
+@@ -0,0 +1,129 @@
++#!/bin/bash
++
++MEHOME=/home/dieken/Work/phoneme/phoneme_feature
++BUILD_OUTPUT_DIR=/home/dieken/Work/tmp/phoneme
++# jdk 1.5 and 1.6 don't work
++JDK_DIR=/usr
++
++#-------------------------------------------------------------
++
++usage () {
++    cat <<EOF
++Usage: ./build-linux-i386.sh [all] [cleanall] | [pcsl] [cleanpcsl]
++                             [cldc] [cleancldc] [midp] [cleanmidp]
++                             [pause]
++
++    all         - make all
++    pcsl        - make pcsl
++    cldc        - make cldc
++    midp        - make midp
++    cleanall    - clean all
++    cleanpcsl   - clean pcsl
++    cleancldc   - clean cldc
++    cleanmidp   - clean midp
++    pause       - pause after each make
++EOF
++}
++
++pause () {
++    if [ -n "$do_pause" ]; then
++        echo "press Enter to continue..."
++        read
++    fi
++}
++
++# we use `exit' to quit this script, so...
++[ $SHLVL -eq 1 ] &&
++    echo "Don't execute me in current shell!" &&
++    return 1
++
++[ -z "$1" ] && usage && exit 1
++
++while [ -n "$1" ]; do
++    case $1 in
++        all)        do_all=x            ;;
++        cleanall)   do_cleanall=x       ;;
++        pcsl)       do_pcsl=x           ;;
++        cleanpcsl)  do_cleanpcsl=x      ;;
++        cldc)       do_cldc=x           ;;
++        cleancldc)  do_cleancldc=x      ;;
++        midp)       do_midp=x           ;;
++        cleanmidp)  do_cleanmidp=x      ;;
++        pause)      do_pause=x          ;;
++        *)          usage && exit 1     ;;
++    esac
++    shift
++done
++
++if [ -n "$do_all" ]; then
++    do_pcsl=x
++    do_cldc=x
++    do_midp=x
++fi
++
++if [ -n "$do_cleanall" ]; then
++    do_cleanpcsl=x
++    do_cleancldc=x
++    do_cleanmidp=x
++fi
++
++echo "do_all        =$do_all"
++echo "do_cleanall   =$do_cleanall"
++echo "do_pcsl       =$do_pcsl"
++echo "do_cleanpcsl  =$do_cleanpcsl"
++echo "do_cldc       =$do_cldc"
++echo "do_cleancldc  =$do_cleancldc"
++echo "do_midp       =$do_midp"
++echo "do_cleanmidp  =$do_cleanmidp"
++
++echo "do_pause      =$do_pause"
++
++
++#-------------------------------------------------------------
++export MEHOME BUILD_OUTPUT_DIR JDK_DIR
++[ -d $BUILD_OUTPUT_DIR ] || mkdir $BUILD_OUTPUT_DIR
++export PATH=$JDK_DIR/bin:$PATH
++
++
++# pcsl -------------------------------------------------------
++export PCSL_PLATFORM=linux_i386_gcc
++export PCSL_OUTPUT_DIR=$BUILD_OUTPUT_DIR/pcsl
++export NETWORK_MODULE=bsd/generic
++if [ -n "$do_cleanpcsl" ]; then
++        make -C $MEHOME/pcsl clean  || exit 1
++fi
++if [ -n "$do_pcsl" ]; then
++    make -C $MEHOME/pcsl        || exit 1
++    make -C $MEHOME/pcsl doc    || exit 1
++    pause
++fi
++
++
++# cldc -------------------------------------------------------
++export JVMWorkSpace=$MEHOME/cldc
++export JVMBuildSpace=$BUILD_OUTPUT_DIR/cldc
++export ENABLE_PCSL=true
++export ENABLE_ISOLATES=true
++if [ -n "$do_cleancldc" ]; then
++        make -C $JVMWorkSpace/build/linux_i386 clean || exit 1
++fi
++if [ -n "$do_cldc" ]; then
++    make -C $JVMWorkSpace/build/linux_i386       || exit 1
++    pause
++fi
++
++
++# midp -------------------------------------------------------
++export MIDP_OUTPUT_DIR=$BUILD_OUTPUT_DIR/midp
++export CLDC_DIST_DIR=$JVMBuildSpace/linux_i386/dist
++export TOOLS_DIR=$MEHOME/tools
++export TARGET_CPU=i386
++export USE_MULTIPLE_ISOLATES=true
++if [ -n "$do_cleanmidp" ]; then
++        make -C $MEHOME/midp/build/linux_fb_gcc clean
++fi
++if [ -n "$do_midp" ]; then
++    make -C $MEHOME/midp/build/linux_fb_gcc
++    pause
++fi
++
+-- 
+1.5.4.rc0.67.gf9c5
+

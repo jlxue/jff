@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<eclipsemeMetadata version="1.6.6" jad="Hello.jad">
+   <device group="Sun Java Wireless Toolkit  2.3" name="DefaultColorPhone"/>
+   <signing signProject="false"/>
+</eclipsemeMetadata>

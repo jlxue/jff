@@ -1,0 +1,162 @@
+From 995b90580d6464f945fda78df7db7c824f740038 Mon Sep 17 00:00:00 2001
+From: Liu Yubao <yubao.liu@gmail.com>
+Date: Mon, 3 Dec 2007 16:58:22 +0800
+Subject: [PATCH 3/6] add building script for rtems-i386
+
+
+Signed-off-by: Liu Yubao <yubao.liu@gmail.com>
+---
+ build-rtems-i386.sh |  141 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 141 insertions(+), 0 deletions(-)
+ create mode 100755 build-rtems-i386.sh
+
+diff --git a/build-rtems-i386.sh b/build-rtems-i386.sh
+new file mode 100755
+index 0000000..0550cea
+--- /dev/null
++++ b/build-rtems-i386.sh
+@@ -0,0 +1,141 @@
++#!/bin/bash
++
++MEHOME=/home/dieken/Work/phoneme/phoneme_feature
++BUILD_OUTPUT_DIR=/home/dieken/Work/tmp/phoneme_rtems
++# jdk 1.5 and 1.6 don't work
++JDK_DIR=/usr
++RTEMS_TOOLS=/opt/rtems
++optGNU_TOOLS_DIR="GNU_TOOLS_DIR=/opt/rtems/i386-rtems4.8"
++
++#-------------------------------------------------------------
++
++usage () {
++    cat <<EOF
++Usage: ./build-rtems-i386.sh [all] [cleanall] | [pcsl] [cleanpcsl]
++                             [cldc] [cleancldc] [midp] [cleanmidp]
++                             [pause]
++
++    all         - make all
++    pcsl        - make pcsl
++    cldc        - make cldc
++    midp        - make midp
++    cleanall    - clean all
++    cleanpcsl   - clean pcsl
++    cleancldc   - clean cldc
++    cleanmidp   - clean midp
++    pause       - pause after each make
++EOF
++}
++
++pause () {
++    if [ -n "$do_pause" ]; then
++        echo "press Enter to continue..."
++        read
++    fi
++}
++
++# we use `exit' to quit this script, so...
++[ $SHLVL -eq 1 ] &&
++    echo "Don't execute me in current shell!" &&
++    return 1
++
++[ -z "$1" ] && usage && exit 1
++
++while [ -n "$1" ]; do
++    case $1 in
++        all)        do_all=x            ;;
++        cleanall)   do_cleanall=x       ;;
++        pcsl)       do_pcsl=x           ;;
++        cleanpcsl)  do_cleanpcsl=x      ;;
++        cldc)       do_cldc=x           ;;
++        cleancldc)  do_cleancldc=x      ;;
++        midp)       do_midp=x           ;;
++        cleanmidp)  do_cleanmidp=x      ;;
++        pause)      do_pause=x          ;;
++        *)          usage && exit 1     ;;
++    esac
++    shift
++done
++
++if [ -n "$do_all" ]; then
++    do_pcsl=x
++    do_cldc=x
++    do_midp=x
++fi
++
++if [ -n "$do_cleanall" ]; then
++    do_cleanpcsl=x
++    do_cleancldc=x
++    do_cleanmidp=x
++fi
++
++echo "do_all        =$do_all"
++echo "do_cleanall   =$do_cleanall"
++echo "do_pcsl       =$do_pcsl"
++echo "do_cleanpcsl  =$do_cleanpcsl"
++echo "do_cldc       =$do_cldc"
++echo "do_cleancldc  =$do_cleancldc"
++echo "do_midp       =$do_midp"
++echo "do_cleanmidp  =$do_cleanmidp"
++
++echo "do_pause      =$do_pause"
++
++
++#-------------------------------------------------------------
++export MEHOME BUILD_OUTPUT_DIR JDK_DIR
++[ -d $BUILD_OUTPUT_DIR ] || mkdir $BUILD_OUTPUT_DIR
++export PATH=$RTEMS_TOOLS/bin:$JDK_DIR/bin:$PATH
++
++
++# pcsl -------------------------------------------------------
++export PCSL_OUTPUT_DIR=$BUILD_OUTPUT_DIR/pcsl
++if [ -n "$do_cleanpcsl" ]; then
++        make -C $MEHOME/pcsl clean  PCSL_PLATFORM=linux_i386_gcc || exit 1
++        make -C $MEHOME/pcsl clean  PCSL_PLATFORM=rtems_i386_gcc || exit 1
++fi
++if [ -n "$do_pcsl" ]; then
++    make -C $MEHOME/pcsl        PCSL_PLATFORM=linux_i386_gcc    \
++      NETWORK_MODULE=bsd/generic || exit 1
++    make -C $MEHOME/pcsl doc    PCSL_PLATFORM=linux_i386_gcc    \
++      NETWORK_MODULE=bsd/generic || exit 1
++    pause
++
++    make -C $MEHOME/pcsl        PCSL_PLATFORM=rtems_i386_gcc    \
++      $optGNU_TOOLS_DIR                                         \
++      NETWORK_MODULE=stubs MEMORY_MODULE=heap FILE_MODULE=armsd || exit 1
++    pause
++fi
++
++
++# cldc -------------------------------------------------------
++export JVMWorkSpace=$MEHOME/cldc
++export JVMBuildSpace=$BUILD_OUTPUT_DIR/cldc
++export ENABLE_PCSL=true
++export ENABLE_ISOLATES=true
++export VERBOSE_BUILD=true
++if [ -n "$do_cleancldc" ]; then
++    make -C $JVMWorkSpace/build/rtems_i386 clean    \
++      $optGNU_TOOLS_DIR  || exit 1
++fi
++if [ -n "$do_cldc" ]; then
++    make -C $JVMWorkSpace/build/rtems_i386              \
++      ENABLE_COMPILATION_WARNINGS=true                  \
++      $optGNU_TOOLS_DIR  || exit 1
++    pause
++fi
++
++
++# midp -------------------------------------------------------
++export MIDP_OUTPUT_DIR=$BUILD_OUTPUT_DIR/midp
++export CLDC_DIST_DIR=$JVMBuildSpace/rtems_i386/dist
++export TOOLS_DIR=$MEHOME/tools
++export TARGET_CPU=i386
++export USE_MULTIPLE_ISOLATES=true
++if [ -n "$do_cleanmidp" ]; then
++        make -C $MEHOME/midp/build/rtems_fb_gcc clean
++fi
++if [ -n "$do_midp" ]; then
++    make -C $MEHOME/midp/build/rtems_fb_gcc
++    pause
++fi
++
+-- 
+1.5.4.rc0.67.gf9c5
+

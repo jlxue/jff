@@ -1,0 +1,141 @@
+# id              此版面的 ID
+# name            版面英文名
+# fromPostID      最近一次查询时待抓取的最低 ID 的帖子, -1 表示从第一帖开始
+# toPostID        最近一次查询时待抓取的最高 ID 的帖子, -1 表示至最新一帖
+
+CREATE TABLE IF NOT EXISTS boards (
+    id              INT             NOT NULL UNIQUE PRIMARY KEY,
+    name            VARCHAR(50)     NOT NULL UNIQUE,
+    fromPostID      INT             NOT NULL DEFAULT -1,
+    toPostID        INT             NOT NULL DEFAULT -1);
+
+INSERT INTO boards VALUES (1032, 'Algorithm', -1, -1);
+INSERT INTO boards VALUES (719, 'Apple', -1, -1);
+INSERT INTO boards VALUES (567, 'Assembler', -1, -1);
+INSERT INTO boards VALUES (196, 'BBSMan_Dev', -1, -1);
+INSERT INTO boards VALUES (22, 'CAD', -1, -1);
+INSERT INTO boards VALUES (192, 'CBuilder', -1, -1);
+INSERT INTO boards VALUES (729, 'CG_Design', -1, -1);
+INSERT INTO boards VALUES (335, 'CPlusPlus', -1, -1);
+INSERT INTO boards VALUES (745, 'CProgramming', -1, -1);
+INSERT INTO boards VALUES (55, 'Crack', -1, -1);
+INSERT INTO boards VALUES (272, 'CSArch', -1, -1);
+INSERT INTO boards VALUES (37, 'Database', -1, -1);
+INSERT INTO boards VALUES (122, 'Delphi', -1, -1);
+INSERT INTO boards VALUES (94, 'DigiMedia', -1, -1);
+INSERT INTO boards VALUES (759, 'Disc', -1, -1);
+INSERT INTO boards VALUES (34, 'DOS', -1, -1);
+INSERT INTO boards VALUES (288, 'DotNET', -1, -1);
+INSERT INTO boards VALUES (281, 'DriverDev', -1, -1);
+INSERT INTO boards VALUES (918, 'eclipse', -1, -1);
+INSERT INTO boards VALUES (171, 'ElectroMusic', -1, -1);
+INSERT INTO boards VALUES (573, 'Emacs', -1, -1);
+INSERT INTO boards VALUES (792, 'Firefox', -1, -1);
+INSERT INTO boards VALUES (388, 'Flash', -1, -1);
+INSERT INTO boards VALUES (183, 'FreeBSD', -1, -1);
+INSERT INTO boards VALUES (195, 'FreeDevelop', -1, -1);
+INSERT INTO boards VALUES (579, 'FuncProgram', -1, -1);
+INSERT INTO boards VALUES (951, 'Google', -1, -1);
+INSERT INTO boards VALUES (632, 'GoogleEarth', -1, -1);
+INSERT INTO boards VALUES (50, 'Graphics', -1, -1);
+INSERT INTO boards VALUES (56, 'Hardware', -1, -1);
+INSERT INTO boards VALUES (912, 'IBMTech', -1, -1);
+INSERT INTO boards VALUES (756, 'Java', -1, -1);
+INSERT INTO boards VALUES (685, 'JavaTutorial', -1, -1);
+INSERT INTO boards VALUES (320, 'MSDN', -1, -1);
+INSERT INTO boards VALUES (99, 'NewSoftware', -1, -1);
+INSERT INTO boards VALUES (391, 'NoteBook', -1, -1);
+INSERT INTO boards VALUES (612, 'OfficeSoft', -1, -1);
+INSERT INTO boards VALUES (980, 'P2PSoftWare', -1, -1);
+INSERT INTO boards VALUES (226, 'Perl', -1, -1);
+INSERT INTO boards VALUES (261, 'PHP', -1, -1);
+INSERT INTO boards VALUES (695, 'PinYin', -1, -1);
+INSERT INTO boards VALUES (109, 'Programming', -1, -1);
+INSERT INTO boards VALUES (284, 'Python', -1, -1);
+INSERT INTO boards VALUES (742, 'Ruby', -1, -1);
+INSERT INTO boards VALUES (715, 'SearchEngineTech', -1, -1);
+INSERT INTO boards VALUES (124, 'Security', -1, -1);
+INSERT INTO boards VALUES (743, 'SocialSoftware', -1, -1);
+INSERT INTO boards VALUES (126, 'SoftEng', -1, -1);
+INSERT INTO boards VALUES (240, 'SoftwareTesting', -1, -1);
+INSERT INTO boards VALUES (460, 'TeX', -1, -1);
+INSERT INTO boards VALUES (837, 'TotalCommander', -1, -1);
+INSERT INTO boards VALUES (79, 'Unix', -1, -1);
+INSERT INTO boards VALUES (786, 'VideoCoding', -1, -1);
+INSERT INTO boards VALUES (731, 'VIM', -1, -1);
+INSERT INTO boards VALUES (1021, 'Virtualization', -1, -1);
+INSERT INTO boards VALUES (78, 'Virus', -1, -1);
+INSERT INTO boards VALUES (77, 'VisualBasic', -1, -1);
+INSERT INTO boards VALUES (187, 'VisualC', -1, -1);
+INSERT INTO boards VALUES (197, 'VR_3D', -1, -1);
+INSERT INTO boards VALUES (75, 'WebDev', -1, -1);
+INSERT INTO boards VALUES (875, 'WebGeeks', -1, -1);
+INSERT INTO boards VALUES (70, 'WindowsTech', -1, -1);
+INSERT INTO boards VALUES (230, 'XML', -1, -1);
+INSERT INTO boards VALUES (116, 'XWindow', -1, -1);
+INSERT INTO boards VALUES (299, 'KernelTech', -1, -1);
+INSERT INTO boards VALUES (392, 'LinuxApp', -1, -1);
+INSERT INTO boards VALUES (69, 'LinuxDev', -1, -1);
+INSERT INTO boards VALUES (59, 'Internet', -1, -1);
+INSERT INTO boards VALUES (696, 'Internetwork', -1, -1);
+INSERT INTO boards VALUES (112, 'NetPRG', -1, -1);
+INSERT INTO boards VALUES (98, 'Networking', -1, -1);
+
+
+CREATE TABLE IF NOT EXISTS posts (
+    boardID         INT             NOT NULL,
+    id              INT             NOT NULL,
+    topicID         INT             NOT NULL,
+    author          VARCHAR(100)    NOT NULL,
+    flags           CHAR(2)         NOT NULL,
+    time            DATETIME        NOT NULL,
+    title           VARCHAR(255)    NOT NULL,
+    length          INT             NOT NULL,
+    n               INT             NOT NULL,
+    PRIMARY KEY (boardID, id));
+
+
+mysqlimport -u root newsmth linuxapp.csv
+  --fields-terminated-by="," --fields-enclosed-by="'" -p
+
+
+CREATE TABLE IF NOT EXISTS temp (
+    boardID         INT             NOT NULL,
+    topicID         INT             NOT NULL,
+    count           INT             NOT NULL,
+    CONSTRAINT PRIMARY KEY (boardID, topicID));
+
+
+# 回复最多的帖子
+SELECT topicID, count(*) AS c, author, title
+  FROM posts
+  WHERE boardID = 392 AND topicID != id
+  GROUP BY topicID
+  ORDER BY c, topicID;
+
+
+# 每一个主题的回复数目
+INSERT INTO temp (boardID, topicID, count)
+  SELECT boardID, topicID as t, count(*) AS c
+  FROM posts
+  WHERE boardID = 392 AND topicID != id
+  GROUP BY topicID
+  ORDER BY c, t;
+
+# 发文得到的回复最多的帐号
+SELECT SUM(t.count) s, p.author
+  FROM temp t, (
+    SELECT author, topicID
+    FROM posts
+    WHERE boardID = 392 AND topicID = id) p
+  WHERE boardID = 392 AND t.topicID = p.topicID
+  GROUP BY p.author
+  ORDER BY s;
+
+# 回复别人最多的帐号
+SELECT COUNT(*) AS c, author
+  FROM posts
+  WHERE boardID = 392 AND topicID != id
+  GROUP BY author
+  ORDER BY c;
+
