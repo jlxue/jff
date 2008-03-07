@@ -6,10 +6,18 @@
 # When executed with root permission, it does:
 #   * create a .git or .hg directory in /
 #   * fully manage /etc and partially /root, /var
-#   * record installed software list by APT hooks
+#   * record installed software list(dpkg --list and dpkg --get-selections)
+#     by APT hooks
 #
 # When executed without root permissioin, it does:
 #   * partially manage ~/.*
+#
+#
+# Example:
+#   # cfgtool init
+#   # cd /; cfgtool add etc; cfgtool commit -m "import /etc to init"
+#   # cfgtool hook
+#   # cfgtool log
 #
 #
 # Reference:
@@ -22,12 +30,12 @@
 #     http://ygingras.net/b/2007/11/a-case-for-hg-on-etc
 #
 # Author:
-#   Liu Yubao <yubao.liu@gmail.com>, all rights reserved.
+#   Liu Yubao <yubao.liu@gmail.com>
 #
 # Copyright:
-#   Copyright (c) 2008 Liu Yubao
+#   Copyright (c) 2008 Liu Yubao, all rights reserved. 
 #
-# Licence:
+# License:
 #   This program is free software; you can redistribute it and/or
 #   modify it under the terms of the GNU General Public License
 #   as published by the Free Software Foundation; either version 2
@@ -35,13 +43,15 @@
 #
 # ChangeLog:
 #   2008-1-25 Liu Yubao
-#       * initial version.
+#       * initial version 0.1.
+#   2008-1-26 Liu Yubao
+#       * add APT hook support, version 0.2.
 #   
 # TODO:
 #   * feed output to pager automatically
 #   * colorize output automatically
-#   * add APT hooks
 #   * add version check for Mercurial (>= 0.9.5)
+#   * record file permission
 #
 
 VCS=
@@ -50,6 +60,16 @@ IS_ROOT=0
 VCS_ROOT="$HOME"
 VCS_REPOS=
 VCS_REPOS_ARG=
+
+
+log () {
+    if [ "-e" = "$1" ]; then
+        opt_e="-e"
+        shift
+    fi
+    echo $opt_e "[cfgtool] $1"
+}
+
 
 init_env () {
     LANG=C
@@ -73,10 +93,26 @@ check_repos () {
         VCS_REPOS="$VCS_ROOT/.hg"
         VCS_REPOS_ARG="-R $VCS_ROOT/"
     else
-        echo "Can't find $VCS_ROOT/.git or $VCS_ROOT/.hg"
-        echo "use 'cfgtool init' to initialize repository."
+        log "Can't find $VCS_ROOT/.git or $VCS_ROOT/.hg"
+        log "use 'cfgtool init' to initialize repository."
         exit 1
         
+    fi
+}
+
+
+save_file_in_vcs () {
+    f="$1"
+    m="$2"
+
+    if [ -e "$f" ]; then
+        if ! cmd_list | grep "^$f$" >/dev/null 2>&1; then
+            log "save $f into vcs: $VCS_REPOS"
+            cmd_add $f || return 1
+        elif [ git == $VCS ]; then
+            cmd_add $f || return 1
+        fi
+        $VCS $VCS_REPOS_ARG commit -m "$m" "$f" || return 1
     fi
 }
 
@@ -86,22 +122,22 @@ select_vcs () {
         break
     done
     if [ -z "$VCS" ]; then
-        echo "Support only GIT and Mercurial, abort."
+        log "Support only GIT and Mercurial, abort."
         return 1
     elif [ "$VCS" = "GIT" ]; then
         VCS=git
         git help init 1>/dev/null 2>&1 || {
-            echo "Can't find git, please install it first, eg:"
-            echo "  aptitude install git-core"
+            log "Can't find git, please install it first, eg:"
+            log "  aptitude install git-core"
             return 2
         }
         VCS_REPOS="$VCS_ROOT/.git"
     else
         VCS=hg
         hg --version 1>/dev/null 2>&1 || {
-            echo "Can't find mercurial, please install it first, eg:"
-            echo "  aptitude install -R mercurial"
-            echo "NOTICE: Mercurial 0.9.5 or higher version is needed!"
+            log "Can't find mercurial, please install it first, eg:"
+            log "  aptitude install -R mercurial"
+            log "NOTICE: Mercurial 0.9.5 or higher version is needed!"
             return 2
         }
         VCS_REPOS="$VCS_ROOT/.hg"
@@ -111,18 +147,42 @@ select_vcs () {
 
 cmd_init () {
     if [ -z "$VCS" ]; then
-        echo "Which version control system to use?"
+        log "Which version control system to use?"
         select_vcs || exit 1
 
-        echo -e "\nPrepare repository $VCS_REPOS..."
+        log
+        log -e "Prepare repository $VCS_REPOS..."
         cd "$VCS_ROOT/" && $VCS $VCS_REPOS_ARG init && chmod 700 "$VCS_REPOS" || {
             exit 1
         }
-        echo -e "\nUse 'cfgtool add' or '$VCS add' to add some files into repository, eg. /etc, ~/.*"
+        log
+        log -e "Use 'cfgtool add' or '$VCS add' to add some files into"
+        log -e "repository, eg. /etc, ~/.*\n\n"
     else
-        echo "$VCS_REPOS has been initialized."
+        log "$VCS_REPOS has been initialized."
     fi
 
+
+    # save output from dpkg --list and dpkg --get-selections
+    [ 0 -eq $IS_ROOT ] && return 0
+
+    if which dpkg >/dev/null 2>&1; then
+        save_file_in_vcs root/dpkg--list.txt    \
+            "save output from dpkg --list" || exit 1
+        save_file_in_vcs root/dpkg--get-selections.txt  \
+            "save output from dpkg --get-selections" || exit 1
+
+        dpkg --list > /root/dpkg--list.txt || exit 1
+        dpkg --get-selections > /root/dpkg--get-selections.txt || exit 1
+
+        save_file_in_vcs root/dpkg--list.txt    \
+            "save new output from dpkg --list when do cfgtool init" ||
+                exit 1
+        save_file_in_vcs root/dpkg--get-selections.txt  \
+            "save new output from dpkg --get-selections when do cfgtool init" ||
+                exit 1
+
+    fi
 }
 
 
@@ -174,9 +234,94 @@ cmd_diff () {
 }
 
 
+cmd_list () {
+    if [ "git" = "$VCS" ]; then
+        git $VCS_REPOS_ARG ls-files "$@"
+    else
+        hg $VCS_REPOS_ARG manifest "$@"
+    fi
+}
+
+
+cmd_hook () {
+    if [ 0 -eq $IS_ROOT ]; then
+        log "Only root can use this function!"
+        return 1
+    fi
+
+    if ! which apt-get >/dev/null 2>&1; then
+        log "Can't find apt-get in PATH, is this Debian system?"
+        return 1
+    fi
+
+    # install cfgtool to /root/cfgtool
+    if [ ! -e /root/cfgtool ]; then
+        log
+        log "!!!!! Please copy cfgtool to /root/cfgtool and"
+        log "!!!!! run 'chmod 500 /root/cfgtool'"
+        log
+    fi
+
+    # install APT hook
+    cd "$VCS_ROOT/"
+    save_file_in_vcs etc/apt/apt.conf "save apt.conf before hook APT" ||
+        exit 1
+
+    if ! grep cfgtool /etc/apt/apt.conf >/dev/null 2>&1; then
+        cat >> /etc/apt/apt.conf <<EOF
+
+// added automatically by cfgtool ------------> begin
+DPkg {
+  Pre-Invoke { "if [ -x /root/cfgtool ]; then /root/cfgtool hook_pre; fi"; };
+  Post-Invoke { "if [ -x /root/cfgtool ]; then /root/cfgtool hook_post; fi"; };
+}
+// added automatically by cfgtool <------------ end
+
+EOF
+        save_file_in_vcs etc/apt/apt.conf "save apt.conf after hook APT" ||
+            exit 1
+        log "Cfgtool has been install in /etc/apt/apt.conf"
+    fi
+}
+
+
+do_hook () {
+    if [ 0 -eq $IS_ROOT ]; then
+        log "Only root can use this function!"
+        return 1
+    fi
+
+    dpkg --list > /root/dpkg--list.txt || exit 1
+    dpkg --get-selections > /root/dpkg--get-selections.txt || exit 1
+    save_file_in_vcs root/dpkg--list.txt    \
+        "dpkg --list from $LOGNAME $1: $caller"
+    save_file_in_vcs root/dpkg--get-selections.txt  \
+        "dpkg --get-selections from $LOGNAME $1: $caller"
+
+    caller=$(ps axww | \
+        awk '/aptitude|apt-get/ {for (i=5; i<=NF; i++) printf("%s ", $i); printf("\n")}' \
+        |head -1)
+    cd $VCS_ROOT/
+    cmd_commit -m "snapshot from $LOGNAME $1: $caller"
+
+    # ignore errors
+    return 0
+}
+
+
+cmd_hook_pre () {
+    do_hook "before" >/dev/null 2>&1
+}
+
+
+cmd_hook_post () {
+    do_hook "after" >/dev/null 2>&1
+}
+
+
 cmd_version () {
     cat <<EOF
-Cfgtool 0.1, Copyright (C) 2008 Liu Yubao
+Cfgtool 0.2, Copyright (C) 2008 Liu Yubao
 
 Cfgtool comes with ABSOLUTELY NO WARRANTY, it is free software, and
 you are welcome to redistribute it under certain conditions; read
@@ -207,6 +352,8 @@ Available sub commands and their equivalent commands in GIT and Mercurial:
     log       : git log                 hg log
     status    : git status              hg status
     diff      : git diff                hg diff
+    list      : git ls-files            hg manifest
+    hook      : install Pre-Invoke and Post-Invoke hooks to APT
     version   : show version of Cfgtool
     help      : show this help information
 
@@ -219,7 +366,7 @@ init_env
 
 CMD="$1"
 if [ -z "$CMD" ]; then
-    echo "Missing arguments, use 'cfgtool help' to get help."
+    log "Missing arguments, use 'cfgtool help' to get help."
     exit 1;
 fi
 
@@ -228,12 +375,16 @@ case "$CMD" in
     init)
         cmd_init "$@"
         ;;
-    add|remove|copy|rename|commit|log|status|diff|version|help)
+    add|remove|copy|rename|commit|log|status|diff|  \
+    list|hook|hook_pre|hook_post)
         check_repos
         cmd_$CMD "$@"
         ;;
+    version|help)
+        cmd_$CMD "$@"
+        ;;
     *)
-        echo "Bad command '$CMD', use 'cfgtool help' to get help."
+        log "Bad command '$CMD', use 'cfgtool help' to get help."
         exit 1
         ;;
 esac
