@@ -1,0 +1,242 @@
+#!/bin/bash
+#
+# A little script to backup /etc or dot files in home directory
+# and record installed software list under version control.
+#
+# When executed with root permission, it does:
+#   * create a .git or .hg directory in /
+#   * fully manage /etc and partially /root, /var
+#   * record installed software list by APT hooks
+#
+# When executed without root permissioin, it does:
+#   * partially manage ~/.*
+#
+#
+# Reference:
+#   * Tracking /etc etc
+#     http://www.selenic.com/mercurial/wiki/index.cgi/TrackingEtcEtc
+#   * Maintain /etc with mercurial on Debian
+#     http://michael-prokop.at/blog/2007/03/14/maintain-etc-with-
+#       mercurial-on-debian/
+#   * A case for hg on /etc
+#     http://ygingras.net/b/2007/11/a-case-for-hg-on-etc
+#
+# Author:
+#   Liu Yubao <yubao.liu@gmail.com>, all rights reserved.
+#
+# Copyright:
+#   Copyright (c) 2008 Liu Yubao
+#
+# Licence:
+#   This program is free software; you can redistribute it and/or
+#   modify it under the terms of the GNU General Public License
+#   as published by the Free Software Foundation; either version 2
+#   of the License, or (at your option) any later version.
+#
+# ChangeLog:
+#   2008-1-25 Liu Yubao
+#       * initial version.
+#   
+# TODO:
+#   * feed output to pager automatically
+#   * colorize output automatically
+#   * add APT hooks
+#   * add version check for Mercurial (>= 0.9.5)
+#
+
+VCS=
+USER=`whoami`
+IS_ROOT=0
+VCS_ROOT="$HOME"
+VCS_REPOS=
+VCS_REPOS_ARG=
+
+init_env () {
+    LANG=C
+    LC_ALL=C
+    export LANG LC_ALL
+
+    if [ "root" = "$USER" ]; then
+        IS_ROOT=1
+        VCS_ROOT=
+    fi
+}
+
+
+check_repos () {
+    if [ -d "$VCS_ROOT/.git" ]; then
+        VCS=git
+        VCS_REPOS="$VCS_ROOT/.git"
+        VCS_REPOS_ARG="--git-dir $VCS_REPOS"
+    elif [ -d "$VCS_ROOT/.hg" ]; then
+        VCS=hg
+        VCS_REPOS="$VCS_ROOT/.hg"
+        VCS_REPOS_ARG="-R $VCS_ROOT/"
+    else
+        echo "Can't find $VCS_ROOT/.git or $VCS_ROOT/.hg"
+        echo "use 'cfgtool init' to initialize repository."
+        exit 1
+        
+    fi
+}
+
+
+select_vcs () {
+    select VCS in GIT Mercurial; do
+        break
+    done
+    if [ -z "$VCS" ]; then
+        echo "Support only GIT and Mercurial, abort."
+        return 1
+    elif [ "$VCS" = "GIT" ]; then
+        VCS=git
+        git help init 1>/dev/null 2>&1 || {
+            echo "Can't find git, please install it first, eg:"
+            echo "  aptitude install git-core"
+            return 2
+        }
+        VCS_REPOS="$VCS_ROOT/.git"
+    else
+        VCS=hg
+        hg --version 1>/dev/null 2>&1 || {
+            echo "Can't find mercurial, please install it first, eg:"
+            echo "  aptitude install -R mercurial"
+            echo "NOTICE: Mercurial 0.9.5 or higher version is needed!"
+            return 2
+        }
+        VCS_REPOS="$VCS_ROOT/.hg"
+    fi
+}
+
+
+cmd_init () {
+    if [ -z "$VCS" ]; then
+        echo "Which version control system to use?"
+        select_vcs || exit 1
+
+        echo -e "\nPrepare repository $VCS_REPOS..."
+        cd "$VCS_ROOT/" && $VCS $VCS_REPOS_ARG init && chmod 700 "$VCS_REPOS" || {
+            exit 1
+        }
+        echo -e "\nUse 'cfgtool add' or '$VCS add' to add some files into repository, eg. /etc, ~/.*"
+    else
+        echo "$VCS_REPOS has been initialized."
+    fi
+
+}
+
+
+cmd_add () {
+    $VCS $VCS_REPOS_ARG add "$@"
+}
+
+
+cmd_remove () {
+    $VCS $VCS_REPOS_ARG rm "$@"
+}
+
+
+cmd_copy () {
+    if [ "git" = "$VCS" ]; then
+        cp "$@" && git $VCS_REPOS_ARG add "${!#}"
+    else
+        hg $VCS_REPOS_ARG cp "$@"
+    fi
+}
+
+
+cmd_rename () {
+    $VCS $VCS_REPOS_ARG mv "$@"
+}
+
+
+cmd_commit () {
+    if [ "git" = "$VCS" ]; then
+        $VCS $VCS_REPOS_ARG commit -a "$@"
+    else
+        hg $VCS_REPOS_ARG commit "$@"
+    fi
+}
+
+
+cmd_log () {
+    $VCS $VCS_REPOS_ARG log "$@"
+}
+
+
+cmd_status () {
+    $VCS $VCS_REPOS_ARG status "$@"
+}
+
+
+cmd_diff () {
+    $VCS $VCS_REPOS_ARG diff "$@"
+}
+
+
+cmd_version () {
+    cat <<EOF
+Cfgtool 0.1, Copyright (C) 2008 Liu Yubao
+
+Cfgtool comes with ABSOLUTELY NO WARRANTY, it is free software, and
+you are welcome to redistribute it under certain conditions; read
+comment in the beginning of this script for details.
+
+EOF
+}
+
+
+cmd_help () {
+    cat <<EOF
+Usage: cfgtool subcommand arguments...
+
+Cfgtool is a little script to backup /etc or dot files in home directory
+and record installed software list under version control.
+
+Most commands are simple wrappers to the corresponding commands in GIT
+or Mercurial, you can use the VCS tool directly.
+    
+Available sub commands and their equivalent commands in GIT and Mercurial:
+
+    init      : git init                hg init
+    add       : git add                 hg add
+    remove    : git rm                  hg rm
+    copy      : cp && git add           hg cp
+    rename    : git mv                  hg mv
+    commit    : git commit -a           hg commit
+    log       : git log                 hg log
+    status    : git status              hg status
+    diff      : git diff                hg diff
+    version   : show version of Cfgtool
+    help      : show this help information
+
+EOF
+}
+
+
+#------------- main entry -----------------------
+init_env
+
+CMD="$1"
+if [ -z "$CMD" ]; then
+    echo "Missing arguments, use 'cfgtool help' to get help."
+    exit 1;
+fi
+
+shift
+case "$CMD" in
+    init)
+        cmd_init "$@"
+        ;;
+    add|remove|copy|rename|commit|log|status|diff|version|help)
+        check_repos
+        cmd_$CMD "$@"
+        ;;
+    *)
+        echo "Bad command '$CMD', use 'cfgtool help' to get help."
+        exit 1
+        ;;
+esac
+
+# vi: et ts=4 sw=4
+
