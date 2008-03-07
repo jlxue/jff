@@ -32,7 +32,7 @@
 #   between all required libraries will be generated, then you can issue this
 #   command to get a PNG image(need GraphViz):
 #
-#   $ dot -Tpng dep.png dep.dot
+#   $ dot -Tpng -o dep.png dep.dot
 #
 #   Use `--debug=1' to enable verbose message.
 #

@@ -14,6 +14,9 @@ hardstatus on
 hardstatus alwayslastline
 hardstatus string "%{.bW}%-w%{.rW}%n %t%{-}%+w %=%{..G} %H %{..Y} %m/%d %C%a "
 
+# another way to show window list
+#caption always "%?%F%{-b 4w}%:%{-b bb}%? %H | %l | %m-%d %c |%?%F%{-b 4w}%?%L=%-Lw%45>%{-b w4}%n%f* %t%{-}%+Lw%-0<"
+
 # key bingdings
 # remove some stupid/dangerous key bindings
 bind k

@@ -155,6 +155,8 @@ set more
 
 set display=lastline
 
+set listchars+=extends:>,precedes:<
+
 "--------------------------------------for autocmd and filetype------------------
 filetype on
 filetype plugin on
