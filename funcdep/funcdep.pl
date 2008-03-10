@@ -3,12 +3,28 @@
 # Generate function dependencies for C source code.
 #
 # Usage:
+#   # prepare tag file
 #   cd vim7/src
-#   bash funcdep.sh
-#   perl funcdep.pl --limit=50 > dep.dot
-#   dot -Tpng dep.png dep.dot
+#   find . -iname "*.[ch]" -o -iname "*.cpp" | sed -e "s/^\.\///" > cscope.files
+#   ctags -L cscope.files
+#   cscope -bkqu
 #
-#   Note: backup your `tags' and `cscope.*' files before running this
+#   # prepare filter file
+#   cat > filter
+#   fileio.c
+#   memfile.c
+#   memline.c
+#   ^D
+#
+#   # generate dot file for function dependencies
+#   perl funcdep.pl --limit 50 --filter filter > dep.dot
+#   echo fileio.c | perl funcdep.pl --filter - > dep.dot
+#
+#   # generate png picture from dot file
+#   dot -Tpng -o dep.png dep.dot
+#   twopi -Tpng -o dep.png dep.dot
+#
+#   NOTICE: backup your `tags' and `cscope.*' files before running this
 #   script.
 #
 # License:
@@ -20,6 +36,8 @@
 # ChangeLog:
 #   2008-03-09
 #       * initial version.
+#   2008-03-10
+#       * add --filter support.
 #       
 use strict;
 use warnings;
@@ -30,8 +48,12 @@ use IPC::Open2;
 use constant DEBUG => 0;
 
 my $limit = 0;      # maximum number of edges
+my $filter;         # a list file contains file:name filter
 
-GetOptions("limit=i"    => \$limit);
+GetOptions("limit=i"    => \$limit,
+           "filter=s"   => \$filter);
+
+$filter = read_filter($filter) if defined $filter;
 
 my %symbols = read_tags("tags");
 
@@ -40,8 +62,10 @@ my ($line, $file, $name, $num, $text);
 my ($child_out, $child_in);
 my $pid = open2($child_out, $child_in, 'cscope', '-dl');
 
+
 for my $k (keys %symbols) {
     next if defined $symbols{$k}->[4];
+    next if defined $filter && $k !~ /$filter/o;
 
     # calls `cscope -dl < 3myfunc`.
     print $child_in 3, $symbols{$k}->[0], "\n";
@@ -67,6 +91,7 @@ print <<EOF;
 strict digraph func_dependence {
     center=1;
     splines=true;
+    overlap=scale;      // for twopi
 
 EOF
 
@@ -74,12 +99,14 @@ if ($limit <= 0) {
     for my $k (keys %symbols_dependencies) {
         my $depends = $symbols_dependencies{$k};
         for my $k2 (keys %$depends) {
-            print '"', $k2, "\"\t\t-> \"$k\";\n";
+            print '"', short_tag($k2), "\"\t\t-> \"", short_tag($k), "\";\n";
         }
     }
 } else {
     my $count = 0;
     my ($got_new, $k, $v, @keys);
+
+    # output by topological order
     while (1) {
         $got_new = 0;
         @keys = keys %symbols_dependencies;
@@ -93,7 +120,7 @@ if ($limit <= 0) {
                     if (exists $v2->{$k}) {
                         last if ++$count >= $limit;
                         delete $v2->{$k};
-                        print '"', $k, "\"\t\t-> \"$k2\";\n";
+                        print '"', short_tag($k), "\"\t\t-> \"", short_tag($k2), "\";\n";
                     }
                 }
             }
@@ -150,5 +177,37 @@ sub read_tags {
 
 sub debug {
     print @_ if DEBUG;
+}
+
+
+sub read_filter {
+    my $pattern = "";
+    my $f;
+
+    if ('-' eq $_[0]) {
+        open $f, $_[0] || die "Can't open $_[0]: $!\n";
+    } else {
+        $f = *STDIN;
+    }
+    while (<$f>) {
+        chomp;
+        next if 0 == length;
+        if (length($pattern) > 0) {
+            $pattern .= "|(?:" . quotemeta($_) . ")";
+        } else {
+            $pattern = "(?:" . quotemeta($_) . ")";
+        }
+    }
+    close $f if '-' ne $_[0];
+
+    return $pattern;
+}
+
+
+sub short_tag {
+    my $tag = shift;        # /path/to/a.c:hello
+    
+    $tag =~ s/.*(?:\\|\/)//;
+    return $tag;
 }
 
