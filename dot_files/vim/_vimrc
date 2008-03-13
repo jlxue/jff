@@ -21,15 +21,15 @@ function MyDiff()
 endfunction
 
 "-------------------------------------key mappings-------------------------------
-nn j gj
-nn k gk
+nnoremap j gj
+nnoremap k gk
 
 "   :help :caddexpr
 "   :help :laddexpr
 "   see Tip #1063 below.
-nmap <F2> :g//laddexpr expand("%") . ":" . line(".") . ":" . getline(".")<CR>:lopen<CR>
+nnoremap <F2> :g//laddexpr expand("%") . ":" . line(".") . ":" . getline(".")<CR>:lopen<CR>
 
-nmap <F3>  :redir @a<CR>:g//<CR>:redir END<CR>:new<CR>:put! a<CR><CR>
+nnoremap <F3>  :redir @a<CR>:g//<CR>:redir END<CR>:new<CR>:put! a<CR><CR>
 "	Tip #1063 Send results of a g// to a new window
 "	http://www.vim.org/tips/tip.php?tip_id=1063
 "	
@@ -48,16 +48,16 @@ nmap <F3>  :redir @a<CR>:g//<CR>:redir END<CR>:new<CR>:put! a<CR><CR>
 "	
 
 " when `paste' is set, filetype indent and autoindent don't work
-nmap <F4> :set paste<CR>"+p:set nopaste<CR>
-nmap <F5> :set paste<CR>"*p:set nopaste<CR>
-imap <F4> <ESC>:set paste<CR>"+p:set nopaste<CR>i
-imap <F5> <ESC>:set paste<CR>"*p:set nopaste<CR>i
+nnoremap <F4> :set paste<CR>"+p:set nopaste<CR>
+nnoremap <F5> :set paste<CR>"*p:set nopaste<CR>
+inoremap <F4> <ESC>:set paste<CR>"+p:set nopaste<CR>i
+inoremap <F5> <ESC>:set paste<CR>"*p:set nopaste<CR>i
 
 " copy to CLIPBOARD selection
-vmap <F6> "+y
+vnoremap <F6> "+y
 
 " Let F7 to show buf explorer(bufexplorer plugin)
-map <F7> <ESC>\be
+noremap <F7> <ESC>\be
 
 " mru.vim
 nnoremap <silent> <S-F7> :MRU<CR>
@@ -68,6 +68,15 @@ let g:qb_hotkey="<F8>"
 "Taglist plugin
 nnoremap <silent> <F9> :TlistToggle<CR>
 
+nnoremap <TAB>      gt
+nnoremap <S-TAB>    gT
+nnoremap <C-N>      <C-W>w
+nnoremap <C-P>      <C-W>W
+
+if version >= 700
+    " open file in new tabpage
+    nnoremap gf <C-W>gf:tabmove<CR>
+endif
 
 "--------------------------------------for plugins-------------------------------
 
