@@ -7,6 +7,10 @@ startup_message off
 # define a bigger scrollback, default is 100 lines, I like large scrollback
 defscrollback 2048
 
+# enable mouse event in screen, export TERM=linux then dvtm
+# (http://www.brain-dump.org/projects/dvtm/) works perfectly!
+termcapinfo * XT
+
 # An alternative hardstatus to display a bar at the bottom listing the
 # windownames and highlighting the current windowname in blue. (This is only
 # enabled if there is no hardstatus setting for your terminal)
