@@ -146,7 +146,7 @@ set cinoptions=t0,:0,g0,j1
 
 " always show status line
 set laststatus=2
-set statusline=%F%*\ %y[%{&fenc}]\ %2*%r%m%*\ %l,%c\ %=%l/%L\ (%p%%)%*\ %{strftime('%Y-%m-%d-%H:%M')}
+set statusline=%F%*\ %y[%{&ff}][%{&fenc}]\ %2*%r%m%*\ %l,%c\ %=%l/%L\ (%p%%)%*\ %{strftime('%Y-%m-%d-%H:%M')}
 
 set virtualedit=block
 
