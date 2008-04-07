@@ -1,0 +1,13 @@
+#!/bin/bash
+
+ok_num=`grep -cw ok t.c`
+mkdir for_test && cd for_test
+cp ../design.txt mypost
+result=`../t linuxapp 2>&1 |tee log | grep -cw ok`
+
+if [ $ok_num -eq $result ]; then
+    echo Passed.
+else
+    echo Failed, see ./for_test/log for details.
+fi
+

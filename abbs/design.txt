@@ -1,0 +1,187 @@
+* Introduction
+
+This is the design document of ABBS, a bulletin board system.
+
+Liu Yubao <yubao.liu@gmail.com>\\
+v0.1, Apr. 2008
+
+
+* ChangeLog
+
+|       DATE | CHANGE                                     |
+|------------+--------------------------------------------|
+| 2008-04-01 | first draft, layout of database files      |
+|------------+--------------------------------------------|
+| 2008-04-03 | switch to Emacs Org-mode, more description |
+|------------+--------------------------------------------|
+
+
+* Layout of data file and index file to store articles of a board
+
+Each board is represented with a data file and an index file. The
+former contains information of all articles in that board, including
+properties like author name, title and content of each article. The
+latter contains indices to all articles.
+
+Bearing portability and efficiency in mind, the data file and index
+file contain machine and compiler dependent information like
+endianness and structure alignment.
+
+
+** Layout of index file
+
+Index files are redundant and can be reconstructed from data files,
+they are used to provide great efficiency to access articles,
+primarily sequentially. All items in index file are fixed size and
+sorted by their IDs, they contain only necessary information to show
+article list.
+
+
+- The head of index file
+
+The head of index file a fixed size record.
+
+| NAME    | SIZE    | COMMENT                           |
+|---------+---------+-----------------------------------|
+| magic   | 8 bytes | "BBSDBIDX"                        |
+| length  | 4 bytes | the length of this head           |
+| format  | 1 byte  | version of this file format[1]    |
+| flags   | 1 byte  | alignment of structure members[2] |
+| padding | 2 byte  | padding                           |
+|---------+---------+-----------------------------------|
+
+
+- The body of index file
+
+The body of index is constituted by many fixed size record.
+
+| NAME       | SIZE      | COMMENT                                                 |
+|------------+-----------+---------------------------------------------------------|
+| magic      | 4 bytes   | 0xDEADBEEF                                              |
+| offset     | 4 bytes   | offset in the data file, relative to the file beginning |
+| id         | 4 bytes   | a unique positive number used to identify this article  |
+| topic\_id  | 4 bytes   | id of the first article in a topic                      |
+| parent\_id | 4 bytes   | id of the article to be replied                         |
+| flags      | 4 bytes   | flags like 'g', 'm', '@', 'x', ';' in NewSMTH           |
+| ctime      | 4 bytes   | time of creation                                        |
+| mtime      | 4 bytes   | time of last modification                               |
+| size       | 4 bytes   | size of a article, calculated in bytes                  |
+| author     | 32 bytes  | author name of a article                                |
+| title      | 128 bytes | title of a article                                      |
+|------------+-----------+---------------------------------------------------------|
+
+
+** Layout of data file
+
+- The head of data file
+
+It's same with the head of index file except the magic field is "BBSDBDAT".
+
+
+- The body of data file
+
+The body of data file is constituted by many variable size record.
+
+| NAME       | SIZE       | COMMENT                                                |
+|------------+------------+--------------------------------------------------------|
+| magic      | 4 bytes    | 0xDEADBEEF                                             |
+| length     | 4 bytes    | length of this record, multiple of 8                   |
+| id         | 4 bytes    | a unique positive number used to identify this article |
+| topic\_id  | 4 bytes    | id of the first article in a topic                     |
+| parent\_id | 4 bytes    | id of the article to be replied                        |
+| flags      | 4 bytes    | flags like 'g', 'm', '@', 'x', ';' in NewSMTH          |
+| ctime      | 4 bytes    | time of creation                                       |
+| mtime      | 4 bytes    | time of last modification                              |
+| size       | 4 bytes    | size of a article, calculated in bytes                 |
+| content    | size bytes | content of a article                                   |
+| author     | 32 bytes   | author name of a article                               |
+| title      | 128 bytes  | title of a article                                     |
+|------------+------------+--------------------------------------------------------|
+
+
+* File arrangement in a running ABBS
+
+- boards/
+
+This directory hierarchy is used to store board databases.
+
+Board databases are placed in directories named after their districts,
+for example:
+
+| DISTRICT NAME | BOARD NAME | COMMENT                                 |
+|---------------+------------+-----------------------------------------|
+| CompTech      |            | district to discuss computer technology |
+|---------------+------------+-----------------------------------------|
+|               | \_info     | properties of this district             |
+|               | LinuxApp   | properties of LinuxApp board            |
+|               | LinuxApp.d | data file of LinuxApp board             |
+|               | LinuxApp.i | index file of LinuxApp board            |
+|               | LinuxApp.b | backup file of LinuxApp.d               |
+|               | LinuxApp.s | running status file of LinuxApp board   |
+|---------------+------------+-----------------------------------------|
+
+The districts can be distributed over many machines.
+
+The format of property file:
+# NOTICE: The colons in the beginning of next lines are special marks
+# of Emacs Org-mode.
+:id: 101
+:name: LinuxApp
+:chinese-name: Linux 技术和应用
+:data-file: boards/CompTech/LinuxApp.d
+:index-file: boards/CompTech/LinuxApp.i
+:backup-file: boards/CompTech/LinuxApp.b
+:status-file: boards/CompTech/LinuxApp.s
+
+
+- pool/
+
+This directory hierarchy is used to store temporary articles being
+edited by users. Each board has its own sub directory named after its
+board name.
+
+It's better to place this directory hierarchy in a RAM file system
+like tmpfs on Linux.
+
+
+- attachments/
+
+This directory hierarchy is used to store attachments uploaded by
+users. Each board has its own sub directory named after its board
+name.  Each attachment is named after its MD5 digest, and an extra
+file with .txt suffix and same base name is created to record some
+properties of the attachment such as original file name.
+
+
+* Programs in ABBS
+
+| NAME     | COMMENT                                                             |
+|----------+---------------------------------------------------------------------|
+| abbsd    | the initial daemon of ABBS, used to startup boardd daemons          |
+| boardd   | board daemon, responsible to modify data and index files of a board |
+| bbs      | BBS client, read article and talk to boardd to post article         |
+| bbsadmin | BBS management console                                              |
+|----------+---------------------------------------------------------------------|
+
+   
+** abbsd
+
+** boardd
+
+** bbs
+
+** bbsadmin
+
+* Plan
+
+- restricted editor (rvim?): can't exec(), can't write to a new file,
+  can't open another file, can't execute script like vim's script, the
+  only functions allowed are just edit and save.
+
+
+Footnotes: 
+[1] The most significant bit indicates the byte order.
+
+[2] 0: 1 byte aligned, 1: 2 bytes aligned, 2: 4 bytes aligned, 3: 8
+bytes aligned.
+
