@@ -1,0 +1,23 @@
+The Ultima Code - The Impossible Mission
+=======================================
+
+uIP, lwIP
+Apache Lucene
+LLVM, Parrot, PyPy, Psyco, IronPython
+Ikarus, Chez Scheme, Larceny,MIT/GNU Scheme
+apache, lighttpd, nginx, shttpd, squid, haproxy, lighty, tomcat
+exim4/postfix
+Cindy, Grazzy, Mina
+Linux, OpenSolaris, NetBSD, FreeBSD, OpenBSD, DragonFlyBSD
+Minix3, eCos, Plan9
+vim, emacs
+Parrot, Perl, Python, PyPy, LLVM, gcc, pcc, www.tendra.org
+hlvm.org, nekovm.org, JikesRVM
+OCaml, SBCL, Erlang, Squeak, strongtalk, OpenJDK, PhoneME
+Lua, Luagit, dynasm
+groff, gpic
+xine, mplayer, vlc
+mpd/mpc, audacious, xmms2, bmpx
+glib, gtk
+git, mercurial
+
