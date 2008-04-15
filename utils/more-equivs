@@ -6,7 +6,7 @@
 #
 # Usage:
 #   ./more-equivs install jde
-#   ...edit ./blacklist to left only gcj related packages...
+#   ...edit ./blacklist to leave only gcj related packages...
 #   ./more-equivs
 #   dpkg -i *gcj*.deb
 #   apt-get install jde
@@ -45,7 +45,7 @@ function cmd_checkinst {
     if apt-get $apt_cmd -s "$@" | grep '^\s*Inst' |
             sed -e "s/^\s*Inst \([^ ]*\) \(\[.*\] \)\?(\(.*\) Debian.*/\1\t\t\t\3/" \
             >./blacklist; then
-        echo Edit ./blacklist to left only packages you don\'t need,
+        echo Edit ./blacklist to leave only packages you don\'t need,
         echo then run \`more-equivs equivs\` or \`more-equivs\`.
     else
         rm blacklist
