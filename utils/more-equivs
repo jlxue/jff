@@ -25,10 +25,11 @@ function usage {
     cat<<EOF
 Usage: more-equivs subcmd ...
     available sub commands:
-        install ...
-    upgrade ...
-    dist-upgrade
-    equivs
+      install ...
+      upgrade ...
+      dist-upgrade
+      equivs
+      help
 EOF
     exit -1
 }
@@ -54,7 +55,12 @@ function cmd_checkinst {
 
 
 function cmd_equivs {
-    [ -e "./blacklist" ] || usage
+    if [ ! -e "./blacklist" ]; then
+        echo "./blacklist not found."
+        echo
+        usage
+    fi
+
     if [ -e "./control" ]; then
         echo Please remove ./control first, more-equvis doesn\'t overwrite it.
         exit -1
@@ -103,9 +109,32 @@ EOF
 }
 
 
+function cmd_help {
+    cat <<EOF
+An example scenario:
+    ./more-equivs install jde
+    ...edit ./blacklist to left only gcj related packages...
+    ./more-equivs
+    dpkg -i *gcj*.deb
+    apt-get install jde
+EOF
+}
+
 ##################################################################################
+if ! which equivs-build 1>/dev/null 2>&1; then
+    echo \`equivs-build\` not found, have you installed \`equivs\' package?
+    exit -1
+fi
+
+if ! which apt-get 1>/dev/null 2>&1; then
+    echo \`apt-get\' not found, is this a Debian family Linux distribution?
+    exit -1
+fi
+
 if [ -z "$1" ]; then
     CMD="equivs"
+elif [ "$1" = "help" ]; then
+    CMD="help"
 else
     apt_cmd="$1"
     [ "$apt_cmd" != "install" -a "$apt_cmd" != "upgrade" -a \
@@ -116,5 +145,4 @@ fi
 
 
 cmd_$CMD "$@"
-
 
