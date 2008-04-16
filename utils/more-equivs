@@ -11,6 +11,9 @@
 #   dpkg -i *gcj*.deb
 #   apt-get install jde
 #
+# Version:
+#   0.3
+#
 # Author:
 #   Liu Yubao <yubao.liu@gmail.com>, 2008-04-16
 #
@@ -43,7 +46,7 @@ function cmd_checkinst {
 
     echo Using \`apt-get $apt_cmd -s "$@"\` to get depends to be installed...
     if apt-get $apt_cmd -s "$@" | grep '^\s*Inst' |
-            sed -e "s/^\s*Inst \([^ ]*\) \(\[.*\] \)\?(\(.*\) Debian.*/\1\t\t\t\3/" \
+            sed -ne "s/^\s*Inst \([^ ]*\) \(\[[^ ]*\] \)\?(\([^ ]*\) .*/\1\t\t\t\3/p" \
             >./blacklist; then
         echo Edit ./blacklist to leave only packages you don\'t need,
         echo then run \`more-equivs equivs\` or \`more-equivs\`.
@@ -67,6 +70,7 @@ function cmd_equivs {
     fi
 
     while read pkg ver; do
+        [ -n "$pkg" -a -n "$ver" ] || continue
         echo generating ./control for $pkg-$ver...
         cat > ./control <<EOF
 ### Commented entries have reasonable defaults.
