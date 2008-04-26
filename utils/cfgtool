@@ -4,7 +4,7 @@
 # and record installed software list under version control.
 #
 # When executed with root permission, it does:
-#   * create a .git or .hg directory in /
+#   * create a .git directory in /
 #   * fully manage /etc and partially /root, /var
 #   * record installed software list(dpkg --list and dpkg --get-selections)
 #     by APT hooks
@@ -46,23 +46,19 @@
 #       * initial version 0.1.
 #   2008-1-26 Liu Yubao
 #       * add APT hook support, version 0.2.
+#   2008-4-27 Liu Yubao
+#	    * remove hg support to make it simple.
+#       * remove simple wrapper functions.
+#       * rewrite some code to make it more robust.
+#       * release 0.3.
 #   
 # TODO:
-#   * feed output to pager automatically
-#   * colorize output automatically
-#   * add version check for Mercurial (>= 0.9.5)
 #   * record file permission
 #
 
-VCS=
-USER=`whoami`
-IS_ROOT=0
-VCS_ROOT="$HOME"
-VCS_REPOS=
-VCS_REPOS_ARG=
-
-
 log () {
+    local opt_e
+
     if [ "-e" = "$1" ]; then
         opt_e="-e"
         shift
@@ -76,170 +72,92 @@ init_env () {
     LC_ALL=C
     export LANG LC_ALL
 
-    if [ "root" = "$USER" ]; then
+    VCS=git
+    IS_ROOT=0
+    VCS_ROOT="$HOME"
+    VCS_REPOS=
+    VCS_REPOS_ARG=
+    VCS_CMD=
+
+    if [ 0 -eq `id -u` ]; then
+        VCS=/usr/bin/git
         IS_ROOT=1
         VCS_ROOT=
+    fi
+
+    VCS_REPOS="$VCS_ROOT/.git"
+    VCS_REPOS_ARG="--git-dir $VCS_REPOS"
+    VCS_CMD="$VCS $VCS_REPOS_ARG"
+
+    if ! $VCS --version >/dev/null 2>&1; then
+        log "Can't find $VCS, please install it first, eg:"
+        log "  aptitude install git-core"
+        exit 1
     fi
 }
 
 
 check_repos () {
-    if [ -d "$VCS_ROOT/.git" ]; then
-        VCS=git
-        VCS_REPOS="$VCS_ROOT/.git"
-        VCS_REPOS_ARG="--git-dir $VCS_REPOS"
-    elif [ -d "$VCS_ROOT/.hg" ]; then
-        VCS=hg
-        VCS_REPOS="$VCS_ROOT/.hg"
-        VCS_REPOS_ARG="-R $VCS_ROOT/"
-    else
-        log "Can't find $VCS_ROOT/.git or $VCS_ROOT/.hg"
-        log "use 'cfgtool init' to initialize repository."
+    if [ ! -d "$VCS_REPOS" ]; then
+        log "Can't find $VCS_ROOT/.git, please use 'cfgtool init' to initialize repository."
         exit 1
-        
     fi
 }
 
 
-save_file_in_vcs () {
-    f="$1"
-    m="$2"
+safe_commit () {
+    local a m
 
-    if [ -e "$f" ]; then
-        if ! cmd_list | grep "^$f$" >/dev/null 2>&1; then
-            log "save $f into vcs: $VCS_REPOS"
-            cmd_add $f || return 1
-        elif [ git == $VCS ]; then
-            cmd_add $f || return 1
-        fi
-        $VCS $VCS_REPOS_ARG commit -m "$m" "$f" || return 1
-    fi
-}
+    [ '-a' = "$1" ] && { a="-a"; shift; }
+    [ '-m' = "$1" ] && { m="$2"; shift 2; }
+    [ '-a' = "$1" ] && { a="-a"; shift; }
 
-
-select_vcs () {
-    select VCS in GIT Mercurial; do
-        break
-    done
-    if [ -z "$VCS" ]; then
-        log "Support only GIT and Mercurial, abort."
-        return 1
-    elif [ "$VCS" = "GIT" ]; then
-        VCS=git
-        git help init 1>/dev/null 2>&1 || {
-            log "Can't find git, please install it first, eg:"
-            log "  aptitude install git-core"
-            return 2
-        }
-        VCS_REPOS="$VCS_ROOT/.git"
+    if [ `$VCS_CMD branch | wc -l` -eq 0 ]; then
+        $VCS_CMD commit $a -m "$m" "$@"
+    elif [ `$VCS_CMD diff --cached -- "$@" | wc -l` -gt 0 ]; then
+        $VCS_CMD commit $a -m "$m" "$@"
+    elif [ -n "$a" -a `$VCS_CMD diff -- "$@" | wc -l` -gt 0 ]; then
+        $VCS_CMD commit $a -m "$m" "$@"
     else
-        VCS=hg
-        hg --version 1>/dev/null 2>&1 || {
-            log "Can't find mercurial, please install it first, eg:"
-            log "  aptitude install -R mercurial"
-            log "NOTICE: Mercurial 0.9.5 or higher version is needed!"
-            return 2
-        }
-        VCS_REPOS="$VCS_ROOT/.hg"
+        return 0
     fi
 }
 
 
 cmd_init () {
-    if [ -z "$VCS" ]; then
-        log "Which version control system to use?"
-        select_vcs || exit 1
+    local a
 
-        log
-        log -e "Prepare repository $VCS_REPOS..."
-        cd "$VCS_ROOT/" && $VCS $VCS_REPOS_ARG init && chmod 700 "$VCS_REPOS" || {
-            exit 1
-        }
-        log
-        log -e "Use 'cfgtool add' or '$VCS add' to add some files into"
-        log -e "repository, eg. /etc, ~/.*\n\n"
-    else
-        log "$VCS_REPOS has been initialized."
+    log -e "Prepare repository $VCS_REPOS..."
+
+    cd "$VCS_ROOT/" || exit 1
+
+    if ! ($VCS_CMD init "$@" && chmod 700 "$VCS_REPOS"); then
+        exit 1
     fi
 
-
     # save output from dpkg --list and dpkg --get-selections
-    [ 0 -eq $IS_ROOT ] && return 0
-
-    if which dpkg >/dev/null 2>&1; then
-        save_file_in_vcs root/dpkg--list.txt    \
-            "save output from dpkg --list" || exit 1
-        save_file_in_vcs root/dpkg--get-selections.txt  \
-            "save output from dpkg --get-selections" || exit 1
+    if [ 1 -eq $IS_ROOT ] && which dpkg >/dev/null 2>&1; then
+        a=0
+        [ -e root/dpkg--list.txt ] && { $VCS_CMD add root/dpkg--list.txt; a=1; }
+        [ -e root/dpkg--get-selections.txt ] && { $VCS_CMD add root/dpkg--get-selections.txt;
+            a=1; }
+        [ 1 -eq $a ] && ( safe_commit -m  \
+            "save output from dpkg --list and dpkg --get-selections before cfgtool init" \
+            root/dpkg--list.txt root/dpkg--get-selections.txt || exit 1)
 
         dpkg --list > /root/dpkg--list.txt || exit 1
         dpkg --get-selections > /root/dpkg--get-selections.txt || exit 1
 
-        save_file_in_vcs root/dpkg--list.txt    \
-            "save new output from dpkg --list when do cfgtool init" ||
-                exit 1
-        save_file_in_vcs root/dpkg--get-selections.txt  \
-            "save new output from dpkg --get-selections when do cfgtool init" ||
-                exit 1
-
+        $VCS_CMD add root/dpkg--list.txt
+        $VCS_CMD add root/dpkg--get-selections.txt
+        safe_commit -m  \
+            "save new output from dpkg --list and dpkg --get-selections after cfgtool init" \
+            root/dpkg--list.txt root/dpkg--get-selections.txt || exit 1
     fi
-}
 
-
-cmd_add () {
-    $VCS $VCS_REPOS_ARG add "$@"
-}
-
-
-cmd_remove () {
-    $VCS $VCS_REPOS_ARG rm "$@"
-}
-
-
-cmd_copy () {
-    if [ "git" = "$VCS" ]; then
-        cp "$@" && git $VCS_REPOS_ARG add "${!#}"
-    else
-        hg $VCS_REPOS_ARG cp "$@"
-    fi
-}
-
-
-cmd_rename () {
-    $VCS $VCS_REPOS_ARG mv "$@"
-}
-
-
-cmd_commit () {
-    if [ "git" = "$VCS" ]; then
-        $VCS $VCS_REPOS_ARG commit -a "$@"
-    else
-        hg $VCS_REPOS_ARG commit "$@"
-    fi
-}
-
-
-cmd_log () {
-    $VCS $VCS_REPOS_ARG log "$@"
-}
-
-
-cmd_status () {
-    $VCS $VCS_REPOS_ARG status "$@"
-}
-
-
-cmd_diff () {
-    $VCS $VCS_REPOS_ARG diff "$@"
-}
-
-
-cmd_list () {
-    if [ "git" = "$VCS" ]; then
-        git $VCS_REPOS_ARG ls-files "$@"
-    else
-        hg $VCS_REPOS_ARG manifest "$@"
-    fi
+    log
+    log -e "Use 'cfgtool add' or '$VCS add' to add some files into"
+    log -e "repository, eg. /etc, ~/.*\n\n"
 }
 
 
@@ -264,7 +182,8 @@ cmd_hook () {
 
     # install APT hook
     cd "$VCS_ROOT/"
-    save_file_in_vcs etc/apt/apt.conf "save apt.conf before hook APT" ||
+    [ -e etc/apt/apt.conf ] && $VCS_CMD add etc/apt/apt.conf
+    safe_commit -m "save apt.conf before hook APT" etc/apt/apt.conf ||
         exit 1
 
     if ! grep cfgtool /etc/apt/apt.conf >/dev/null 2>&1; then
@@ -278,7 +197,8 @@ DPkg {
 // added automatically by cfgtool <------------ end
 
 EOF
-        save_file_in_vcs etc/apt/apt.conf "save apt.conf after hook APT" ||
+        $VCS_CMD add etc/apt/apt.conf
+        safe_commit -m "save apt.conf after hook APT" etc/apt/apt.conf ||
             exit 1
         log "Cfgtool has been install in /etc/apt/apt.conf"
     fi
@@ -286,6 +206,8 @@ EOF
 
 
 do_hook () {
+    local pid
+
     if [ 0 -eq $IS_ROOT ]; then
         log "Only root can use this function!"
         return 1
@@ -293,19 +215,22 @@ do_hook () {
 
     dpkg --list > /root/dpkg--list.txt || exit 1
     dpkg --get-selections > /root/dpkg--get-selections.txt || exit 1
-    save_file_in_vcs root/dpkg--list.txt    \
-        "dpkg --list from $LOGNAME $1: $caller"
-    save_file_in_vcs root/dpkg--get-selections.txt  \
-        "dpkg --get-selections from $LOGNAME $1: $caller"
 
-    caller=$(ps axww | \
-        awk '/aptitude|apt-get/ {for (i=5; i<=NF; i++) printf("%s ", $i); printf("\n")}' \
-        |head -1)
-    cd $VCS_ROOT/
-    cmd_commit -m "snapshot from $LOGNAME $1: $caller"
+    pid=$PPID
+    while [ $pid -gt 0 ]; do
+        caller=`/bin/ps -p $pid -o cmd= h`
+        (echo $caller | /bin/grep 'aptitude\|apt-get') && break
+        pid=`/bin/ps -p $pid -o ppid= h`
+    done
 
-    # ignore errors
-    return 0
+    [ $pid -eq 0 ] && caller=`/bin/ps -p $PPID -o cmd= h`
+
+    cd / &&
+        $VCS_CMD add root/dpkg--list.txt &&
+        $VCS_CMD add root/dpkg--get-selections.txt &&
+        $VCS_CMD add etc &&
+        ($VCS_CMD ls-files -d | xargs -r $VCS_CMD rm -r -q) &&
+        safe_commit -a -m "snapshot from $LOGNAME $1: $caller"
 }
 
 
@@ -321,7 +246,7 @@ cmd_hook_post () {
 
 cmd_version () {
     cat <<EOF
-Cfgtool 0.2, Copyright (C) 2008 Liu Yubao
+Cfgtool 0.3, Copyright (C) 2008 Liu Yubao
 
 Cfgtool comes with ABSOLUTELY NO WARRANTY, it is free software, and
 you are welcome to redistribute it under certain conditions; read
@@ -338,24 +263,18 @@ Usage: cfgtool subcommand arguments...
 Cfgtool is a little script to backup /etc or dot files in home directory
 and record installed software list under version control.
 
-Most commands are simple wrappers to the corresponding commands in GIT
-or Mercurial, you can use the VCS tool directly.
+Most commands are simple wrappers to the corresponding commands in GIT,
+you can use GIT directly.
     
-Available sub commands and their equivalent commands in GIT and Mercurial:
+Available sub commands and their equivalent commands in GIT:
 
-    init      : git init                hg init
-    add       : git add                 hg add
-    remove    : git rm                  hg rm
-    copy      : cp && git add           hg cp
-    rename    : git mv                  hg mv
-    commit    : git commit -a           hg commit
-    log       : git log                 hg log
-    status    : git status              hg status
-    diff      : git diff                hg diff
-    list      : git ls-files            hg manifest
+    init      : git --git-dir=/path/to/.git init
     hook      : install Pre-Invoke and Post-Invoke hooks to APT
+    <cmd>     : git --git-dir=/path/to/.git <cmd>
     version   : show version of Cfgtool
     help      : show this help information
+
+The .git directory is in $HOME/ for normal user and / for root user.
 
 EOF
 }
@@ -375,8 +294,7 @@ case "$CMD" in
     init)
         cmd_init "$@"
         ;;
-    add|remove|copy|rename|commit|log|status|diff|  \
-    list|hook|hook_pre|hook_post)
+    hook|hook_pre|hook_post)
         check_repos
         cmd_$CMD "$@"
         ;;
@@ -384,8 +302,8 @@ case "$CMD" in
         cmd_$CMD "$@"
         ;;
     *)
-        log "Bad command '$CMD', use 'cfgtool help' to get help."
-        exit 1
+        check_repos
+        $VCS_CMD $CMD "$@"
         ;;
 esac
 
