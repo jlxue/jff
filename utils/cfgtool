@@ -51,6 +51,8 @@
 #       * remove simple wrapper functions.
 #       * rewrite some code to make it more robust.
 #       * release 0.3.
+#   2008-4-27 Liu Yubao
+#       * fix working tree problem, version 0.3.1.
 #   
 # TODO:
 #   * record file permission
@@ -86,7 +88,7 @@ init_env () {
     fi
 
     VCS_REPOS="$VCS_ROOT/.git"
-    VCS_REPOS_ARG="--git-dir $VCS_REPOS"
+    VCS_REPOS_ARG="--git-dir=$VCS_REPOS --work-tree=$VCS_ROOT/"
     VCS_CMD="$VCS $VCS_REPOS_ARG"
 
     if ! $VCS --version >/dev/null 2>&1; then
@@ -246,7 +248,7 @@ cmd_hook_post () {
 
 cmd_version () {
     cat <<EOF
-Cfgtool 0.3, Copyright (C) 2008 Liu Yubao
+Cfgtool 0.3.1, Copyright (C) 2008 Liu Yubao
 
 Cfgtool comes with ABSOLUTELY NO WARRANTY, it is free software, and
 you are welcome to redistribute it under certain conditions; read
@@ -268,9 +270,9 @@ you can use GIT directly.
     
 Available sub commands and their equivalent commands in GIT:
 
-    init      : git --git-dir=/path/to/.git init
+    init      : git --git-dir=/path/to/.git --work-tree=/path/to init
     hook      : install Pre-Invoke and Post-Invoke hooks to APT
-    <cmd>     : git --git-dir=/path/to/.git <cmd>
+    <cmd>     : git --git-dir=/path/to/.git --work-tree=/path/to <cmd>
     version   : show version of Cfgtool
     help      : show this help information
 
