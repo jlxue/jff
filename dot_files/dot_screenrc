@@ -4,6 +4,9 @@ escape ^Jj
 
 startup_message off
 
+# make vim not overwrite the content in screen window after vim exits
+altscreen on
+
 # define a bigger scrollback, default is 100 lines, I like large scrollback
 defscrollback 2048
 
