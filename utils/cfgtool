@@ -53,6 +53,8 @@
 #       * release 0.3.
 #   2008-4-27 Liu Yubao
 #       * fix working tree problem, version 0.3.1.
+#   2008-4-29 Liu Yubao
+#       * add core.worktree to workaround git's wired behaviour, version 0.3.2.
 #   
 # TODO:
 #   * record file permission
@@ -133,7 +135,8 @@ cmd_init () {
 
     cd "$VCS_ROOT/" || exit 1
 
-    if ! ($VCS_CMD init "$@" && chmod 700 "$VCS_REPOS"); then
+    if ! ($VCS_CMD init "$@" && $VCS_CMD config core.worktree ".."
+            && chmod 700 "$VCS_REPOS"); then
         exit 1
     fi
 
