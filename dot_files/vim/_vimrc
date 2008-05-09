@@ -21,8 +21,8 @@ function MyDiff()
 endfunction
 
 "-------------------------------------key mappings-------------------------------
-nnoremap j gj
-nnoremap k gk
+"nnoremap j gj
+"nnoremap k gk
 
 "   :help :caddexpr
 "   :help :laddexpr
@@ -48,10 +48,10 @@ nnoremap <F3>  :redir @a<CR>:g//<CR>:redir END<CR>:new<CR>:put! a<CR><CR>
 "	
 
 " when `paste' is set, filetype indent and autoindent don't work
-nnoremap <F4> :set paste<CR>"+p:set nopaste<CR>
-nnoremap <F5> :set paste<CR>"*p:set nopaste<CR>
-inoremap <F4> <ESC>:set paste<CR>"+p:set nopaste<CR>i
-inoremap <F5> <ESC>:set paste<CR>"*p:set nopaste<CR>i
+nnoremap <F4> :set paste<CR>"*p:set nopaste<CR>
+nnoremap <F5> :set paste<CR>"+p:set nopaste<CR>
+inoremap <F4> <ESC>:set paste<CR>"*p:set nopaste<CR>i
+inoremap <F5> <ESC>:set paste<CR>"+p:set nopaste<CR>i
 
 " copy to CLIPBOARD selection
 vnoremap <F6> "+y
@@ -59,14 +59,18 @@ vnoremap <F6> "+y
 " Let F7 to show buf explorer(bufexplorer plugin)
 noremap <F7> <ESC>\be
 
-" mru.vim
-nnoremap <silent> <S-F7> :MRU<CR>
-
 " Define g:qb_hotkey before source qbuf.vim
-let g:qb_hotkey="<F8>"
+let g:qb_hotkey="<S-F7>"
 
-"Taglist plugin
+" mru.vim
+nnoremap <silent> <F8> :MRU<CR>
+
+" Taglist plugin
 nnoremap <silent> <F9> :TlistToggle<CR>
+
+" autopreview.vim
+nnoremap <S-F9> :AutoPreviewToggle<CR>
+inoremap <S-F9> <ESC>:AutoPreviewToggle<CR>i
 
 nnoremap <TAB>      gt
 nnoremap <S-TAB>    gT
@@ -94,6 +98,10 @@ let Tlist_File_Fold_Auto_Close = 1
 
 " for mru.vim
 let MRU_Max_Entries = 50
+
+" for autopreview.vim
+"let g:AutoPreview_enabled = 0
+"let g:AutoPreview_allowed_filetypes = ["c", "cpp", "java"]
 
 "--------------------------------------misc settings-----------------------------
 set nu
@@ -166,6 +174,7 @@ set display=lastline
 
 set listchars+=extends:>,precedes:<
 
+set updatetime=2000
 "--------------------------------------for autocmd and filetype------------------
 filetype on
 filetype plugin on
