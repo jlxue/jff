@@ -12,6 +12,7 @@ Linux, OpenSolaris, NetBSD, FreeBSD, OpenBSD, DragonFlyBSD
 Minix3, eCos, Plan9
 vim, emacs
 Parrot, Perl, Python, PyPy, LLVM, gcc, pcc, www.tendra.org
+Mozilla SpiderMonkey + Tamarin(二者合并为 ActionMonkey)
 hlvm.org, nekovm.org, JikesRVM
 OCaml, SBCL, ClozureCL, Erlang, Squeak, strongtalk, OpenJDK, PhoneME
 Lua, Luagit, dynasm
