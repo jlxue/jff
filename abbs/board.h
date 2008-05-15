@@ -52,23 +52,19 @@ uint32_t
 board_count_all_articles(board_t* board);
 
 uint32_t
-board_count_alive_articles(board_t* board);
-
-uint32_t
 board_get_first_article_id(board_t* board);
 
 uint32_t
 board_get_last_article_id(board_t* board);
 
-uint32_t
-board_get_first_alive_article_id(board_t* board);
-
-uint32_t
-board_get_last_alive_article_id(board_t* board);
+article_t*
+board_append_article(board_t* board, uint32_t id, uint32_t topic_id,
+                     uint32_t parent_id, const char* author, const char* title,
+                     const char* filename);
 
 article_t*
-board_add_article(board_t* board, uint32_t topic_id, uint32_t parent_id,
-                  const char* author, const char* title, const char* filename);
+board_add_article(board_t* board, const char* author, const char* title,
+                  const char* filename);
 
 article_t*
 board_get_article(board_t* board, uint32_t id);
@@ -87,10 +83,6 @@ board_delete_article_range(board_t* board, article_t** articles,
 
 article_t*
 board_update_article(board_t* board, article_t* article,
-                     const char* title, const char* filename);
-
-article_t*
-board_reply_article(board_t* board, article_t* article, const char* author,
                      const char* title, const char* filename);
 
 uint32_t

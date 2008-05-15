@@ -2,7 +2,7 @@
 
 ok_num=`grep -cw ok t.c`
 mkdir for_test && cd for_test
-cp ../design.txt mypost
+cp ../README mypost
 result=`../t linuxapp 2>&1 |tee log | grep -cw ok`
 
 if [ $ok_num -eq $result ]; then

@@ -1,0 +1,8 @@
+SharedLibrary('bbsdb', Split("""
+    board.c
+    util.c"""))
+
+Program('bbs', 'bbs.c', LIBS=['bbsdb'], LIBPATH='.')
+Program('boardd', 'boardd.c', LIBS=['bbsdb'], LIBPATH='.')
+Program('t', 't.c', LIBS=['bbsdb'], LIBPATH='.')
+

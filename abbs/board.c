@@ -51,7 +51,7 @@
 #define     DEFAULT_DATA_MMAP_WIN       (32 * 1024 * 1024)  /* 32 MB    */
 #define     DEFAULT_INDEX_MMAP_WIN      (10 * 1024 * 1024)  /* 10 MB    */
 
-#define     DEFAULT_DATA_EXPAND_SIZE    (8 * 1024)          /* 8 KB     */
+#define     DEFAULT_DATA_EXPAND_SIZE    (64 * 1024)         /* 64 KB    */
 #define     DEFAULT_INDEX_EXPAND_SIZE   (4 * 1024)          /* 4 KB     */
 
 
@@ -112,9 +112,6 @@ typedef struct {
     uint32_t    count;              /* count of all articles        */
     uint32_t    first_id;           /* id of first article          */
     uint32_t    last_id;            /* id of last article           */
-    uint32_t    alive_count;        /* count of all alive articles  */
-    uint32_t    first_alive_id;     /* id of first alive article    */
-    uint32_t    last_alive_id;      /* id of last alive article     */
 } stat_info_t;
 
 
@@ -557,6 +554,53 @@ write_stat_info(int fd, const stat_info_t* stat)
 }
 
 
+static int
+prepare_data_room(board_t* board, uint32_t length)
+{
+    struct stat st;
+
+    assert(NULL != board);
+
+
+    ERRORP(-1 == fstat(board->data.fd, &st), "Can't fstat data file.");
+    board->data.st_size = st.st_size;
+    if (board->data.st_size - board->data.used_size < length) {
+        ERRORP(-1 == expand_file(&board->data),
+               "Error happened when expand data file.");
+    }
+
+    return 0;
+
+L_error:
+    return -1;
+}
+
+
+static int
+prepare_index_room(board_t* board)
+{
+    struct stat st;
+
+    assert(NULL != board);
+
+
+    ERRORP(-1 == fstat(board->index.fd, &st), "Can't fstat index file.");
+    board->index.st_size = st.st_size;
+
+    if (board->index.st_size - board->index.used_size < 10 * sizeof(article_t)) {
+        ERRORP(-1 == expand_file(&board->index),
+               "Error happened when expand index file.");
+        ERRORP(-1 == write_stat_info(board->index.fd, &board->stat),
+               "Error happend when write stat info.");
+    }
+
+    return 0;
+
+L_error:
+    return -1;
+}
+
+
 /*
  * get the range of articles contained completely in memory mapping window. 
  * The out parameters `first' and `last' indict the range [first,start).
@@ -721,12 +765,12 @@ board_open(const char* file, char mode)
     } else {
         board->data.fd = open(path, O_RDWR | O_CREAT, 0644);
         ERRORVP(-1 == board->data.fd, "Can't open %s to read and write", path);
-        board->data.prot = PROT_WRITE;
+        board->data.prot = PROT_READ | PROT_WRITE;
 
         path[len + 1] = 'i';
         board->index.fd = open(path, O_RDWR | O_CREAT, 0644);
         ERRORVP(-1 == board->data.fd, "Can't open %s to read and write", path);
-        board->index.prot = PROT_WRITE;
+        board->index.prot = PROT_READ | PROT_WRITE;
     }
 
 
@@ -780,7 +824,7 @@ board_close(board_t* board)
     /*
      * write statistics information to the end of index file.
      */
-    if (PROT_WRITE == board->index.prot) {
+    if ((PROT_READ | PROT_WRITE) == board->index.prot) {
         struct stat st;
         if ((-1 != fstat(board->index.fd, &st) &&
                 board->index.used_size + sizeof(stat_info_t) <= st.st_size &&
@@ -818,15 +862,6 @@ board_count_all_articles(board_t* board)
 
 
 uint32_t
-board_count_alive_articles(board_t* board)
-{
-    assert(NULL != board);
-
-    return board->stat.alive_count;
-}
-
-
-uint32_t
 board_get_first_article_id(board_t* board)
 {
     assert(NULL != board);
@@ -844,27 +879,10 @@ board_get_last_article_id(board_t* board)
 }
 
 
-uint32_t
-board_get_first_alive_article_id(board_t* board)
-{
-    assert(NULL != board);
-
-    return board->stat.first_alive_id;
-}
-
-
-uint32_t
-board_get_last_alive_article_id(board_t* board)
-{
-    assert(NULL != board);
-
-    return board->stat.last_alive_id;
-}
-
-
 article_t*
-board_add_article(board_t* board, uint32_t topic_id, uint32_t parent_id,
-                  const char* author, const char* title, const char* filename)
+board_append_article(board_t* board, uint32_t id, uint32_t topic_id,
+                     uint32_t parent_id, const char* author, const char* title,
+                     const char* filename)
 {
     struct stat st;
     article_t* article;
@@ -872,7 +890,8 @@ board_add_article(board_t* board, uint32_t topic_id, uint32_t parent_id,
     int fd = -1, author_len, title_len;
     char* p;
 
-    assert(NULL != board && NULL != author && NULL != title && NULL != filename);
+    assert(NULL != board && id > 0 && topic_id > 0 && parent_id > 0 &&
+           NULL != author && NULL != title && NULL != filename);
 
 
     author_len = strlen(author);
@@ -884,30 +903,19 @@ board_add_article(board_t* board, uint32_t topic_id, uint32_t parent_id,
     /*
      * prepare room for the new article.
      */
-    ERRORP(-1 == fstat(board->index.fd, &st), "Can't fstat index file.");
-    board->index.st_size = st.st_size;
-    ERRORP(-1 == fstat(board->data.fd, &st), "Can't fstat data file.");
-    board->data.st_size = st.st_size;
-
     fd = open(filename, O_RDONLY);
     ERRORVP(-1 == fd, "Can't open %s to read.", filename);
     ERRORVP(-1 == fstat(fd, &st), "Can't fstat: %s", filename);
     ADD_TO_MAX_NO_WRAP(length, st.st_size, 10 * sizeof(article_t), UINT32_MAX);
-    if (board->data.st_size - board->data.used_size < length)
-        ERRORP(-1 == expand_file(&board->data),
-               "Error happened when expand data file.");
-    if (board->index.st_size - board->index.used_size < 10 * sizeof(article_t)) {
-        ERRORP(-1 == expand_file(&board->index),
-               "Error happened when expand index file.");
-        ERRORP(-1 == write_stat_info(board->index.fd, &board->stat),
-               "Error happend when write stat info.");
-    }
+    if (-1 == prepare_data_room(board, length))
+        goto L_error;
 
 
     /*
      * write data file.
      */
     length = sizeof(article_t) + st.st_size;
+    length = ALIGN_UP(length, 8);
     if (-1 == slide_mmap_window(&board->data, board->data.used_size, length))
         goto L_error;
     p = board->data.content + board->data.length + sizeof(article_t);
@@ -917,9 +925,7 @@ board_add_article(board_t* board, uint32_t topic_id, uint32_t parent_id,
         goto L_error;
     article = (article_t*)(board->data.content + board->data.length);
     article->length = length;
-    article->id = board->stat.last_id + 1;
-    if (0 == topic_id)
-        topic_id = parent_id = article->id;     /* new article, not reply   */
+    article->id = id;
     article->topic_id = topic_id;
     article->parent_id = parent_id;
     article->flags = 0;
@@ -932,16 +938,47 @@ board_add_article(board_t* board, uint32_t topic_id, uint32_t parent_id,
     article->magic = 0xDEADBEEF;
 
 
+    close(fd);
+
+    return article;
+
+L_error:
+    if (-1 != fd)
+        close(fd);
+    return NULL;
+}
+
+
+article_t*
+board_add_article(board_t* board, const char* author, const char* title,
+                  const char* filename)
+{
+    article_t *article, *article_idx;
+    uint32_t id;
+
+
+    prepare_index_room(board);
+
+
+    /*
+     * write data file.
+     */
+    id = board->stat.last_id + 1;
+    article = board_append_article(board, id, id, id, author, title, filename);
+    if (NULL == article)
+        return NULL;
+                                   
+
     /*
      * write index file.
      */
     if (-1 == slide_mmap_window(&board->index, board->index.used_size,
                                 sizeof(article_t)))
-        goto L_error;
+        return NULL;
     memcpy(board->index.content + board->index.length, article,
            sizeof(article_t));
-    article = (article_t*)(board->index.content + board->index.length);
-    article->offset = board->data.used_size;
+    article_idx = (article_t*)(board->index.content + board->index.length);
+    article_idx->offset = board->data.used_size;
 
 
     /*
@@ -949,26 +986,18 @@ board_add_article(board_t* board, uint32_t topic_id, uint32_t parent_id,
      */
     board->index.used_size += sizeof(article_t);
     board->index.length += sizeof(article_t);
-    board->data.used_size += length;
-    board->data.length += length;
+    board->data.used_size += article->length;
+    board->data.length += article->length;
 
 
     /*
      * update stat_info.
      */
     board->stat.last_id++;
-    board->stat.last_alive_id = board->stat.last_id;
     board->stat.count++;
-    board->stat.alive_count++;
 
 
-    close(fd);
-    return article;
-
-L_error:
-    if (-1 != fd)
-        close(fd);
-    return NULL;
+    return article_idx;
 }
 
 
@@ -1073,26 +1102,42 @@ article_t*
 board_update_article(board_t* board, article_t* article,
                      const char* title, const char* filename)
 {
+    article_t* article_data;    /* article in data file */
+
     assert(NULL != board && NULL != article && 0xDEADBEEF == article->magic &&
            NULL != filename);
 
-    return board_add_article(board, article->topic_id, article->parent_id,
-                             article->author,
-                             NULL == title ? article->title : title,
-                             filename);
-}
+
+    /*
+     * write data file.
+     */
+    article_data = board_append_article(board, article->id, article->topic_id,
+                                        article->parent_id, article->author,
+                                        NULL == title ? article->title : title,
+                                        filename);
+    if (NULL == article_data)
+        return NULL;
+
+    
+    /*
+     * write index file.
+     */
+    if (NULL != title)
+        strcpy(article->title, title);
+    article->size = 0;      /* avoid race condition */
+    article->offset = board->data.used_size;
+    article->size = article_data->size;
+    article->mtime = article_data->mtime;
 
 
-article_t*
-board_reply_article(board_t* board, article_t* article, const char* author,
-                    const char* title, const char* filename)
-{
-    assert(NULL != board && NULL != article && 0xDEADBEEF == article->magic &&
-           NULL != filename);
+    /*
+     * update mmap_info.
+     */
+    board->data.used_size += article_data->length;
+    board->data.length += article_data->length;
 
-    return board_add_article(board, article->topic_id, article->id, author,
-                             NULL == title ? article->title : title,
-                             filename);
+
+    return article;
 }
 
 

@@ -1,0 +1,49 @@
+CFLAGS += -Wall -g
+# ASFLAGS +=
+# LDFLAGS +=
+# INCLUDES +=
+
+########################################################################
+.PHONY: all test clean distclean
+
+.DEFAULT: all
+
+
+LIB_BBSDB_SOURCES[] = board util
+LIB_BBSDB = libbbsdb
+
+DynamicCLibrary($(LIB_BBSDB), $(LIB_BBSDB_SOURCES))
+
+
+LDFLAGS += -L . -lbbsdb
+
+BBS_CLIENT = bbs
+BBS_CLIENT_SOURCES[] = bbs
+
+BOARD_DAEMON = boardd
+BOARD_DAEMON_SOURCES[] = boardd
+
+BOARD_TEST = t
+BOARD_TEST_SOURCES[] = t
+
+CProgram($(BBS_CLIENT), $(BBS_CLIENT_SOURCES))
+CProgram($(BOARD_DAEMON), $(BOARD_DAEMON_SOURCES))
+CProgram($(BOARD_TEST), $(BOARD_TEST_SOURCES))
+
+$(BBS_CLIENT)$(EXE): $(LIB_BBSDB)$(EXT_DLL)
+$(BOARD_DAEMON)$(EXE): $(LIB_BBSDB)$(EXT_DLL)
+$(BOARD_TEST)$(EXE): $(LIB_BBSDB)$(EXT_DLL)
+
+all: $(BBS_CLIENT)$(EXE) $(BOARD_DAEMON)$(EXE) $(BOARD_TEST)$(EXE)
+
+test: $(BOARD_TEST)$(EXE)
+	rm -rf ./for_test/
+	./dotest
+
+clean:
+	rm -rf *.o *~ for_test $(BBS_CLIENT)$(EXE) $(BOARD_DAEMON)$(EXE)	\
+		$(BOARD_TEST)$(EXE) $(LIB_BBSDB)$(EXT_DLL)
+
+distclean: clean
+	rm -f *.omc
+

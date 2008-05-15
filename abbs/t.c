@@ -119,7 +119,7 @@ test_board_add_article(const char* file)
     assert(NULL != board);
 
     for (i = 0; i < sizeof(ids)/sizeof(uint32_t); ++i) {
-        article = board_add_article(board, 0, 0, author, title, filename);
+        article = board_add_article(board, author, title, filename);
         assert(NULL != article && 0 != article_get_id(article));
         ids[i] = article_get_id(article);
     }
