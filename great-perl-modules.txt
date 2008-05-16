@@ -5,6 +5,7 @@ Clone
 Cwd
 Data::Dumper
 DBI
+Class::DBI
 DBIx::Class
 Rose::DB::Object
 DBIx::Simple
@@ -198,6 +199,8 @@ HTML::Seamstress
 
 Filter::Simple
 Filter::Util::Call
+
+POE
 
 http://www.perlfoundation.org/perl5/index.cgi?recommended_cpan_modules
 

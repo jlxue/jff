@@ -4,10 +4,10 @@ The Ultima Code - The Impossible Mission
 uIP, lwIP
 Apache Lucene
 LLVM, Parrot, PyPy, Psyco, IronPython
-Ikarus, Chez Scheme, Larceny,MIT/GNU Scheme
+Ikarus Scheme, Chez Scheme, Larceny,MIT/GNU Scheme
 apache, lighttpd, nginx, shttpd, squid, haproxy, lighty, tomcat
 exim4/postfix
-Cindy, Grazzy, Mina
+Java NIO framework: Cindy, Grazzy, Apache Mina, www.quickserver.org, grizzly.dev.java.net
 Linux, OpenSolaris, NetBSD, FreeBSD, OpenBSD, DragonFlyBSD
 Minix3, eCos, Plan9
 vim, emacs
