@@ -47,7 +47,7 @@ Sys::Mmap
 PAR::Packer
 DateTime
 Date::Calc
-Date::Manip (å¤ªåºå¤§ï¼Œä¸æ¨è)
+Date::Manip (Ì«ÅÓ´ó£¬²»ÍÆ¼ö)
 Data::FormValidator
 Params::Validate
 Path::Class
@@ -67,7 +67,7 @@ HOP::Lexer
 Markdown
 Template::Extract
 
-Parse::RecDescent   (ä¸æ¨èï¼Œå¤ªæ…¢)
+Parse::RecDescent   (²»ÍÆ¼ö£¬Ì«Âı)
 Parse::Yapp
 Parse::Eyapp
 perl-byacc
@@ -77,17 +77,18 @@ http://packages.debian.org/lemon    thread safer parser generator
 
 Win32::AdminMisc
 Win32::FileOp
-BerkeleyDB (æ¯” DB_File çš„æ¥å£æ›´å…¨é¢)
+BerkeleyDB (±È DB_File µÄ½Ó¿Ú¸üÈ«Ãæ)
 
 
-XML æ“ä½œï¼š
+XML ²Ù×÷£º
 XML::Simple
 XML::Twig
 XML::Rules
 XML::LibXML
-ä¸æ¨èç”¨ XML::Parser, XML::XPath, XML::DOM, æ¨èç”¨ XML::LibXMLã€‚
+²»ÍÆ¼öÓÃ XML::Parser, XML::XPath, XML::DOM, ÍÆ¼öÓÃ XML::LibXML¡£
 
 
+Class::Struct
 Moose
 
 Test::More
@@ -119,7 +120,7 @@ Test::Builder::Tester
 Bundle::Test
 
 
-Web æ¡†æ¶ï¼š
+Web ¿ò¼Ü£º
 Apache::PageKit
 Maypole
 Catalyst
