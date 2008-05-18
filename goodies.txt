@@ -1,7 +1,7 @@
 * Network
 
 http://www.kegel.com/c10k.html
-é«˜æ€§èƒ½ I/O æŠ€æœ¯
+¸ßĞÔÄÜ I/O ¼¼Êõ
 
 http://www.ibm.com/developerworks/linux/library/l-async/
 Boost application performance using asynchronous I/O
@@ -14,7 +14,7 @@ http://lucene.apache.org/hadoop
 http://www.gridgain.com/
 
 http://blog.csdn.net/guxianga/archive/2007/09/19/1791131.aspx
-å¤§å‹Web2.0ç«™ç‚¹æ„å»ºæŠ€æœ¯åˆæ¢: Flickr, YouTube, mixi.jp, Technorati,
+´óĞÍ Web 2.0 Õ¾µã¹¹½¨¼¼Êõ³õÌ½: Flickr, YouTube, mixi.jp, Technorati,
 MySpace, LiveJournal
 
 
@@ -62,7 +62,7 @@ Top 100 Network Security Tools
 * Input Method
 
 http://openvanilla.org/oldwiki/zh/index.php?title=ChineseInformationProcessing
-è¾“å…¥æ³•èµ„æ–™
+ÊäÈë·¨×ÊÁÏ
 
 http://risujin.org/cellwriter/
 Handwriting recognization
@@ -98,7 +98,7 @@ http://www.sbin.org/doc/Xlib/
 Xlib Programming Manual (O'Reilly &amp; Associates, Inc.)
 
 http://blog.csdn.net/absurd/category/336948.aspx
-Absurd's blog: X Window ç ”ç©¶
+Absurd's blog: X Window ÑĞ¾¿
 
 http://www.kdecn.org
 http://www.qtcn.org (124.254.42.10)
@@ -119,8 +119,8 @@ http://www.openhandsetalliance.com/android_overview.html
 http://www.openzaurus.org
 Zaurus PDA
 
-http://www.angstrom-distribution.org/ (OpenZaurus é¡¹ç›®çš„åç»§ï¼‰
-iPAQ, Zaurus, Palm ç­‰ PDA
+http://www.angstrom-distribution.org/ (OpenZaurus ÏîÄ¿µÄºó¼Ì£©
+iPAQ, Zaurus, Palm µÈ PDA
 
 http://alp.access-company.com/
 
@@ -131,7 +131,7 @@ Limo
 * Software
 
 http://www.cgsecurity.org/wiki/TestDisk
-TestDisk: ä¿®å¤åˆ†åŒºè¡¨ã€å¼•å¯¼æ‰‡åŒº
+TestDisk: ĞŞ¸´·ÖÇø±í¡¢Òıµ¼ÉÈÇø
 
 http://www.octave.org
 http://www.scilab.org
@@ -182,7 +182,7 @@ http://debaday.debian.net/
 http://lists.debian.org/completeindex.html
 
 http://alioth.debian.org
-http://(git|hg|bzr|svn|cvs|darcs|arch).debian.orgã€‚
+http://(git|hg|bzr|svn|cvs|darcs|arch).debian.org¡£
 
 http://lists.debian.org
 http://lists.alioth.debian.org
@@ -199,4 +199,12 @@ http://www.debian.org/doc/manuals/project-history/index.en.html
 http://packages.debian.org
 http://www.debian.org/distrib/packages
 http://packages.qa.debian.org
+
+
+* Java
+
+EasyMock/JMock, JUnit/TestNG, HttpUnit, DbUnit, Cargo,
+Selenium: ¿ØÖÆä¯ÀÀÆ÷½øĞĞ Web Ó¦ÓÃ²âÊÔ
+CruiseControl, Anthill, Hudson: ³ÖĞø¼¯³É
+STAN, Clover, CheckStyle, FindBugs: ´úÂë¸²¸Ç¡¢ÖÊÁ¿²âÊÔ
 
