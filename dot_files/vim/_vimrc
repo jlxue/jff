@@ -57,7 +57,7 @@ inoremap <F5> <ESC>:set paste<CR>"+p:set nopaste<CR>i
 vnoremap <F6> "+y
 
 " Let F7 to show buf explorer(bufexplorer plugin)
-noremap <F7> <ESC>\be
+map <F7> <ESC>\be
 
 " Define g:qb_hotkey before source qbuf.vim
 let g:qb_hotkey="<S-F7>"
@@ -182,10 +182,12 @@ set listchars+=extends:>,precedes:<
 
 set updatetime=2000
 "--------------------------------------for autocmd and filetype------------------
-filetype on
+syntax on
 filetype plugin on
 filetype indent on
-syntax on
+
+" press v in quickfix window to preview
+au FileType qf :nnoremap <buffer> v <Enter>zz:wincmd p<Enter>
 
 " for gf command to open java source file at import clause
 au FileType java :set suffixesadd+=.java
