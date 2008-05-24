@@ -2275,9 +2275,25 @@ function! s:Tlist_Process_File(filename, ftype)
         " Contributed by: David Fishburn.
         let s:taglist_tempfile = fnamemodify(tempname(), ':h') .
                     \ '\taglist.cmd'
-        exe 'redir! > ' . s:taglist_tempfile
-        silent echo ctags_cmd
-        redir END
+        "Andrew modify start 2007-12-28
+        "get current codepage by using 'chcp' 
+        if executable("chcp")
+          let code_page = matchstr(system("chcp"), "\\d\\+")
+          let ctags_cmd = iconv(ctags_cmd, &encoding, code_page)
+        endif
+        "write cmd into file using writefile() instead of redir
+        "as redir can't handle file encoding correctly
+        let s:ctags_cmd_list = [ctags_cmd]
+        if(filereadable(s:taglist_tempfile))
+          call delete(s:taglist_tempfile)
+        endif
+        call s:Tlist_Log_Msg('andrew write into file ' . s:taglist_tempfile . ' now')
+        call writefile(s:ctags_cmd_list, s:taglist_tempfile, "b")
+        "exe 'redir! > ' . s:taglist_tempfile
+        "silent echo "\n"  
+        "silent echo ctags_cmd
+        "redir END
+        "Andrew modify end 2007-12-28
 
         call s:Tlist_Log_Msg('Cmd inside batch file: ' . ctags_cmd)
         let ctags_cmd = '"' . s:taglist_tempfile . '"'
@@ -2316,6 +2332,13 @@ function! s:Tlist_Process_File(filename, ftype)
         call s:Tlist_Log_Msg('No tags defined in ' . a:filename)
         return fidx
     endif
+
+    "temp add by Andrew 2007-12-29 begin
+    if executable("chcp")
+      let code_page = matchstr(system("chcp"), "\\d\\+")
+      let cmd_output = iconv(cmd_output, code_page, &encoding)
+    endif
+    " temp add by Andrew 2007-12-29 end
 
     call s:Tlist_Log_Msg('Generated tags information for ' . a:filename)
 
