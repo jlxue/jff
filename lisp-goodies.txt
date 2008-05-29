@@ -1,0 +1,55 @@
+http://weitz.de/starter-pack/
+    提供一份 Windows 环境下常用 Lisp 库的打包下载工具，以及一份
+很不错的指导文档。基于 LispWorks Personal Edition。
+
+http://gbbopen.org/
+
+http://www.cl-user.net/
+
+http://common-lisp.net/
+
+http://www.cliki.net/
+
+http://wiki.alu.org/Gardeners_Projects
+
+* 解析数字
+    parse-integer, cl-parse-number
+* 多进程、多线程
+    bordeaux-threads, GBBopen 库里的 portable-threads 更好
+* 文件系统操作
+    cl-fad
+    iolib (http://common-lisp.net/project/iolib/manual/)
+* 图形界面
+    McCLIM
+    wxCL(http://www.wxcl-project.org)
+
+    UI 放在单独进程的做法：
+    ltk (搭配 http://www.equi4.com/tclkit/index.html 单文件 Tcl/Tk)
+    gtk-server (Windows 下需要把 gtk dll 所在目录加入 PATH)
+    foil (http://foil.sf.net)
+
+    clg (http://sourceforge.net/projects/clg)
+    cl-gtk (http://tenkan.org/clgtk/index.html)
+* 网络编程
+    usocket
+* i18n
+    cl-l10n
+* 正则表达式
+    cl-ppcre, terse-ppcre
+* 加密解密
+    iconclad
+* 数据库操作
+    clsql, Elephant
+* 外部接口
+    CFFI
+* 单元测试
+    http://aperiodic.net/phil/archives/Geekery/notes-on-lisp-testing-frameworks.html
+    lisp-unit Stefil FiveAM
+* 内嵌文档，
+    cldoc, albert
+* 高级数据结构（主要是图算法）
+    cl-containers
+* 词法、语法解析
+    cl-lexer, cl-yacc, META
+
+
