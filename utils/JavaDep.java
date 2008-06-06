@@ -50,6 +50,9 @@ public class JavaDep {
                     javaDep.includes.add(args[++i]);
                 } else if (args[i].equals("-x")) {
                     javaDep.excludes.add(args[++i]);
+                } else if (args[i].equals("-h") || args[i].equals("--help")) {
+                    showUsage();
+                    return;
                 } else {
                     classnames.add(args[i]);
                 }
