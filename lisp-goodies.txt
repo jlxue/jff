@@ -29,10 +29,12 @@ http://wiki.alu.org/Gardeners_Projects
     split-sequence
     trivial-features
     s-utils
+    cl-utilities
 * 压缩解压缩
     chipz       decompress
     salza2      compress
     zip
+    archive     tar
 * 解析数字
     parse-integer, cl-parse-number
 * 多进程、多线程
@@ -42,8 +44,10 @@ http://wiki.alu.org/Gardeners_Projects
 * 文件系统操作
     cl-fad
     iolib (http://common-lisp.net/project/iolib/manual/)
+    cl-iolib-posix
     osi-cat
     odd-streams     奇数比特的字节流
+    gzip-stream
 * 图形界面
     McCLIM
     wxCL(http://www.wxcl-project.org)
@@ -88,6 +92,7 @@ http://wiki.alu.org/Gardeners_Projects
     cl-irc
     cl-webdav
     mel-base        Email handling
+    cl-smtp
     net-telnet-date
     Puri            manipulate URI
     rfc2388
@@ -98,6 +103,7 @@ http://wiki.alu.org/Gardeners_Projects
     cl-net-snmp
     s-http-client
     s-sysdeps       manage processes, TCP server/client
+    clorb           CORBA
 * i18n
     cl-l10n
     trivial-utf-8
@@ -105,7 +111,7 @@ http://wiki.alu.org/Gardeners_Projects
     cl-ppcre, terse-ppcre
     regex   darcs http://www.foldr.org/~michaelw/projects/regex
 * 加密解密
-    iconclad
+    ironclad
     cl-base64
     md5
     s-base64
@@ -138,9 +144,16 @@ http://wiki.alu.org/Gardeners_Projects
     iterate
     redshank            Emacs 宏包，增强 Lisp 编辑模式
     zpb-ttf             parse ttf
+    zpb-exif
     cells               a dataflow extension to CLOS
     clawk
     lisa
+    aspectl
+    cl-plus
+    contextl
+    f2cl
+    paiprolog
+    screamer
 
 * software
     maxima, stumpwm, axiom, acl2, piano, tiburon
