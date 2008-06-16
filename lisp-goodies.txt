@@ -30,11 +30,13 @@ http://wiki.alu.org/Gardeners_Projects
     trivial-features
     s-utils
     cl-utilities
+    Metatilities
+    getopt
 * 压缩解压缩
     chipz       decompress
     salza2      compress
     zip
-    archive     tar
+    archive     tar,cpio
 * 解析数字
     parse-integer, cl-parse-number
 * 多进程、多线程
@@ -61,6 +63,7 @@ http://wiki.alu.org/Gardeners_Projects
     cl-gtk (http://tenkan.org/clgtk/index.html)
 
     graphic-forms       UI library for Windows
+    pixel art library
 * 图形图像
     cl-gd
     adw-charting        simple chart drawing library
@@ -74,6 +77,7 @@ http://wiki.alu.org/Gardeners_Projects
     zpng
     cl-opengl
     cljl                jpeg
+    cl-plplot
 * 网络编程
     usocket
     chunga      RFC 2616, chunked encoding
@@ -97,13 +101,16 @@ http://wiki.alu.org/Gardeners_Projects
     Puri            manipulate URI
     rfc2388
     trivial-gray-streams
-    trivial-sockets
+    trivial-sockets(superseeded by usocket)
+    trivial-https(superseeded by drakma)
+    trivial-http(superseeded by drakma)
     cffi-net
     parse-html
     cl-net-snmp
     s-http-client
     s-sysdeps       manage processes, TCP server/client
     clorb           CORBA
+    Araneida        http server
 * i18n
     cl-l10n
     trivial-utf-8
@@ -118,6 +125,7 @@ http://wiki.alu.org/Gardeners_Projects
 * 数据库操作
     clsql, Elephant
     Postmodern      interact with PostgreSQL
+    cl-couchdb
 * 外部接口
     CFFI
 * 测试
@@ -128,10 +136,11 @@ http://wiki.alu.org/Gardeners_Projects
 * 内嵌文档，
     cldoc, albert
 * 高级数据结构（主要是图算法）
+    cl-graph
     cl-containers
     spatial-trees
 * 词法、语法解析
-    cl-lexer, cl-yacc, META, Zebu
+    cl-lexer, cl-yacc, META, Zebu, FUCC
 * XML
     Closure XML Parser(cxml)
     plexippus-xpath
