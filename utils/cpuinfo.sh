@@ -6,16 +6,22 @@
 }
 cat <<EOF
 # ----------------------------- EXPLANATION -------------------------------
-# physical id   : physical package id
-#   core id     : cpu core id of a processor
-#     processor : id of a processor, represent a processing unit seen by OS
-# cores         : number of cores in the corresponding physical package
-# siblings      : number of processors in the corresponding physical package
-# core siblings : the thread siblings to cpu X in the same core
-# thread siblings : the thread siblings to cpu X in the same physical package
+# physical_id   : Physical package id of the logical CPU
+#   core_id     : Core id of the logical CPU
+#     processor : Id of a logical CPU
+# cores         : Total number of cores in the physical package currently in
+#                 use by the OS
+# siblings      : Total number of logical processors(includes both threads
+#                 and cores) in the physical package currently in use by
+#                 the OS 
+# core_siblings : Siblings mask of all the logical CPUs in a physical package
+# thread_siblings : Siblings mask of all the logical CPUs in a CPU core
 #
 # core and thread siblings are cpu masks, each bit in thread siblings represents
 # a processor.
+#
+# Reference: Multi-core and Linux Kernel, Suresh Siddha
+#
 EOF
 
 physical_id=?
@@ -27,7 +33,7 @@ flags=?
 
 if [ -r /proc/cpuinfo ]; then
     echo    "--------------------------- /proc/cpuinfo ---------------------------"
-    echo -e "physical id   core id   processor   cores   siblings\tflags"
+    echo -e "physical_id   core_id   processor   cores   siblings\tflags"
     while read r ; do
         case $r in
         physical*)
@@ -66,7 +72,7 @@ fi
 
 if [ -d /sys/devices/system/cpu ]; then
     echo    "----------------------- /sys/devices/system/cpu/ --------------------"
-    echo -e "physical id   core id   processor   core_siblings\tthread_siblings"
+    echo -e "physical_id   core_id   processor   core_siblings\tthread_siblings"
     for cpu in /sys/devices/system/cpu/cpu* ; do
         processor=${cpu##*cpu}
         [ -r $cpu/topology/physical_package_id ] || continue
