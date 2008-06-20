@@ -71,9 +71,7 @@ if [ -d /sys/devices/system/cpu ]; then
         physical_id=`cat $cpu/topology/physical_package_id`
         core_id=`cat $cpu/topology/core_id`
         core_siblings=`cat $cpu/topology/core_siblings`
-        core_siblings=`expr $core_siblings + 0`
         thread_siblings=`cat $cpu/topology/thread_siblings`
-        thread_siblings=`expr $thread_siblings + 0`
         echo -e "$physical_id\t      $core_id\t\t$processor\t    $core_siblings\t\t\t$thread_siblings"
     done
 fi
