@@ -1,6 +1,10 @@
 #!/bin/bash
 
-[ -r /proc/cpuinfo -o -d /sys/devices/system/cpu ] && cat <<EOF
+[ -r /proc/cpuinfo -o -d /sys/devices/system/cpu ] || {
+    echo "no /proc/cpuinfo and /sys/devices/system/cpu/ found."
+    exit 1
+}
+cat <<EOF
 # ----------------------------- EXPLANATION -------------------------------
 # physical id   : physical package id
 #   core id     : cpu core id of a processor
@@ -63,12 +67,13 @@ if [ -d /sys/devices/system/cpu ]; then
     echo -e "physical id   core id   processor   core_siblings\tthread_siblings"
     for cpu in /sys/devices/system/cpu/cpu* ; do
         processor=${cpu##*cpu}
+        [ -r $cpu/topology/physical_package_id ] || continue
         physical_id=`cat $cpu/topology/physical_package_id`
         core_id=`cat $cpu/topology/core_id`
         core_siblings=`cat $cpu/topology/core_siblings`
-        core_siblings=${core_siblings#0} 
+        core_siblings=`expr $core_siblings + 0`
         thread_siblings=`cat $cpu/topology/thread_siblings`
-        thread_siblings=${thread_siblings#0}
+        thread_siblings=`expr $thread_siblings + 0`
         echo -e "$physical_id\t      $core_id\t\t$processor\t    $core_siblings\t\t\t$thread_siblings"
     done
 fi
