@@ -11,9 +11,11 @@ cat <<EOF
 #     processor : id of a processor, represent a processing unit seen by OS
 # cores         : number of cores in the corresponding physical package
 # siblings      : number of processors in the corresponding physical package
-# core siblings : number of processors in the corresponding physical package
-# thread siblings : number of processors in the corresponding core
+# core siblings : the thread siblings to cpu X in the same core
+# thread siblings : the thread siblings to cpu X in the same physical package
 #
+# core and thread siblings are cpu masks, each bit in thread siblings represents
+# a processor.
 EOF
 
 physical_id=?
@@ -50,14 +52,14 @@ if [ -r /proc/cpuinfo ]; then
         ;;
         esac
 
-        if [ -z  "$r" ]; then
-        echo -e "$physical_id\t      $core_id\t\t$processor\t    $cores\t    $siblings\t\t$flags"
-        physical_id=?
-        core_id=?
-        processor=?
-        cores=?
-        siblings=?
-        flags=?
+        if [ -z  "$r" -a '?' != $physical_id ]; then
+            echo -e "$physical_id\t      $core_id\t\t$processor\t    $cores\t    $siblings\t\t$flags"
+            physical_id=?
+            core_id=?
+            processor=?
+            cores=?
+            siblings=?
+            flags=?
         fi
     done < /proc/cpuinfo
 fi
@@ -72,7 +74,7 @@ if [ -d /sys/devices/system/cpu ]; then
         core_id=`cat $cpu/topology/core_id`
         core_siblings=`cat $cpu/topology/core_siblings`
         thread_siblings=`cat $cpu/topology/thread_siblings`
-        echo -e "$physical_id\t      $core_id\t\t$processor\t    $core_siblings\t\t\t$thread_siblings"
+        echo -e "$physical_id\t      $core_id\t\t$processor\t    $core_siblings\t\t$thread_siblings"
     done
 fi
 
