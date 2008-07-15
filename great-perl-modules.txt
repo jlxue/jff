@@ -64,6 +64,7 @@ Perl::Tidy
 Perl::Critic
 Text::CSV_XS
 Text::CSV_PP
+Text::CSV::Simple
 HOP::Lexer
 Markdown
 Template::Extract
@@ -159,6 +160,7 @@ List::MoreUtils
 Moose
 
 App::Config
+Config::General
 
 typesafety
 
@@ -203,4 +205,8 @@ Filter::Util::Call
 POE
 
 http://www.perlfoundation.org/perl5/index.cgi?recommended_cpan_modules
+
+Regex::Assemble
+Regex::Common
+Text::Autoformat
 

@@ -111,6 +111,9 @@ http://wiki.alu.org/Gardeners_Projects
     s-sysdeps       manage processes, TCP server/client
     clorb           CORBA
     Araneida        http server
+    cl-memcached
+    weblocks
+    uncommon web
 * i18n
     cl-l10n
     trivial-utf-8

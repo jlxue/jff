@@ -30,7 +30,7 @@
 
 (in-package :cl-user)
 
-(defpackage cl-hello
+(defpackage :cl-hello
   (:nicknames hello)
   (:use :cl)
   (:export :main :*default-name*))
