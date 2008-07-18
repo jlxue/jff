@@ -1,0 +1,16 @@
+syntax: glob
+
+*.o
+bbs
+boardd
+t
+tags
+for_test
+.omake*
+*.omc
+*.a
+*.so
+.sconsign.dblite
+*.os
+test_apdb
+

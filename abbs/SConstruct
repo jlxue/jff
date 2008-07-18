@@ -1,8 +1,12 @@
-SharedLibrary('bbsdb', Split("""
-    board.c
+SharedLibrary('bbs', Split("""
+    apdb.c
+    env.c
     util.c"""))
 
-Program('bbs', 'bbs.c', LIBS=['bbsdb'], LIBPATH='.')
-Program('boardd', 'boardd.c', LIBS=['bbsdb'], LIBPATH='.')
-Program('t', 't.c', LIBS=['bbsdb'], LIBPATH='.')
+SharedLibrary('jail', ['jail.c'], LIBS=['dl'])
+
+Program('boardd', 'boardd.c', LIBS=['bbs'], LIBPATH='.')
+
+Program('test_apdb', 'test_apdb.c', LIBS=['bbs'], LIBPATH='.')
+
 

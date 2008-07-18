@@ -1,0 +1,18 @@
+1. create a file: open(file, O_RDWR | O_CREAT, 0644);
+  * must provide O_CREAT
+  * must provide 0644, or the owner can't read/write it.
+
+2. mmap() return MAP_FAILED not NULL, MAP_FAILED is (void*)-1.
+
+3. git/git-compat-util.h: auto restarted syscalls xread(), xwrite()
+
+4. glibc: bsearch, lsearch, lfind, tsearch, hsearch, insque, remque
+
+5. align_up, align_down
+
+6. linux-2.6/linux/jiffies.h: solve wrap around prolem.
+   time_after(), time_before(), time_after_eq(), time_before_eq()
+
+7. do {...} while (0) if a macro contains more than one clause.
+
+        

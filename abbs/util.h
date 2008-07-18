@@ -10,47 +10,28 @@ extern "C" {
 #endif
 
 
-#define     ERROR(cond, s)          \
-    do {                            \
-        if (cond) {                 \
-            fprintf(stderr, "[%s:%d] " s "\n", __FILE__, __LINE__);     \
-            goto L_error;           \
-        }                           \
-    } while (0)
-
-
-#define     ERRORP(cond, s)         \
-    do {                            \
-        if (cond) {                 \
-            fprintf(stderr, "[%s:%d] " s ": %s\n", __FILE__, __LINE__,  \
-                    strerror(errno));   \
-            goto L_error;           \
-        }                           \
-    } while (0)
-
-
-#define     ERRORV(cond, s, ...)    \
+#define     ERROR_IF(cond, s, ...)  \
     do {                            \
         if (cond) {                 \
             fprintf(stderr, "[%s:%d] " s "\n", __FILE__, __LINE__,      \
-                    __VA_ARGS__);   \
+                    ##__VA_ARGS__); \
             goto L_error;           \
         }                           \
     } while (0)
 
 
-#define     ERRORVP(cond, s, ...)   \
+#define     ERRORP_IF(cond, s, ...) \
     do {                            \
         if (cond) {                 \
             fprintf(stderr, "[%s:%d] " s ": %s\n", __FILE__, __LINE__,  \
-                    __VA_ARGS__, strerror(errno));                      \
+                    ##__VA_ARGS__, strerror(errno));                    \
             goto L_error;           \
         }                           \
     } while (0)
 
 
-#define     DEBUGV(s, ...)      \
-    fprintf(stderr, "[%s:%d] " s "\n", __FILE__, __LINE__, __VA_ARGS__)
+#define     DEBUG(s, ...)      \
+    fprintf(stderr, "[%s:%d] " s "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 
 
 #define     ALIGN_UP(n, a)      (((n) + (a) - 1) & ~((size_t)(a) - 1))
