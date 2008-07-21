@@ -1,7 +1,29 @@
+/*
+ * board - append-only database to store articles of a BBS board
+ *
+ * Copyright (C) 2008 Liu Yubao <yubao.liu@gmail.com>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ *
+ * ChangeLog:
+ *  2008-07-16  Liu Yubao
+ *      * initial version, pass some basic tests
+ *
+ */
 #include <assert.h>
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include <fcntl.h>
 #include <sys/file.h>
@@ -13,10 +35,6 @@
 #include "apdb.h"
 #include "board.h"
 #include "util.h"
-
-
-#define AUTHOR_LEN      32
-#define TITLE_LEN       128
 
 
 typedef struct {
@@ -37,7 +55,7 @@ typedef struct {
     unsigned        pid;        /* id of the replied article                */
     time_t          ctime;      /* time of creation                         */
     time_t          mtime;      /* time of modification                     */
-    char            author[AUTHOR_LEN];
+    char            author[AUTHOR_LEN]; /* can't contains '-', see boardd.c */
     char            title[TITLE_LEN];
 } index_t;
 
@@ -225,7 +243,7 @@ board_reply_end(board_t* board)
 
 
 int
-board_modify_begin(board_t* board, article_t article, unsigned flags,
+board_modify_begin(board_t* board, article_t article,
                    const char* title, size_t article_len)
 {
     const index_t* indexp;
@@ -236,8 +254,6 @@ board_modify_begin(board_t* board, article_t article, unsigned flags,
     len = strlen(title);
     if (len >= TITLE_LEN || 0 == len)
         return -1;
-
-    board_article_set_flags(board, article, flags);
 
     if (-1 == apdb_update_begin(board->db, article, sizeof(data_t) + article_len))
         return -1;

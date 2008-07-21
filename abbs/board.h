@@ -1,9 +1,34 @@
+/*
+ * board - append-only database to store articles of a BBS board
+ *
+ * Copyright (C) 2008 Liu Yubao <yubao.liu@gmail.com>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ */
 #ifndef BOARD_H__
 #define BOARD_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
+#define AUTHOR_LEN      32
+#define TITLE_LEN       128
+
+#define FLAG_POST_CHAR      'n'     /* new      */
+#define FLAG_REPLY_CHAR     'f'     /* follow   */
+#define FLAG_MODIFY_CHAR    'e'     /* edit     */
+#define FLAG_DELETE_CHAR    'd'     /* delete   */
 
 typedef struct board_s board_t;
 
@@ -45,7 +70,7 @@ board_reply_end(board_t* board);
 
 
 int
-board_modify_begin(board_t* board, article_t article, unsigned flags,
+board_modify_begin(board_t* board, article_t article,
                    const char* title, size_t article_len);
 
 

@@ -27,7 +27,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
  * ChangeLog:
  *  2008-07-17  Liu Yubao
@@ -35,6 +35,7 @@
  *        open64(), creat(), creat64(), mkdir(), rmdir(), opendir(),
  *        execve()
  *      * remove duplicate code, make parse_env() more robust
+ *
  */
 
 #define _GNU_SOURCE
@@ -225,7 +226,7 @@ __attribute__((constructor)) void initialize(void)
     LOOKUP_SYMBOL(open);
     LOOKUP_SYMBOL(open64);
     LOOKUP_SYMBOL(mkdir);
-    LOOKUP_SYMBOL(rmdir); 
+    LOOKUP_SYMBOL(rmdir);
     LOOKUP_SYMBOL(opendir);
 
     DBG("leave\n");

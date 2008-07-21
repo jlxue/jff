@@ -1,24 +1,24 @@
 /*
- * apdb - an append-only record database
- *        
+ * apdb - append-only record database
+ *
  * Copyright (C) 2008 Liu Yubao <yubao.liu@gmail.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  *
  * ChangeLog:
  *  2008-07-16  Liu Yubao
  *      * initial version, pass some basic tests
+ *
  */
-
 
 /* #define _FILE_OFFSET_BITS       64 */
 
@@ -193,7 +193,7 @@ apdb_open(const char* path, char mode, size_t index_content_len)
     ERRORP_IF(MAP_FAILED == db->data_mmap, "failed to mmap data file");
 
     db->data_file_len = st.st_size;
-    
+
 
     /*
      * check data file
@@ -313,7 +313,7 @@ remap_data_file(apdb_t* db, off_t to)
     if (db->data_mmap_len < db->data_file_len) {
         ERRORP_IF(-1 == munmap(db->data_mmap, db->data_mmap_len),
                   "failed to munmap");
-        
+
         db->data_mmap_len = db->data_file_len + DATA_EXPAND_SIZE;
 
         /* always mmap to read  */
@@ -348,7 +348,7 @@ remap_index_file(apdb_t* db, off_t to)
     if (db->index_mmap_len < db->index_file_len) {
         ERRORP_IF(-1 == munmap(db->index_mmap, db->index_mmap_len),
                   "failed to munmap");
-        
+
         db->index_mmap_len = db->index_file_len + INDEX_EXPAND_SIZE;
 
         /* mmap PROT_READ for client and PROT_READ | PROT_WRITE for server */
@@ -483,7 +483,7 @@ apdb_add_end(apdb_t* db, const void* content)
 {
     index_t index, *indexp;
     int content_len;
-    
+
     assert(NULL != db && ADD == db->action && CAN_WRITE(db) &&
            db->next_length == db->next_written);
 
@@ -912,7 +912,7 @@ apdb_record_set_index(apdb_t* db, apdb_record_t record, void* content)
     index->flags &= ~WRITING;
 
     return 0;
-    
+
 #if 0
 L_error:
     db->error = -1;

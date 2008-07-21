@@ -2,11 +2,11 @@ SharedLibrary('bbs', Split("""
     apdb.c
     board.c
     env.c
-    util.c"""))
+    util.c"""), CFLAGS=['-Wall', '-g'])
 
 SharedLibrary('jail', ['jail.c'], LIBS=['dl'])
 
-Program('boardd', 'boardd.c', LIBS=['bbs'], LIBPATH='.')
+Program('boardd', 'boardd.c', CFLAGS=['-Wall', '-g'], LIBS=['bbs', 'ev'], LIBPATH='.')
 
 Program('test_apdb', 'test_apdb.c', LIBS=['bbs'], LIBPATH='.')
 
