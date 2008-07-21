@@ -23,7 +23,9 @@
 * create a file "d_10-23" to delete article, "a_xxxx" to add article.
   use inotify to listen event.
 
-* libev!!, libevent, libnotify, inotify!!, dnotify, gamin!!, fam
+* libev, libevent, libnotify, inotify
+* ncursesw, slang, libcdk, newt
 
 * minimize fstat() calls
 * boardd doesn't require mmap()
+* self auto adaptive second level index for index_t

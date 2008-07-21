@@ -41,6 +41,7 @@
 #define GUARD               0xDEADBEEF
 #define INDEX_EXPAND_SIZE   4096
 #define DATA_EXPAND_SIZE    (1024 * 1024 * 2)
+#define ALIGN_SIZE          8
 
 #ifndef O_NOATIME
 #define O_NOATIME           0
@@ -55,6 +56,9 @@
 #define INDEX_TO_RECORD(db, index)  \
     ((char*)(index) - (char*)(db)->index_mmap)
 
+#define CAN_WRITE(db)   (PROT_WRITE == (PROT_WRITE & db->prot))
+
+
 /*
  * actions that can't finish quickly
  */
@@ -67,6 +71,7 @@ typedef enum {
 
 typedef struct {
     unsigned    guard;
+    unsigned    flags;
     unsigned    id;
     size_t      length;     /* length of content */
     char        content[];
@@ -98,10 +103,11 @@ struct apdb_s {
     int         error;
 
     action_t    action;
-    unsigned    next_id;
-    size_t      next_length;
-    size_t      next_offset;
-    apdb_record_t next_record;
+    unsigned    next_id;        /* id of the new record being added     */
+    size_t      next_length;    /* length of data content               */
+    size_t      next_offset;    /* offset of data_t in data file        */
+    size_t      next_written;   /* how much content has been written    */
+    apdb_record_t next_record;  /* the record being updated             */
 };
 
 
@@ -199,7 +205,8 @@ apdb_open(const char* path, char mode, size_t index_content_len)
 
         data = (data_t*)db->data_mmap;
         ERROR_IF(GUARD != data->guard || 0 != data->id ||
-                 st.st_size < sizeof(data_t) + data->length,
+                 st.st_size < ALIGN_UP(sizeof(data_t) + data->length,
+                                       ALIGN_SIZE),
                  "corrupted header record");
     }
 
@@ -243,7 +250,8 @@ apdb_open(const char* path, char mode, size_t index_content_len)
         index = RECORD_TO_INDEX(db, (count - 1) * db->index_len);
         ERROR_IF(GUARD != index->guard, "corrupted tailer index");
 
-        ERROR_IF(db->data_file_len < index->offset + index->length,
+        ERROR_IF(db->data_file_len < ALIGN_UP(index->offset + index->length,
+                                              ALIGN_SIZE),
                  "corrupted tailer record");
     }
 
@@ -288,11 +296,14 @@ apdb_close(apdb_t* db)
 
 
 static void
-remap_data_file(apdb_t* db)
+remap_data_file(apdb_t* db, off_t to)
 {
     struct stat st;
 
     assert(NULL != db);
+
+    if (to > 0 && to <= db->data_mmap_len)
+        return;
 
     ERRORP_IF(-1 == fstat(db->data_fd, &st),
               "failed to fstat");
@@ -304,6 +315,8 @@ remap_data_file(apdb_t* db)
                   "failed to munmap");
         
         db->data_mmap_len = db->data_file_len + DATA_EXPAND_SIZE;
+
+        /* always mmap to read  */
         db->data_mmap = mmap(NULL, db->data_mmap_len, PROT_READ,
                               MAP_SHARED, db->data_fd, 0);
         ERRORP_IF(MAP_FAILED == db->data_mmap,
@@ -318,11 +331,14 @@ L_error:
 
 
 static void
-remap_index_file(apdb_t* db)
+remap_index_file(apdb_t* db, off_t to)
 {
     struct stat st;
 
     assert(NULL != db);
+
+    if (to > 0 && to <= db->index_mmap_len)
+        return;
 
     ERRORP_IF(-1 == fstat(db->index_fd, &st),
               "failed to fstat");
@@ -334,6 +350,8 @@ remap_index_file(apdb_t* db)
                   "failed to munmap");
         
         db->index_mmap_len = db->index_file_len + INDEX_EXPAND_SIZE;
+
+        /* mmap PROT_READ for client and PROT_READ | PROT_WRITE for server */
         db->index_mmap = mmap(NULL, db->index_mmap_len, db->prot,
                               MAP_SHARED, db->index_fd, 0);
         ERRORP_IF(MAP_FAILED == db->index_mmap,
@@ -355,19 +373,12 @@ get_next_id(apdb_t* db)
 
     assert(NULL != db);
 
-    remap_index_file(db);
-
-    if (db->error)
-        goto L_error;
-
     if (0 == db->index_file_len)
         return 0;
 
     count = db->index_file_len / db->index_len;
     index = RECORD_TO_INDEX(db, (count - 1) * db->index_len);
-    ERROR_IF(GUARD != index->guard, "corrupted index");
-
-    ERROR_IF(UINT_MAX == index->id, "id overflow");
+    ERROR_IF(GUARD != index->guard || UINT_MAX == index->id, "corrupted index");
 
     return index->id + 1;
 
@@ -381,34 +392,32 @@ int
 apdb_add_begin(apdb_t* db, size_t length)
 {
     data_t data;
-    struct stat st;
 
-    assert(NULL != db && NONE == db->action);
+    assert(NULL != db && NONE == db->action && CAN_WRITE(db));
 
     if (db->error)
         return -1;
 
     db->next_id = get_next_id(db);
-    if (db->error)
+    if (db->error || UINT_MAX == db->next_id /* avoid overflow */)
         return -1;
 
-    ERRORP_IF(-1 == fstat(db->data_fd, &st),
-              "failed to fstat");
-    db->data_file_len = st.st_size;
-
     db->next_length = length;
-    db->next_offset = st.st_size;
+    db->next_offset = db->data_file_len;
+    db->next_written = 0;
 
     data.guard = GUARD;
+    data.flags = 0;
     data.id = db->next_id;
     data.length = length;
 
     ERRORP_IF(sizeof(data_t) != writen(db->data_fd, &data, sizeof(data_t)),
               "failed to write");
 
+    db->data_file_len += sizeof(data_t);
     db->action = ADD;
 
-    return 0;
+    return (int)data.id;
 
 L_error:
     db->error = -1;
@@ -419,15 +428,22 @@ L_error:
 int
 apdb_append_data(apdb_t* db, const void* content, size_t length)
 {
-    assert(NULL != db && (ADD == db->action || UPDATE == db->action));
+    assert(NULL != db && (ADD == db->action || UPDATE == db->action) &&
+           CAN_WRITE(db) && db->next_length - db->next_written >= length);
 
     if (db->error) {
         db->action = NONE;
         return -1;
     }
 
+    ERROR_IF(db->next_length - db->next_written < length,
+             "write more data than expected");
+
     ERRORP_IF(length != writen(db->data_fd, content, length),
               "failed to write");
+
+    db->data_file_len += length;
+    db->next_written += length;
 
     return 0;
 
@@ -438,16 +454,48 @@ L_error:
 }
 
 
+static void
+pad_data_file(apdb_t* db)
+{
+    static char zeros[ALIGN_SIZE] = {'\0'};
+    size_t aligned_data_file_len;
+
+    assert(NULL != db && 0 == db->error);
+
+    aligned_data_file_len = ALIGN_UP(db->data_file_len, ALIGN_SIZE);
+
+    if (aligned_data_file_len > db->data_file_len) {
+        int len = aligned_data_file_len - db->data_file_len;
+        ERRORP_IF(len != writen(db->data_fd, zeros, len),
+                  "failed to pad");
+        db->data_file_len = aligned_data_file_len;
+    }
+
+    return;
+
+L_error:
+    db->error = -1;
+}
+
+
 apdb_record_t
 apdb_add_end(apdb_t* db, const void* content)
 {
     index_t index, *indexp;
     int content_len;
-
-    assert(NULL != db && ADD == db->action);
+    
+    assert(NULL != db && ADD == db->action && CAN_WRITE(db) &&
+           db->next_length == db->next_written);
 
     db->action = NONE;
 
+    if (db->error)
+        return -1;
+
+    ERROR_IF(db->next_length != db->next_written,
+             "write less data than expected");
+
+    pad_data_file(db);
     if (db->error)
         return -1;
 
@@ -464,14 +512,16 @@ apdb_add_end(apdb_t* db, const void* content)
     ERRORP_IF(content_len != writen(db->index_fd, content, content_len),
               "failed to write index content");
 
-    remap_index_file(db);
+    db->index_file_len += db->index_len;
+    remap_index_file(db, db->index_file_len);
+    if (db->error)
+        return -1;
 
     indexp = RECORD_TO_INDEX(db, db->index_file_len - db->index_len);
 
     assert(GUARD == indexp->guard && WRITING == indexp->flags &&
            index.id == indexp->id && index.length == indexp->length &&
-           index.offset == indexp->offset &&
-           0 == memcmp(content, indexp->content, content_len));
+           index.offset == indexp->offset);
 
     indexp->flags = 0;
 
@@ -505,11 +555,16 @@ apdb_get(apdb_t* db, unsigned id)
     if (db->error)
         return -1;
 
-    remap_index_file(db);
+    remap_index_file(db, 0);
     if (db->error)
         return -1;
 
     count = db->index_file_len / db->index_len;
+    if (0 == count)
+        return -1;
+    else if (0 == id)
+        return 0;
+
     key.id = id;
     index = bsearch(&key, db->index_mmap, count, db->index_len,
                     cmp_index_by_id);
@@ -530,7 +585,7 @@ apdb_delete(apdb_t* db, apdb_record_t record)
 {
     index_t* index;
 
-    assert(NULL != db && record >= 0);
+    assert(NULL != db && record >= 0 && CAN_WRITE(db));
 
     index = RECORD_TO_INDEX(db, record);
     assert(GUARD == index->guard);
@@ -544,31 +599,29 @@ apdb_update_begin(apdb_t* db, apdb_record_t record, size_t length)
 {
     index_t* index;
     data_t data;
-    struct stat st;
 
-    assert(NULL != db && record >= 0 && NONE == db->action);
+    assert(NULL != db && record >= 0 && NONE == db->action && CAN_WRITE(db));
 
     if (db->error)
         return -1;
-
-    ERRORP_IF(-1 == fstat(db->data_fd, &st),
-              "failed to fstat");
-    db->data_file_len = st.st_size;
 
     index = RECORD_TO_INDEX(db, record);
     assert(GUARD == index->guard);
 
     db->next_record = record;
     db->next_length = length;
-    db->next_offset = st.st_size;
+    db->next_offset = db->data_file_len;
+    db->next_written = 0;
 
     data.guard = GUARD;
+    data.flags = index->flags;
     data.id = index->id;
     data.length = length;
 
     ERRORP_IF(sizeof(data_t) != writen(db->data_fd, &data, sizeof(data_t)),
               "failed to write");
 
+    db->data_file_len += sizeof(data_t);
     db->action = UPDATE;
 
     return 0;
@@ -584,10 +637,17 @@ apdb_update_end(apdb_t* db, void* content)
 {
     index_t* index;
 
-    assert(NULL != db && UPDATE == db->action);
+    assert(NULL != db && UPDATE == db->action && CAN_WRITE(db));
 
     db->action = NONE;
 
+    if (db->error)
+        return -1;
+
+    ERROR_IF(db->next_length != db->next_written,
+             "write less data than expected");
+
+    pad_data_file(db);
     if (db->error)
         return -1;
 
@@ -606,39 +666,9 @@ apdb_update_end(apdb_t* db, void* content)
 
     return 0;
 
-#if 0
 L_error:
     db->error = -1;
     return -1;
-#endif
-}
-
-
-int
-apdb_update_index(apdb_t* db, apdb_record_t record, void* content)
-{
-    index_t* index;
-
-    assert(NULL != db && record >= 0 && NULL != content && NONE == db->action);
-
-    if (db->error)
-        return -1;
-
-    index = RECORD_TO_INDEX(db, record);
-    assert(GUARD == index->guard);
-
-    index->flags |= WRITING;
-    memcpy(index->content, content, db->index_len - sizeof(index_t));
-
-    index->flags &= ~WRITING;
-
-    return 0;
-    
-#if 0
-L_error:
-    db->error = -1;
-    return -1;
-#endif
 }
 
 
@@ -650,7 +680,7 @@ apdb_count(apdb_t* db)
     if (db->error)
         return 0;
 
-    remap_index_file(db);
+    remap_index_file(db, 0);
     if (db->error)
         return 0;
 
@@ -666,7 +696,7 @@ apdb_first(apdb_t* db)
     if (db->error)
         return -1;
 
-    remap_index_file(db);
+    remap_index_file(db, 2 * db->index_len);
     if (db->error)
         return -1;
 
@@ -695,7 +725,7 @@ apdb_last(apdb_t* db)
     if (db->error)
         return -1;
 
-    remap_index_file(db);
+    remap_index_file(db, 0);
     if (db->error)
         return -1;
 
@@ -731,12 +761,13 @@ apdb_next(apdb_t* db, apdb_record_t record)
     if (db->error)
         return -1;
 
-    remap_index_file(db);
+    next = record + db->index_len;
+
+    remap_index_file(db, next + db->index_len);
     if (db->error)
         return -1;
 
-    next = record + db->index_len;
-    if (db->index_file_len >= next) {
+    if (db->index_file_len >= next + db->index_len) {
         index_t* index = RECORD_TO_INDEX(db, next);
 
         if (GUARD == index->guard) {
@@ -806,20 +837,6 @@ apdb_record_flags(apdb_t* db, apdb_record_t record)
 }
 
 
-off_t
-apdb_record_offset(apdb_t* db, apdb_record_t record)
-{
-    index_t* index;
-
-    assert(NULL != db && record >= 0);
-
-    index = RECORD_TO_INDEX(db, record);
-    assert(GUARD == index->guard);
-
-    return index->offset;
-}
-
-
 size_t
 apdb_record_length(apdb_t* db, apdb_record_t record)
 {
@@ -834,7 +851,7 @@ apdb_record_length(apdb_t* db, apdb_record_t record)
 }
 
 
-void*
+const void*
 apdb_record_data(apdb_t* db, apdb_record_t record)
 {
     index_t* index;
@@ -844,21 +861,21 @@ apdb_record_data(apdb_t* db, apdb_record_t record)
     if (db->error)
         return NULL;
 
-    remap_data_file(db);
-    if (db->error)
-        return NULL;
-
     index = RECORD_TO_INDEX(db, record);
     assert(GUARD == index->guard && index->offset >= 0);
 
     if (sizeof(data_t) == index->length)
         return NULL;
 
+    remap_data_file(db, index->offset + index->length);
+    if (db->error)
+        return NULL;
+
     return (char*)db->data_mmap + index->offset + sizeof(data_t);
 }
 
 
-void*
+const void*
 apdb_record_index(apdb_t* db, apdb_record_t record)
 {
     index_t* index;
@@ -872,5 +889,53 @@ apdb_record_index(apdb_t* db, apdb_record_t record)
         return index->content;
     else
         return NULL;
+}
+
+
+int
+apdb_record_set_index(apdb_t* db, apdb_record_t record, void* content)
+{
+    index_t* index;
+
+    assert(NULL != db && record >= 0 && NULL != content &&
+           NONE == db->action && CAN_WRITE(db));
+
+    if (db->error)
+        return -1;
+
+    index = RECORD_TO_INDEX(db, record);
+    assert(GUARD == index->guard);
+
+    index->flags |= WRITING;
+    memcpy(index->content, content, db->index_len - sizeof(index_t));
+
+    index->flags &= ~WRITING;
+
+    return 0;
+    
+#if 0
+L_error:
+    db->error = -1;
+    return -1;
+#endif
+}
+
+
+int
+apdb_record_set_flags(apdb_t* db, apdb_record_t record, unsigned flags)
+{
+    index_t* index;
+
+    assert(NULL != db && record >= 0 && NONE == db->action && CAN_WRITE(db));
+
+    if (db->error)
+        return -1;
+
+    index = RECORD_TO_INDEX(db, record);
+    assert(GUARD == index->guard);
+
+    index->flags = flags & ~(WRITING | DELETED);
+
+    return 0;
 }
 

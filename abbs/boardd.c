@@ -15,6 +15,8 @@
 
 #define TITLE_LEN       64
 
+typedef int (*cmp_func_t)(const void*, const void*);
+
 static void
 usage(void)
 {
@@ -85,7 +87,7 @@ main(int argc, char** argv)
         } else
             old_mtime = st.st_mtime;
 
-        n = scandir(".", &namelist, NULL, cmp_by_mtime);
+        n = scandir(".", &namelist, NULL, (cmp_func_t)cmp_by_mtime);
         if (n < 0) {
             perror("");
             break;

@@ -3,6 +3,8 @@
 
 #include <errno.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #ifdef __cplusplus
@@ -94,6 +96,30 @@ readn(int fd, void* buf, size_t n);
 
 ssize_t
 writen(int fd, const void* buf, size_t n);
+
+
+typedef struct {
+    char        a;
+    int64_t     b;
+} check_struct_pack_t;
+
+static inline int
+get_struct_pack(void)
+{
+    switch (sizeof(check_struct_pack_t)) {
+    case 9:
+        return 0;       /* pack(1)                  */
+    case 10:
+        return 1;       /* pack(2)                  */
+    case 12:
+        return 2;       /* pack(4)                  */
+    case 16:
+        return 3;       /* pack(8)                  */
+    default:
+        abort();        /* should never reach here  */
+        return 3;
+    }
+}
 
 
 #ifdef __cplusplus

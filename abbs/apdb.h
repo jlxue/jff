@@ -94,13 +94,6 @@ apdb_update_end(apdb_t* db, void* content);
 
 
 /**
- * update only index for a record
- */
-int
-apdb_update_index(apdb_t* db, apdb_record_t record, void* content);
-
-
-/**
  * get count of all records in a database
  */
 unsigned
@@ -150,13 +143,6 @@ apdb_record_flags(apdb_t* db, apdb_record_t record);
 
 
 /**
- * get the offset of a record in data file
- */
-off_t
-apdb_record_offset(apdb_t* db, apdb_record_t record);
-
-
-/**
  * get the length of a record
  */
 size_t
@@ -166,15 +152,29 @@ apdb_record_length(apdb_t* db, apdb_record_t record);
 /**
  * get the data of a record
  */
-void*
+const void*
 apdb_record_data(apdb_t* db, apdb_record_t record);
 
 
 /**
  * get the index of a record
  */
-void*
+const void*
 apdb_record_index(apdb_t* db, apdb_record_t record);
+
+
+/**
+ * update only index for a record
+ */
+int
+apdb_record_set_index(apdb_t* db, apdb_record_t record, void* content);
+
+
+/**
+ * update flags for a record
+ */
+int
+apdb_record_set_flags(apdb_t* db, apdb_record_t record, unsigned flags);
 
 
 #ifdef __cplusplus

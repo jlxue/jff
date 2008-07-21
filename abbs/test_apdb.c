@@ -114,8 +114,8 @@ test_apdb_add_record(const char* file)
     assert(NULL != db);
 
     for (i = 0; i < sizeof(ids)/sizeof(unsigned); ++i) {
-        assert(0 == apdb_add_begin(db, sizeof(content)));
-        assert(0 == apdb_append_data(db, content, sizeof(content)));
+        assert(0 == apdb_add_begin(db, i));
+        assert(0 == apdb_append_data(db, content, i));
         record = apdb_add_end(db, NULL);
         assert(-1 != record && i == apdb_record_id(db, record));
         ids[i] = i;
@@ -135,14 +135,13 @@ test_apdb_add_record(const char* file)
     for (i = 0; i < sizeof(ids)/sizeof(unsigned); ++i) {
         record = apdb_get(db, ids[i]);
         assert(-1 != record);
-        printf("id = %4d offset=%8d length=%4d\n",
+        printf("id = %4d length=%4d\n",
                apdb_record_id(db, record),
-               apdb_record_offset(db, record),
                apdb_record_length(db, record));
         assert(apdb_record_id(db, record) == ids[i] &&
-               apdb_record_length(db, record) == sizeof(content) &&
+               apdb_record_length(db, record) == i &&
                NULL == apdb_record_index(db, record) &&
-               0 == memcmp(content, apdb_record_data(db, record), sizeof(content)));
+               0 == memcmp(content, apdb_record_data(db, record), i));
     }
     fprintf(stderr, "get 256 articles: ok\n");
 

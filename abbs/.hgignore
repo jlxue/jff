@@ -1,16 +1,13 @@
 syntax: glob
 
 *.o
-bbs
-boardd
-t
-tags
-for_test
-.omake*
-*.omc
+*.os
 *.a
 *.so
-.sconsign.dblite
-*.os
+bbs
+boardd
 test_apdb
+for_test
+.sconsign.dblite
+tags
 

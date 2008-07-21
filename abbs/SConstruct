@@ -1,5 +1,6 @@
 SharedLibrary('bbs', Split("""
     apdb.c
+    board.c
     env.c
     util.c"""))
 
