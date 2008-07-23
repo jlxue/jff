@@ -38,10 +38,11 @@
 
 
 typedef struct {
+    unsigned char   header_t_len;
     unsigned short  index_t_len;
     unsigned short  data_t_len;
-    unsigned char   header_t_len;
     unsigned char   int_len;
+    unsigned char   long_len;
     unsigned char   unsigned_len;
     unsigned char   size_t_len;
     unsigned char   off_t_len;
@@ -83,15 +84,25 @@ board_open(const char* path, char mode)
     if (NULL == board)
         return NULL;
 
+    /* 
+     * Because all new articles are added with this temporary index,
+     * by setting the last byte to '\0' we can prvent reader processes
+     * from accessing memory out of range when writer process is
+     * overwriting the author and title fields.
+     */
+    board->next_index.author[AUTHOR_LEN - 1] = '\0';
+    board->next_index.title[TITLE_LEN - 1] = '\0';
+
     board->db = apdb_open(path, mode, sizeof(index_t));
     ERRORP_IF(NULL == board->db, "can't open board: path=%s, mode=%c",
               path, mode);
 
     /* byte order has been checked against 'magic' field in apdb_open() */
+    h.header_t_len = sizeof(header_t);
     h.index_t_len = sizeof(index_t);
     h.data_t_len = sizeof(data_t);
-    h.header_t_len = sizeof(header_t);
     h.int_len = sizeof(int);
+    h.long_len = sizeof(long);
     h.unsigned_len = sizeof(unsigned);
     h.size_t_len = sizeof(size_t);
     h.off_t_len = sizeof(off_t);
@@ -144,13 +155,21 @@ board_close(board_t* board)
 article_t
 board_get(board_t* board, unsigned id)
 {
+    article_t article;
+    unsigned flags;
+
     assert(NULL != board);
 
     /* header record, hidden to the caller  */
     if (0 == id)
         return -1;
 
-    return apdb_get(board->db, id);
+    article = apdb_get(board->db, id);
+    flags = apdb_record_flags(board->db, article);
+    if (flags & (DELETED | WRITING))
+        return -1;
+    else
+        return article;
 }
 
 
@@ -182,6 +201,7 @@ add_begin(board_t* board, unsigned tid, unsigned pid,
         board->next_index.pid = pid;
     }
     board->next_index.ctime = board->next_index.mtime = time(NULL);
+    
     strcpy(board->next_index.author, author);
     strcpy(board->next_index.title, title);
 
@@ -227,7 +247,7 @@ board_reply_begin(board_t* board, article_t article,
     indexp = (const index_t*)apdb_record_index(board->db, article);
 
     tid = indexp->tid;
-    pid = board_article_id(board, article);
+    pid = apdb_record_id(board->db, article);
 
     return add_begin(board, tid, pid, author, title, article_len);
 }
@@ -410,8 +430,7 @@ board_article_title(board_t* board, article_t article)
 int
 board_article_set_title(board_t* board, article_t article, const char* title)
 {
-    const index_t* indexp;
-    index_t index;
+    index_t* indexp;
     size_t len;
 
     assert(NULL != board && NULL != title);
@@ -420,12 +439,17 @@ board_article_set_title(board_t* board, article_t article, const char* title)
     if (len >= TITLE_LEN || 0 == len)
         return -1;
 
-    indexp = (const index_t*)apdb_record_index(board->db, article);
-    memcpy(&index, indexp, sizeof(index_t));
-    index.mtime = time(NULL);
-    strcpy(index.title, title);
+    if (-1 == apdb_record_lock(board->db, article))
+        return -1;
 
-    return apdb_record_set_index(board->db, article, &index);
+    indexp = (index_t*)apdb_record_index(board->db, article);
+
+    strcpy(indexp->title, title);
+    indexp->mtime = time(NULL);
+
+    apdb_record_unlock(board->db, article);
+
+    return 0;
 }
 
 

@@ -47,9 +47,6 @@
 #define O_NOATIME           0
 #endif
 
-#define DELETED             0x1
-#define WRITING             0x2
-
 #define RECORD_TO_INDEX(db, record) \
     ((index_t*)((char*)(db)->index_mmap + (record)))
 
@@ -809,6 +806,64 @@ apdb_previous(apdb_t* db, apdb_record_t record)
 }
 
 
+int
+apdb_for_each(apdb_t* db, apdb_record_t from, apdb_record_t to, unsigned count,
+              int (*op)(apdb_record_t record, unsigned id, unsigned* flags,
+                        size_t length, void* index, void* arg),
+              void* arg)
+{
+    index_t* index;
+    unsigned total;
+    int step;
+
+    assert(NULL != db && from >= 0 && to >= 0 && NULL != op);
+
+    if (db->error)
+        return -1;
+
+    total = from - to;
+    if (total > 0) {
+        remap_index_file(db, from + db->index_len);
+
+        assert(from + db->index_len <= db->index_file_len);
+
+        step = -db->index_len;      /* backwards */
+    } else if (total < 0) {
+        remap_index_file(db, to + db->index_len);
+
+        assert(to + db->index_len <= db->index_file_len);
+
+        total = -total;
+        step = db->index_len;       /* forwards */
+    }
+
+    total += 1;     /* [from, to], not [from, to)   */
+    if (count > total)
+        count = total;
+
+    if (0 == count)
+        return 0;
+
+    index = RECORD_TO_INDEX(db, from);
+    do {
+        if (GUARD != index->guard) {
+            db->error = -1;
+            return -1;
+        }
+
+        if (op(INDEX_TO_RECORD(db, index), index->id, &index->flags,
+                 index->length - sizeof(data_t),
+                 db->index_len > sizeof(index_t) ? index->content : NULL,
+                 arg))
+            break;
+
+        index = (index_t*)((char*)index + step);
+    } while (--count > 0);
+
+    return 0;
+}
+
+
 unsigned
 apdb_record_id(apdb_t* db, apdb_record_t record)
 {
@@ -875,7 +930,7 @@ apdb_record_data(apdb_t* db, apdb_record_t record)
 }
 
 
-const void*
+void*
 apdb_record_index(apdb_t* db, apdb_record_t record)
 {
     index_t* index;
@@ -889,35 +944,6 @@ apdb_record_index(apdb_t* db, apdb_record_t record)
         return index->content;
     else
         return NULL;
-}
-
-
-int
-apdb_record_set_index(apdb_t* db, apdb_record_t record, void* content)
-{
-    index_t* index;
-
-    assert(NULL != db && record >= 0 && NULL != content &&
-           NONE == db->action && CAN_WRITE(db));
-
-    if (db->error)
-        return -1;
-
-    index = RECORD_TO_INDEX(db, record);
-    assert(GUARD == index->guard);
-
-    index->flags |= WRITING;
-    memcpy(index->content, content, db->index_len - sizeof(index_t));
-
-    index->flags &= ~WRITING;
-
-    return 0;
-
-#if 0
-L_error:
-    db->error = -1;
-    return -1;
-#endif
 }
 
 
@@ -937,5 +963,43 @@ apdb_record_set_flags(apdb_t* db, apdb_record_t record, unsigned flags)
     index->flags = flags & ~(WRITING | DELETED);
 
     return 0;
+}
+
+
+int
+apdb_record_lock(apdb_t* db, apdb_record_t record)
+{
+    index_t* index;
+
+    assert(NULL != db && record >= 0 &&
+           NONE == db->action && CAN_WRITE(db));
+
+    if (db->error)
+        return -1;
+
+    index = RECORD_TO_INDEX(db, record);
+    assert(GUARD == index->guard && !(WRITING & index->flags));
+
+    index->flags |= WRITING;
+
+    return 0;
+}
+
+
+void
+apdb_record_unlock(apdb_t* db, apdb_record_t record)
+{
+    index_t* index;
+
+    assert(NULL != db && record >= 0 &&
+           NONE == db->action && CAN_WRITE(db));
+
+    if (db->error)
+        return;
+
+    index = RECORD_TO_INDEX(db, record);
+    assert(GUARD == index->guard && (WRITING & index->flags));
+
+    index->flags &= ~WRITING;
 }
 

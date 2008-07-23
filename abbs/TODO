@@ -24,7 +24,7 @@
   use inotify to listen event.
 
 * libev, libevent, libnotify, inotify
-* ncursesw, slang, libcdk, newt
+* ncursesw, slang, libcdk, libnewt, libstfl-dev, aptitude's libcwidget
 
 * minimize fstat() calls
 * boardd doesn't require mmap()

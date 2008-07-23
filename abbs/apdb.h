@@ -26,6 +26,10 @@ extern "C" {
 #endif
 
 
+#define DELETED             0x1
+#define WRITING             0x2
+
+
 typedef struct apdb_s apdb_t;
 
 typedef off_t apdb_record_t;
@@ -130,6 +134,16 @@ apdb_previous(apdb_t* db, apdb_record_t record);
 
 
 /**
+ * iterate records
+ */
+int
+apdb_for_each(apdb_t* db, apdb_record_t from, apdb_record_t to, unsigned count,
+              int (*op)(apdb_record_t record, unsigned id, unsigned* flags,
+                        size_t length, void* index, void* arg),
+              void* arg);
+
+
+/**
  * get the id of a record
  */
 unsigned
@@ -160,15 +174,8 @@ apdb_record_data(apdb_t* db, apdb_record_t record);
 /**
  * get the index of a record
  */
-const void*
+void*
 apdb_record_index(apdb_t* db, apdb_record_t record);
-
-
-/**
- * update only index for a record
- */
-int
-apdb_record_set_index(apdb_t* db, apdb_record_t record, void* content);
 
 
 /**
@@ -176,6 +183,20 @@ apdb_record_set_index(apdb_t* db, apdb_record_t record, void* content);
  */
 int
 apdb_record_set_flags(apdb_t* db, apdb_record_t record, unsigned flags);
+
+
+/**
+ * set WRITING flag
+ */
+int
+apdb_record_lock(apdb_t* db, apdb_record_t record);
+
+
+/**
+ * clear WRITING flag
+ */
+void
+apdb_record_unlock(apdb_t* db, apdb_record_t record);
 
 
 #ifdef __cplusplus

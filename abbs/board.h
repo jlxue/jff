@@ -25,10 +25,10 @@ extern "C" {
 #define AUTHOR_LEN      32
 #define TITLE_LEN       128
 
-#define FLAG_POST_CHAR      'n'     /* new      */
-#define FLAG_REPLY_CHAR     'f'     /* follow   */
-#define FLAG_MODIFY_CHAR    'e'     /* edit     */
-#define FLAG_DELETE_CHAR    'd'     /* delete   */
+#define FLAG_POST_CHAR      'p'
+#define FLAG_REPLY_CHAR     'r'
+#define FLAG_MODIFY_CHAR    'e'
+#define FLAG_DELETE_CHAR    'd'
 
 typedef struct board_s board_t;
 
