@@ -52,8 +52,8 @@ typedef struct {
 
 
 typedef struct {
-    unsigned        tid;        /* id of the first article on this topic    */
     unsigned        pid;        /* id of the replied article                */
+    unsigned        tid;        /* id of the first article on this topic    */
     time_t          ctime;      /* time of creation                         */
     time_t          mtime;      /* time of modification                     */
     char            author[AUTHOR_LEN]; /* can't contains '-', see boardd.c */
@@ -142,7 +142,8 @@ board_close(board_t* board)
 {
     int ret = 0;
 
-    assert(NULL != board);
+    if (NULL == board)
+        return 0;
 
     ret = apdb_close(board->db);
 
@@ -165,11 +166,70 @@ board_get(board_t* board, unsigned id)
         return -1;
 
     article = apdb_get(board->db, id);
+    if (-1 == article)
+        return -1;
+
     flags = apdb_record_flags(board->db, article);
     if (flags & (DELETED | WRITING))
         return -1;
     else
         return article;
+}
+
+
+article_t
+board_first(board_t* board, unsigned mask)
+{
+    apdb_record_t r;
+
+    assert(NULL != board);
+
+    r = apdb_first(board->db);
+    while (-1 != r && (mask & apdb_record_flags(board->db, r)))
+        r = apdb_next(board->db, r);
+
+    return r;
+}
+
+
+article_t
+board_last(board_t* board, unsigned mask)
+{
+    apdb_record_t r;
+
+    assert(NULL != board);
+
+    r = apdb_last(board->db);
+    while (-1 != r && (mask & apdb_record_flags(board->db, r)))
+        r = apdb_previous(board->db, r);
+
+    return r;
+}
+
+
+article_t
+board_next(board_t* board, article_t a, unsigned mask)
+{
+    assert(NULL != board);
+
+    a = apdb_next(board->db, a);
+    while (-1 != a && (mask & apdb_record_flags(board->db, a)))
+        a = apdb_next(board->db, a);
+
+    return a;
+}
+
+
+article_t
+board_previous(board_t* board, article_t a, unsigned mask)
+{
+    assert(NULL != board);
+
+    a = apdb_previous(board->db, a);
+    while (-1 != a && (mask & apdb_record_flags(board->db, a)))
+        a = apdb_previous(board->db, a);
+
+    return a;
 }
 
 
@@ -305,7 +365,7 @@ board_delete(board_t* board, article_t article)
 {
     assert(NULL != board);
 
-    return apdb_delete(board->db, article);
+    apdb_delete(board->db, article);
 }
 
 
@@ -339,13 +399,13 @@ board_article_length(board_t* board, article_t article)
 const char*
 board_article_content(board_t* board, article_t article)
 {
-    const char* data;
+    const data_t* data;
 
     assert(NULL != board);
 
-    data = (const char*)apdb_record_data(board->db, article);
+    data = (const data_t*)apdb_record_data(board->db, article);
 
-    return data + sizeof(data_t);
+    return data->content;
 }
 
 

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-SRC="apdb.h apdb.c board.h board.c boardd.c env.h env.c jail.c \
-test_apdb.c util.h util.c SConstruct dotest test_boardd.sh \
-test_jail.sh"
+SRC="apdb.h apdb.c board.h board.c bbs.c boardd.c env.h env.c jail.c \
+test_apdb.c util.h util.c SConstruct test_apdb.sh test_boardd.sh \
+test_jail.sh run_bbs.sh run_boardd.sh"
 
 echo $SRC
 

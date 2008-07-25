@@ -28,9 +28,18 @@ extern "C" {
 #endif
 
 
+#if defined(__GNUC__) && (__GNUC__ > 2)
+#define likely(x)	__builtin_expect(!!(x), 1)
+#define unlikely(x)	__builtin_expect(!!(x), 0)
+#else
+#define likely(x)   (x)
+#define unlikely(x) (x)
+#endif
+
+
 #define     ERROR_IF(cond, s, ...)  \
     do {                            \
-        if (cond) {                 \
+        if (unlikely(cond)) {       \
             fprintf(stderr, "[%s:%d] " s "\n", __FILE__, __LINE__,      \
                     ##__VA_ARGS__); \
             goto L_error;           \
@@ -40,7 +49,7 @@ extern "C" {
 
 #define     ERRORP_IF(cond, s, ...) \
     do {                            \
-        if (cond) {                 \
+        if (unlikely(cond)) {       \
             fprintf(stderr, "[%s:%d] " s ": %s\n", __FILE__, __LINE__,  \
                     ##__VA_ARGS__, strerror(errno));                    \
             goto L_error;           \
@@ -65,7 +74,7 @@ extern "C" {
  */
 #define     ADD_TO_MAX_NO_WRAP(a, b, c, m)  \
     do {    \
-        if ((m) - (b) > (c)) (a) = (b) + (c); else (a) = (m);   \
+        if (unlikely((m) - (b) > (c))) (a) = (b) + (c); else (a) = (m);   \
     } while (0)
 
 /*
@@ -73,7 +82,7 @@ extern "C" {
  */
 #define     SUB_TO_MIN_NO_WRAP(a, b, c, m)  \
     do {    \
-        if ((b) - (m) > (c)) (a) = (b) - (c); else (a) = (m);   \
+        if (unlikely((b) - (m) > (c))) (a) = (b) - (c); else (a) = (m);   \
     } while (0)
 
 

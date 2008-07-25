@@ -22,8 +22,8 @@ extern "C" {
 #endif
 
 
-#define AUTHOR_LEN      32
-#define TITLE_LEN       128
+#define AUTHOR_LEN      16
+#define TITLE_LEN       64
 
 #define FLAG_POST_CHAR      'p'
 #define FLAG_REPLY_CHAR     'r'
@@ -45,6 +45,22 @@ board_close(board_t* board);
 
 article_t
 board_get(board_t* board, unsigned id);
+
+
+article_t
+board_first(board_t* board, unsigned mask);
+
+
+article_t
+board_last(board_t* board, unsigned mask);
+
+
+article_t
+board_next(board_t* board, article_t article, unsigned mask);
+
+
+article_t
+board_previous(board_t* board, article_t article, unsigned mask);
 
 
 int

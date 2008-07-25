@@ -6,7 +6,12 @@ SharedLibrary('bbs', Split("""
 
 SharedLibrary('jail', ['jail.c'], LIBS=['dl'])
 
-Program('boardd', 'boardd.c', CFLAGS=['-Wall', '-g'], LIBS=['bbs', 'ev'], LIBPATH='.')
+Program('boardd', 'boardd.c',
+        CFLAGS=Split("-Wall -g"), LIBS=Split("bbs ev"), LIBPATH='.')
+
+Program('bbs', 'bbs.c',
+        CFLAGS=Split("-Wall -g"), LIBS=Split("bbs readline"),
+        LIBPATH='.')
 
 Program('test_apdb', 'test_apdb.c', LIBS=['bbs'], LIBPATH='.')
 

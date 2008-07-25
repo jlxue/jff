@@ -178,6 +178,7 @@ apdb_open(const char* path, char mode, size_t index_content_len)
     }
 
     free(fullpath);
+    fullpath = NULL;
 
 
     /*
@@ -269,7 +270,8 @@ apdb_close(apdb_t* db)
 {
     int ret = 0;
 
-    assert(NULL != db);
+    if (NULL == db)
+        return 0;
 
     if (MAP_FAILED != db->data_mmap)
         ret = munmap(db->data_mmap, db->data_mmap_len);
@@ -299,7 +301,11 @@ remap_data_file(apdb_t* db, off_t to)
 
     assert(NULL != db);
 
-    if (to > 0 && to <= db->data_mmap_len)
+    /*
+     * don't have to be to <= db->data_file_len, because
+     * we don't use data_file_len to calculate count of records.
+     */
+    if (to <= db->data_mmap_len)
         return;
 
     ERRORP_IF(-1 == fstat(db->data_fd, &st),
@@ -334,7 +340,12 @@ remap_index_file(apdb_t* db, off_t to)
 
     assert(NULL != db);
 
-    if (to > 0 && to <= db->index_mmap_len)
+    /*
+     * can't be to <= db->index_mmap_len, because st_size
+     * can be changed by writer process and reader processes
+     * use index_file_len to calculate count of records.
+     */
+    if (to <= db->index_file_len)
         return;
 
     ERRORP_IF(-1 == fstat(db->index_fd, &st),
@@ -509,8 +520,7 @@ apdb_add_end(apdb_t* db, const void* content)
     ERRORP_IF(content_len != writen(db->index_fd, content, content_len),
               "failed to write index content");
 
-    db->index_file_len += db->index_len;
-    remap_index_file(db, db->index_file_len);
+    remap_index_file(db, db->index_file_len + db->index_len);
     if (db->error)
         return -1;
 
@@ -552,7 +562,7 @@ apdb_get(apdb_t* db, unsigned id)
     if (db->error)
         return -1;
 
-    remap_index_file(db, 0);
+    remap_index_file(db, SIZE_MAX);
     if (db->error)
         return -1;
 
@@ -677,7 +687,7 @@ apdb_count(apdb_t* db)
     if (db->error)
         return 0;
 
-    remap_index_file(db, 0);
+    remap_index_file(db, SIZE_MAX);
     if (db->error)
         return 0;
 
@@ -722,7 +732,7 @@ apdb_last(apdb_t* db)
     if (db->error)
         return -1;
 
-    remap_index_file(db, 0);
+    remap_index_file(db, SIZE_MAX);
     if (db->error)
         return -1;
 
@@ -806,6 +816,7 @@ apdb_previous(apdb_t* db, apdb_record_t record)
 }
 
 
+#if 0   /* awful API */
 int
 apdb_for_each(apdb_t* db, apdb_record_t from, apdb_record_t to, unsigned count,
               int (*op)(apdb_record_t record, unsigned id, unsigned* flags,
@@ -862,6 +873,7 @@ apdb_for_each(apdb_t* db, apdb_record_t from, apdb_record_t to, unsigned count,
 
     return 0;
 }
+#endif
 
 
 unsigned

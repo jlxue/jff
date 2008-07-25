@@ -66,7 +66,8 @@ boardd_close(boardd_t* boardd)
     unsigned i;
     int ret = 0;
 
-    assert(NULL != boardd);
+    if (NULL == boardd)
+        return 0;
 
     if (NULL == boardd->db_paths || NULL == boardd->pool_dirs ||
             NULL == boardd->boards || NULL == boardd->wds)

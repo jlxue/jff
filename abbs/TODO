@@ -29,3 +29,6 @@
 * minimize fstat() calls
 * boardd doesn't require mmap()
 * self auto adaptive second level index for index_t
+
+* write test case with perl's test any protocol.
+

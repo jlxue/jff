@@ -114,7 +114,7 @@ test_apdb_add_record(const char* file)
     assert(NULL != db);
 
     for (i = 0; i < sizeof(ids)/sizeof(unsigned); ++i) {
-        assert(0 == apdb_add_begin(db, i));
+        assert(i == apdb_add_begin(db, i));
         assert(0 == apdb_append_data(db, content, i));
         record = apdb_add_end(db, NULL);
         assert(-1 != record && i == apdb_record_id(db, record));

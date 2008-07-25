@@ -133,6 +133,7 @@ apdb_record_t
 apdb_previous(apdb_t* db, apdb_record_t record);
 
 
+#if 0   /* awful API... */
 /**
  * iterate records
  */
@@ -141,6 +142,7 @@ apdb_for_each(apdb_t* db, apdb_record_t from, apdb_record_t to, unsigned count,
               int (*op)(apdb_record_t record, unsigned id, unsigned* flags,
                         size_t length, void* index, void* arg),
               void* arg);
+#endif
 
 
 /**
