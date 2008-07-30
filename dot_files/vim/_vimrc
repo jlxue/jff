@@ -57,7 +57,7 @@ inoremap <F5> <ESC>:set paste<CR>"+p:set nopaste<CR>i
 vnoremap <F6> "+y
 
 " Let F7 to show buf explorer(bufexplorer plugin)
-map <F7> <ESC>\be
+noremap <F7> <ESC>\be
 
 " Define g:qb_hotkey before source qbuf.vim
 let g:qb_hotkey="<S-F7>"

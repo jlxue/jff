@@ -1,0 +1,21 @@
+[ui]
+username = dieken
+
+[extensions]
+extdiff =
+
+[extdiff]
+cmd.cdiff = colordiff
+opts.cdiff = -pu
+
+cmd.ydiff = colordiff
+opts.ydiff = -y
+
+cmd.vdiff = vim
+opts.vdiff = -d
+
+cmd.gvdiff = gvim
+opts.gvdiff = -f -d
+
+cmd.kdiff = kdiff3
+
