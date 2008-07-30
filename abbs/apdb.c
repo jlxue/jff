@@ -380,6 +380,8 @@ get_next_id(apdb_t* db)
     index_t* index;
 
     assert(NULL != db);
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     if (0 == db->index_file_len)
         return 0;
@@ -402,6 +404,8 @@ apdb_add_begin(apdb_t* db, size_t length)
     data_t data;
 
     assert(NULL != db && NONE == db->action && CAN_WRITE(db));
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     if (db->error)
         return -1;
@@ -438,6 +442,8 @@ apdb_append_data(apdb_t* db, const void* content, size_t length)
 {
     assert(NULL != db && (ADD == db->action || UPDATE == db->action) &&
            CAN_WRITE(db) && db->next_length - db->next_written >= length);
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     if (db->error) {
         db->action = NONE;
@@ -469,6 +475,8 @@ pad_data_file(apdb_t* db)
     size_t aligned_data_file_len;
 
     assert(NULL != db && 0 == db->error);
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     aligned_data_file_len = ALIGN_UP(db->data_file_len, ALIGN_SIZE);
 
@@ -494,6 +502,8 @@ apdb_add_end(apdb_t* db, const void* content)
 
     assert(NULL != db && ADD == db->action && CAN_WRITE(db) &&
            db->next_length == db->next_written);
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     db->action = NONE;
 
@@ -558,6 +568,8 @@ apdb_get(apdb_t* db, unsigned id)
     index_t  key;
 
     assert(NULL != db);
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     if (db->error)
         return -1;
@@ -593,6 +605,8 @@ apdb_delete(apdb_t* db, apdb_record_t record)
     index_t* index;
 
     assert(NULL != db && record >= 0 && CAN_WRITE(db));
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     index = RECORD_TO_INDEX(db, record);
     assert(GUARD == index->guard);
@@ -608,6 +622,8 @@ apdb_update_begin(apdb_t* db, apdb_record_t record, size_t length)
     data_t data;
 
     assert(NULL != db && record >= 0 && NONE == db->action && CAN_WRITE(db));
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     if (db->error)
         return -1;
@@ -645,6 +661,8 @@ apdb_update_end(apdb_t* db, void* content)
     index_t* index;
 
     assert(NULL != db && UPDATE == db->action && CAN_WRITE(db));
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     db->action = NONE;
 
@@ -683,6 +701,8 @@ unsigned
 apdb_count(apdb_t* db)
 {
     assert(NULL != db);
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     if (db->error)
         return 0;
@@ -699,6 +719,8 @@ apdb_record_t
 apdb_first(apdb_t* db)
 {
     assert(NULL != db);
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     if (db->error)
         return -1;
@@ -728,6 +750,8 @@ apdb_last(apdb_t* db)
     unsigned count;
 
     assert(NULL != db);
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     if (db->error)
         return -1;
@@ -764,6 +788,8 @@ apdb_next(apdb_t* db, apdb_record_t record)
     apdb_record_t next;
 
     assert(NULL != db && record >= 0);
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     if (db->error)
         return -1;
@@ -796,6 +822,8 @@ apdb_previous(apdb_t* db, apdb_record_t record)
     index_t* index;
 
     assert(NULL != db && record >= 0);
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     if (db->error)
         return -1;
@@ -882,6 +910,8 @@ apdb_record_id(apdb_t* db, apdb_record_t record)
     index_t* index;
 
     assert(NULL != db && record >= 0);
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     index = RECORD_TO_INDEX(db, record);
     assert(GUARD == index->guard);
@@ -896,6 +926,8 @@ apdb_record_flags(apdb_t* db, apdb_record_t record)
     index_t* index;
 
     assert(NULL != db && record >= 0);
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     index = RECORD_TO_INDEX(db, record);
     assert(GUARD == index->guard);
@@ -910,6 +942,8 @@ apdb_record_length(apdb_t* db, apdb_record_t record)
     index_t* index;
 
     assert(NULL != db && record >= 0);
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     index = RECORD_TO_INDEX(db, record);
     assert(GUARD == index->guard);
@@ -924,6 +958,8 @@ apdb_record_data(apdb_t* db, apdb_record_t record)
     index_t* index;
 
     assert(NULL != db && record >= 0);
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     if (db->error)
         return NULL;
@@ -948,6 +984,8 @@ apdb_record_index(apdb_t* db, apdb_record_t record)
     index_t* index;
 
     assert(NULL != db && record >= 0);
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     index = RECORD_TO_INDEX(db, record);
     assert(GUARD == index->guard);
@@ -965,6 +1003,8 @@ apdb_record_set_flags(apdb_t* db, apdb_record_t record, unsigned flags)
     index_t* index;
 
     assert(NULL != db && record >= 0 && NONE == db->action && CAN_WRITE(db));
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     if (db->error)
         return -1;
@@ -985,6 +1025,8 @@ apdb_record_lock(apdb_t* db, apdb_record_t record)
 
     assert(NULL != db && record >= 0 &&
            NONE == db->action && CAN_WRITE(db));
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     if (db->error)
         return -1;
@@ -1005,6 +1047,8 @@ apdb_record_unlock(apdb_t* db, apdb_record_t record)
 
     assert(NULL != db && record >= 0 &&
            NONE == db->action && CAN_WRITE(db));
+    assert(db->data_file_len <= db->data_mmap_len &&
+           db->index_file_len <= db->index_mmap_len);
 
     if (db->error)
         return;
