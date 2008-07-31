@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libbbs.la
+lib_LTLIBRARIES = libbbs.la libjail.la
 bin_PROGRAMS = bbs boardd
 include_HEADERS = apdb.h board.h util.h env.h
 
@@ -14,6 +14,9 @@ libbbs_la_SOURCES = \
 	util.h
 
 libbbs_la_LDFLAGS = -version-info 0:0:0
+
+libjail_la_SOURCES = jail.c
+libjail_la_LDFLAGS = -ldl
 
 bbs_SOURCES = bbs.c
 bbs_LDADD = libbbs.la $(READLINELIB)
