@@ -1,7 +1,5 @@
 #!/bin/bash
 
-export LD_LIBRARY_PATH=`pwd`
-
 ok_num=`grep -cw ok test_apdb.c`
 mkdir for_test 2>/dev/null
 cd for_test

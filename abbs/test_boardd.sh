@@ -1,6 +1,5 @@
 mkdir -p for_test/tmp for_test/pool 2>/dev/null
-cd for_test &&
-LD_LIBRARY_PATH=/home/dieken/abbs ../boardd myboard pool &
+cd for_test && ../boardd myboard pool &
 
 
 cd for_test &&

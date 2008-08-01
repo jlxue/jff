@@ -20,13 +20,8 @@
 * LVS + HA -> Lighttpd -> Squid (varnish)
            -> ningx -> apache -> memcached -> mogilefs
 
-* create a file "d_10-23" to delete article, "a_xxxx" to add article.
-  use inotify to listen event.
-
-* libev, libevent, libnotify, inotify
 * ncursesw, slang, libcdk, libnewt, libstfl-dev, aptitude's libcwidget
 
-* minimize fstat() calls, writer process doesn't have to call remap_data_file()
 * boardd doesn't require mmap()
 * self auto adaptive second level index for index_t
 
