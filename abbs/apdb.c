@@ -22,7 +22,17 @@
 
 #define _GNU_SOURCE         /* for O_CLOEXEC    */
 
-/* define _FILE_OFFSET_BITS to 64 in Makefile to get large file support */
+/*
+ * Define _FILE_OFFSET_BITS to 64 in Makefile to get large file support,
+ * but:
+ * a. apdb_t use size_t type for *_file_len and *_mmap_len
+ * b. mmap() 's second argument is size_t type and apdb uses mmap() to
+ *    map the whole file
+ * c. virtual address space of a process is limited by the OS
+ *
+ * so apdb supports only 4 GB files on 32-bit OS even with large file
+ * support (maybe less than 2GB because of limit of virtual address space).
+ */
 
 #include <assert.h>
 #include <limits.h>
@@ -329,13 +339,17 @@ apdb_close(apdb_t* db)
 
 
 static void
-remap_data_file(apdb_t* db, off_t to)
+remap_data_file(apdb_t* db, size_t to)
 {
     struct stat st;
 
     assert(NULL != db && 0 == db->error);
 
     if (! CAN_WRITE(db)) {
+        /*
+         * don't have to be to <= db->data_file_len, because
+         * we don't use data_file_len to calculate count of records.
+         */
         if (to <= db->data_mmap_len)
             return;
 
@@ -367,14 +381,20 @@ L_error:
 
 
 static void
-remap_index_file(apdb_t* db, off_t to)
+remap_index_file(apdb_t* db, size_t to)
 {
     struct stat st;
 
     assert(NULL != db && 0 == db->error);
 
     if (! CAN_WRITE(db)) {
-        if (to <= db->index_mmap_len)
+        /*
+         * can't be to <= db->index_mmap_len, because st_size
+         * can be changed by writer process and reader processes
+         * use index_file_len to calculate count of records in
+         * apdb_first() and apdb_next().
+         */
+        if (to <= db->index_file_len)
             return;
 
         ERRORP_IF(-1 == fstat(db->index_fd, &st),
@@ -438,11 +458,11 @@ apdb_add_begin(apdb_t* db, size_t length)
     if (db->error)
         return -1;
 
-    if (SIZE_MAX - db->index_len <= db->index_file_len) {
+    if (SSIZE_MAX - db->index_len <= db->index_file_len) {
         DEBUG("index file too big");
         return -1;
     }
-    if (SIZE_MAX - ALIGN_UP(sizeof(data_t) + length, ALIGN_SIZE) <=
+    if (SSIZE_MAX - ALIGN_UP(sizeof(data_t) + length, ALIGN_SIZE) <=
             db->data_file_len) {
         DEBUG("data file too big");
         return -1;
@@ -661,7 +681,7 @@ apdb_update_begin(apdb_t* db, apdb_record_t record, size_t length)
     if (db->error)
         return -1;
 
-    if (SIZE_MAX - ALIGN_UP(sizeof(data_t) + length, ALIGN_SIZE) <=
+    if (SSIZE_MAX - ALIGN_UP(sizeof(data_t) + length, ALIGN_SIZE) <=
             db->data_file_len) {
         DEBUG("data file too big");
         return -1;
