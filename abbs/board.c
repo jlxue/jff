@@ -38,9 +38,9 @@
 
 
 typedef struct {
-    unsigned char   header_t_len;
     unsigned short  index_t_len;
     unsigned short  data_t_len;
+    unsigned char   header_t_len;
     unsigned char   int_len;
     unsigned char   long_len;
     unsigned char   unsigned_len;
