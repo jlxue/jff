@@ -15,7 +15,7 @@ if(NOT DEFINED BUILD_SHARED_LIBS)
     MESSAGE(STATUS "** use -DBUILD_SHARED_LIBS=OFF to build static libraries")
 endif()
 
-add_definitions(-Wall)
+add_definitions(-Wall -Wextra)
 
 set(libbbs_SOURCES
     apdb.c

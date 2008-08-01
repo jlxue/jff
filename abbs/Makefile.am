@@ -6,7 +6,7 @@ EXTRA_DIST = CMakeLists.txt Makefile.am SConstruct design.txt \
 			 autogen.sh run_bbs.sh run_boardd.sh test_apdb.sh \
 			 test_boardd.sh test_jail.sh
 
-AM_CPPFLAGS = -Wall
+AM_CPPFLAGS = -Wall -Wextra
 
 libbbs_la_SOURCES = \
 	apdb.c \

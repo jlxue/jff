@@ -129,7 +129,7 @@ apdb_open(const char* path, char mode, size_t index_content_len)
     size_t      len;
     struct stat st;
 
-    assert(NULL != path && index_content_len >= 0);
+    assert(NULL != path);
 
 
     /*
@@ -215,11 +215,11 @@ apdb_open(const char* path, char mode, size_t index_content_len)
     if (st.st_size > 0) {
         data_t* data;
 
-        ERROR_IF(st.st_size < sizeof(data_t), "corrupted data file");
+        ERROR_IF(st.st_size < (off_t)sizeof(data_t), "corrupted data file");
 
         data = (data_t*)db->data_mmap;
         ERROR_IF(GUARD != data->guard || 0 != data->id ||
-                 st.st_size < ALIGN_UP(sizeof(data_t) + data->length,
+                 st.st_size < (off_t)ALIGN_UP(sizeof(data_t) + data->length,
                                        ALIGN_SIZE),
                  "corrupted header record");
     }
@@ -244,7 +244,7 @@ apdb_open(const char* path, char mode, size_t index_content_len)
         index_t* index;
         unsigned count;
 
-        ERROR_IF(st.st_size < db->index_len, "corrupted index file");
+        ERROR_IF(st.st_size < (off_t)db->index_len, "corrupted index file");
 
         index = RECORD_TO_INDEX(db, 0);
         ERROR_IF(GUARD != index->guard || 0 != index->id || 0 != index->offset,
@@ -510,7 +510,7 @@ apdb_append_data(apdb_t* db, const void* content, size_t length)
     ERROR_IF(db->next_length - db->next_written < length,
              "write more data than expected");
 
-    ERRORP_IF(length != writen(db->data_fd, content, length),
+    ERRORP_IF((ssize_t)length != writen(db->data_fd, content, length),
               "failed to write");
 
     db->data_file_len += length;
@@ -881,7 +881,7 @@ apdb_previous(apdb_t* db, apdb_record_t record)
     if (db->error)
         return -1;
 
-    if (record >= 2 * db->index_len) {
+    if (record >= (off_t)(2 * db->index_len)) {
         prev = record - db->index_len;
         index = RECORD_TO_INDEX(db, prev);
 

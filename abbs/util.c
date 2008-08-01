@@ -22,7 +22,8 @@
 ssize_t
 readn(int fd, void* buf, size_t n)
 {
-    size_t left, len;
+    size_t left;
+    ssize_t len;
     char* buffer;
 
     buffer = buf;
@@ -46,7 +47,8 @@ readn(int fd, void* buf, size_t n)
 ssize_t
 writen(int fd, const void* buf, size_t n)
 {
-    size_t left, len;
+    size_t left;
+    ssize_t len;
     const char* buffer;
 
     buffer = buf;

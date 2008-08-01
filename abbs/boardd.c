@@ -79,7 +79,7 @@ boardd_close(boardd_t* boardd)
             free(boardd->db_paths[i]);
         if (NULL != boardd->pool_dirs[i])
             free(boardd->pool_dirs[i]);
-        if (NULL != boardd->boards[i]);
+        if (NULL != boardd->boards[i])
             board_close(boardd->boards[i]);
     }
 
