@@ -274,14 +274,16 @@ apdb_open(const char* path, char mode, size_t index_content_len)
      * avoid forked writer child processes writing data and index file
      */
     if (! readonly) {
-        int flags;
+        long flags;
 
         flags = fcntl(db->data_fd, F_GETFD);
-        ERRORP_IF(-1 == fcntl(db->data_fd, F_SETFD, flags | FD_CLOEXEC),
+        flags |= FD_CLOEXEC;
+        ERRORP_IF(-1 == fcntl(db->data_fd, F_SETFD, flags),
                   "failed to set FD_CLOEXEC on data_fd");
 
         flags = fcntl(db->index_fd, F_GETFD);
-        ERRORP_IF(-1 == fcntl(db->index_fd, F_SETFD, flags | FD_CLOEXEC),
+        flags |= FD_CLOEXEC;
+        ERRORP_IF(-1 == fcntl(db->index_fd, F_SETFD, flags),
                   "failed to set FD_CLOEXEC on index_fd");
     }
 #endif
