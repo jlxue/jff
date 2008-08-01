@@ -34,3 +34,6 @@
 
 * libltdl3
 
+* Makefile.am: how to install header files to .../abbs/xxx?
+* Makefile.am: how to always build libjail as shared library?
+
