@@ -23,7 +23,6 @@
 
 #include <dirent.h>
 #include <fcntl.h>
-#include <pwd.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -35,6 +34,8 @@
 
 #include "apdb.h"
 #include "board.h"
+#include "pool.h"
+#include "user.h"
 #include "util.h"
 
 
@@ -304,11 +305,11 @@ cmd_prev(client_t* client, unsigned argc, unsigned arg1, unsigned arg2)
 static int
 cmd_post(client_t* client, unsigned argc, unsigned arg1, unsigned arg2)
 {
-    char realpath[PATH_MAX];
-    char poolpath[PATH_MAX];
-    time_t ctime;
-    char date[15];
-    struct passwd* pwd;
+    char realpath[POOL_PATH_MAX];
+    char poolpath[POOL_PATH_MAX];
+    char poolfile[POOL_FILENAME_MAX];
+    time_t curtime;
+    const char* author;
     int fd;
     pid_t pid;
 
@@ -317,35 +318,30 @@ cmd_post(client_t* client, unsigned argc, unsigned arg1, unsigned arg2)
         return -1;
     }
 
-    ctime = time(NULL);
-    if (sizeof(date) - 1 != strftime(date, sizeof(date), "%Y%m%d%H%M%S",
-                                     localtime(&ctime))) {
-        fprintf(stderr, "strftime failed\n");
-            return -1;
-    }
+    curtime = time(NULL);
 
-    pwd = getpwuid(geteuid());
-    if (NULL == pwd || NULL == pwd->pw_name) {
+    author = get_user_name(geteuid());
+    if (NULL == author) {
         perror("can't find current user name\n");
         return -1;
     }
-    if (strchr(pwd->pw_name, '-')) {
-        fprintf(stderr, "usename can't contains '-'\n");
+
+    if (0 == generate_pool_file_name(poolfile, POOL_FILENAME_MAX,
+                OP_POST, &curtime, author, 100, 0, 0)) {
+        fprintf(stderr, "pool file name too long\n");
         return -1;
     }
 
     realpath[PATH_MAX - 1] = '\0';
-    if (snprintf(realpath, PATH_MAX, "%s/%c-%s-%s.XXXXXX",
-                 client->tmp_dir, FLAG_POST_CHAR, date, pwd->pw_name)
-            >= PATH_MAX) {
+    if (snprintf(realpath, PATH_MAX, "%s/%s",
+                 client->tmp_dir, poolfile) >= PATH_MAX) {
         fprintf(stderr, "username too long\n");
         return -1;
     }
 
     poolpath[PATH_MAX - 1] = '\0';
-    if (snprintf(poolpath, PATH_MAX, "%s/%c-%s-%s.XXXXXX",
-                 client->pool_dir, FLAG_POST_CHAR, date, pwd->pw_name)
-            >= PATH_MAX) {
+    if (snprintf(poolpath, PATH_MAX, "%s/%s",
+                 client->pool_dir, poolfile) >= PATH_MAX) {
         fprintf(stderr, "username too long\n");
         return -1;
     }

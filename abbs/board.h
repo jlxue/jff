@@ -25,10 +25,8 @@ extern "C" {
 #define AUTHOR_LEN      16
 #define TITLE_LEN       64
 
-#define FLAG_POST_CHAR      'p'
-#define FLAG_REPLY_CHAR     'r'
-#define FLAG_MODIFY_CHAR    'e'
-#define FLAG_DELETE_CHAR    'd'
+#define IS_VALID_BOARD_ID(id)   ((id) > 0 && (id) < USHRT_MAX)
+#define IS_VALID_ARTICLE_ID(id) ((id) > 0 && (id) < UINT_MAX)
 
 typedef struct board_s board_t;
 

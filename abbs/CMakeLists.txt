@@ -23,6 +23,10 @@ set(libbbs_SOURCES
     board.c
     env.c
     env.h
+    pool.c
+    pool.h
+    user.c
+    user.h
     util.c
     util.h)
 

@@ -15,6 +15,10 @@ libbbs_la_SOURCES = \
 	board.h \
 	env.c \
 	env.h \
+	pool.h \
+	pool.c \
+	user.c \
+	user.h \
 	util.c \
 	util.h
 

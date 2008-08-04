@@ -12,12 +12,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- *
- *
- * ChangeLog:
- *  2008-07-16  Liu Yubao
- *      * initial version, pass some basic tests
- *
  */
 #include <assert.h>
 #include <limits.h>

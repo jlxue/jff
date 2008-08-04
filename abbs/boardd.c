@@ -12,16 +12,11 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
- *
- * ChangeLog:
- *  2008-07-21  Liu Yubao
- *      * initial version
- *
  */
 #define _GNU_SOURCE         /* for strndup  */
 
 #include <assert.h>
+#include <ctype.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +24,6 @@
 
 #include <dirent.h>
 #include <fcntl.h>
-#include <pwd.h>
 #include <sys/inotify.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -40,6 +34,8 @@
 
 #include "apdb.h"
 #include "board.h"
+#include "pool.h"
+#include "user.h"
 #include "util.h"
 
 
@@ -48,20 +44,22 @@
 
 typedef struct {
     unsigned        count;
+    unsigned short* board_ids;
     char**          db_paths;
-    char**          pool_dirs;
     board_t**       boards;
 
-    int             fd;        /* inotify fd */
-    int*            wds;       /* watch fd  */
+    int             fd;                     /* inotify fd */
+    int             wd;                     /* watch fd  */
     char            events[EVENT_BUF_LEN];
-    char            pool_file[PATH_MAX];
-    char            real_file[PATH_MAX];
+
+    size_t          pool_dir_len;
+    char            pool_file[POOL_PATH_MAX];
+    char            real_file[POOL_PATH_MAX];
 } boardd_t;
 
 
-int
-boardd_close(boardd_t* boardd)
+static int
+boardd_destroy(boardd_t* boardd)
 {
     unsigned i;
     int ret = 0;
@@ -69,32 +67,28 @@ boardd_close(boardd_t* boardd)
     if (NULL == boardd)
         return 0;
 
-    if (NULL == boardd->db_paths || NULL == boardd->pool_dirs ||
-            NULL == boardd->boards || NULL == boardd->wds)
+    if (NULL == boardd->board_ids || NULL == boardd->db_paths ||
+            NULL == boardd->boards)
         goto L_leave;
 
 
     for (i = 0; i < boardd->count; ++i) {
         if (NULL != boardd->db_paths[i])
             free(boardd->db_paths[i]);
-        if (NULL != boardd->pool_dirs[i])
-            free(boardd->pool_dirs[i]);
         if (NULL != boardd->boards[i])
-            board_close(boardd->boards[i]);
+            ret |= board_close(boardd->boards[i]);
     }
 
 L_leave:
+    if (NULL != boardd->board_ids)
+        free(boardd->board_ids);
     if (NULL != boardd->db_paths)
         free(boardd->db_paths);
-    if (NULL != boardd->pool_dirs)
-        free(boardd->pool_dirs);
     if (NULL != boardd->boards)
         free(boardd->boards);
-    if (NULL != boardd->wds)
-        free(boardd->wds);
 
     if (-1 != boardd->fd)
-        ret = close(boardd->fd);
+        ret |= close(boardd->fd);
 
     free(boardd);
 
@@ -102,14 +96,15 @@ L_leave:
 }
 
 
-boardd_t*
-boardd_open(unsigned count, char* paths[])
+static boardd_t*
+boardd_create(char* pool_dir, unsigned count, unsigned short* ids, char** paths)
 {
     boardd_t* boardd;
-    unsigned i;
     struct stat st;
+    unsigned i;
+    long flags;
 
-    assert(count > 0);
+    assert(NULL != pool_dir && count > 0);
 
     boardd = (boardd_t*)calloc(1, sizeof(boardd_t));
     if (NULL == boardd)
@@ -117,45 +112,56 @@ boardd_open(unsigned count, char* paths[])
 
     boardd->fd = -1;
 
+    boardd->board_ids = (unsigned short*)calloc(count, sizeof(unsigned short));
     boardd->db_paths = (char**)calloc(count, sizeof(char*));
-    boardd->pool_dirs = (char**)calloc(count, sizeof(char*));
     boardd->boards = (board_t**)calloc(count, sizeof(board_t*));
-    boardd->wds = (int*)calloc(count, sizeof(int));
-    ERRORP_IF(NULL == boardd->db_paths || NULL == boardd->pool_dirs ||
-            NULL == boardd->boards || NULL == boardd->wds,
-            "out of memory");
+    ERRORP_IF(NULL == boardd->board_ids || NULL == boardd->db_paths ||
+              NULL == boardd->boards, "out of memory");
+
+
+    boardd->pool_dir_len = strlen(pool_dir);
+    ERROR_IF(boardd->pool_dir_len < 2 || boardd->pool_dir_len >= POOL_PATH_MAX - 1,
+             "invalid pool dir");
+    ERRORP_IF(-1 == stat(pool_dir, &st), "can't stat(%s)", pool_dir);
+    ERROR_IF(! S_ISDIR(st.st_mode), "%s isn't a directory", pool_dir);
+
+    memcpy(boardd->pool_file, pool_dir, boardd->pool_dir_len);
+    if ('/' != pool_dir[boardd->pool_dir_len - 1]) {
+        boardd->pool_file[boardd->pool_dir_len] = '/';
+        ++boardd->pool_dir_len;
+    }
+
 
     boardd->fd = inotify_init();
     ERRORP_IF(-1 == boardd->fd, "inotify_init() failed");
-    ERROR_IF(-1 == fcntl(boardd->fd, F_SETFL, O_NONBLOCK),
+
+    flags = fcntl(boardd->fd, F_GETFL);
+    flags |= O_NONBLOCK;
+    ERROR_IF(-1 == fcntl(boardd->fd, F_SETFL, flags),
              "can't set inotify fd to nonblock mode");
+    boardd->wd = inotify_add_watch(boardd->fd, pool_dir,
+                                   IN_CREATE | IN_DONT_FOLLOW);
+    ERRORP_IF(-1 == boardd->wd, "can't watch %s with inotify",
+              pool_dir);
+
 
     for (i = 0; i < count; ++i) {
         ++boardd->count;
-        boardd->db_paths[i] = strdup(paths[2 * i]);
-        boardd->pool_dirs[i] = strdup(paths[2 * i + 1]);
-        ERRORP_IF(NULL == boardd->db_paths[i] || NULL == boardd->pool_dirs[i],
+
+        boardd->board_ids[i] = ids[i];
+        boardd->db_paths[i] = strdup(paths[i]);
+        ERRORP_IF(NULL == boardd->db_paths[i],
                   "out of memory");
 
-        ERRORP_IF(-1 == stat(boardd->pool_dirs[i], &st),
-                  "can't stat(%s)", boardd->pool_dirs[i]);
-        ERROR_IF(! S_ISDIR(st.st_mode), "%s isn't a directory",
-                 boardd->pool_dirs[i]);
-
-        boardd->boards[i] = board_open(boardd->db_paths[i], 'w');
+        boardd->boards[i] = board_open(paths[i], 'w');
         ERRORP_IF(NULL == boardd->boards[i], "can't open board %s to write",
-                  boardd->db_paths[i]);
-
-        boardd->wds[i] = inotify_add_watch(boardd->fd, boardd->pool_dirs[i],
-                                           IN_CREATE | IN_DONT_FOLLOW);
-        ERRORP_IF(-1 == boardd->wds[i], "can't watch %s with inotify",
-                  boardd->pool_dirs[i]);
+                  paths[i]);
     }
 
     return boardd;
 
 L_error:
-    boardd_close(boardd);
+    boardd_destroy(boardd);
     return NULL;
 }
 
@@ -163,7 +169,7 @@ L_error:
 static void
 usage(void)
 {
-    fprintf(stderr, "Usage: boardd <board_db1> <pooldir1> ...\n");
+    fprintf(stderr, "Usage: boardd <pool_dir> <board_id1> <board_db1> ...\n");
 }
 
 
@@ -175,230 +181,198 @@ signal_cb(EV_P_ struct ev_signal* w, int revents)
 }
 
 
-/*
- * filename template:
- *      d-yyyymmddHHMMSS-author-id.xxxxxx
- *      d-yyyymmddHHMMSS-author-id1-id2.xxxxxx
- */
-static int
-delete_articles(boardd_t* boardd, unsigned i, const char* filename,
-                uid_t uid)
+size_t
+get_title(const char* content, size_t len, char* title, size_t size)
 {
-    article_t article;
-    unsigned long id1, id2;
-    const char* p;
-    char* end;
+    const char* p = content;
+    size_t n = 0;
 
-    assert(NULL != boardd && i < boardd->count && NULL != filename &&
-           uid >= 1000);
+    assert(NULL != content && len > 0 && NULL != title && size > 0);
 
-    ERROR_IF(FLAG_DELETE_CHAR != *filename || '-' != *(filename + 1),
-             "invalid file name");
-
-    p = strrchr(filename, '-');
-    if (NULL == p)
-        return -1;
-    
-    p = strrchr(p, '-');
-    if (NULL == p)
-        return -1;
-
-    p = strrchr(p, '-');
-    if (NULL == p)
-        return -1;
-
-    if ('\0' == *++p)
-        return -1;
-
-    id1 = strtoul(p, &end, 10);
-    if (0 == id1 || id1 >= UINT_MAX)
-        return -1;
-    article = board_get(boardd->boards[i], (unsigned)id1);
-    ERROR_IF(-1 == article, "article %u not found", (unsigned)id1);
-
-    if ('\0' == *++end)
-        return -1;
-    id2 = strtoul(end, NULL, 10);
-    if (0 == id2 || (id2 >= UINT_MAX && ULONG_MAX != id2)) {
-        return -1;
-    } else {
-        id2 = 0;
-        /* TODO: delete a range */
-        return -1;
+    while (len > 0 && isspace(*p)) {
+        --len;
+        ++p;
     }
 
-    board_delete(boardd->boards[i], article);
+    while (len > 0 && n < size && ('\r' != *p && '\n' != *p)) {
+        title[n] = *p;
+        --len;
+        ++p;
+        ++n;
+    }
+
+    title[n] = '\0';
+
+    return n;
+}
+
+
+static int
+post_article(board_t* board, const char* author, const char* title,
+             const char* content, size_t len)
+{
+    if (-1 == board_post_begin(board, author, title, len) ||
+            -1 == board_append_data(board, content, len) ||
+            -1 == board_post_end(board))
+        return -1;
 
     return 0;
+}
 
-L_error:
+
+static int
+reply_article(board_t* board, article_t article, const char* author,
+              const char* title, const char* content, size_t len)
+{
+    if (-1 == board_reply_begin(board, article, author, title, len) ||
+            -1 == board_append_data(board, content, len) ||
+            -1 == board_reply_end(board))
+        return -1;
+
+    return 0;
+}
+
+
+static int
+modify_article(board_t* board, article_t article, const char* title,
+              const char* content, size_t len)
+{
+    if (-1 == board_modify_begin(board, article, title, len) ||
+            -1 == board_append_data(board, content, len) ||
+            -1 == board_modify_end(board))
+        return -1;
+
+    return 0;
+}
+
+
+static int
+delete_article(board_t* board, article_t article)
+{
     return -1;
 }
 
 
-/* 
- * filename template:
- *      post:   p-yyyymmddHHMMSS-author.xxxxxx
- *      reply:  r-yyyymmddHHMMSS-author-id.xxxxxx
- *      modify: m-yyyymmddHHMMSS-author-id.xxxxxx
- *
- *  where xxxxxx are random strings generated by mkstemp()
- */
 static int
-post_reply_modify_article(boardd_t* boardd, unsigned i, const char* filename,
-                          uid_t uid, const char* real_fullpath)
+delete_article_range(board_t* board, article_t from, article_t to)
 {
-    struct stat st;
-    int fd = -1;
-    void* data = MAP_FAILED;
-
-    article_t article;
-
-    struct passwd* pwd;         /* for author name  */
-    const char *title = NULL;
-
-
-    assert(NULL != boardd && i < boardd->count && NULL != filename &&
-           uid >= 1000 && NULL != real_fullpath);
-
-    ERROR_IF('-' != *(filename + 1), "invalid file name");
-
-    /* get article */
-    if (FLAG_MODIFY_CHAR == *filename || FLAG_REPLY_CHAR == *filename) {
-        unsigned long id;
-        const char* p = strrchr(filename, '-');
-        char* end;
-
-        ERROR_IF(NULL == p || '\0' == *++p, "invalid filename: %s",
-                 filename);
-
-        id = strtoul(p, &end, 10);
-        ERROR_IF(0 == id || id >= UINT_MAX, "invalid id: %ld", id);
-
-        article = board_get(boardd->boards[i], (unsigned)id);
-        ERROR_IF(-1 == article, "article not found");
-    }
-
-    /* get author name, don't trust the file name   */
-    pwd = getpwuid(uid);
-    ERRORP_IF(NULL == pwd || NULL == pwd->pw_name,
-              "can't find passwd entry for uid=%d", uid);
-
-
-    /* TODO: check permission                       */
-
-
-    /* get content  */
-    fd = open(real_fullpath, O_RDONLY);
-    ERRORP_IF(-1 == fd, "can't open %s to read", real_fullpath);
-
-    ERRORP_IF(-1 == fstat(fd, &st), "can't stat %s", real_fullpath);
-
-    ERROR_IF(st.st_uid != uid, "uid of %s and %s are different",
-             filename, real_fullpath);
-
-    ERROR_IF(0 == st.st_size, "can't post empty article: %s", real_fullpath);
-
-    data = mmap(0, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
-    ERRORP_IF(MAP_FAILED == data, "mmap failed");
-
-
-    /* get title    */
-    title = strndup((const char*)data,
-                    MIN(TITLE_LEN - 1, strcspn((const char*)data, "\r\n")));
-
-    switch (*filename) {
-    case FLAG_MODIFY_CHAR:
-        ERRORP_IF(-1 == board_modify_begin(boardd->boards[i], article, title,
-                                     st.st_size) ||
-                  -1 == board_append_data(boardd->boards[i], data,
-                                          st.st_size) ||
-                  -1 == board_modify_end(boardd->boards[i]),
-                  "failed to modify %s, %s", filename, real_fullpath);
-        break;
-    case FLAG_POST_CHAR:
-        ERRORP_IF(-1 == board_post_begin(boardd->boards[i], pwd->pw_name, title,
-                                         st.st_size) ||
-                  -1 == board_append_data(boardd->boards[i], data,
-                                          st.st_size) ||
-                  -1  == board_post_end(boardd->boards[i]),
-                  "failed to post %s, %s", filename, real_fullpath);
-        break;
-    case FLAG_REPLY_CHAR:
-        ERRORP_IF(-1 == board_reply_begin(boardd->boards[i], article,
-                                          pwd->pw_name, title, st.st_size) ||
-                  -1 == board_append_data(boardd->boards[i], data,
-                                          st.st_size) ||
-                  -1 == board_reply_end(boardd->boards[i]),
-                  "failed to reply %s, %s", filename, real_fullpath);
-        break;
-    default:
-        fprintf(stderr, "invalid file name: %s\n", filename);
-        goto L_error;
-    }
-
-    return 0;
-
-L_error:
-    if (NULL != title)
-        free((void*)title);
-    if (data != MAP_FAILED)
-        munmap(data, st.st_size);
-    if (-1 != fd)
-        close(fd);
-
     return -1;
 }
 
 
 static void
-process_pool_file(boardd_t* boardd, unsigned i, const char* filename)
+process_pool_file(boardd_t* boardd, const char* filename)
 {
+    board_op_t op;
+    unsigned id1, id2, i;
+    unsigned short bid;
+    article_t article1, article2;
     struct stat st;
     size_t len;
+    int fd = -1, ret = -1;
+    const char* content = MAP_FAILED;
 
-    assert(NULL != boardd && i < boardd->count && NULL != filename);
+    assert(NULL != boardd && NULL != filename);
 
-    len = strlen(boardd->pool_dirs[i]);
-    if (len + strlen(filename) + 1 >= PATH_MAX) {
-        fprintf(stderr, "file path too long: %s/%s\n", boardd->pool_dirs[i],
-                filename);
-        return;
-    }
-    strcpy(boardd->pool_file, boardd->pool_dirs[i]);
-    boardd->pool_file[len] = '/';
-    strcpy(boardd->pool_file + len + 1, filename);
+    len = strlen(filename) + 1;
+    ERROR_IF(len + boardd->pool_dir_len >= POOL_PATH_MAX,
+             "file path too long: %s\n", filename);
+    memcpy(boardd->pool_file + boardd->pool_dir_len, filename, len);
 
-    ERRORP_IF(-1 == lstat(boardd->pool_file, &st),
-             "lstat() failed");
+    ERRORP_IF(-1 == lstat(boardd->pool_file, &st), "lstat() failed");
 
     ERROR_IF(st.st_uid < 1000,
              "uid(%d) < 1000 is not allowed to post/reply/modify/delete"
              " article\n", st.st_uid);
 
-    if (S_ISREG(st.st_mode)) {
-        /* delete */
-        delete_articles(boardd, i, filename, st.st_uid);
+    op = parse_pool_file_name(filename, &bid, &id1, &id2);
+    ERROR_IF(OP_INVALID == op,
+             "unkown file %s in pool directory\n", filename);
 
-        /* always delete the pool file as we won't retry    */
-        ERRORP_IF(-1 == unlink(boardd->pool_file),
-                  "failed to unlink %s", boardd->pool_file);
-    } else if (S_ISLNK(st.st_mode)) {
-        /* post, reply modify */
-        ERRORP_IF(NULL == realpath(boardd->pool_file, boardd->real_file),
-                  "realpath(%s) failed", boardd->pool_file);
-        if (0 == post_reply_modify_article(boardd, i, filename, st.st_uid,
-                                           boardd->real_file)) {
-            ERRORP_IF(-1 == unlink(boardd->pool_file),
-                      "failed to unlink %s", boardd->pool_file);
-            ERRORP_IF(-1 == unlink(boardd->real_file),
-                      "failed to unlink %s", boardd->real_file);
-        }
-    } else {
-        fprintf(stderr, "unkown file in pool directory\n");
+    for (i = 0; i < boardd->count; ++i) {
+        if (bid == boardd->board_ids[i])
+            break;
+    }
+    ERROR_IF(i == boardd->count,
+             "unkown board id in file name: %s\n", filename);
+
+
+    if (OP_POST != op) {
+        article1 = board_get(boardd->boards[i], id1);
+        ERROR_IF(-1 == article1, "can't find article %u in board %hu", id1, bid);
     }
 
+    if (OP_DELETE_RANGE == op) {
+        article2 = board_get(boardd->boards[i], id2);
+        ERROR_IF(-1 == article2, "can't find article %u in board %hu",
+                 id1, bid);
+        ret = delete_article_range(boardd->boards[i], article1, article2);
+    } else if (OP_DELETE == op) {
+        ret = delete_article(boardd->boards[i], article1);
+    } else {
+        ssize_t n;
+        const char *author;
+        char title[TITLE_LEN];
+        uid_t uid;
+
+        ERROR_IF(! S_ISLNK(st.st_mode),
+                 "%s should be symlink for post/reply/modify", filename);
+        n = readlink(boardd->pool_file, boardd->real_file, POOL_PATH_MAX);
+        ERROR_IF(-1 == n || POOL_PATH_MAX == n, "readlink(%s) failed",
+                 boardd->pool_file);
+
+        fd = open(boardd->real_file, O_RDONLY);
+        ERRORP_IF(-1 == fd, "can't read %s", boardd->real_file);
+
+        uid = st.st_uid;
+        ERRORP_IF(-1 == fstat(fd, &st), "can't stat(%s)", boardd->real_file);
+        ERROR_IF(uid != st.st_uid, "%s and %s must have same uid",
+                 boardd->pool_file, boardd->real_file);
+        ERROR_IF(0 == st.st_size, "%s is empty", boardd->real_file);
+
+        content = mmap(0, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
+        ERRORP_IF(MAP_FAILED == content, "mmap(%s) failed", boardd->real_file);
+
+        ERROR_IF(0 == get_title(content, st.st_size, title, TITLE_LEN),
+                 "title too short");
+
+        author = get_user_name(uid);
+        ERROR_IF(NULL == author, "can't find username for uid(%u)", uid);
+
+        switch (op) {
+        case OP_POST:
+            ret = post_article(boardd->boards[i], author, title,
+                               content, st.st_size);
+            break;
+        case OP_REPLY:
+            ret = reply_article(boardd->boards[i], article1, author, title,
+                                content, st.st_size);
+            break;
+        case OP_MODIFY:
+            ret = modify_article(boardd->boards[i], article1, title,
+                                 content, st.st_size);
+            break;
+        default:
+            break;
+        }
+
+
+        if (0 == ret)
+            unlink(boardd->real_file);
+        else
+            ERRORP_IF(1, "failed to post/reply/modify %s", boardd->real_file);
+    }
+
+    if (0 == ret)
+        unlink(boardd->pool_file);
+    else
+        ERRORP_IF(1, "failed to process %s", boardd->pool_file);
+
 L_error:
+    if (MAP_FAILED != content)
+        munmap((void*)content, st.st_size);
+    if (-1 != fd)
+        close(fd);
     return;
 }
 
@@ -407,25 +381,17 @@ static void
 process_inotify_events(boardd_t* boardd, ssize_t bytes)
 {
     struct inotify_event* event;
-    unsigned i;
 
     event = (struct inotify_event*)boardd->events;
     while ((char*)event - boardd->events < bytes) {
-        for (i = 0; i < boardd->count; ++i)
-            if (event->wd == boardd->wds[i])
-                break;
-        if (i == boardd->count) {
-            fprintf(stderr, "unkown wd: %d, name=%s\n", event->wd, event->name);
-        } else {
-            fprintf(stderr, "got event in pool dir %s, file %s, wd %d: ",
-                    boardd->pool_dirs[i], event->name, event->wd);
-            if (IN_IGNORED == (IN_IGNORED & event->mask) ||
-                    IN_UNMOUNT == (IN_IGNORED & event->mask)) {
-                fprintf(stderr, "file removed or fs unmounted\n");
-            } else if (IN_CREATE == (IN_CREATE & event->mask)) {
-                fprintf(stderr, "file created\n");
-                process_pool_file(boardd, i, event->name);
-            }
+        fprintf(stderr, "got event in pool dir: file %s, wd %d: ",
+                event->name, event->wd);
+        if (IN_IGNORED == (IN_IGNORED & event->mask) ||
+                IN_UNMOUNT == (IN_IGNORED & event->mask)) {
+            fprintf(stderr, "file removed or fs unmounted\n");
+        } else if (IN_CREATE == (IN_CREATE & event->mask)) {
+            fprintf(stderr, "file created\n");
+            process_pool_file(boardd, event->name);
         }
 
         event = (struct inotify_event*)((char*)event +
@@ -436,7 +402,7 @@ process_inotify_events(boardd_t* boardd, ssize_t bytes)
 
 
 static void
-pool_dirs_watcher_cb(EV_P_ struct ev_io* w, int revents)
+pool_dir_watcher_cb(EV_P_ struct ev_io* w, int revents)
 {
     ssize_t bytes;
     boardd_t* boardd = (boardd_t*)w->data;
@@ -471,14 +437,17 @@ pool_dirs_watcher_cb(EV_P_ struct ev_io* w, int revents)
 int
 main(int argc, char** argv)
 {
-    unsigned count;
+    unsigned count, i;
+    int id;
     boardd_t* boardd;
+    unsigned short* ids;
+    char** paths;
     struct ev_loop* loop;
     struct ev_signal sig_hup_watcher, sig_int_watcher,
                      sig_quit_watcher, sig_term_watcher;
-    struct ev_io pool_dirs_watcher;
+    struct ev_io pool_dir_watcher;
 
-    if (argc < 3 || (argc % 2) == 0) {
+    if (argc < 4 || (argc % 2) == 1) {
         usage();
         return EXIT_FAILURE;
     }
@@ -490,11 +459,6 @@ main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    count = (argc - 1) / 2;
-    boardd = boardd_open(count, &argv[1]);
-    if (NULL == boardd)
-        return EXIT_FAILURE;
-
     ev_signal_init(&sig_hup_watcher, signal_cb, SIGHUP);
     ev_signal_init(&sig_int_watcher, signal_cb, SIGINT);
     ev_signal_init(&sig_quit_watcher, signal_cb, SIGQUIT);
@@ -505,13 +469,39 @@ main(int argc, char** argv)
     ev_signal_start(EV_A_ &sig_quit_watcher);
     ev_signal_start(EV_A_ &sig_term_watcher);
 
-    ev_io_init(&pool_dirs_watcher, pool_dirs_watcher_cb, boardd->fd, EV_READ);
-    pool_dirs_watcher.data = boardd;
-    ev_io_start(EV_A_ &pool_dirs_watcher);
+    count = (argc - 2) / 2;
+    ids = (unsigned short*)malloc(count * sizeof(unsigned short));
+    if (NULL == ids)
+        return EXIT_FAILURE;
+    paths = (char**)malloc(count * sizeof(char*));
+    if (NULL == paths) {
+        free(ids);
+        return EXIT_FAILURE;
+    }
+    for (i = 0; i < count; ++i) {
+        id = atoi(argv[2 + 2 * i]);
+        if (! IS_VALID_BOARD_ID(id))
+            break;
+        ids[i] = (unsigned short)id;
+        paths[i] = argv[2 + 2 * i + 1];
+    }
+    if (i < count) {
+        free(ids);
+        free(paths);
+        return EXIT_FAILURE;
+    }
+
+    boardd = boardd_create(argv[1], count, ids, paths);
+    if (NULL == boardd)
+        return EXIT_FAILURE;
+
+    ev_io_init(&pool_dir_watcher, pool_dir_watcher_cb, boardd->fd, EV_READ);
+    pool_dir_watcher.data = boardd;
+    ev_io_start(EV_A_ &pool_dir_watcher);
 
     ev_loop(EV_A_ 0);
 
-    if (boardd_close(boardd))
+    if (boardd_destroy(boardd))
         return EXIT_FAILURE;
     else
         return EXIT_SUCCESS;
