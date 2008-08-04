@@ -8,20 +8,29 @@ v0.1, Apr. 2008
 
 * ChangeLog
 
-|       DATE | CHANGE                                     |
-|------------+--------------------------------------------|
-| 2008-04-01 | first draft, layout of database files      |
-|------------+--------------------------------------------|
-| 2008-04-03 | switch to Emacs Org-mode, more description |
-|------------+--------------------------------------------|
+|       DATE | CHANGE                                      |
+|------------+---------------------------------------------|
+| 2008-04-01 | first draft, layout of database files       |
+|------------+---------------------------------------------|
+| 2008-04-03 | switch to Emacs Org-mode, more descrciption |
+|------------+---------------------------------------------|
+| 2008-08-02 | introduce apdb, update documentation        |
+|------------+---------------------------------------------|
 
 
-* Layout of data file and index file to store articles of a board
+* apdb, an append-only database
+
+This specialized database is used to store articles for a BBS board,
+see comment in apdb.c for details.
+
+
+* Layout of data file and index file for a board database
 
 Each board is represented with a data file and an index file. The
-former contains information of all articles in that board, including
-properties like author name, title and content of each article. The
-latter contains indices to all articles.
+former has a ".d" suffix and contains information of all articles in
+that board, including properties like author name, title and content
+of each article. The latter has a ".i" suffix and contains indices of
+all articles.
 
 Bearing portability and efficiency in mind, the data file and index
 file contain machine and compiler dependent information like
@@ -31,72 +40,71 @@ endianness and structure alignment.
 ** Layout of index file
 
 Index files are redundant and can be reconstructed from data files,
-they are used to provide great efficiency to access articles,
+they are used to provide great efficiency to lookup articles,
 primarily sequentially. All items in index file are fixed size and
 sorted by their IDs, they contain only necessary information to show
 article list.
 
+Structure of index item:
 
-- The head of index file
+| NAME       | TYPE         | COMMENT                                                          |
+|------------+--------------+------------------------------------------------------------------|
+| guard      | unsigned int | 0xDEADBEEF(the byte order in file implies endianness)            |
+| flags      | unsigned int | flags represent 'g', 'm', '@', 'x', ';' in KBS                   |
+| id         | unsigned int | a unique positive integer used to identify this article          |
+| length     | size_t       | length of whole data item in data file                           |
+| offset     | off_t        | offset of data item in data file, relative to the file beginning |
+| pid        | unsigned int | parent id, id of the replied article                             |
+| tid        | unsigned int | topic id, id of the first article on this topic                  |
+| ctime      | time_t       | time of creation                                                 |
+| mtime      | time_t       | time of last modification                                        |
+| author     | 16 bytes     | author name of a article, including the trailing zero            |
+| title      | 64 bytes     | title of a article, including the trailing zero                  |
+|------------+--------------+------------------------------------------------------------------|
 
-The head of index file a fixed size record.
 
-| NAME    | SIZE    | COMMENT                           |
-|---------+---------+-----------------------------------|
-| magic   | 8 bytes | "BBSDBIDX"                        |
-| length  | 4 bytes | the length of this head           |
-| format  | 1 byte  | version of this file format[1]    |
-| flags   | 1 byte  | alignment of structure members[2] |
-| padding | 2 byte  | padding                           |
-|---------+---------+-----------------------------------|
-
-
-- The body of index file
-
-The body of index is constituted by many fixed size record.
-
-| NAME       | SIZE      | COMMENT                                                 |
-|------------+-----------+---------------------------------------------------------|
-| magic      | 4 bytes   | 0xDEADBEEF                                              |
-| offset     | 4 bytes   | offset in the data file, relative to the file beginning |
-| id         | 4 bytes   | a unique positive number used to identify this article  |
-| topic\_id  | 4 bytes   | id of the first article in a topic                      |
-| parent\_id | 4 bytes   | id of the article to be replied                         |
-| flags      | 4 bytes   | flags like 'g', 'm', '@', 'x', ';' in NewSMTH           |
-| ctime      | 4 bytes   | time of creation                                        |
-| mtime      | 4 bytes   | time of last modification                               |
-| size       | 4 bytes   | size of a article, calculated in bytes                  |
-| author     | 32 bytes  | author name of a article                                |
-| title      | 128 bytes | title of a article                                      |
-|------------+-----------+---------------------------------------------------------|
-
+The first index item (id=0) is ignored as the first data item is used to record meta information
+about this board database.
 
 ** Layout of data file
 
-- The head of data file
+The data file is made up of many variable size records.
 
-It's same with the head of index file except the magic field is "BBSDBDAT".
+Structure of data item:
 
+| NAME    | TYPE         | COMMENT                                                        |
+|---------+--------------+----------------------------------------------------------------|
+| guard   | unsigned int | 0xDEADBEEF(the byte order in file implies endianness)          |
+| flags   | unsigned int | flags represent 'g', 'm', '@', 'x', ';' in KBS                 |
+| id      | unsigned int | a unique positive integer used to identify this article        |
+| length  | size_t       | length of whole data item in data file                         |
+| pid     | unsigned int | parent id, id of the replied article                           |
+| tid     | unsigned int | topic id, id of the first article on this topic                |
+| ctime   | time_t       | time of creation                                               |
+| mtime   | time_t       | time of last modification                                      |
+| author  | 16 bytes     | author name of a article, including the trailing zero          |
+| title   | 64 bytes     | title of a article, including the trailing zero                |
+| content | char []      | article content, its length is deduced from the "length" field |
+|---------+--------------+----------------------------------------------------------------|
 
-- The body of data file
+The data item lacks the "offset" field in the index item.
 
-The body of data file is constituted by many variable size record.
+The content field of first data item(id=0) records some meta
+information about the board database:
 
-| NAME       | SIZE       | COMMENT                                                |
-|------------+------------+--------------------------------------------------------|
-| magic      | 4 bytes    | 0xDEADBEEF                                             |
-| length     | 4 bytes    | length of this record, multiple of 8                   |
-| id         | 4 bytes    | a unique positive number used to identify this article |
-| topic\_id  | 4 bytes    | id of the first article in a topic                     |
-| parent\_id | 4 bytes    | id of the article to be replied                        |
-| flags      | 4 bytes    | flags like 'g', 'm', '@', 'x', ';' in NewSMTH          |
-| ctime      | 4 bytes    | time of creation                                       |
-| mtime      | 4 bytes    | time of last modification                              |
-| size       | 4 bytes    | size of a article, calculated in bytes                 |
-| content    | size bytes | content of a article                                   |
-| author     | 32 bytes   | author name of a article                               |
-| title      | 128 bytes  | title of a article                                     |
-|------------+------------+--------------------------------------------------------|
+| NAME         | TYPE           | COMMENT                                                         |
+|--------------+----------------+-----------------------------------------------------------------|
+| index_t_len  | unsigned short | length of an index item without guard, flags, id, length fields |
+| data_t_len   | unsigned short | length of a data item without content field                     |
+| header_t_len | unsigned char  | content length of this data item                                |
+| int_len      | unsigned char  | length of int                                                   |
+| long_len     | unsigned char  | length of long                                                  |
+| unsigned_len | unsigned char  | length of unsigned                                              |
+| size_t_len   | unsigned char  | length of size_t                                                |
+| off_t_len    | unsigned char  | length of off_t                                                 |
+| time_t_len   | unsigned char  | length of time_t                                                |
+| struct_pack  | unsigned char  | structure member alignment, see [1]                             |
+|--------------+----------------+-----------------------------------------------------------------|
 
 
 * File arrangement in a running ABBS
@@ -174,14 +182,8 @@ properties of the attachment such as original file name.
 
 * Plan
 
-- restricted editor (rvim?): can't exec(), can't write to a new file,
-  can't open another file, can't execute script like vim's script, the
-  only functions allowed are just edit and save.
-
 
 Footnotes: 
-[1] The most significant bit indicates the byte order.
-
-[2] 0: 1 byte aligned, 1: 2 bytes aligned, 2: 4 bytes aligned, 3: 8
+[1] 0: 1 byte aligned, 1: 2 bytes aligned, 2: 4 bytes aligned, 3: 8
 bytes aligned.
 
