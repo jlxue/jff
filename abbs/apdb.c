@@ -447,7 +447,7 @@ L_error:
 }
 
 
-int
+unsigned
 apdb_add_begin(apdb_t* db, size_t length)
 {
     data_t data;
@@ -487,7 +487,7 @@ apdb_add_begin(apdb_t* db, size_t length)
     db->data_file_len += sizeof(data_t);
     db->action = ADD;
 
-    return (int)data.id;
+    return data.id;
 
 L_error:
     db->error = -1;

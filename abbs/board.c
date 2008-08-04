@@ -116,7 +116,7 @@ board_open(const char* path, char mode)
             goto L_error;
 
         memset(&index, 0, sizeof(index_t));
-        if (-1 == apdb_add_begin(board->db, sizeof(h)) ||
+        if ((unsigned)-1 == apdb_add_begin(board->db, sizeof(h)) ||
                 -1 == apdb_append_data(board->db, &h, sizeof(h)) ||
                 -1 == apdb_add_end(board->db, &index))
             goto L_error;
