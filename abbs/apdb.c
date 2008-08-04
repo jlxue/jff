@@ -897,15 +897,14 @@ apdb_previous(apdb_t* db, apdb_record_t record)
 }
 
 
-#if 0   /* awful API */
-int
-apdb_for_each(apdb_t* db, apdb_record_t from, apdb_record_t to, unsigned count,
-              int (*op)(apdb_record_t record, unsigned id, unsigned* flags,
-                        size_t length, void* index, void* arg),
-              void* arg)
+unsigned
+apdb_foreach(apdb_t* db, apdb_record_t from, apdb_record_t to, unsigned count,
+             int (*op)(apdb_record_t record, unsigned id, unsigned* flags,
+                       size_t length, void* index, void* arg),
+             void* arg)
 {
     index_t* index;
-    unsigned total;
+    unsigned n;
     int step;
 
     assert(NULL != db && from >= 0 && to >= 0 && NULL != op);
@@ -913,28 +912,30 @@ apdb_for_each(apdb_t* db, apdb_record_t from, apdb_record_t to, unsigned count,
     if (db->error)
         return -1;
 
-    total = from - to;
-    if (total > 0) {
+    if (0 == count)
+        return 0;
+
+    if (from > to) {            /* backwards */
         remap_index_file(db, from + db->index_len);
 
         assert(from + db->index_len <= db->index_file_len);
 
-        step = -db->index_len;      /* backwards */
-    } else if (total < 0) {
+        n = (from - to) / db->index_len;
+        step = -db->index_len;
+    } else {                    /* forwards */
         remap_index_file(db, to + db->index_len);
 
         assert(to + db->index_len <= db->index_file_len);
 
-        total = -total;
-        step = db->index_len;       /* forwards */
+        n = (to - from) / db->index_len;
+        step = db->index_len;
     }
 
-    total += 1;     /* [from, to], not [from, to)   */
-    if (count > total)
-        count = total;
-
-    if (0 == count)
-        return 0;
+    n += 1;     /* [from, to], not [from, to)   */
+    if (n > count)
+        n = count;
+    else
+        count = n;
 
     index = RECORD_TO_INDEX(db, from);
     do {
@@ -944,17 +945,16 @@ apdb_for_each(apdb_t* db, apdb_record_t from, apdb_record_t to, unsigned count,
         }
 
         if (op(INDEX_TO_RECORD(db, index), index->id, &index->flags,
-                 index->length - sizeof(data_t),
-                 db->index_len > sizeof(index_t) ? index->content : NULL,
-                 arg))
+                    index->length - sizeof(data_t),
+                    db->index_len > sizeof(index_t) ? index->content : NULL,
+                    arg))
             break;
 
         index = (index_t*)((char*)index + step);
-    } while (--count > 0);
+    } while (--n > 0);
 
-    return 0;
+    return count - n;
 }
-#endif
 
 
 unsigned
