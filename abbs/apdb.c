@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any latter version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,10 +14,44 @@
  * Lesser General Public License for more details.
  *
  *
+ * Implementation:
+ *
+ *  A database consists of two files, a data file and an index file,
+ *  the former consists of data_t structures, the latter consists of
+ *  index_t structures. A data_t structure and an index_t structure
+ *  represent a record. Each record is identified by its `id' field,
+ *  a monotonous incremental integer. At any time there can be many
+ *  reader processes but only one writer process, it's supposed all
+ *  modification directives are executed by the writer process.
+ *
+ *  Add record:
+ *      append a data_t structure to data file, append an index_t
+ *      structure to index file.
+ *
+ *  Modify record:
+ *      append a data_t structure to data file, modify `offset' and `length'
+ *      fields of corresponding index_t structure in index file.
+ *
+ *  Delete record:
+ *      modify `flags' field of corresponding index_t structure in index file.
+ *      this implys append-only databases need garbage collection regularly.
+ *
+ *  Search record by id:
+ *      As index_t structures are always sorted by id in ascending order,
+ *      it's easy to search a record by id with binary search.
+ *
+ *  Garbage collection:
+ *      Dump all undeleted records to a new database, then all processes
+ *      switch to the new one.
+ *
+ *
  * ChangeLog:
+ *
  *  2008-07-16  Liu Yubao
  *      * initial version, pass some basic tests
  *
+ *  2008-08-02  Liu Yubao
+ *      * enhance and document code
  */
 
 #define _GNU_SOURCE         /* for O_CLOEXEC    */
@@ -338,6 +372,15 @@ apdb_close(apdb_t* db)
 }
 
 
+/**
+ * make sure range [0, min(to, st_size)) of data file is mapped.
+ *
+ * @note Writer process always knows the current real size of data
+ * file, but reader processes don't, so we need update @c data_file_len
+ * when map window can't fully cover [0, to), the caller should
+ * check @c data_file_len against @c to after calling this function to
+ * make sure not access data out of file ending.
+ */
 static void
 remap_data_file(apdb_t* db, size_t to)
 {
@@ -345,14 +388,19 @@ remap_data_file(apdb_t* db, size_t to)
 
     assert(NULL != db && 0 == db->error);
 
-    if (! CAN_WRITE(db)) {
-        /*
-         * don't have to be to <= db->data_file_len, because
-         * we don't use data_file_len to calculate count of records.
-         */
-        if (to <= db->data_mmap_len)
-            return;
-
+    /*
+     * don't have to be to <= db->data_file_len, because
+     * we don't use @c data_file_len to calculate count of records.
+     *
+     * @note db->data_file_len is always less or equal to st_size.
+     *
+     * @note NEVER return if @c to <= db->data_file_len for writer
+     * process because writer process increases data_file_len when
+     * adding record but doesn't update map window before finishing.
+     */
+    if (to <= db->data_mmap_len) {
+        return;
+    } else if (! CAN_WRITE(db)) {
         ERRORP_IF(-1 == fstat(db->data_fd, &st),
                   "failed to fstat");
 
@@ -380,6 +428,15 @@ L_error:
 }
 
 
+/**
+ * make sure range [0, min(to, st_size)) of index file is mapped.
+ *
+ * @note Writer process always knows the current real size of index
+ * file, but reader processes don't, so we need update @c index_file_len
+ * when map window can't fully cover [0, to), the caller should
+ * check @c index_file_len against @c to after calling this function to
+ * make sure not access data out of file ending.
+ */
 static void
 remap_index_file(apdb_t* db, size_t to)
 {
@@ -401,6 +458,13 @@ remap_index_file(apdb_t* db, size_t to)
                   "failed to fstat");
 
         db->index_file_len = st.st_size;
+    } else if (to <= db->data_mmap_len) {
+        /*
+         * @note NEVER return if @c to <= db->index_file_len for writer
+         * process because writer process increases index_file_len when
+         * adding record but doesn't update map window before finishing.
+         */
+        return;
     }
 
     if (db->index_mmap_len < db->index_file_len) {
@@ -423,13 +487,23 @@ L_error:
 }
 
 
+/**
+ * get next available id, 0 <= id < UINT_MAX
+ *
+ * @param db    pointer to a database instance
+ *
+ * @return UINT_MAX on error, next id on success
+ *
+ * @note This function can only be called by writer process
+ * because only it knows the real last record.
+ */
 static unsigned
 get_next_id(apdb_t* db)
 {
     unsigned count;
     index_t* index;
 
-    assert(NULL != db);
+    assert(NULL != db && CAN_WRITE(db));
     assert(db->index_file_len <= db->index_mmap_len);
 
     if (0 == db->index_file_len)
@@ -525,6 +599,12 @@ L_error:
 }
 
 
+/**
+ * Fill padding zeros to data file so every records are aligned
+ * by ALIGN_SIZE, it's convenient for memory mapping.
+ *
+ * @param db    pointer to a database instance
+ */
 static void
 pad_data_file(apdb_t* db)
 {
@@ -607,11 +687,8 @@ L_error:
 
 
 static int
-cmp_index_by_id(const void* a, const void* b)
+cmp_index_by_id(const index_t* k, const index_t* i)
 {
-    const index_t* k = (index_t*)a;
-    const index_t* i = (index_t*)b;
-
     return (k->id - i->id);
 }
 
@@ -641,7 +718,7 @@ apdb_get(apdb_t* db, unsigned id)
 
     key.id = id;
     index = bsearch(&key, db->index_mmap, count, db->index_len,
-                    cmp_index_by_id);
+                    (int (*)(const void*, const void*))cmp_index_by_id);
 
     if (NULL == index) {
         return -1;
