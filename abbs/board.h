@@ -42,7 +42,7 @@ board_close(board_t* board);
 
 
 article_t
-board_get(board_t* board, unsigned id);
+board_get(board_t* board, unsigned id, unsigned mask);
 
 
 article_t
@@ -94,6 +94,10 @@ board_modify_end(board_t* board);
 
 void
 board_delete(board_t* board, article_t article);
+
+
+unsigned
+board_delete_range(board_t* board, article_t from, article_t to);
 
 
 unsigned

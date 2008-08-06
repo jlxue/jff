@@ -181,6 +181,7 @@ signal_cb(EV_P_ struct ev_signal* w, int revents)
 }
 
 
+/* get the first non-empty line as title    */
 size_t
 get_title(const char* content, size_t len, char* title, size_t size)
 {
@@ -249,14 +250,16 @@ modify_article(board_t* board, article_t article, const char* title,
 static int
 delete_article(board_t* board, article_t article)
 {
-    return -1;
+    board_delete(board, article);
+    return 0;
 }
 
 
 static int
 delete_article_range(board_t* board, article_t from, article_t to)
 {
-    return -1;
+    board_delete_range(board, from, to);
+    return 0;
 }
 
 
@@ -298,12 +301,12 @@ process_pool_file(boardd_t* boardd, const char* filename)
 
 
     if (OP_POST != op) {
-        article1 = board_get(boardd->boards[i], id1);
+        article1 = board_get(boardd->boards[i], id1, (WRITING | DELETED));
         ERROR_IF(-1 == article1, "can't find article %u in board %hu", id1, bid);
     }
 
     if (OP_DELETE_RANGE == op) {
-        article2 = board_get(boardd->boards[i], id2);
+        article2 = board_get(boardd->boards[i], id2, (WRITING | DELETED));
         ERROR_IF(-1 == article2, "can't find article %u in board %hu",
                  id1, bid);
         ret = delete_article_range(boardd->boards[i], article1, article2);

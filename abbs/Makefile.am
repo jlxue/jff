@@ -25,7 +25,7 @@ libbbs_la_SOURCES = \
 libbbs_la_LDFLAGS = -version-info 0:0:0
 
 libjail_la_SOURCES = jail.c
-libjail_la_LDFLAGS = -ldl
+libjail_la_LIBADD = -ldl
 
 bbs_SOURCES = bbs.c
 bbs_LDADD = libbbs.la $(READLINELIB)

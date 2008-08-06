@@ -133,6 +133,19 @@ apdb_delete(apdb_t* db, apdb_record_t record);
 
 
 /**
+ * delete many records
+ *
+ * @param db    pointer to a database instance
+ * @param from  the beginning record
+ * @param to    the ending record, included.
+ *
+ * @return count of deleted records
+ */
+unsigned
+apdb_delete_range(apdb_t* db, apdb_record_t from, apdb_record_t to);
+
+
+/**
  * begin to update a record
  *
  * @param db    pointer to a database instance

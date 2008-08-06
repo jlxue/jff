@@ -45,16 +45,22 @@ typedef struct {
 } header_t;
 
 
+/*
+ * contained in apdb.c:index_t's content[] field
+ */
 typedef struct {
     unsigned        pid;        /* id of the replied article                */
     unsigned        tid;        /* id of the first article on this topic    */
     time_t          ctime;      /* time of creation                         */
     time_t          mtime;      /* time of modification                     */
-    char            author[AUTHOR_LEN]; /* can't contains '-', see boardd.c */
+    char            author[AUTHOR_LEN]; /* can't contains '_', see pool.c   */
     char            title[TITLE_LEN];
 } index_t;
 
 
+/*
+ * contained in apdb.c:data_t's content[] field
+ */
 typedef struct {
     index_t         info;
     char            content[];
@@ -148,7 +154,7 @@ board_close(board_t* board)
 
 
 article_t
-board_get(board_t* board, unsigned id)
+board_get(board_t* board, unsigned id, unsigned mask)
 {
     article_t article;
     unsigned flags;
@@ -164,7 +170,7 @@ board_get(board_t* board, unsigned id)
         return -1;
 
     flags = apdb_record_flags(board->db, article);
-    if (flags & (DELETED | WRITING))
+    if (flags & mask)
         return -1;
     else
         return article;
@@ -360,6 +366,15 @@ board_delete(board_t* board, article_t article)
     assert(NULL != board);
 
     apdb_delete(board->db, article);
+}
+
+
+unsigned
+board_delete_range(board_t* board, article_t from, article_t to)
+{
+    assert(NULL != board);
+
+    return apdb_delete_range(board->db, from, to);
 }
 
 

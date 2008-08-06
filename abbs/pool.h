@@ -8,8 +8,8 @@
 extern "C" {
 #endif
 
-#define POOL_FILENAME_MAX   256
-#define POOL_PATH_MAX       512
+#define POOL_FILENAME_MAX   128
+#define POOL_PATH_MAX       256
 
 
 typedef enum {

@@ -8,7 +8,6 @@
 #include "board.h"
 #include "pool.h"
 
-
 #define POOL_FILENAME_SEP       '_'
 
 #define FLAG_POST_CHAR          'p'
@@ -123,7 +122,6 @@ generate_pool_file_name(char* filename, size_t len, board_op_t op, time_t* t,
                         const char* author, unsigned short bid, unsigned id1,
                         unsigned id2)
 {
-    char flag;
     char timestamp[15];
     int n;
 
@@ -133,26 +131,29 @@ generate_pool_file_name(char* filename, size_t len, board_op_t op, time_t* t,
 
     switch (op) {
     case OP_POST:
-        flag = FLAG_POST_CHAR;
+        n = snprintf(filename, len, "%c_%s_%hu_%s.XXXXXX",
+                     FLAG_POST_CHAR, timestamp, bid, author);
         break;
     case OP_REPLY:
-        flag = FLAG_REPLY_CHAR;
+        n = snprintf(filename, len, "%c_%s_%hu_%s_%u.XXXXXX",
+                     FLAG_REPLY_CHAR, timestamp, bid, author, id1);
         break;
     case OP_MODIFY:
-        flag = FLAG_MODIFY_CHAR;
+        n = snprintf(filename, len, "%c_%s_%hu_%s_%u.XXXXXX",
+                     FLAG_MODIFY_CHAR, timestamp, bid, author, id1);
         break;
     case OP_DELETE:
-        flag = FLAG_DELETE_CHAR;
+        n = snprintf(filename, len, "%c_%s_%hu_%s_%u.XXXXXX",
+                     FLAG_DELETE_CHAR, timestamp, bid, author, id1);
         break;
     case OP_DELETE_RANGE:
-        flag = FLAG_DELETE_RANGE_CHAR;
+        n = snprintf(filename, len, "%c_%s_%hu_%s_%u_%u.XXXXXX",
+                     FLAG_DELETE_RANGE_CHAR, timestamp, bid, author, id1, id2);
         break;
     default:
         return 0;
     }
 
-    n = snprintf(filename, len, "%c_%s_%hu_%s.XXXXXX",
-                 flag, timestamp, bid, author);
     if(n <= 0 || (size_t)n >= len)
         return 0;
 

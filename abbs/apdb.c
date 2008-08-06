@@ -6,7 +6,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any latter version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -743,6 +743,37 @@ apdb_delete(apdb_t* db, apdb_record_t record)
     assert(GUARD == index->guard);
 
     index->flags |= DELETED;
+}
+
+
+unsigned
+apdb_delete_range(apdb_t* db, apdb_record_t from, apdb_record_t to)
+{
+    index_t *begin, *end;
+    unsigned count = 0;
+
+    assert(NULL != db && from >= 0 && CAN_WRITE(db));
+    assert(db->index_file_len <= db->index_mmap_len);
+
+    if (from > to) {
+        apdb_record_t r;
+
+        r = from;
+        from = to;
+        to = r;
+    }
+
+    begin = RECORD_TO_INDEX(db, from);
+    end = RECORD_TO_INDEX(db, to);
+    assert(GUARD == begin->guard && GUARD == end->guard);
+
+    do {
+        begin->flags |= DELETED;
+        begin = (index_t*)((char*)begin + db->index_len);
+        ++count;
+    } while (begin <= end);
+
+    return count;
 }
 
 

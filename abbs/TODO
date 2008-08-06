@@ -32,3 +32,8 @@
 * Makefile.am: how to install header files to .../abbs/xxx?
 * Makefile.am: how to always build libjail as shared library?
 
+* Perl implementation:
+    sqlite, slang, ncurses, inotify, mmap all have Perl interfaces,
+    and DBI, cache::*, memcached, Encoding modules..., but perl
+    consumes more memory.
+

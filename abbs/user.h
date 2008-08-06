@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+const char*
+get_user_name(uid_t uid);
 
 #ifdef __cplusplus
 }
