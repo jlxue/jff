@@ -207,4 +207,4 @@ EasyMock/JMock, JUnit/TestNG, HttpUnit, DbUnit, Cargo,
 Selenium: 控制浏览器进行 Web 应用测试
 CruiseControl, Anthill, Hudson: 持续集成
 STAN, Clover, CheckStyle, FindBugs: 代码覆盖、质量测试
-
+db4o, httpclient

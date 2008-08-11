@@ -23,3 +23,5 @@ glib, gtk
 git, mercurial
 WebKit
 
+===========================
+good libs: libev, libevent, sglib, sqlite3

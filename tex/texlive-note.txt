@@ -1,0 +1,488 @@
+* 概况
+
+texlive.tlpdb 信息组织的非常好，每个包都有很详细的说明。
+
+所有包分成五类，如下：
+
+分类            个数    大小(binfiles, runfiles, docfiles, srcfiles)
+====================================================================
+Collection      84      0, 0, 0, 0 (28768, 0, 0)
+Documentation   98      0, 0, 40398, 576 (26078, 85390802, 534703)
+Package         1561    3680, 186353, 167206, 23021 (324742446, 461438444, 23057161)
+Scheme          10      0, 0, 0, 0 (4781, 0, 0)
+TLCore          1251    159754, 7403, 6086, 0 (181982003, 12659669, 0)
+--------------------------------------------------------------------
+                3004    27.4%, 32.6%, 36.0%, 4% 
+                        括号内为 containersize, doccontainersize, srccontainersize
+
+Collection 和 Scheme，前者可以视为 Debian 上的 metapackage，将满足特定功
+能的所有包关联在一起，后者可以视为 Debian 上的 task，将满足特定任务的所有
+包关联在一起。
+
+几个特殊的包(都属于 TLCore 类，都是没有实际内容的包)：
+00texlive-installation.config
+    安装时充当默认配置，安装后记录配置，配置项如下：
+    platform                    安装时选择的架构
+    location                    安装位置
+    opt_paper                   a4，默认纸张
+    opt_create_formats          1，是否创建 fmt 文件
+    opt_create_symlinks         0，是否创建符号链接
+    opt_sys_bin                 /usr/local/bin
+    opt_sys_info                /usr/local/info
+    opt_sys_man                 /usr/local/man
+    opt_install_docfiles        1
+    opt_install_srcfiles        1
+    available_architectures     i386-linux mips-irix sparc-solaris i386-darwin
+                                win32 powerpc-aix i386-openbsd i386-solaris
+                                hppa-hpux alpha-linux sparc-linux i386-freebsd
+                                powerpc-linux amd64-freebsd x86_64-linux
+                                universal-darwin
+                                注：这些跟 config.guess 里定义的不一样。
+
+00texlive.config
+    texlive 的打包配置，决定构建 texlive 时是否将文档
+和源码分开打包。
+
+00texlive.core
+    无用。
+
+00texlive.installer
+    安装程序
+
+
+* 包信息
+
+每个包有如下属性，标星号的是必需属性：
+
+name               * 此包名字，唯一
+category           * 分类
+revision           * 此包版本
+shortdesc            短描述
+longdesc             长描述，这两个描述可以都没有
+depend               依赖的其它包，包名有的以 .ARCH 结尾
+execute              安装后执行的动作
+
+binfiles             bin/ 下的系统架构相关的可执行程序，貌似不包括脚本
+runfiles             运行所需文件
+containermd5       * 去掉文档的压缩包的 MD5 摘要
+containersize      * 去掉文档的压缩包大小
+
+docfiles             文档清单以及总大小
+doccontainermd5      文档压缩包的 MD5 摘要
+doccontainersize     文档压缩包大小
+
+srcfiles             源文件清单
+srccontainermd5      源文件压缩包的 MD5 摘要
+srccontainersize     源文件压缩包大小
+
+catalogue            此包的编目名字，当 ctan 上名字跟 name 属性不一致时使用
+                     (这种情况极少)，比如 uk-tex-faq 有不同译本，每个译本一
+                     个包
+catalogue-ctan       此包在 ctan 上的位置
+catalogue-date       此包信息更新的日期？
+catalogue-license    此包的许可证
+catalogue-version    此包的版本
+                     注意：只有三分之一多点的包有后面四个属性，不知何故
+
+
+* 语言相关的包
+
+字体：arphic
+文档：collection-documentation-chinese
+断字：hyphen-chinese
+排版：cchess(中国象棋), china2e(农历), cjk, collection-langcjk, xiangqi,
+      yi4latex
+
+
+* 架构相关的包
+
+binfiles 区分架构, 比 00texlive.installation.config 列出的多一个
+powerpc-darwin，如下：
+
+   个数 架构                大小        百分比
+=============================================
+     89 x86_64-linux        9206        5.59% 
+     89 sparc-solaris       11517       6.99% 
+     89 sparc-linux         9020        5.47% 
+     89 powerpc-linux       9180        5.57% 
+     89 powerpc-aix         10797       6.55% 
+     89 i386-solaris        9011        5.47% 
+     89 i386-openbsd        7938        4.82% 
+     89 i386-linux          8399        5.10% 
+     89 i386-freebsd        8578        5.21% 
+     89 amd64-freebsd       9385        5.70% 
+     89 alpha-linux         14448       8.77% 
+     88 universal-darwin    17992       10.92%
+     88 mips-irix           11848       7.19% 
+     87 hppa-hpux           9178        5.57% 
+     85 win32               18136       11.01%
+      1 powerpc-darwin      59          0.04% 
+      1 i386-darwin         62          0.04% 
+
+
+* Collection 84 个
+
+collection-basic        <required>
+    plain TeX macros, Computer Modern fonts etc; no LaTeX.
+    依赖 ams amsfonts bibtex cm cmex dvips enctex etex etex-pkg
+    hyph-utf8 makeindex metafont mflogo misc plain hyphen-base
+    collection-basicbin collection-documentation-base
+
+collection-basicbin     <required>
+    bin-bibtex bin-dialog bin-dvipdfm bin-dvipdfmx bin-dvipsk
+    bin-getnonfreefonts bin-gsftopk bin-kpathsea bin-makeindex
+    bin-metafont bin-mfware bin-tetex bin-texlive bin-tex
+    bin-texconfig bin-xdvi dvipdfmx-def glyphlist luatex pdftex
+    texlive.infra
+
+collection-bibtexextra
+    额外的 bibtex 样式
+
+collection-binextra
+    DVI 文件操作，文学编程
+
+collection-context
+    ConTeXt 支持
+
+collection-documentation-base
+    texlive-en.pdf
+
+collection-documentation-xxxxxx
+    bulgarian chinese czechslovak dutch english finnish
+    french german greek italian japanese korean mongolian
+    polish portuguese russian slovenian spanish thai
+    turkish ukrainian vietnamese
+
+collection-fontbin
+    fontinst mft bin-afm2pl bin-fontware bin-ps2pkm collection-basic
+    字体转换程序
+
+collection-fontsextra
+    额外字体
+
+collection-fontsrecommended     <required>
+    推荐安装字体
+
+collection-formatsextra
+    额外的 format
+
+collection-games
+    排版游戏比如象棋棋谱
+
+collection-genericextra
+    额外的宏包
+
+collection-genericrecommended
+    推荐的宏包
+
+collection-graphicstools
+    dvipng, pngtools
+
+collection-htmlxml
+    LaTeX -> XML/HTML 转换以及 XML/SGML 排版(JadeTeX, PassiveTeX)
+
+collection-humanities
+    法律、语言学、社会科学、人类学方面的资料排版
+
+collection-langxxxxxx
+    african arab armenian cjk croatian cyrillic czechslovak
+    danish dutch finnish french german greek hebrew hungarian
+    indic italian latin mongolian norwegian other polish
+    portuguese spanish swedish tibetan ukenglish vietnamese
+
+collection-latex                <required>
+    LaTeX 支持
+
+collection-latex3
+    LaTeX 3 支持
+
+collection-latexextra
+    LaTeX 额外宏包
+
+collection-latexrecommended     <required>
+    LaTeX 推荐宏包
+
+collection-mathextra
+    数学排版
+
+collection-metapost
+    MetaPost 以及它的宏包
+
+collection-music
+    乐谱排版
+
+collection-omega
+    Omega 支持
+
+collection-pictures
+    图形包，如 pgf, texdraw, tikz
+
+collection-plainextra
+    额外的 plain TeX 宏包
+
+collection-pstricks
+    pstricks
+
+collection-psutils
+    psutils
+
+collection-publishers
+    发行书籍或发表论文排版用的宏包
+
+collection-science
+    自然科学和计算机科学排版用的宏包（计算机科学不算自然科学?）
+
+collection-texinfo
+    GNU Texinfo
+
+collection-ttfutils
+    ttf utils
+
+collection-wintools
+    Windows 版 gzip, chktex, unzip, wget, xpdf
+
+collection-xetex
+    XeTeX
+
+
+* Scheme 10 个
+
+scheme-basic
+    依赖 collection-basic, collection-latex，支持排版
+    plain TeX 和 LaTeX 文档生成 PS 和 PDF。
+scheme-context
+    依赖 collection-context collection-metapost xetex
+    tex-gyre antt antp iwona kurier lm，支持排版 ConTeXt
+    文档。
+scheme-full
+    依赖所有 collection。
+scheme-gust
+    为波兰语定制。
+scheme-gutenberg
+    为法语定制。
+scheme-medium
+    额外依赖部分 collection-langxxx（不包括 cjk）以及其它
+    一些 collection。
+scheme-minimal
+    依赖 collection-basic，只能排版 plain TeX 文档。
+scheme-omega
+    额外依赖一大堆语言包。
+scheme-tetex
+    功能上基本与 tetex 套装等价，额外依赖一大堆语言包。
+scheme-xml
+    基本是 scheme-basic 加上 XML 支持，比如 PassiveTeX,
+    JadeTeX, tex4ht, xmltex。
+
+
+* 实用工具程序
+
+查看文档：texdoc, texdoctk
+查看目录布局变量设置：texconfig conf
+刷新文件名数据库：mktexlsr
+设置 texlive 环境变量 tl-portable
+管理安装：tlmgr
+管理 format: fmtutil
+更新字体映射: updmap
+
+
+* install-tl 安装程序
+
+install-tl.bat      临时修改 PATH 和 PERL5LIB 以运行 install-tl
+install-tl          Perl 脚本
+
+$localpath  install-tl 所在目录，install-tl 运行会切换到这个目录下
+$installerdir   "."，install-tl 所在目录，指定 installer 相关文件
+            的路径应该用 $installerdir
+%install    pkgname => 1，记录待安装的软件包
+$location   安装源位置，如果指定了 -portable，则是环境变量 TEXDIR
+            的值，此时 %vars 中键 TEXDIR, TEXDIRW, TEXMFSYSVAR,
+            TEXMFSYSCONFIG, TEXMFLOCAL, TEXMFHOME, TEXMFVAR,
+            TEXMFCONFIG 都被设置成对应环境变量的值。
+$tlpdb      安装源上的 texlive.tlpdb, TeXLive::TLPDB 对象
+$localtlpdb 本地的 texlive.tlpdb, TeXLive::TLPDB 对象
+
+非 portable 方式下如下环境变量影响安装位置：
+ TEXLIVE_INSTALL_PREFIX         /usr/local/texlive   => $tex_prefix
+ TEXLIVE_INSTALL_TEXDIR         $tex_prefix/2007     => $vars{TEXDIRW}
+ TEXLIVE_INSTALL_TEXMFSYSVAR    $vars{TEXDIRW}/texmf-var
+ TEXLIVE_INSTALL_TEXMFSYSCONFIG $vars{TEXDIRW}/texmf-config
+ TEXLIVE_INSTALL_TEXMFLOCAL     $tex_prefix/texmf-local
+ TEXLIVE_INSTALL_TEXMFHOME      '$HOME/texmf'
+
+TEXDIRW 和 TEXDIR 的区别：
+    前者必须是可写的目录，存放 texmf-var, texmf-config
+    后者在 dvd 安装方式时是 abs_path($::installerdir), 否则是
+    TEXDIRW，因此在 postinstall 时执行 mktexls 等应该用 TEXDIR
+    来指定程序的全路径。
+
+do_installation()   实际安装
+do_cleanup()        保存 log 和 profile。
+
+
+* 精简 TeXLive
+
+所有 srcfiles(92.18 MB) + docfiles(834.73 MB) + runfiles(756.86 MB)
++ i386-linux binfiles(32.81 MB) 一共 1716.57 MB。
+
+各种安装情况的大小(i386-linux binfiles):
+scheme-basic
+    srcsize: 11.64 MB
+    docsize: 55.70 MB
+    runsize: 25.40 MB
+    binsize: 9.51 MB
+    total size: 102.25 MB
+
+scheme-basic + collection-langcjk
+    srcsize: 13.00 MB
+    docsize: 62.64 MB
+    runsize: 113.11 MB
+    binsize: 9.68 MB
+    total size: 198.44 MB
+
+scheme-basic + collection-langcjk + collection-fontsrecommended +
+collection-latexrecommended
+    srcsize: 30.05 MB
+    docsize: 145.02 MB
+    runsize: 218.77 MB
+    binsize: 9.69 MB
+    total size: 403.52 MB
+
+其它：
+collection-context, collection-metapost, collection-pictures,
+collection-pstricks, collection-psutils, collection-wintools,
+collection-xetex，加上 beamer 一共：
+    srcsize: 35.23 MB
+    docsize: 306.61 MB
+    runsize: 258.59 MB
+    binsize: 23.56 MB
+    total size: 624.00 MB
+
+按需安装，记录文件访问次数 or atime
+squashfs + unionfs/aufs
+
+TEXMFCNF 指定 Kpathsea 库配置文件 texmf.cnf 位置。
+
+可能的工作量：
+    发行版软件包的定义
+    按照发行版习惯重新布置文件
+    因文件布局改变而需要修改配置文件或者可执行程序代码
+    与系统已有工具的配合，如使用系统字体
+    如何让用户自己更新或者安装未纳入发行版管理的宏包
+
+
+* Debian 上 TeXLive 包情况
+
+** 目录结构有很大改变
+
+符合 Debian 惯例，每个目录下都符合 TDS 要求(/etc/texmf 下多一些文件), 
+以 TEX... 变量名引用则并无二致。
+
+TEXMFMAIN   /usr/local/texlive/2008/texmf               -> /usr/share/texmf
+TEXMFDIST   /usr/local/texlive/2008/texmf-dist          -> /usr/share/texmf-texlive
+TEXMFDOC    /usr/local/texlive/2008/texmf-doc           -> /usr/share/doc/texmf
+TEXMFLOCAL  /usr/local/texlive/texmf-local              -> /usr/local/share/texmf
+TEXMFSYSVAR /usr/local/texlive/2008/texlive/texmf-var   -> /var/lib/texmf
+TEXMFSYSCONFIG /usr/local/texlive/2008/texmf-config     -> /etc/texmf
+TEXMFVAR    $HOME/.texlive2008/texmf-var    -> $HOME/.texmf-var
+TEXMFCONFIG $HOME/.texlive2008/texmf-config -> $HOME/.texmf-config
+TEXMFHOME   $HOME/texmf         -> $HOME/texmf
+VARTEXFONTS                     -> /tmp/texfonts
+TEXMF                           -> $HOME/.tex-config
+                                   $HOME/.texmf-var
+                                   $HOMR/texmf
+                                   /etc/texmf
+                                   !! /var/lib/texmf
+                                   !! /usr/local/share/texmf
+                                   !! /usr/share/texmf
+                                   !! /usr/share/texmf-texlive
+SYSTEXMF                        -> /var/lib/texmf,
+                                   /usr/local/share/texmf:
+                                   /usr/share/texmf:
+                                   /usr/share/texmf-live
+
+
+** 分包基本与 TeXLive 的 scheme、collection 一致，更细致。
+
+1. /usr/share/doc/texlive-common/README.Debian: 与 TeX Live 的区别
+2. /usr/share/doc/texlive-common/README.source: Debian TeX Live 的源码维护
+3. tex-common 软件包包含了 Debian 用来维护 texlive 相关包的工具程序:
+   update-fontlang, update-texmf, updat-updmap, update-fmtutil,
+   update-language, dh_installtex
+   (update-* 只是维护配置文件，并不是取代对应的 TeX 工具程序)
+/usr/share/doc/tex-common:
+    Debian-TeX-Policy
+    TeX-on-Debian
+    tds
+
+========================================================
+Debian package                      TeXLive Package
+--------------------------------------------------------
+texlive-full                        scheme-full
+texlive                             scheme-basic
+    元包，方便用户安装
+    依赖
+        texlive-fonts-recommends
+        texlive-latex-base
+        texlive-latex-recommended
+texlive-base                        collection-basic
+    依赖
+        texlive-base-bin
+        texlive-doc-base
+texlive-base-bin                    collection-basicbin
+texlive-base-bin-doc
+texlive-bibtex-extra                collection-bibtexextra
+texlive-context                     collection-context
+texlive-doc-base                    collection-documentation-base
+texlive-doc-xxxx                    collection-documentation-xxxxxx
+texlive-extra-utils                 collection-binextra
+texlive-font-utils                  collection-fontbin, collection-ttfutils
+texlive-fonts-extra                 collection-fontsextra
+texlive-fonts-extra-doc
+texlive-fonts-recommended           collection-fontsrecommended
+texlive-formats-extra               collection-formatsextra
+texlive-games                       collection-games
+texlive-generic-extra               collection-genericextra
+texlive-generic-recommended         collection-genericrecommended
+texlive-humanities                  collection-humanities
+texlive-humanities-doc
+texlive-lang-all
+texlive-lang-xxx                    collection-langxxx
+    collection-langcjk 改叫 latex-cjk-xxx 了，分的更细
+texlive-latex-base                  collection-latex
+texlive-latex-base-doc
+texlive-latex-extra                 collection-latexextra
+texlive-latex-extra-doc
+texlive-latex-recommended           collection-latexrecommended
+texlive-latex-recommended-doc
+texlive-latex3                      collection-latex3
+texlive-math-extra                  collection-mathextra
+texlive-metapost                    collection-metapost
+texlive-metapost-doc
+texlive-music                       collection-music
+texlive-omega                       collection-omega
+texlive-pictures                    collection-pictures
+texlive-pictures-doc
+texlive-plain-extra                 collection-plainextra
+texlive-pstricks                    collection-pstricks
+texlive-pstricks-doc
+texlive-publishers                  collection-publishers
+texlive-publishers-doc
+texlive-science                     collection-science
+texlive-science-doc
+texlive-xetex                       collection-xetex
+texinfo                             collection-texinfo
+dvipng, pngtools                    collection-graphicstools
+jadetex, tex4ht, xmltex             collection-htmlxml
+(collection-htmlxml 中的 passivetex, xmlplay 包含在 Debian 的 xmltex 中) 
+(psutils，缺一些程序)               collection-psutils
+
+
+** 配置文件布局
+
+/etc/texmf/texmf.cnf
+/var/lib/texmf/web2c/updmap.cfg
+/var/lib/texmf/tex/generic/config/language.dat
+/var/lib/texmf/web2c/fmtutil.cnf
+四个文件都是从 /etc/texmf 下对应子目录的配置文件片段组合而成，
+只有 /etc/texmf/texmf.cnf 允许手动编辑，其修改被 ucf 合并。
+
