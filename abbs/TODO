@@ -34,6 +34,6 @@
 
 * Perl implementation:
     sqlite, slang, ncurses, inotify, mmap all have Perl interfaces,
-    and DBI, cache::*, memcached, Encoding modules..., but perl
-    consumes more memory.
+    and DBI, cache::*, memcached, Encoding modules, Text::Wrap,
+    Text::Soundex, POE, Catalyst...  but perl consumes more memory.
 
