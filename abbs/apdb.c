@@ -190,9 +190,10 @@ apdb_open(const char* path, char mode, size_t index_content_len)
     fullpath = (char*)malloc(len + 3);
     ERRORP_IF(NULL == fullpath, "failed to malloc for fullpath");
 
-    strcpy(fullpath, path);
+    memcpy(fullpath, path, len);
     fullpath[len++] = '.';
-    fullpath[len] = 'd';
+    fullpath[len++] = 'd';
+    fullpath[len++] = '\0';
 
     readonly = 'r' == mode;
     if (readonly) {
@@ -201,7 +202,7 @@ apdb_open(const char* path, char mode, size_t index_content_len)
         db->data_fd = open(fullpath, flags);
         ERRORP_IF(-1 == db->data_fd, "failed to open %s readonly", fullpath);
 
-        fullpath[len] = 'i';
+        fullpath[len - 2] = 'i';
         db->index_fd = open(fullpath, flags);
         ERRORP_IF(-1 == db->index_fd, "failed to open %s readonly", fullpath);
 
@@ -218,7 +219,7 @@ apdb_open(const char* path, char mode, size_t index_content_len)
         ERRORP_IF(-1 == flock(db->data_fd, LOCK_EX | LOCK_NB),
                "failed to lock data file");
 
-        fullpath[len] = 'i';
+        fullpath[len - 2] = 'i';
         db->index_fd = open(fullpath, flags, 0644);
         ERRORP_IF(-1 == db->index_fd, "failed to open %s readwrite", fullpath);
         ERRORP_IF(-1 == flock(db->index_fd, LOCK_EX | LOCK_NB),
