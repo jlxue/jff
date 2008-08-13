@@ -1174,6 +1174,10 @@ apdb_record_set_flags(apdb_t* db, apdb_record_t record, unsigned flags)
 }
 
 
+/*
+ * XXX: This isn't a real implementation of locking.
+ *      Possible solution: file-region lock, reader-writer lock?
+ */
 int
 apdb_record_lock(apdb_t* db, apdb_record_t record)
 {
