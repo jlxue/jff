@@ -21,6 +21,26 @@ AC_CHECK_LIB(ev, ev_loop, [EVLIB=-lev], AC_MSG_ERROR([
 *** Unable to find libev library]))
 AC_SUBST([EVLIB])
 
+AC_CHECK_LIB(sqlite3, sqlite3_open_v2, [SQLITE3LIB=-lsqlite3], AC_MSG_WARN([
+*** Unable to find sqlite3 library]))
+AC_SUBST([SQLITE3LIB])
+AM_CONDITIONAL([HAVE_SQLITE3], [test -n "$SQLITE3LIB"])
+
+AC_CHECK_LIB(gdbm, gdbm_open, [GDBMLIB=-lgdbm], AC_MSG_WARN([
+*** Unable to find gdbm library]))
+AC_SUBST([GDBMLIB])
+AM_CONDITIONAL([HAVE_GDBM], [test -n "$GDBMLIB"])
+
+AC_CHECK_LIB(db, db_create, [BDBLIB=-ldb], AC_MSG_WARN([
+*** Unable to find libdb library]))
+AC_SUBST([BDBLIB])
+AM_CONDITIONAL([HAVE_BDB], [test -n "$BDBLIB"])
+
+AC_CHECK_LIB(tokyocabinet, tchdbnew, [TOKYO_CABINET_LIB=-ltokyocabinet], AC_MSG_WARN([
+*** Unable to find Tokyo Cabinet library]))
+AC_SUBST([TOKYO_CABINET_LIB])
+AM_CONDITIONAL([HAVE_TOKYO_CABINET], [test -n "$TOKYO_CABINET_LIB"])
+
 # Checks for header files.
 AC_HEADER_DIRENT
 AC_HEADER_STDC
@@ -50,5 +70,5 @@ AC_FUNC_STAT
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS([memset mkdir munmap realpath rmdir strchr strcspn strdup strndup strrchr strspn strtoul])
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile test/Makefile test/benchmark/Makefile])
 AC_OUTPUT

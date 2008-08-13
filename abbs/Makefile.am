@@ -1,3 +1,5 @@
+SUBDIRS = . test
+
 lib_LTLIBRARIES = libbbs.la libjail.la
 bin_PROGRAMS = bbs boardd
 #include_HEADERS = apdb.h board.h util.h env.h
