@@ -1,0 +1,32 @@
+2008-08-04  Liu Yubao  <yubao.liu@gmail.com>
+
+	* update design documentation
+
+2008-07-31  Liu Yubao  <yubao.liu@gmail.com>
+
+	* add CMake support
+
+2008-07-26  Liu Yubao  <yubao.liu@gmail.com>
+
+	* add autotools support
+
+2008-07-23  Liu Yubao  <yubao.liu@gmail.com>
+
+	* implement bbs.c
+
+2008-07-18  Liu Yubao  <yubao.liu@gmail.com>
+
+	* rewrite board.c and boardd.c with apdb
+
+2008-07-12  Liu Yubao  <yubao.liu@gmail.com>
+
+	* introduce apdb
+
+2008-04-07  Liu Yubao  <yubao.liu@gmail.com>
+
+	* initial implementation of board.c and boardd.c
+
+2008-04-01  Liu Yubao  <yubao.liu@gmail.com>
+
+	* start this project, write design documentation
+

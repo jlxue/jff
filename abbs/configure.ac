@@ -3,7 +3,7 @@
 
 AC_PREREQ(2.59)
 AC_INIT(ABBS, 0.0.1, yubao.liu@gmail.com)
-AM_INIT_AUTOMAKE([-Wall -Werror foreign dist-bzip2])
+AM_INIT_AUTOMAKE([-Wall -Werror dist-bzip2])
 AC_CONFIG_SRCDIR([bbs.c])
 AC_CONFIG_HEADERS([config.h])
 
