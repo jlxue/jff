@@ -29,6 +29,8 @@ extern "C" {
 #define DELETED             0x1
 #define WRITING             0x2
 
+#define APDB_MASK_BITS      8
+
 
 typedef struct apdb_s apdb_t;
 
