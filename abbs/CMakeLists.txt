@@ -36,8 +36,6 @@ set(bbs_SOURCES bbs.c)
 
 set(boardd_SOURCES boardd.c)
 
-set(test_apdb_SOURCES test_apdb.c)
-
 add_library(libbbs ${libbbs_SOURCES})
 set_target_properties(libbbs PROPERTIES OUTPUT_NAME bbs)
 set_target_properties(libbbs PROPERTIES VERSION 0.0 SOVERSION 0)
@@ -52,6 +50,5 @@ target_link_libraries(bbs libbbs readline)
 add_executable(boardd ${boardd_SOURCES})
 target_link_libraries(boardd libbbs ev)
 
-add_executable(test_apdb ${test_apdb_SOURCES})
-target_link_libraries(test_apdb libbbs)
+add_subdirectory(test)
 
