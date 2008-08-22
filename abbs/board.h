@@ -17,6 +17,8 @@
 #ifndef BOARD_H__
 #define BOARD_H__
 
+#include "apdb.h"   /* for WRITING and DELETED  */
+
 #ifdef __cplusplus
 extern "C" {
 #endif

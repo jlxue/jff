@@ -32,7 +32,6 @@
 #include <readline/history.h>
 #include <readline/readline.h>
 
-#include "apdb.h"
 #include "board.h"
 #include "pool.h"
 #include "user.h"
