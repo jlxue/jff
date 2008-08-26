@@ -133,6 +133,7 @@ Limo
 http://www.cgsecurity.org/wiki/TestDisk
 TestDisk: 修复分区表、引导扇区
 
+http://www.gnuplot.info
 http://www.octave.org
 http://www.scilab.org
 http://www.sagemath.org
@@ -208,3 +209,7 @@ Selenium: 控制浏览器进行 Web 应用测试
 CruiseControl, Anthill, Hudson: 持续集成
 STAN, Clover, CheckStyle, FindBugs: 代码覆盖、质量测试
 db4o, httpclient
+
+* C++
+Qt, ACE, ASIO, Boost, Crypto++, ICU
+
