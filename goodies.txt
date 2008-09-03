@@ -211,5 +211,5 @@ STAN, Clover, CheckStyle, FindBugs: ¥˙¬Î∏≤∏«°¢÷ ¡ø≤‚ ‘
 db4o, httpclient
 
 * C++
-Qt, ACE, ASIO, Boost, Crypto++, ICU
+Qt, ACE, ASIO, Boost, Crypto++, ICU, Poco, Protocol Buffers, safe_iop
 
