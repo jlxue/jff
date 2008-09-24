@@ -57,7 +57,8 @@ inoremap <F5> <ESC>:set paste<CR>"+p:set nopaste<CR>i
 vnoremap <F6> "+y
 
 " Let F7 to show buf explorer(bufexplorer plugin)
-noremap <F7> <ESC>\be
+map <F7> <ESC>\be
+imap <F7> <ESC>\be
 
 " Define g:qb_hotkey before source qbuf.vim
 let g:qb_hotkey="<S-F7>"
@@ -181,6 +182,27 @@ set display=lastline
 set listchars+=extends:>,precedes:<
 
 set updatetime=2000
+
+" for linux kernel source
+if getcwd() =~ 'linux-2.6'
+    set noet ts=8 sw=8
+endif
+if has("cscope")
+    set cscopeprg=cscope\ -d\ -k\ -q
+    set cscopequickfix=s-,c-,d-,i-,t-,e-
+    set cst
+    set csto=1
+    set nocsverb
+    " add any database in current directory
+    if filereadable("cscope.out")
+        cs add cscope.out
+    " else add database pointed to by environment
+    elseif $CSCOPE_DB != ""
+        cs add $CSCOPE_DB
+    endif
+    set csverb
+endif
+
 "--------------------------------------for autocmd and filetype------------------
 syntax on
 filetype plugin on

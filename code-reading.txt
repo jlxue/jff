@@ -1,3 +1,44 @@
+http://fxr.watson.org
+        FreeBSD 3-stable 至 FreeBSD 8-current
+        Linux 2.4.22, Linux 2.6 git branch
+        Plan 9
+        Darwin 7.0 XNU 至 Darwin 9.0 XNU
+        TrustedBSD
+        OpenSolaris
+        Minix 3.1.1
+        NetBSD 2.x - HEAD
+        OpenBSD
+        DragonFlyBSD
+
+http://fxr.googlebit.com/
+        FreeBSD 6 stable, 7 stable, 8 current
+        NetBSD current
+        OpenBSD current
+        linux 2.6.22.4
+
+http://lxr.linux.no/
+        linux 2.6.11 - current
+        linux 2.5.0 - 2.6.11
+        linux 0.01 - 2.4.31
+        SysLinux
+        coreboot v2
+        coreboot v3
+        MacOS X Darwin XNU
+        Perl
+
+http://www.tamacom.com/tour.html
+        Linux 2.6.x
+        FreeBSD 7.x
+        NetBSD 4.x
+        OpenBSD 4.x
+        GNU Hurd 0.3
+        OpenSolaris
+        UNIX v7
+        4.3BSD
+
+http://mxr.mozilla.org
+
+
 The Ultima Code - The Impossible Mission
 =======================================
 
@@ -12,7 +53,7 @@ Linux, OpenSolaris, NetBSD, FreeBSD, OpenBSD, DragonFlyBSD
 Minix3, eCos, Plan9
 vim, emacs
 Parrot, Perl, Python, PyPy, LLVM, gcc, pcc, www.tendra.org
-Mozilla SpiderMonkey + Tamarin(二者合并为 ActionMonkey)
+Mozilla SpiderMonkey + Tamarin(二者合并为 ActionMonkey), TraceMonkey, Google V8, SquirrelFish Extreme
 hlvm.org, nekovm.org, JikesRVM
 OCaml, SBCL, ClozureCL, Erlang, Squeak, strongtalk, OpenJDK, PhoneME
 Lua, Luagit, dynasm
