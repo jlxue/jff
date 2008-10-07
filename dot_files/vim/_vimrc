@@ -61,6 +61,9 @@ map <F7> <ESC>\be
 imap <F7> <ESC>\be
 
 " Define g:qb_hotkey before source qbuf.vim
+"   For Putty, <S-F7> may don't work, use 
+"   let g:qb_hotkey="^vS-F7" instead. ^vS-F7
+"   means: press Ctrl-v, then press Shift and F7.
 let g:qb_hotkey="<S-F7>"
 
 " mru.vim
@@ -188,7 +191,11 @@ if getcwd() =~ 'linux-2.6'
     set noet ts=8 sw=8
 endif
 if has("cscope")
-    set cscopeprg=cscope\ -d\ -k\ -q
+    if executable('mlcscope')
+        set cscopeprg=mlcscope\ -d\ -k\ -q
+    else
+        set cscopeprg=cscope\ -d\ -k\ -q
+    endif
     set cscopequickfix=s-,c-,d-,i-,t-,e-
     set cst
     set csto=1
