@@ -1,0 +1,42 @@
+1. http://code.google.com/p/ctxnotes/
+zhfonts.tex 和 ctxnotes.pdf
+编译需要 http://modules.contextgarden.net/t-layout 。
+额外的 tex 文件放到 $TEXMFLOCAL/tex/context/third/ 目录下，
+然后执行 luatools --generate && context --make。
+
+最新版 luatex for windows:
+http://www.fsci.fuk.kindai.ac.jp/kakuto/win32-ptex/web2c75-e.html
+luaTeX-DEV for W32
+下载那个“luatex-dev-w32.tar.bz2”，用里面的\bin\luatex.dll
+替换context minimals 里面的 \tex\texmf-mswin\bin\luatex.dll
+然后再Generate Formats (LuaTeX)就行了
+
+
+2. http://wiki.contextgarden.net/Main_Page
+ConTeXt 文档
+
+3. mtxrun --script fonts --list
+看字体列表
+   mtxrun --script fonts --help 看更多选项
+
+4. 编译文档
+context a.tex       or      texexec --lua a.tex
+context --mode=screen a.tex     为屏幕阅读模式编译
+context --purge
+
+5. 工具程序
+luatools --generate         Mark IV 的 mktexlsr 替代品
+context --make              Mark IV 的 fmtutil 替代品
+
+6. 编译 luatex:
+svn checkout svn://scm.foundry.supelec.fr/svn/luatex/trunk luatex
+cd luatex
+./build.sh
+
+7. 减少 luatex 内存消耗
+\let\synchronizetext\relax
+\synchronizemathfontsfalse
+
+8. 升级 ConTeXt Minimals
+ctxtools --updatecontext
+

@@ -1,0 +1,12 @@
+set PATH=c:\MinGW\bin;%PATH%
+set BOOST_ROOT=d:\boost_1_36_0
+set BOOST_BUILD=d:\boost_build
+
+cd %BOOST_ROOT%\tools\jam\src
+.\build.bat mingw
+
+cd %BOOST_ROOT%
+tools\jam\src\bin.ntx86\bjam  --toolset=gcc ^
+    --build-dir=%BOOST_BUILD%   ^
+    --without-mpi --without-python stage release
+
