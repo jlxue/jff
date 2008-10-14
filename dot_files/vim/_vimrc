@@ -107,6 +107,9 @@ let MRU_Max_Entries = 50
 "let g:AutoPreview_enabled = 0
 "let g:AutoPreview_allowed_filetypes = ["c", "cpp", "java"]
 
+" for showmarks.vim
+let g:showmarks_include="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
 "--------------------------------------misc settings-----------------------------
 " recursively search tag file upwards, see :help file-searching
 set tags=./tags,tags;
