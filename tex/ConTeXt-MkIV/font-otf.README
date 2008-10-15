@@ -1,0 +1,23 @@
+发信人: garfileo (garfileo), 信区: TeX
+标  题: Re: ConTeXt 里怎么调节中文标点为一个汉字宽度？
+发信站: 水木社区 (Tue Oct 14 10:51:52 2008), 站内
+
+
+【 在 donated (吾未见好德如好色者也) 的大作中提到: 】
+: 等我有空了就来写一个....
+: Hans的代码并不好看,寒假看懂过一次还fix了两个bug,到了暑假看相同的代码居
+: 然不知道在说什么.....
+
+我修改了 font-otf.lua 最后那部分的一些代码，现在貌似可以禁止标点符号出现
+在行尾。这样就可以通过修改 inter_char_half_factor 的值来调整标点宽度了，
+我觉得设置成 0.3，也就是将标点宽度压缩为一个汉字宽度的 7/10，会好看一些
+；本来是设置成压缩一半宽度，实在有点过紧。
+
+附件是我修改后的 font-otf.lua，查询 "LiYanrui" 即可找到我修改的所有地方。
+在使用时，只需将 font-otf.lua 放在 $TEXMFLOCAL/tex/context/base 目录中，
+然后“luatools --generate && context --make”重新生成一下 ConText 格式。
+--
+
+※ 修改:·garfileo 于 Oct 14 10:55:48 2008 修改本文·[FROM: 210.44.190.*]
+※ 来源:·水木社区 http://newsmth.net·[FROM: 210.44.190.*]
+

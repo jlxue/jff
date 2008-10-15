@@ -33,6 +33,9 @@ svn checkout svn://scm.foundry.supelec.fr/svn/luatex/trunk luatex
 cd luatex
 ./build.sh
 
+编译好的版本：
+http://foundry.supelec.fr/frs/?group_id=10
+
 7. 减少 luatex 内存消耗
 \let\synchronizetext\relax
 \synchronizemathfontsfalse
