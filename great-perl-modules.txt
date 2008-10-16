@@ -150,6 +150,7 @@ XML::LibXML
 Template
 
 DBD::SQLite
+DBD::RAM
 
 Parse::RecDescent
 
