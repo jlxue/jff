@@ -1,0 +1,58 @@
+\startcomponent workflow
+\product git-way-explained
+
+\section{工作流程}
+
+由于 GIT 太灵活了太繁复了，所以 GIT 用户常常结合自己的使用经历
+总结 GIT 的工作流程，在 GIT 源码的 Documentation/howto 和 GIT
+邮件列表中有很多这样的总结。
+
+我个人的体会有如下几点：
+
+\startitemize[n,packed,broad]
+\item 不要往不是自己手动建立的分支上直接提交。
+
+这里说的主要是 tracking branch，也就是 .git/config 中 [branch] 节
+配置的那些分支，因为 remote branch 一般都不会误提交上去。我感觉
+压根就不应该使用 tracking branch，因为 git pull 的合并百分之九十
+的情况下都不是想要的结果，而且经常发生冲突，即使确实想合并，执行
+下 \type{git merge} 也不费事，不建议使用 pull 命令。另外我常常希望上游
+分支的历史尽量是线性的以方便查看，所以我常用 rebase 和 cherry-pick
+而不是 merge 或者 pull 来处理工作分支。
+
+我跟踪别人分支的办法是用 \type{git fetch repos src:dst} 或者 \type{git remote update}，
+前者比较随意，目标分支可以不在 refs/remotes/ 这个命名空间里，后者比较正规。
+
+有了 remote branch 后我再建立个 normal branch 就行了
+\footnote{git checkout -b my origin/master 会自动在 .git/config 中
+把 my 分支配置为 tracking branch，去掉这个配置就行了。}，想提交到正式库时，
+先更新 remote branch，然后 rebase normal branch，然后 push 或者 fetch 到
+正式库中的上游分支。
+
+这样最少可以只牵涉到三个分支：正式库里的上游分支，本地库里的
+remote branch 和工作分支。而如果要用 tracking branch 的话，为了
+避免 pull 时冲突，我不会把 tracking branch 作为工作分支，这样
+tracking branch 和 remote branch 的功能就完全重复了。实际上
+我很少用 pull，所以 tracking branch 对我没用，只会让人迷糊。
+
+如果我的本地库要提供一个分支让人跟踪，那么我一般是再建立个工作分支，
+可以随意提交修改，改好后再建立个分支用\type{git merge --squash} 和
+\type{git cherry-pick}来整理这些修改，弄完后\type{git rebase pub}
+然后用 \type{git push . my:pub} 更新我的公开分支，不往公开分支上直接提交。
+
+\item 不要往 HEAD 指向的分支 push。
+
+push 的目标分支应该不会被 checkout 出来，因为 push 过后，head 指向的
+位置变了，导致 index 跟 HEAD 版本不匹配而出现很莫名的文件被修改状态，
+虽然可以用 \type{git reset --hard} 或者更细致的
+\type{git reset && git checkout paths...} 纠正，但总是不便。
+
+\item 尽量不要回滚公开分支。
+
+公开分支如果回滚了，比如被 rebase，commit --amend 或者强制修改了 head 的指向，
+都会给别人从这个分支上 pull 造成麻烦，即使执行 pull 的人本地没有做
+任何修改也会出现很莫名的冲突。
+\stopitemize
+
+\stopcomponent
+

@@ -1,0 +1,118 @@
+\startcomponent merge
+\product git-way-explained
+
+\section{合并之 fast forward}
+
+Fast forward 不知道怎么翻译才比较合适，头一次在 GIT 里见到
+这个术语，它指的是在合并两个分支时常常遇到的一种特殊情形，
+如下图：
+
+\placefigure[][fig:fastforward]{Fast forward}{
+\starttyping
+            a --- b  ==> master
+                        \
+                          c ---- d ==> test
+\stoptyping
+}
+
+考虑\in{图}[fig:fastforward] 中的分支情况，master 分支
+在 test 分支分出去之后没有任何提交，也就是说 master 分支{\bf 真包含于}
+test 分支，这时在 master 分支{\bf 上}合并 test 分支，GIT 并不会创建一个
+新的 commit 对象以表达两个分支的合并，而是直接把 master 这个 head 修改成
+跟 test 这个 head 一致，这种特殊的合并就称为 fast forward，合并后的
+结果如\in{图}[fig:fastforward2]：
+\placefigure[][fig:fastforward2]{Fast forward 的结果}{
+\starttyping
+            a --- b  --- c --- d ==> master, test
+\stoptyping
+}
+
+Fast forward 的效果很类似于 CVS/Subversion 的 update 操作，前者是
+一种特殊的合并，后者是把 HEAD 版本跟工作拷贝合并。在合并的目的分支
+没有任何修改时，GIT 的 fast forward 是把目的分支的状态同步到跟源分支
+一致；在工作拷贝没有任何修改时，CVS/Subversion 的 update 是把工作拷贝
+的状态同步到跟 HEAD 指向的版本一致。
+
+在 Subversion 里，\in{图}[fig:fastforward] 的情况下把 test 往 master
+合并会在 master 分支上创建一个新版本，再把 master 往 test 合并又会
+创建一个新版本，这种策略对于分布式版本控制是个灾难，无法达到一个稳定
+的合并状态。
+
+Fast forward 对于分布式版本控制的影响是深远的，首先，从\in{图}[fig:fastforward2]
+看，合并后的两个分支是完全等价的，实际上是变成了一个分支，各自有自己的
+head 做标记。这就是一种隐式的自动分支归并，在全局版本图上，分叉点的数目
+取决于实际的修改分歧，而不是分支操作也就是 git branch 命令被执行的次数，
+这种特性避免了分支数目爆炸性的增长弄得合并的工作量巨大不可收拾。考虑如果
+Subversion 允许分支存放在多个服务器上，但仍然按照 Subversion 的分支、合
+并策略，那么除非我们显式的删除分支，分支的数目是只增不减的，这会给合并带
+来灾难性的困难。
+
+其次，fast forward 实际上{\bf 从全局看}是抹除了在 Subversion 这种版本控制
+工具里的“私有分支”。用过 Subversion 的人应该很习惯于建立一个私有分支，然后
+在上面修改，并不时的从其它分支上合并修改到私有分支，在这个私有分支上的每
+次提交都是分支拥有者的。而在 GIT 里，如果你不在自己的私有分支上提交，那么
+fast forward 后，你所谓的“私有分支”不复存在，即使你在这个私有分支上做
+了些提交，但只要别的分支合并过你的分支，你再合并就会发生 fast forward，
+之后你就没有“这个私有分支全部是我私人的提交”这个保证了。个人觉得这种特性
+是非常有哲学意味的：从全局版本图看，看不出来你的分支轨迹，也就是找不出
+你建立的 head 曾指代的版本(这在 Subversion 里是可以做到的，因为分支合并
+不会减少分支)，你能看到的就是版本图中哪些节点是你参与过的：想留下痕迹就
+贡献，停止贡献就不再有新的痕迹，历史的演化是靠的所有人堆积起来的贡献，而
+不是决定于单个人的痕迹。
+
+GIT 的 fast forward，Subversion 式的总是创建新版本，两种策略的优劣也是引起很多
+口水的，当初我也是很不习惯没有“私有分支”，理解 fast forward 的意义后也就觉得
+挺好的了。
+
+如果你想要 svn log 式的直线分支历史，有两种近似的方式，第一，可以用 git log -g xxx，
+这个会查看 xxx 这个 head 的 ref log，也就是 head 这个 reference 曾经指代过哪些 commit。
+但是因为 head 可以指向版本图中任何位置，因此 git log -g xxx 看到的并不一
+定是一条直线历史。第二，可以用 git log --first-parent，意思是在回溯历史
+遇到 commit 是合并操作时，只回溯其第一个父版本(默认是回溯所有父版本)，
+如\in{图}[fig:first-parent] 所示，master 曾指向 abefglm，如果只想看这些
+提交情况，那么默认的 git log master 是不行的，因为会从 m 回溯到图中所有
+版本，这时 git log --first-parent 就是合适的，因为 git merge 创建 commit
+是将合并发生时 HEAD 指向的 commit 作为第一个 parent，所以就在 m 处只去回溯
+l 那边，在 f 处只回溯 e 那边，最后得到 mlgfeba 这一系列版本的历史。但是
+git log --first-parent 在碰到 fast forward 时会失效，如\in{图}[fig:first-parent2]
+所示，test 往 master 合并后，git log --first-parent master
+就不是 master 曾指代的 gba，而是成了 gdcba，因为 g 的 first parent 是 d。
+
+%            a --- b -- e -- f -- g -- l -- m --- ==> master
+%                  \        /              /
+%                   c ---- d ==> test     /
+%                    \                   /
+%                     h --- i --- j --- k ==> test2
+\placefigure[][fig:first-parent]{--first-parent 的作用}{
+\starttyping
+            a --- b -- e -- f -- g -- l -- m --- ==> master
+                        \            /                      /
+                         c --- d ==> test      /
+                            \                            /
+                               h -- i -- j -- k ==> test2
+\stoptyping
+}
+
+%            a --- b ---------- ==> master
+%                  \
+%                   c -- d -- g ==> test
+%                    \       /
+%                     e --- f ==> test2
+\placefigure[][fig:first-parent2]{--first-parent 的失效}{
+\starttyping
+            a --- b ---------- ==> master
+                        \
+                          c  --  d  --  g  ==>  test
+                           \                /
+                              e  ---  f  ==>  test2
+\stoptyping
+}
+
+既然 --first-parent 并不总是有效的，与其让 git merge 操作生成的 commit
+的 first parent 是当前 HEAD 而让分支合并操作不对称，不如让 git merge
+生成的 commit 的各个 parent 按照 SHA1 值排序，这样不管 HEAD 是谁，合并
+的结果都是一样的。不知道为什么 GIT 没有采用这个方案，或许是历史原因。
+
+
+\stopcomponent
+

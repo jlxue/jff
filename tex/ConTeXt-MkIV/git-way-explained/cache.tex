@@ -1,0 +1,123 @@
+\startcomponent cache
+\product git-way-explained
+
+\section{混乱之源——index}
+
+在 git 里文件在逻辑上有三个地方保存：repository, index,
+work tree。repository 就是指 .git，这里保存了提交过的各个
+版本的文件。work tree 就是工作目录，index 用来暂存修改
+(实际只是存了个索引 .git/index，真实数据在 .git/objects/ 目录下)
+以及记录工作目录里文件状态，其实早先 index 就被称做 cache，
+现在在命令行选项中也能看到 cache 的字样。
+
+正是 index 的这个暂存修改功能，导致 git 比起 svn 复杂
+多了，svn 里的 .svn 只用于记录工作目录里文件状态，并保存
+一份干净的基础版本。
+
+下面列举一下涉及 index 的几个命令，你就能明白为什么有很多人都建议
+对 GIT 用户隐藏 index 缓存文件这个机制了。
+
+\definedescription[gitcmd][location=top,headstyle=bold,width=broad]
+\startgitcmd{git add}
+将文件从 work tree 加入 index。注意与 subversion 的 add 命令
+不同，git add 是把文件内容加入 index，在每次修改 work tree
+中文件后，都要 git add 才能让 git commit 把修改提交到 repository 里。
+\stopgitcmd
+
+\startgitcmd{git rm}
+git rm 是从 index 和 work tree 中删除文件，git rm --cached 只从
+index 中删除文件。
+\stopgitcmd
+
+\startgitcmd{git commit}
+git commit 是把 index 中文件提交到 repository 里，git commit -a 是
+把 work tree 中所有修改过的文件都 git add 到 index 里，然后把 index
+中文件提交到 repository 里。
+\stopgitcmd
+
+\startgitcmd{git reset}
+git reset <commit> -- paths... 是从 repository 中的 commit 版本取 paths
+指定的文件覆盖 index 中的对应文件，也就是撤销 index 中暂存的修改。注意
+输出信息中的“needs update”是说文件目前状态没有被“git update-index”命令
+更新到 index 中，此处的“update”跟 CVS、Subversion 里的 update 完全
+是两码事。
+
+git reset --hard <commit> 是取 repository 中的 commit 版本覆盖 index 和
+work tree 中的所有文件，也就是撤销 index 和 work tree 中的修改。注意这个
+命令不允许指定 paths。
+\stopgitcmd
+
+\startgitcmd{git checkout}
+git checkout <commit-ish> 是切换分支，取 repository 中指定版本的文件
+覆盖 index 中文件，并覆盖 work tree 中文件(如果有区别要用 -f 强制覆盖，
+用 -m 来与 work tree 合并)。
+
+git checkout -- paths... 从 index 取文件覆盖 work tree 中文件。
+
+git checkout <tree-ish> -- paths... 从 repository 中的 commit 版本取文件
+覆盖 index 以及 work tree 中文件。
+
+需要注意的是与 Subversion 里的 revert 命令等价的是
+\starttyping
+git reset -- paths... && git checkout -- paths...
+\stoptyping
+或者
+\starttyping
+git checkout HEAD -- paths...
+\stoptyping
+而 git revert 相当于 Subversion 里撤销已经提交的修改：提交一个新版本，
+新版本做的修改等效于撤销指定版本的修改。
+
+在用 git checkout 的第一种形式切换分支时，如果工作目录中有修改没提交，
+那么最好用 git stash 先暂存起来，因为可能出现这样的尴尬境地：源分支
+有文件 A、B、C，其中 C 有修改没提交，目标分支中 A、B 、C 都被修改或者删除，
+那么切换分支会因为 C 的修改而告失败(默认不会覆盖或者合并)，但在处理
+C 时已经处理完 A 和 B，所以最后分支没切换成功，但 git status 显示 A、B、
+C 都被修改了(A、B 是中断的分支切换操作误引起的，C 是切换分支前的正常修改
+)，如果文件很多，你就分不出来哪些是切换分支前修改过的。此时的挽救办法是
+执行 git diff --name-status <目标分支>，输出的就是切换分支前修改的文件，
+排除这些，git status 显示的就是失败的分支切换误引起的。
+\stopgitcmd
+
+\startgitcmd{git status}
+git status 的输出分为三个部分，第一部分是“Changes to be committed”，
+列举的是 index 中的文件状态，用不带 -a 的 git commit 会把这些文件
+提交到 repository 中；第二部分是“Changed but not updated”，这部分
+列举的是 work tree 中被 git 管理的文件状态，用 git add 会把这些文件
+加入到 index 中，这里的“update”一词来源于 GIT 底层命令 update-index；
+第三部分是“untracked files”，这部分列举的是 work tree 中没有被 git 管理的文件。
+
+在 git status 第一部分输出中有“unstage”这个词，“stage”这个字眼
+是为了避免“index”这个太易混淆的词，stage 是指 git add/rm，unstage 指
+git reset，staged files 就是指 index 中暂存的文件修改。
+\stopgitcmd
+
+\startgitcmd{git diff}
+
+由于在 repository 中有多份文件树，在 index 和 work tree
+中各有一份文件树，因此 diff 的功能非常丰富：
+
+git diff 比较 index 和 work tree
+
+git diff --cached tree-ish 比较 index 和 tree-ish，后者缺省为 HEAD
+
+git diff tree-ish 比较 tree-ish 和 work tree
+
+git diff tree1-ish tree2-ish 比较两个 tree
+
+tree-ish 可以是文件树的一个部分，比如
+\starttyping
+git diff v2.6.21:init v2.6.27:init
+\stoptyping
+\stopgitcmd
+
+上面命令末尾都可以添加 -- path...，表示只输出牵涉到这些路径的
+结果。
+
+[ XXX: 繁复，无视正交设计原则。其实可以直接用一个 index 引用来标记，
+限制用户不能自己建立 index 引用， 类似于 Subversion 的 -r BASE 里的 BASE，
+造成现在这个局面无非是懒：懒输入 index 所以就用隐含参数和选项，
+懒得输入 -r 所以要用 -- 分隔版本号和文件名 ]
+
+\stopcomponent
+

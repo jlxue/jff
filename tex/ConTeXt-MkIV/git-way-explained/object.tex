@@ -1,0 +1,55 @@
+\startcomponent object
+\product git-way-explained
+
+\section{对象记法}
+
+关于版本的记法在 git help rev-parse 中有详细描述，必须学会的是
+\type{~} 和 \type{^} 记法的含义。
+
+在 git 文档里常能碰上 commit-ish 和 tree-ish 这两个词，commit-ish
+的意思是能推导出版本号的字符串，比如 SHA1 摘要，包含 \type{~} 和 \type{^} 记法
+的版本号，版本的日期记法，标签对象的摘要，标签名字，分支名字，以及
+这些记法的组合。tree-ish 含义以此类推。
+
+指定某个版本的文件树中内容用: tree-ish:fullpath 语法，
+比如 v2.6.27:init/main.c 就表示 linux-v2.6.27 源码中
+的 init/main.c 文件，注意 init 前面没有“/”，而且也
+不能是相对于当前目录的相对路径名，比如在 init/ 目录下
+也不能用 v2.6.27:./main.c。
+
+[ XXX: 如果目录树很深，不能用相对路径不方便; 冒号记法
+  可能跟 Windows 盘符记法冲突，比如有个分支 C，那么可能
+  不小心引用了 C: 盘的文件 ]
+
+查看对象内容可以用 git cat-file -p xxx 或者 git show xxx 。
+
+由于 git 的命令行指定版本并没有用 -r REV 这样的方式，
+而是直接用 REV 作为参数，如果这个命令同时还能接收文件名，
+那么往往就会将 REV 和 file 参数混淆，此时需要在 file 参数
+前面添加“--”参数。
+
+[ XXX: git 有时能自动分清，有时不行]
+
+由于 git 自己实现了命令行选项解析，因此选项不能像 rm aa -f
+那样放到后面。
+
+[ XXX: 重造车轮]
+
+
+git log 参数是个 commit-ish，其含义是说查看从这个版本能够
+回溯到的所有版本的日志信息，这跟 svn log 看单个分支的直线
+历史是不一样的。git log 的这种行为导致看非线性历史的日志
+时完全不可用，虽然 git log 后面可以用 .. 和 \type{^} 记号做版本树
+剪枝，但还是没有 tig 和 gitk 好用。 而且由于 git merge
+的 fast forward 特性，导致即使 git log --first-parent 看的
+也未必是分支{\bf 头}曾经指代的那个轨迹。
+
+由于 git log 的版本树回溯特性，因此看某个版本之后 N 个版本
+的日志很不方便，如果要查看的这 N 个版本是线性演化的，那么
+可以用下面的命令 \$ver 和 \$ver 之后第 N 个版本的区别：
+\starttyping
+git diff $ver `git rev-list $ver.. | tail -$n | head -1`
+\stoptyping
+
+\stopcomponent
+

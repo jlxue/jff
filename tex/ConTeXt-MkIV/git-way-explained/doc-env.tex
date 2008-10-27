@@ -1,0 +1,91 @@
+\startenvironment doc-env
+
+\usemodule[bib]
+
+%% --------------------------- 中文字体
+\usetypescriptfile[zhfonts]
+\usetypescript[myfont]
+\setupbodyfont[myfont,rm,12pt]
+
+%% --------------------------- 交互设置
+\setupcolors[state=start]
+\setupcolor[hex]
+\setupinteraction[state=start,
+                  title={GIT 使用体会},
+                  subtitle={GIT Way Explained (v2)},
+                  author={Yubao.Liu@gmail.com},
+                  keyword={GIT SCM VCS},
+                  focus=standard,
+                  color=blue]
+\setupinteractionscreen[option=bookmark]
+\placebookmarks[section,subsection][section]
+
+
+%% --------------------------- 版式
+% 纸张
+\setuppapersize[A4][A4]
+
+% 布局
+%\setuplayout[width=fit,height=middle,
+%             leftmargin=3cm,rightmargin=3cm,
+%             backspace=4cm,topspace=2cm,
+%             headerdistance=.5cm,footerdistance=.5cm,
+%             leftmargindistance=.5cm,rightmargindistance=.5cm,
+%             header=1cm,footer=1cm]
+
+% 目录
+\setupcombinedlist[content][alternative=c]
+
+% 章节标题
+\setupheads[indentnext=yes]
+
+% 段落缩进、行间距、段落间距
+\setupinterlinespace[big]
+\setupwhitespace[big]
+\setupindenting[always,first,2em]
+\setupfloats[indentnext=yes] 
+
+
+%% --------------------------- 杂项
+%\setuptolerance[horizontal,stretch]
+%\setupexternalfigures[directory={./figures}]
+
+%% 代码环境
+\setuplinenumbering[color=darkgray,style=small]
+\setuptyping[before={\blank[.5em]\setupinterlinespace[medium]\startframedtext[width=\makeupwidth]},
+             after={\blank[.5em]\stopframedtext}]
+
+%% 阴影盒
+\startuniqueMPgraphic{shade box}
+    path p;
+    u := 1cm; w := \overlaywidth; h := \overlayheight;
+    roundcorner := 8pt; offset := 12pt;
+    
+    color shade;
+    shade := (.6,.6,.6);
+
+    for i = 0 step .02 until 1:
+        fill unitsquare xyscaled (w-i*u,h-i*u) squeezed (8pt,6pt) 
+             shifted (offset+i*u/2,-offset+i*u/2)
+             withcolor transparent (1,.1,shade);
+    endfor;
+
+    p := unitsquare xyscaled (w, h);
+    draw p withcolor transparent (1,0,white);
+
+    p := p shifted (offset/2, -offset/2) squeezed (8pt,6pt);
+    fill p withcolor \MPcolor{darkgray};
+    draw p withcolor \MPcolor{OrnamentColor};
+\stopuniqueMPgraphic
+\defineoverlay[shade box][\uniqueMPgraphic{shade box}]
+\setupframedtexts[frame=off,background={shade box}]
+
+\useURL[ctxnotes][http://code.google.com/p/ctxnotes/]
+\useURL[GIT][http://git.or.cz]
+\useURL[Mercurial][http://www.selenic.com/mercurial]
+\useURL[Subversion][http://subversion.tigris.org/]
+\useURL[linus-word][http://thread.gmane.org/gmane.comp.version-control.git/27/focus=217]
+\useURL[junio-word][http://thread.gmane.org/gmane.comp.version-control.bazaar-ng.general/18006/focus=18494]
+
+\stopenvironment
+

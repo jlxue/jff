@@ -1,0 +1,113 @@
+\startcomponent repository
+\product git-way-explained
+
+\section{版本库}
+
+版本库就是 .git 目录，用于保存{\bf 全局}版本演化图的
+{\bf 子集}和标签。git clone A B，然后 A 库和 B 库内
+各自修改提交了，从全局看，A 的修改者和 B 的修改者
+都是在扩展一个全局的版本图，只是两个库各自只包含了
+这个全局版本图的子集：
+
+\startitemize[n,packed,broad]
+\item 起始情况
+
+    A 库版本图：
+\starttyping
+        a -- b => master
+\stoptyping
+
+    全局版本图:
+\starttyping
+        a -- b
+\stoptyping
+
+\item git clone A B 后，A 和 B 各提交一次
+
+    A 库版本图：
+\starttyping
+        a -- b -- c => master
+\stoptyping
+
+    B 库版本图:
+%        a -- b -- c' => master
+%             \
+%              origin/master
+\starttyping
+        a -- b -- c' => master (tracking branch)
+                   \
+           origin/master (remote branch)
+\stoptyping
+
+    全局版本图:
+%        a -- b -- c
+%              \
+%               c'
+\starttyping
+        a -- b -- c
+                 \
+                   c'
+\stoptyping
+\stopitemize
+    
+A 和 B 之间同步，以完善到包含全局版本图，就是通过
+push 和 fetch 命令实现的(pull = fetch + merge)。
+
+这里有几个需要注意的地方：
+\startitemize[1,packed,broad]
+\item head 和 tag ref 都是只用于在某一个版本库之内标记，因为
+  它们用一个字符串标记版本，而不同库里这个字符串可以都
+  用到，比如都有 master 分支，上面故意没有在全局版本图上
+  标注 head 就是为了强调 head 和 tag ref 的私有性，实际在
+  表达全局版本图时往往都会标出各自的 head;
+  我们平时说 linux kernel-2.6 的上游分支，其实是因为社会
+  关系，以 Linus Torvalds 那个公开代码库里的 master 分支
+  为准，而纯粹从技术上讲，并不存在一个全局的 master 分支，
+  这跟集中式的版本管理工具比如 Subversion 全局主分支是
+  很不一样的;
+
+\item origin/master 是 git clone 自动建立的分支，用于跟踪
+  clone 来源的分支情况，存放在 .git/refs/remotes/origin/
+  下，用 git fetch 或者 git remote update 更新, 在
+  .git/config 中 origin 定义了对方库地址;
+
+\item B 库里的 master 也是 git clone 自动建立的分支，用于
+  跟踪 origin/master 分支的变化(git branch --track 可以用于
+  建立这样的分支)，在 .git/config 里定义了 master 分支的
+  跟踪关系;
+
+\item GIT 的文档里称 origin/master 这样的为 remote branch，这个
+  叫法相当易混淆，从上面的图看来，分支首先分为远端库里的分支
+  和本地库里的分支，之间可以重名; 其次，每一个库里的分支又
+  分为 remote branch, tracking branch, normal branch。
+  remote branch 完全是用来同步对方库里的分支的，因此绝对
+  不要往 remote branch 上提交;
+  tracking branch 在无参数的 git pull 时会在同步完 remote
+  branch 后，将 remote branch 往 tracking branch 上合并，
+  在多人开发时这往往会冲突，因此也不建议往 tracking branch
+  上提交。
+
+  [ XXX: tracking branch 太无厘头了, 实际上 remote branch
+   改叫 tracking branch 才合适，而原来的 tracking branch 以及
+   pull 命令不应该存在]
+
+\item git branch -a 显示的 remote branch 列表并没有 remotes 前缀，
+  而在 git 里分支只是用 .git/refs/heads 下某个文件记录的，因此
+  可以建立一个 origin/master 分支，这样会导致 git branch -a
+  的输出很迷惑人，可以用 remotes/origin/master 来显式指代
+  remote branch。
+
+  [ XXX: refs, refs/heads, refs/tags 都可以省略，又加上
+   symbolic ref 添乱，太容易弄迷糊了]
+
+\stopitemize
+
+理解 GIT 里的 branch(准确说是 branch head) 只是各人在全局版本图上的动态
+标签，以及 GIT repository 只是保存了这个全局版本图的子集，对于理解分布式
+版本控制中的分支关系是非常重要的，千万不要把 GIT 里的 branch 理解成像
+Subversion 里那样一个线性的版本序列。GIT 里所称呼的 remote branch，不过
+是私有的一个标记，用来跟踪其它代码库里的某个 head，remote branch 需要
+不时的用 git fetch 同步才能和对应的 head 指向{\bf 全局}版本图中的同一个版本。
+
+\stopcomponent
+

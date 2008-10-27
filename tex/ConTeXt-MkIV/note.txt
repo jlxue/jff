@@ -21,6 +21,8 @@ ConTeXt 文档
 
 4. 编译文档
 context a.tex       or      texexec --lua a.tex
+texmfstart.exe texexec --lua a.tex
+
 context --mode=screen a.tex     为屏幕阅读模式编译
 context --purge
 

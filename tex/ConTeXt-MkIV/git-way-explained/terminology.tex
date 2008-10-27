@@ -1,0 +1,200 @@
+\startcomponent terminology
+\product git-way-explained
+
+\section{GIT 里的术语定义}
+
+GIT 里用 blob, tree, commit, tag 四种存储对象来描述版本控制
+所需信息，每一种存储对象都是以类型名字、内容长度、内容计算出
+的 SHA1 摘要值命名，存放在 .git/objects/ 目录下的文件。
+
+\definedescription[term][location=top,headstyle=bold,width=broad]
+\startterm{blob}
+表示\in{第}{节}[basis]中的文件, blob 只有文件数据和长度，不保存名字、
+文件类型、权限等信息，恰如其名;
+\stopterm
+
+\startterm{tree}
+表示\in{第}{节}[basis]中的目录，不包括像 Subversion 那样的 property，
+只有文件权限位（无属组和属主信息)、对象类型(blob 还是
+tree)、SHA1 摘要值、文件或子目录名字。早期的 git 实现中
+tree 对象保存的是整个文件树的路径名清单，现在的实现中
+一个 tree 对象只保存某个目录下的一层信息;
+\stopterm
+
+\startterm{commit}
+表示\in{第}{节}[basis]中的版本;
+\stopterm
+
+\startterm{tag}
+表示\in{第}{节}[basis]中静态标签。
+\stopterm
+
+值得一提的是 GIT 自称 content tracker 而非版本控制工具。
+这一思想在 blob 和 tree 记录的信息上有所体现，blob 和 tree
+只记录了绝对必要的{\bf 数据}(权限位虽然不必要但是在 UNIX 类
+系统上非常有用)，因为是 content tracker，所以 blob 和 tree
+不关心作者名字、类似 Subversion 那样的额外属性，这样两个作者
+声称数据内容一致(额外属性可以不一致)时，必然可以共用 blob
+和 tree 存储对象。这样做的好处是存储模型简单，节约空间，
+有利于分布式使用，坏处是少了 Subversion 那样方便的跟目录、
+文件关联的版本控制的属性功能。
+
+content tracker 这个名字还体现在对 file 和 blob 的区分对待
+上：file 指 blob + file name。git 所关心的是文件内容的流向，
+并不显式记录复制、移动这些信息，这些信息是运行时根据文件
+内容流向动态分析出来的。这样做的好处是减轻了使用者的负担，
+据个人所见，很多 Subversion 用户在应该用 copy 时却用 add，
+导致版本库迅速膨胀，而且 svn log 里看不出来复制、移动信息。
+这样做的坏处自然是动态分析需要时间，单次变更集(change set)
+太大时效果不行，这就寄希望于更好的探测算法了──起码我们将来
+可以很容易补救。
+
+file 和 blob 的区别体现在文件历史上，在 git 里，一个文件
+的历史是这个文件路径曾经指代的文件内容变化，也就是一个
+路径所牵涉到的历史，而在 Subversion 里一个文件历史指的是
+这个文件在版本变迁中内容的改变、路径的改变历史，因此如下
+操作在 git log 和 svn log 结果迥然不同：
+
+\starttyping
+    git/svn add a && commit && git/svn mv a b && commit
+    git log -- a 会显示两次提交(一次新增，一次删除);
+    git log -- b 会显示一次提交;
+    svn log a 会显示 a 没有纳入版本控制;
+    svn log b 会显示两次提交。
+\stoptyping
+
+上面两个命令虽然形式类似，但语义是相当不同的，svn
+是在当前版本的文件树中找文件，找到后回溯它的历史，
+包括内容变化和名字变化，而 git 是从当前版本回溯历史，
+过滤出修改中涉及指定路径的修改(svn 和 git 各有选项能模拟彼此的效果)。
+
+关于 file 和 blob 的区别以及 GIT 不显式记录移动、复制操作
+的设计，早期在 GIT 的邮件列表上引起极大的争议，为此爆发了
+GIT 之父 Linus Torvalds 惊天地泣鬼神前无古人后无来者先天下
+之忧而忧后天下之乐而乐的“I'm right”宣言\footnote{\from[linus-word]}，
+以及现任 GIT 维护者 Junio C Hamano 同样相当精彩的“read it now”
+警言\footnote{\from[junio-word]}。
+
+虽然 GIT 是 stupid content tracker，可实际上我们是拿它
+当 version control system 来使。GIT 包含两种命令，
+底层命令和高层命令，底层命令实现了 content tracker，高层
+命令封装底层命令模拟出了 version control system──
+其实语义跟通常的版本控制系统还是有差别的，这往往让人迷惑。
+
+
+在 GIT 中还有两种引用(reference, 简称 ref)类型：head 和 tag，
+head 就是第一节中的动态标签，tag 也表示第一节中的静态标签，
+只是其存储方式比 tag 对象经济许多，被称为轻量级 tag。
+
+引用存放在 .git/refs/heads 和 .git/refs/tags 下(引用可以
+被打包集中存放在 .git/info/refs 或 .git/packed-refs 文件
+中)。
+
+[ XXX: 术语跟 CVS、Subversion 很不一样，可怜我等呆瓜脑袋］
+
+
+更混乱的是还有一个 symbolic ref，保存在 .git/ 目录下的符号
+链接或者内容为 refs: refs/.... 的普通文件，比如 .git/HEAD
+内容一开始是 refs: refs/heads/master，表示当前 head 是
+master。
+
+需要注意的是在命令行引用分支时，如果 symbolic ref 跟
+ref 重名，那么引用后者时要用 refs/heads/xxx 或者 heads/xxx
+这样的名字。
+
+[ XXX: 够混淆]
+
+
+下面从实例看看它们各自的存储方式。
+\starttyping
+$ mkdir t && cd t
+$ git init          # 初始化版本库，默认放在工作目录里
+$ echo hello > a
+$ git add a
+$ git commit -m "first"
+$ git tag v0
+$ ls .git/objects/??/*
+.git/objects/09/76950c1fdbcb52435a433913017bf044b3a58f
+.git/objects/51/ca0ad1685f36558c01ec400350d988f44176bd
+.git/objects/ce/013625030ba8dba906f756967f9e9ca394464a
+$ git cat-file -t 097695
+tree
+$ git cat-file -t 51ca0a
+commit
+$ git cat-file -t ce0136
+blob
+$ git cat-file -p 09769a
+100644 blob ce013625030ba8dba906f756967f9e9ca394464a    a
+$ git cat-file -p 51ca0a
+tree 0976950c1fdbcb52435a433913017bf044b3a58f
+author Liu Yubao <yubao.liu@gmail.com> 1224781865 +0800
+committer Liu Yubao <yubao.liu@gmail.com> 1224781865 +0800
+
+first
+$ git cat-file -p ce0136
+hello
+$ find .git/refs/ -type f | while read f ; do echo $f; cat $f; done
+.git/refs/tags/v0
+51ca0ad1685f36558c01ec400350d988f44176bd
+.git/refs/heads/master
+51ca0ad1685f36558c01ec400350d988f44176bd
+\stoptyping
+
+从上面可以看到：我们创建了一个 blob (git add 创建)、
+一个 tree 和 一个 commit(git commit 创建)、一个分支
+master (git commit 第一次提交时创建)和一个轻量级 tag
+v0 (git tag 创建)，它们的关系为：
+
+\starttyping
+master 和 v0 -> commit(51ca0a) -> tree(097695) -> blob(ce0136)
+\stoptyping
+
+\starttyping
+$ git tag -m "this is v1" v1
+\stoptyping
+这会新增 .git/objects/83/50f23b202c16803a7b20d2a8e37015d674babc
+和 .git/refs/tags/v1。
+
+\starttyping
+$ git cat-file -p 8350f2
+object 51ca0ad1685f36558c01ec400350d988f44176bd
+type commit
+tag v1
+tagger Liu Yubao <yubao.liu@gmail.com> Fri Oct 24 01:31:01 2008 +0800
+
+this is v1
+$ cat .git/refs/tags/v1
+8350f23b202c16803a7b20d2a8e37015d674babc
+\stoptyping
+
+可以看到新增了一个 tag ref v1 指向 tag object 8350f2，后者指向
+commit object 51ca0a。
+
+tag 可以指向四种 object，常用的是指向 tree 和 commit。
+
+[ XXX: tag object 本身并没有记录入 commit 或者 tree 中，而 tag object
+内容包含了名字，那么 tag ref 只是为了加速访问而存在的东西了。tag 是为了
+助记，那么 tag object 的存在就滑稽了，其 SHA1 摘要用户一般记不住，tag
+object 的内容也完全可以放入 tag ref 中，即使签名也能用 ASCII 形式的
+签名附在 tag ref 文件内容末尾。]
+
+从上面的 commit 对象内容可以看出 commit 区分了 author 和 committer，
+这对于协同开发是很方便的。
+
+关于分支很重要的一点就是分支其实是用 head 也就是一个
+浮动标签表示的，我们可以很暴力的直接修改甚至删除重建
+这个标签，这样就能改变一个分支名指代的分支了，这招
+可以说是被 GIT 的 pull/push/fetch/merge/rebase/reset/revert
+折腾的头晕目眩之余的必杀技:
+\starttyping
+    git push -f . test:master
+    git fetch -f . test:master
+    git branch -D master && git branch master test
+    git update-ref refs/heads/master test
+    cp .git/refs/heads/test .git/refs/heads/master
+\stoptyping
+然后执行 git reset --hard，就能恢复 master 这个 head 让它
+与 test 这个 head 指向同一个版本。
+
+\stopcomponent
+

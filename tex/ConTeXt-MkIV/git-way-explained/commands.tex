@@ -1,0 +1,242 @@
+\startcomponent commands
+\product git-way-explained
+
+\section{常用命令简介}
+
+\definedescription[gitcmd][location=top,headstyle=bold,width=broad]
+\startgitcmd{git add}
+往 index 里添加文件内容。加上 -i 选项可以交互式的选择需要 add 哪些内容，
+细到 patch hunk 级别，非常实用。
+\stopgitcmd
+
+\startgitcmd{am}
+从邮箱里提取补丁并应用。git apply-mbox 是过时的命令。
+\stopgitcmd
+
+\startgitcmd{apply}
+应用补丁。
+\stopgitcmd
+
+\startgitcmd{archive}
+将指定版本的文件树打包，支持 tar 和 zip 格式。
+\stopgitcmd
+
+\startgitcmd{bisect}
+对半查找版本树中引入 bug 的版本，由于版本树往往不是线性的，手工记录
+验证过的版本并且剪枝是很琐碎的。
+\stopgitcmd
+
+\startgitcmd{blame}
+查看每一行是从哪个版本来的，谁修改的。git annotate 是过时的命令。
+\stopgitcmd
+
+\startgitcmd{bundle}
+将指定版本的各种对象以及 refs 打包，方便离线开发。
+\stopgitcmd
+
+\startgitcmd{cat-file}
+判断对象类型，以及原样或者格式化输出对象内容，注意对于 tree 对象
+要用 ls-tree 或者 cat-file -p 或者 show 命令查看，cat-file 的原样
+输出是二进制数据。
+\stopgitcmd
+
+\startgitcmd{checkout}
+切换分支或者撤销修改。
+\stopgitcmd
+
+\startgitcmd{cherry-pick}
+相当于将某次提交打个补丁应用到当前分支，用来从其它分支提取所需的
+修改而不用合并整个分支。
+\stopgitcmd
+
+\startgitcmd{clean}
+删除工作目录中没有被 git 管理的文件，非常方便。
+\stopgitcmd
+
+\startgitcmd{clone}
+复制代码库，如果目标库和源库在同一台机器上，-s 选项能够很节约磁盘空间。
+另外 --depth 选项可以避免复制代码库中包含的整个版本历史。
+\stopgitcmd
+
+\startgitcmd{commit}
+提交一个新版本。 
+\stopgitcmd
+
+\startgitcmd{config}
+配置 git 的行为，有三种配置：system 范围的，指 \type{/etc/gitconfig}，global
+范围的，指 \type{$HOME/.gitconfig}，repository 范围的，指 \type{.git/config}，
+三者的优先级依次增高。config 命令默认操作的是 \type{.git/config}。repo-config
+是过时的命令。 
+
+config 命令可以用来设置命令别名，比如将 b 设置为 branch 的别名：
+\starttyping
+git config --global alias.b branch
+\stoptyping
+
+一份示例配置 \type{$HOME/.gitconfig}，具体含义参考 \type{git help config}：
+\starttyping
+[user]
+        email = YourEmail
+        name = YourName
+[color]
+        ui = auto
+[alias]
+        ci = commit
+        st = status
+        co = checkout
+        b = branch
+[diff]
+        renames = copy
+[rerere]
+	    enabled = true
+[i18n]
+	    commitEncoding = utf-8
+	    logOutputEncoding = utf-8
+\stoptyping
+\stopgitcmd
+
+\startgitcmd{count-objects}
+统计 loose object 个数以及所占空间。 
+\stopgitcmd
+
+\startgitcmd{describe}
+将某个版本用最近的 tag 加上 \type{~} 和 \type{^} 记法来显示，方便识别，
+有一点点类似 Subversion 里的整数版本号。
+\stopgitcmd
+
+\startgitcmd{diff}
+查看文件内容修改情况。
+\stopgitcmd
+
+\startgitcmd{fetch}
+从远端代码库同步版本图到本地代码库，并修改本地库里指定的 head 跟远端库里
+对应的 head 一致，这个修改要求本地的 head 指示的分支{\bf 真包含于} 远端库
+里对应 head 指示的分支，否则要加 -f 选项。
+\stopgitcmd
+
+\startgitcmd{format-patch}
+将分支上的修改生成补丁序列，跟 am、imap-send、send-email 命令搭配构成了利用
+Email 进行协作分布式开发的工作流程。
+\stopgitcmd
+
+\startgitcmd{gc}
+由于 GIT 里存储对象分为 loose object 和 packed object，因此需要不时用
+repack 将 loose objects 打包成 pack 格式存储的 packed objects，以节省
+磁盘空间并提高访问效率。此外还有一些其它需要清理的文件，gc 作为一个高层
+命令统管了这些杂事。
+\stopgitcmd
+
+\startgitcmd{grep}
+在指定版本的文件树里搜索包含特定模式的行。
+\stopgitcmd
+
+\startgitcmd{gui}
+GIT 的图形界面，个人觉得不大好用。
+\stopgitcmd
+
+\startgitcmd{init}
+新建一个 GIT 版本库。init-db 是过时的命令。
+\stopgitcmd
+
+\startgitcmd{log}
+查看版本历史。
+\stopgitcmd
+
+\startgitcmd{ls-files}
+显示 index 和 work tree 中的文件列表，常用于 Shell 编程。
+\stopgitcmd
+
+\startgitcmd{merge}
+分支合并。
+\stopgitcmd
+
+\startgitcmd{mergetool}
+在合并冲突发生后，此命令会对每个冲突的文件调用第三方合并工具，比如
+kdiff3(最好的图形三路合并工具)来进行可视化的合并，非常方便。
+\stopgitcmd
+
+\startgitcmd{mv}
+重命名、移动文件或者目录，这个命令只是为了方便，GIT 并不在版本库里
+记录这个操作。
+\stopgitcmd
+
+\startgitcmd{pull}
+pull = fetch + merge，不推荐用这个命令。
+\stopgitcmd
+
+\startgitcmd{push}
+与 fetch 功能类似，命令行格式一致，只是操作的方向相反，也接收 -f 选项。
+\stopgitcmd
+
+\startgitcmd{rebase}
+将一个分支上的版本序列提取出来在另一个分支上重新提交一遍，这个命令可以
+用来保证上游分支历史是直线的，有一点类似于 CVS 和 Subversion
+里的 update 命令，只是更强大，能一次处理多个版本，在 CVS 和 Subversion
+里，在某一个分支上工作的操作序列是这样的：
+
+\starttyping
+checkout <branch>
+...modify....
+update
+commit
+\stoptyping
+update 操作保证了 commit 的提交总是在最新版本的基础上，这样分支历史
+就是一条直线。
+
+在 GIT 里，类似功能的操作序列是这样的：
+\starttyping
+git clone <remote_repos> <local_repos>
+checkout -b <my_branch> <remotes/upstream_branch>
+...can modify and commit many times...
+...`fetch` or `remote update` to update <remotes/upstream_branch>
+rebase <remotes/upstream_branch>
+commit
+push remote_repos <my_branch>:<upstream_branch>
+\stoptyping
+
+由于 GIT 的分布式版本控制特性，类似功能的命令 GIT 显得要繁琐的多。
+\stopgitcmd
+
+\startgitcmd{remote}
+管理 remote branches。
+\stopgitcmd
+
+\startgitcmd{reset}
+撤销 index 和 work tree 中未提交的修改。
+\stopgitcmd
+
+\startgitcmd{revert}
+撤销已经提交的修改。 
+\stopgitcmd
+
+\startgitcmd{rm}
+删除文件。
+\stopgitcmd
+
+\startgitcmd{shortlog}
+统计提交情况。
+\stopgitcmd
+
+\startgitcmd{show-branch}
+显示各个分支的提交情况，方便查看是否有提交需要合并或者 cherry-pick。
+\stopgitcmd
+
+\startgitcmd{stash}
+暂存 index 和 work tree 的状态，稍候可以再恢复，非常有用的命令。
+\stopgitcmd
+
+\startgitcmd{status}
+查看 index 和 work tree 中文件状态。
+\stopgitcmd
+
+\startgitcmd{svn}
+与 Subversion 的双向交互，这样可以用 GIT 来当作更强更快的 Subversion 的客户端了。
+\stopgitcmd
+
+\startgitcmd{tag}
+管理静态标签。
+\stopgitcmd
+
+
+\stopcomponent
+
