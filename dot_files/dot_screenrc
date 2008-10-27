@@ -26,6 +26,7 @@ hardstatus string "%{.bW}%-w%{.rW}%n %t%{-}%+w %=%{..G} %H %{..Y} %m/%d %C%a "
 
 # key bingdings
 # remove some stupid/dangerous key bindings
+bind s
 bind k
 bind ^k
 bind .

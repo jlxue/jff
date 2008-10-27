@@ -16,9 +16,6 @@
 [diff]
 	renames = copy
 
-[merge]
-	summary = true
-
 [status]
 	relativePath = true
 

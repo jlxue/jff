@@ -152,6 +152,16 @@ postfix+cyrus+openldap+gosa2+roundcube
 exim4+squirrelmail
 openwebmail
 
+Octave, SciLab, Maxima, GnuPlot
+http://www.r-project.org
+http://www.sagemath.org
+
+The AXIOM family:
+  Axiom:     http://www.axiom-developer.org/
+  OpenAxiom: http://www.open-axiom.org/
+  FriCAS:    http://fricas.sourceforge.net/
+             http://axiom-wiki.newsynthesis.org/FriCASBinaries
+
 
 * Debian
 
