@@ -19,9 +19,7 @@ set ALL_OPT=FEAUTURES=HUGE %IME_OPT% %PERL_OPT% %PYTHON_OPT% %DEBUG_OPT% %OTHER_
 
 echo clean...
 nmake -f Make_mvc.mak clean %ALL_OPT%
-pause
 FOR /D %%d IN (ObjGO*) DO rd /s/q %%d
-pause
 
 
 echo building with options:
