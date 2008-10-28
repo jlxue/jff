@@ -1,26 +1,36 @@
 @echo off
-
 rem set path=c:\winnt;c:\winnt\system32
+rem vcvars32.bat
 
-rem d:\work\vcvars32.bat
+cd src
 
-cd vim7\src
-rem 由于link.sh跟其它程序有关联，因此临时改名了
-del link.sh.old
-ren link.sh link.sh.old
+rem .sh文件跟其它程序有关联,避免运行VC的link时执行了link.sh
+rem ren link.sh link.sh.old
 
-@echo clean...
-nmake -f Make_mvc.mak clean GUI=yes OLE=yes MBYTE=yes IME=yes GDYNAMIC_IME=yes GIME=yes PERL=d:\work\program\Perl DYNAMIC_PERL=yes PERL_VER=58 PYTHON=d:\work\program\Python24 DYNAMIC_PYTHON=yes PYTHON_VER=24 CSCOPE=yes CPUNU=i586 DEBUG=yes MAP=lines
-rd /s/q ObjGOLYd
 
-@echo make...
-nmake -f Make_mvc.mak all GUI=yes OLE=yes MBYTE=yes IME=yes GDYNAMIC_IME=yes GIME=yes PERL=d:\work\program\Perl DYNAMIC_PERL=yes PERL_VER=58 PYTHON=d:\work\program\Python24 DYNAMIC_PYTHON=yes PYTHON_VER=24 CSCOPE=yes CPUNU=i586 DEBUG=yes MAP=lines
+set IME_OPT=MBYTE=yes IME=yes GDYNAMIC_IME=yes GIME=yes
+set PERL_OPT=PERL=C:\Perl DYNAMIC_PERL=yes PERL_VER=510
+set PYTHON_OPT=PYTHON=C:\Python25 DYNAMIC_PYTHON=yes PYTHON_VER=25
+set DEBUG_OPT=DEBUG=yes MAP=lines
+set OTHER_OPT=GUI=yes OLE=yes CPUNU=i586 SNIFF=yes CSCOPE=yes
 
-rem nmake -f Make_mvc.mak all FEATURES=HUGE GUI=yes OLE=yes MBYTE=yes IME=yes GDYNAMIC_IME=yes GIME=yes PERL=d:\work\program\Perl DYNAMIC_PERL=yes PERL_VER=58 PYTHON=d:\work\program\Python24 DYNAMIC_PYTHON=yes PYTHON_VER=24  SNIFF=no CSCOPE=yes CPUNU=i586 DEBUG=yes MAP=lines
+set ALL_OPT=FEAUTURES=HUGE %IME_OPT% %PERL_OPT% %PYTHON_OPT% %DEBUG_OPT% %OTHER_OPT%
 
-ren link.sh.old link.sh
 
-@echo done.
-
+echo clean...
+nmake -f Make_mvc.mak clean %ALL_OPT%
 pause
+FOR /D %%d IN (ObjGO*) DO rd /s/q %%d
+pause
+
+
+echo building with options:
+echo %ALL_OPT%
+
+nmake -f Make_mvc.mak all %ALL_OPT%
+
+rem ren link.sh.old link.sh
+echo done.
+
+echo on
 
