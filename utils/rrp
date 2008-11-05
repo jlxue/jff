@@ -1,0 +1,382 @@
+#!/bin/bash
+#
+# rrp, a not fully wrapper to repo and GIT
+#
+# Purpose
+#   This little script is aimed to provide simple
+#   CLI to imitate Subversion and help to archive
+#   a centralized administered software development
+#   model.
+#
+# License
+#   GPL v3
+#
+# Authors
+#   Liu Yubao <yubao.liu@gmail.com>
+#
+# ChangeLog
+#   2008-11-04  Liu Yubao
+#       * initial skeleton, implement help command
+#   2008-11-05  Liu Yubao
+#       * implement checkout/update/commit/uncommit
+#
+
+######################## constant vars #################################
+# version of this little script
+RRP_VERSION=0.1
+
+# IP of the server containing central repository
+SERVER_IP=192.168.88.5
+# Port of the ssh service on the server
+SERVER_PORT=22
+# path of the official repository
+REPOS_PATH=/src/android/android
+# path of the temporary repository
+HOT_REPOS_PATH=/src/android/android-hot
+# default remote
+DEFAULT_REMOTE=origin
+# default upstream branch
+DEFAULT_UPSTREAM_BRANCH=master
+# default working branch
+DEFAULT_WORKING_BRANCH=my
+# person who is responsible for account configuration
+ADMIN_EMAIL=yubao.liu@gmail.com
+# path where to place script "repo"
+REPO=$HOME/repo
+
+
+######################## global vars ###################################
+# The directory that contains .repo
+PROJECT_ROOT=
+# The directory that contains .git
+MODULE_ROOT=
+# Does the working copy lie in same machine with central repository?
+IS_LOCAL=0
+# remote url for official repository to pull baseline code
+PULL_REPOS_PATH=
+# remote url for temporary repository to push changes
+PUSH_REPOS_PATH=
+# user account, eg yubaoliu
+USER_ACCOUNT=
+# user name, eg "Liu Yubao"
+USER_NAME=
+# user email, eg yubao.liu@gmail.com
+USER_EMAIL=
+
+
+######################## auxiliary functions ###########################
+find_dir () {
+    local d=$1
+    local dir=$(pwd)
+
+    while [ -n "$dir" ]; do
+        [ -d "$dir/$d" ] && break
+        dir=$(dirname $dir)
+        [ "$dir" = "/" ] && dir= && break
+    done
+
+    echo "$dir"
+}
+
+
+run_cmd () {
+    echo [CMD] "$@"
+    "$@"
+}
+
+
+has_sub_command () {
+    test "$(type -t "cmd_$1")" = 'function'
+}
+
+
+initialize () {
+    PROJECT_ROOT=$(find_dir '.repo')
+    MODULE_ROOT=$(find_dir '.git')
+
+    # project_root is empty or module_root is out of project_root, we
+    # get a wrong module_root, so set it empty
+    [ -z "$PROJECT_ROOT" ] ||
+        [ "$PROJECT_ROOT" != $(expr substr "$MODULE_ROOT" 1 $(expr length "$PROJECT_ROOT")) ] &&
+        MODULE_ROOT=
+
+    /sbin/ifconfig | grep -qF $SERVER_IP && IS_LOCAL=1
+
+    which git >/dev/null 2>&1 || { echo "git isn't installed!" >&2; exit 1; }
+
+    if [ ! -f $HOME/.ssh/id_rsa ]; then
+        echo "Run ssh-keygen for you, please use default path and you'd better"
+        echo "supply password to protect your private key."
+        echo
+
+        run_cmd ssh-keygen
+
+        echo
+        echo "$HOME/.ssh/id_rsa.pub is your public key, send it to"
+        echo "$ADMIN_EMAIL whenever you create a new one."
+        echo "!!! You CAN'T access the source code repository until the"
+        echo "!!! administrator finishes the configuration for you."
+
+        exit 1
+    fi
+
+    USER_ACCOUNT=$USER
+    if [ ! -f $HOME/.ssh/config ] || ! grep -qF $SERVER_IP $HOME/.ssh/config; then
+        echo -n "What's your git account on $SERVER_IP?[$USER_ACCOUNT-git]"
+
+        local u
+        read -t 30 u
+        [ -n "$u" ] && USER_ACCOUNT=${u%-git}
+        echo "Write account settings for $SERVER_IP to $HOME/.ssh/config."
+        {
+            echo "Host $SERVER_IP"
+            echo "    Port $SERVER_PORT"
+            echo "    User $USER_ACCOUNT-git"
+        } >> $HOME/.ssh/config
+    else
+        local key arg ready
+        while read key arg; do
+            key=$(echo $key | tr [:upper:] [:lower:])
+            case "$key,$arg,$ready" in
+                host,$SERVER_IP,)
+                    ready=1
+                    ;;
+                user,*,1)
+                    USER_ACCOUNT=${arg%-git}
+                    ready=
+                    ;;
+            esac
+        done < $HOME/.ssh/config
+    fi
+
+    if [ $IS_LOCAL -eq 1 ]; then
+        PULL_REPOS_PATH=$REPOS_PATH
+    else
+        PULL_REPOS_PATH=ssh://$USER_ACCOUNT-git@$SERVER_IP:$SERVER_PORT$REPOS_PATH
+    fi
+    PUSH_REPOS_PATH=ssh://$USER_ACCOUNT-git@$SERVER_IP:$SERVER_PORT$HOT_REPOS_PATH
+}
+
+
+must_under_project_root () {
+    [ -z "$PROJECT_ROOT" ] &&
+        echo .repo not found in current directory and its upper directories! >&2 &&
+        exit 1
+}
+
+
+must_under_module_root () {
+    [ -z "$MODULE_ROOT" ] &&
+        echo .git not found in current directory and its upper directories! >&2 &&
+        exit 1
+}
+
+
+cache_ssh_private_key () {
+    [ -z "$SSH_AGENT_PID" ] &&
+        echo "ssh-agent not running, you'd better execute \`eval \$(ssh-agent)'" &&
+        echo "or \`ssh-agent bash', then execute \`ssh-add' to avoid being" &&
+        echo "asked password again and again." &&
+        eval $(ssh-agent) &&
+        ssh-add
+}
+
+
+has_local_commit () {
+    test $(git show-ref -s refs/heads/$DEFAULT_WORKING_BRANCH) != \
+         $(git show-ref -s refs/remotes/$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH)
+}
+
+
+has_new_commit () {
+    local proj=$1
+    local branch=$USER_ACCOUNT/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH
+    local newrev=$(git show-ref -s refs/heads/$DEFAULT_WORKING_BRANCH)
+    local oldrev=$(git ls-remote --heads $PUSH_REPOS_PATH/$proj $branch)
+    oldrev=${oldrev%% *}
+
+    [ -n "$newrev" -a "$oldrev" != "$newrev" ]
+}
+
+
+commit_project () {
+    local proj=$1
+
+    if has_local_commit && has_new_commit $1; then
+        run_cmd git push -f $PUSH_REPOS_PATH/$proj \
+                $DEFAULT_WORKING_BRANCH:$USER_ACCOUNT/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH
+    #else
+    #    echo "No new local commits on branch '$DEFAULT_WORKING_BRANCH' of project '$proj'."
+    fi
+}
+
+
+uncommit_project () {
+    local proj=$1
+
+    local branch=$USER_ACCOUNT/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH
+    if [ 1 -eq $(git ls-remote --heads $PUSH_REPOS_PATH/$proj $branch | wc -l) ]; then
+        run_cmd git push -f $PUSH_REPOS_PATH/$proj \
+                0000000000000000000000000000000000000000:$branch
+    #else
+    #    echo "No branch '$branch' found in project '$PUSH_REPOS_PATH/$proj'."
+    fi
+}
+
+######################## sub commands ##################################
+cmd_help () {
+    if [ -z "$1" ]; then
+        cat <<EOF
+rrp, a not fully wrapper to repo and GIT, v$RRP_VERSION
+
+Usage:
+  rrp COMMAND [options] [arguments]
+
+Available commands:
+  checkout  - check out a working copy from repository
+  update    - update working copy from repository
+  commit    - commit changes to repository
+  uncommit  - cancel commits to repository
+  review    - review commits to repository
+  editlog   - edit log text of a local commit
+
+See 'rrp help COMMAND' for more information on a specific command.
+EOF
+    else
+        local cmd="$1"
+        if has_sub_command "$cmd"; then
+            echo "Sorry, no detailed help yet."
+        else
+            echo "Unkown command, run 'rrp help' for help information." >&2
+        fi
+    fi
+}
+
+
+cmd_checkout () {
+    # make sure not in a working copy
+    if [ -n "$PROJECT_ROOT" ]; then
+        echo "Can't checkout into an existed working copy!" >&2
+        exit 1
+    fi
+
+    # make sure in a empty directory
+    if [ $(ls -a | wc -l) -gt 2 ]; then
+        echo "Current directory isn't empty!" >&2
+        exit 1
+    fi
+
+    # install script "repo" from android.git.kernel.org
+    if [ ! -x $REPO ]; then
+        run_cmd git clone --depth=1 git://android.git.kernel.org/tools/repo.git
+        if [ -f repo/repo ]; then
+            run_cmd cp -i repo/repo $REPO
+        else
+            exit 1
+        fi
+        chmod u+x $REPO
+        rm -rf repo
+    fi
+
+    # accessing remote repository requires private key
+    [ $IS_LOCAL -ne 1 ] && cache_ssh_private_key
+
+    # initialize working copy
+    run_cmd $REPO init -u $PULL_REPOS_PATH/.repo/manifests.git \
+            -b $DEFAULT_UPSTREAM_BRANCH || exit 1
+
+    # get customized script "repo"
+    if [ $IS_LOCAL -eq 1 ]; then
+        run_cmd cd .repo/repo &&
+            run_cmd git fetch $REPOS_PATH/.repo/repo alternates-repo:alternates-repo &&
+            run_cmd git checkout alternates-repo -- &&
+            run_cmd cd - || exit 1
+    fi
+
+    # fetch android source code and create a working branch
+    run_cmd $REPO sync &&
+    run_cmd $REPO start $DEFAULT_WORKING_BRANCH
+}
+
+
+cmd_update () {
+    must_under_project_root
+    cache_ssh_private_key
+
+    run_cmd $REPO sync &&
+        run_cmd $REPO forall -c git checkout $DEFAULT_WORKING_BRANCH
+}
+
+
+cmd_commit () {
+    must_under_project_root
+    cache_ssh_private_key
+
+    local proj=${MODULE_ROOT#$PROJECT_ROOT/}
+
+    if [ -z "$proj" ]; then     # in project_root directory
+        proj=$1
+        [ -z "$1" ] &&          # no arguments given
+            $REPO forall -c pwd | while read proj; do
+                proj=${proj#$PROJECT_ROOT/}
+                cd "$PROJECT_ROOT/$proj" && commit_project $proj
+            done ||             # has arguments given
+            while shift; do
+                cd "$PROJECT_ROOT/$proj" && commit_project $proj
+                proj=$1
+            done
+    else                        # in sub directory of project_root directory
+        commit_project $proj
+    fi
+}
+
+
+cmd_uncommit () {
+    cache_ssh_private_key
+
+    local proj=$1
+
+    if [ -z "$proj" ]; then     # no arguments given
+        must_under_project_root
+
+        proj=${MODULE_ROOT#$PROJECT_ROOT/}
+        [ -n "$proj" ] && uncommit_project $proj ||
+            $REPO forall -c pwd | while read proj; do
+                proj=${proj#$PROJECT_ROOT/}
+                uncommit_project $proj
+            done
+    else                        # has arguments given
+        while shift; do
+            uncommit_project $proj
+            proj=$1
+        done
+    fi
+}
+
+
+cmd_review () {
+    must_under_module_root
+    cache_ssh_private_key
+}
+
+
+cmd_editlog () {
+    must_under_module_root
+}
+
+######################## main entry ####################################
+cmd="$1"
+shift
+
+[ -z "$cmd" ] && cmd_help && exit 0
+
+if has_sub_command "$cmd"; then
+    # initilize some global variables
+    initialize
+
+    # execute the sub command
+    cmd_$cmd "$@"
+else
+    echo "Unkown command, run 'rrp help' for help information." >&2
+fi
+
