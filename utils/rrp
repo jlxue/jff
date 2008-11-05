@@ -19,11 +19,12 @@
 #       * initial skeleton, implement help command
 #   2008-11-05  Liu Yubao
 #       * implement checkout/update/commit/uncommit
+#       * cleanup ssh-agent when this script exits
 #
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.1
+RRP_VERSION=0.2
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -62,6 +63,8 @@ USER_ACCOUNT=
 USER_NAME=
 # user email, eg yubao.liu@gmail.com
 USER_EMAIL=
+# is ssh-agent started by this script?
+IS_NEW_SSH_AGENT=
 
 
 ######################## auxiliary functions ###########################
@@ -158,6 +161,14 @@ initialize () {
 }
 
 
+finalize () {
+    test $IS_NEW_SSH_AGENT && {
+        [ -n "$SSH_AGENT_PID" ] && kill "$SSH_AGENT_PID"
+        [ -n "$SSH_AUTH_SOCK" ] && { rm "$SSH_AUTH_SOCK"; rmdir "$(basename "$SSH_AUTH_SOCK")"; }
+    } >/dev/null 2>&1
+}
+
+
 must_under_project_root () {
     [ -z "$PROJECT_ROOT" ] &&
         echo .repo not found in current directory and its upper directories! >&2 &&
@@ -178,6 +189,7 @@ cache_ssh_private_key () {
         echo "or \`ssh-agent bash', then execute \`ssh-add' to avoid being" &&
         echo "asked password again and again." &&
         eval $(ssh-agent) &&
+        IS_NEW_SSH_AGENT=1 &&
         ssh-add
 }
 
@@ -365,6 +377,8 @@ cmd_editlog () {
 }
 
 ######################## main entry ####################################
+trap finalize EXIT
+
 cmd="$1"
 shift
 
