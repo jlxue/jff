@@ -18,13 +18,20 @@
 #   2008-11-04  Liu Yubao
 #       * initial skeleton, implement help command
 #   2008-11-05  Liu Yubao
-#       * implement checkout/update/commit/uncommit
-#       * cleanup ssh-agent when this script exits
+#       * implement checkout/update/commit/uncommit, v0.1
+#       * cleanup ssh-agent when this script exits, v0.2
+#       * make remote client can access repository, v0.3
+#   2008-11-06  Liu Yubao
+#       * check whether updated when commit
+#       * clarify 'module' and 'project' words
+#       * implement ls command
+#       * fix bug in initialize() when MODULE_ROOT is null
+#       * release v0.4
 #
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.2
+RRP_VERSION=0.4
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -52,7 +59,7 @@ PROJECT_ROOT=
 # The directory that contains .git
 MODULE_ROOT=
 # Does the working copy lie in same machine with central repository?
-IS_LOCAL=0
+IS_LOCAL=
 # remote url for official repository to pull baseline code
 PULL_REPOS_PATH=
 # remote url for temporary repository to push changes
@@ -100,7 +107,7 @@ initialize () {
     # project_root is empty or module_root is out of project_root, we
     # get a wrong module_root, so set it empty
     [ -z "$PROJECT_ROOT" ] ||
-        [ "$PROJECT_ROOT" != $(expr substr "$MODULE_ROOT" 1 $(expr length "$PROJECT_ROOT")) ] &&
+        [ "$PROJECT_ROOT" != "$(expr substr "$MODULE_ROOT" 1 $(expr length "$PROJECT_ROOT"))" ] &&
         MODULE_ROOT=
 
     /sbin/ifconfig | grep -qF $SERVER_IP && IS_LOCAL=1
@@ -152,7 +159,7 @@ initialize () {
         done < $HOME/.ssh/config
     fi
 
-    if [ $IS_LOCAL -eq 1 ]; then
+    if [ "$IS_LOCAL" ]; then
         PULL_REPOS_PATH=$REPOS_PATH
     else
         PULL_REPOS_PATH=ssh://$USER_ACCOUNT-git@$SERVER_IP:$SERVER_PORT$REPOS_PATH
@@ -194,44 +201,52 @@ cache_ssh_private_key () {
 }
 
 
-has_local_commit () {
-    test $(git show-ref -s refs/heads/$DEFAULT_WORKING_BRANCH) != \
-         $(git show-ref -s refs/remotes/$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH)
-}
-
-
-has_new_commit () {
-    local proj=$1
+local_updated_and_has_new_commit () {
+    local module=$1
     local branch=$USER_ACCOUNT/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH
+    local baserev=$(git show-ref -s refs/remotes/$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH)
     local newrev=$(git show-ref -s refs/heads/$DEFAULT_WORKING_BRANCH)
-    local oldrev=$(git ls-remote --heads $PUSH_REPOS_PATH/$proj $branch)
+
+    if [ -z "$newrev" ]; then
+        echo "$module: local branch \`$DEFAULT_WORKING_BRANCH\' not found!" >&2
+        return 1
+    fi
+
+    if [ $(git merge-base $baserev $newrev) != $baserev ]; then
+        echo "$module is out of date, please update it first!" >&2
+        return 1
+    fi
+
+    local oldrev=$(git ls-remote --heads $PUSH_REPOS_PATH/$module $branch)
     oldrev=${oldrev%% *}
 
-    [ -n "$newrev" -a "$oldrev" != "$newrev" ]
+    test "$baserev" != "$newrev" -a "$oldrev" != "$newrev"
 }
 
 
-commit_project () {
-    local proj=$1
+commit_module () {
+    local module=$1
 
-    if has_local_commit && has_new_commit $1; then
-        run_cmd git push -f $PUSH_REPOS_PATH/$proj \
+    git fetch
+
+    if local_updated_and_has_new_commit $module; then
+        run_cmd git push -f $PUSH_REPOS_PATH/$module \
                 $DEFAULT_WORKING_BRANCH:$USER_ACCOUNT/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH
     #else
-    #    echo "No new local commits on branch '$DEFAULT_WORKING_BRANCH' of project '$proj'."
+    #    echo "No new local commits on branch '$DEFAULT_WORKING_BRANCH' of module '$module'."
     fi
 }
 
 
-uncommit_project () {
-    local proj=$1
+uncommit_module () {
+    local module=$1
 
     local branch=$USER_ACCOUNT/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH
-    if [ 1 -eq $(git ls-remote --heads $PUSH_REPOS_PATH/$proj $branch | wc -l) ]; then
-        run_cmd git push -f $PUSH_REPOS_PATH/$proj \
+    if [ 1 -eq $(git ls-remote --heads $PUSH_REPOS_PATH/$module $branch | wc -l) ]; then
+        run_cmd git push -f $PUSH_REPOS_PATH/$module \
                 0000000000000000000000000000000000000000:$branch
     #else
-    #    echo "No branch '$branch' found in project '$PUSH_REPOS_PATH/$proj'."
+    #    echo "No branch '$branch' found in module '$PUSH_REPOS_PATH/$module'."
     fi
 }
 
@@ -247,10 +262,12 @@ Usage:
 Available commands:
   checkout  - check out a working copy from repository
   update    - update working copy from repository
+  rebase    - rebase working branch onto upstream branch
   commit    - commit changes to repository
   uncommit  - cancel commits to repository
   review    - review commits to repository
   editlog   - edit log text of a local commit
+  ls        - list modules
 
 See 'rrp help COMMAND' for more information on a specific command.
 EOF
@@ -291,14 +308,14 @@ cmd_checkout () {
     fi
 
     # accessing remote repository requires private key
-    [ $IS_LOCAL -ne 1 ] && cache_ssh_private_key
+    [ "$IS_LOCAL" ] || cache_ssh_private_key
 
     # initialize working copy
     run_cmd $REPO init -u $PULL_REPOS_PATH/.repo/manifests.git \
-            -b $DEFAULT_UPSTREAM_BRANCH || exit 1
+            -b $(test "$IS_LOCAL" && echo $DEFAULT_UPSTREAM_BRANCH-local || echo $DEFAULT_UPSTREAM_BRANCH) || exit 1
 
     # get customized script "repo"
-    if [ $IS_LOCAL -eq 1 ]; then
+    if [ "$IS_LOCAL" ]; then
         run_cmd cd .repo/repo &&
             run_cmd git fetch $REPOS_PATH/.repo/repo alternates-repo:alternates-repo &&
             run_cmd git checkout alternates-repo -- &&
@@ -324,21 +341,21 @@ cmd_commit () {
     must_under_project_root
     cache_ssh_private_key
 
-    local proj=${MODULE_ROOT#$PROJECT_ROOT/}
+    local module=${MODULE_ROOT#$PROJECT_ROOT/}
 
-    if [ -z "$proj" ]; then     # in project_root directory
-        proj=$1
+    if [ -z "$module" ]; then     # in project_root directory
+        module=$1
         [ -z "$1" ] &&          # no arguments given
-            $REPO forall -c pwd | while read proj; do
-                proj=${proj#$PROJECT_ROOT/}
-                cd "$PROJECT_ROOT/$proj" && commit_project $proj
+            $REPO forall -c pwd | while read module; do
+                module=${module#$PROJECT_ROOT/}
+                cd "$PROJECT_ROOT/$module" && commit_module $module
             done ||             # has arguments given
             while shift; do
-                cd "$PROJECT_ROOT/$proj" && commit_project $proj
-                proj=$1
+                cd "$PROJECT_ROOT/$module" && commit_module $module
+                module=$1
             done
     else                        # in sub directory of project_root directory
-        commit_project $proj
+        commit_module $module
     fi
 }
 
@@ -346,21 +363,21 @@ cmd_commit () {
 cmd_uncommit () {
     cache_ssh_private_key
 
-    local proj=$1
+    local module=$1
 
-    if [ -z "$proj" ]; then     # no arguments given
+    if [ -z "$module" ]; then     # no arguments given
         must_under_project_root
 
-        proj=${MODULE_ROOT#$PROJECT_ROOT/}
-        [ -n "$proj" ] && uncommit_project $proj ||
-            $REPO forall -c pwd | while read proj; do
-                proj=${proj#$PROJECT_ROOT/}
-                uncommit_project $proj
+        module=${MODULE_ROOT#$PROJECT_ROOT/}
+        [ -n "$module" ] && uncommit_module $module ||
+            $REPO forall -c pwd | while read module; do
+                module=${module#$PROJECT_ROOT/}
+                uncommit_module $module
             done
     else                        # has arguments given
         while shift; do
-            uncommit_project $proj
-            proj=$1
+            uncommit_module $module
+            module=$1
         done
     fi
 }
@@ -376,6 +393,23 @@ cmd_editlog () {
     must_under_module_root
 }
 
+
+cmd_ls () {
+    must_under_project_root
+
+    local pattern="$1"
+
+    if [ -z "$pattern" ]; then
+        local module=${MODULE_ROOT#$PROJECT_ROOT/}
+        [ -n "$module" ] && echo $module && return 0
+    fi
+
+    $REPO forall -c pwd | while read d; do
+        echo ${d#$PROJECT_ROOT/}
+    done | grep -i "$pattern"
+}
+
+
 ######################## main entry ####################################
 trap finalize EXIT
 
@@ -385,7 +419,7 @@ shift
 [ -z "$cmd" ] && cmd_help && exit 0
 
 if has_sub_command "$cmd"; then
-    # initilize some global variables
+    # initialize some global variables
     initialize
 
     # execute the sub command
