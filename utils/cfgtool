@@ -55,6 +55,10 @@
 #       * fix working tree problem, version 0.3.1.
 #   2008-4-29 Liu Yubao
 #       * add core.worktree to workaround git's wired behaviour, version 0.3.2.
+#   2008-11-7 Liu Yubao
+#       * fix a syntax error, bash doesn't allow "&&" at the beginning of line
+#       * move dpkg hook to /etc/apt/apt.conf.d/80cfgtool
+#       * release 0.4
 #   
 # TODO:
 #   * record file permission
@@ -135,8 +139,8 @@ cmd_init () {
 
     cd "$VCS_ROOT/" || exit 1
 
-    if ! ($VCS_CMD init "$@" && $VCS_CMD config core.worktree ".."
-            && chmod 700 "$VCS_REPOS"); then
+    if ! ($VCS_CMD init "$@" && $VCS_CMD config core.worktree ".." &&
+            chmod 700 "$VCS_REPOS"); then
         exit 1
     fi
 
@@ -187,12 +191,16 @@ cmd_hook () {
 
     # install APT hook
     cd "$VCS_ROOT/"
-    [ -e etc/apt/apt.conf ] && $VCS_CMD add etc/apt/apt.conf
-    safe_commit -m "save apt.conf before hook APT" etc/apt/apt.conf ||
-        exit 1
 
-    if ! grep cfgtool /etc/apt/apt.conf >/dev/null 2>&1; then
-        cat >> /etc/apt/apt.conf <<EOF
+    local f=etc/apt/apt.conf.d/80cfgtool
+    local d=$(dirname "$f")
+
+    [ ! -e "$d" ] && mkdir -p "$d" || exit 1
+
+    if [ -e "$f" ]; then
+        log "Cfgtool hook exists: $f"
+    else
+        cat >> "$f" <<EOF
 
 // added automatically by cfgtool ------------> begin
 DPkg {
@@ -202,10 +210,10 @@ DPkg {
 // added automatically by cfgtool <------------ end
 
 EOF
-        $VCS_CMD add etc/apt/apt.conf
-        safe_commit -m "save apt.conf after hook APT" etc/apt/apt.conf ||
+        $VCS_CMD add "$f"
+        safe_commit -m "save $f after hook APT" "$f" ||
             exit 1
-        log "Cfgtool has been install in /etc/apt/apt.conf"
+        log "Cfgtool has been install in $f"
     fi
 }
 
