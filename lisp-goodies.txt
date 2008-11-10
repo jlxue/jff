@@ -61,6 +61,7 @@ http://wiki.alu.org/Gardeners_Projects
 
     clg (http://sourceforge.net/projects/clg)
     cl-gtk (http://tenkan.org/clgtk/index.html)
+    cells-gtk(http://common-lisp.net/project/cells-gtk/)
 
     graphic-forms       UI library for Windows
     pixel art library
