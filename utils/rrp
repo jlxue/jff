@@ -17,21 +17,103 @@
 # ChangeLog
 #   2008-11-04  Liu Yubao
 #       * initial skeleton, implement help command
+#
 #   2008-11-05  Liu Yubao
 #       * implement checkout/update/commit/uncommit, v0.1
 #       * cleanup ssh-agent when this script exits, v0.2
 #       * make remote client can access repository, v0.3
+#
 #   2008-11-06  Liu Yubao
 #       * check whether updated when commit
 #       * clarify 'module' and 'project' words
 #       * implement ls command
-#       * fix bug in initialize() when MODULE_ROOT is null
-#       * release v0.4
+#       * fix bug in initialize() when MODULE_ROOT is null, v0.4
+#       * implement review command, v0.5
 #
+#   2008-11-11  Liu Yubao
+#       * refer branch name more strictly, v0.6
+#       * old git doesn't support --depth=1, use --depth 1 instead, v0.7
+#       * make messages more attractive by ASCII character frame
+#       * don't download from android.git.kernel.org because it's
+#         very slow sometimes
+#       * update $HOME/repo to new version automatically
+#
+#   2008-11-12  Liu Yubao
+#       * make sure commit_module() run in root directory of a module
+#       * add showbranch, whatupdated, diff, status and for all commands
+#       * don't switch to branch "my" after `rrp update' because we
+#         are maybe already on it, v0.8
+#       * add missed "&&" to cache_ssh_private_key(), v0.9
+#       * optimize efficience of cmd_commit()
+#       * add progress indicator for cmd_commit() and cmd_uncommit(), v0.10
+#       * correct "echo" to "read" in initialize(), v0.11
+#
+#   2008-11-13  Liu Yubao
+#       * implement cherry command
+#       * implement reasonable behaviour of whatupdated, v0.12
+#       * use SSH_AUTH_SOCK to tell whether ssh-agent is required
+#         because GNOME seahorse doesn't expose SSH_AUTH_SOCK
+#
+#   2008-11-14  Liu Yubao
+#       * make show-branch and what-updated synonyms for showbranch
+#         and whatupdated
+#
+#   2008-11-16  Liu Yuao
+#       * make `less' not use alternate screen with -X option
+#       * add `editlog' command
+#       * output colorful important running command
+#       * add module name and branch name to PS1, v0.13
+#
+#
+
+######################## part executed in $HOME/.bashrc ################
+# To make the pollution to shell environment minimum, I put this code
+# snippet here for setting PS1.
+#
+__rrp_find_dir () {
+    local d=$1
+    local dir=$(pwd)
+
+    while [ -n "$dir" ]; do
+        [ -d "$dir/$d" ] && break
+        dir=$(dirname $dir)
+        [ "$dir" = "/" ] && dir= && break
+    done
+
+    echo "$dir"
+}
+
+
+__rrp_ps1 () {
+    local PROJECT_ROOT=$(__rrp_find_dir '.repo')
+    local MODULE_ROOT=$(__rrp_find_dir '.git')
+    local module
+
+    # project_root is empty or module_root is out of project_root, we
+    # get a wrong module_root, so set it empty
+    [ -z "$PROJECT_ROOT" ] ||
+        [ "$PROJECT_ROOT" != "$(expr substr "$MODULE_ROOT" 1 $(expr length "$PROJECT_ROOT"))" ] &&
+        MODULE_ROOT=
+
+    module=${MODULE_ROOT#$PROJECT_ROOT/}
+    echo $(__git_ps1 "$module(%s)")
+}
+
+
+if [ "$1" = "ps1" ]; then
+    if [ "$(type -t "__git_ps1")" != 'function' ]; then
+        echo "git completion isn't enabled, please check your ~/.bashrc to uncomment" >&2
+        echo "'. /etc/bash_completion' or append '. /path/to/git-completion.sh' to .bashrc" >&2
+    else
+        PS1='[$SHLVL]\033[01;31m$(__rrp_ps1)\033[00m'"$PS1"
+    fi
+
+    return
+fi
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.4
+RRP_VERSION=0.13
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -47,10 +129,11 @@ DEFAULT_REMOTE=origin
 DEFAULT_UPSTREAM_BRANCH=master
 # default working branch
 DEFAULT_WORKING_BRANCH=my
-# person who is responsible for account configuration
-ADMIN_EMAIL=yubao.liu@gmail.com
 # path where to place script "repo"
 REPO=$HOME/repo
+# ref updates of upstream branch in every modules happening in
+# $UPDATE_INTERVAL seconds are thought as one update of whole android project
+UPDATE_INTERVAL=300
 
 
 ######################## global vars ###################################
@@ -75,22 +158,13 @@ IS_NEW_SSH_AGENT=
 
 
 ######################## auxiliary functions ###########################
-find_dir () {
-    local d=$1
-    local dir=$(pwd)
-
-    while [ -n "$dir" ]; do
-        [ -d "$dir/$d" ] && break
-        dir=$(dirname $dir)
-        [ "$dir" = "/" ] && dir= && break
-    done
-
-    echo "$dir"
-}
 
 
 run_cmd () {
+    # see repo/color.py for color ANSI escape sequences
+    echo -ne "\033[31;40m"      # red foreground, black background
     echo [CMD] "$@"
+    echo -ne "\033[00m"         # reset color
     "$@"
 }
 
@@ -100,9 +174,21 @@ has_sub_command () {
 }
 
 
+install_ps1_setting_to_bashrc () {
+    grep -q "rrp ps1" $HOME/.bashrc 2>/dev/null ||
+        cat >> $HOME/.bashrc <<EOF
+
+# !!! Inserted by rrp to show android module path and branch name
+# in shell prompt. If you don't like it, comment out next line.
+. /usr/local/bin/rrp ps1    # DON'T REMOVE THIS LINE
+
+EOF
+}
+
+
 initialize () {
-    PROJECT_ROOT=$(find_dir '.repo')
-    MODULE_ROOT=$(find_dir '.git')
+    PROJECT_ROOT=$(__rrp_find_dir '.repo')
+    MODULE_ROOT=$(__rrp_find_dir '.git')
 
     # project_root is empty or module_root is out of project_root, we
     # get a wrong module_root, so set it empty
@@ -110,32 +196,38 @@ initialize () {
         [ "$PROJECT_ROOT" != "$(expr substr "$MODULE_ROOT" 1 $(expr length "$PROJECT_ROOT"))" ] &&
         MODULE_ROOT=
 
+    install_ps1_setting_to_bashrc
+
     /sbin/ifconfig | grep -qF $SERVER_IP && IS_LOCAL=1
 
     which git >/dev/null 2>&1 || { echo "git isn't installed!" >&2; exit 1; }
 
     if [ ! -f $HOME/.ssh/id_rsa ]; then
-        echo "Run ssh-keygen for you, please use default path and you'd better"
-        echo "supply password to protect your private key."
+        echo "+-------------------------------------------------------------------+"
+        echo "| Run ssh-keygen for you, please use default path and you'd better  |"
+        echo "| supply password to protect your private key.                      |"
+        echo "+-------------------------------------------------------------------+"
         echo
 
         run_cmd ssh-keygen
 
         echo
-        echo "$HOME/.ssh/id_rsa.pub is your public key, send it to"
-        echo "$ADMIN_EMAIL whenever you create a new one."
-        echo "!!! You CAN'T access the source code repository until the"
-        echo "!!! administrator finishes the configuration for you."
+        echo "+-------------------------------------------------------------------+"
+        echo "| \$HOME/.ssh/id_rsa.pub is your public key, send it to              |"
+        echo "| your administrator whenever you create a new one.                 |"
+        echo "| !!! You CAN'T access the source code repository until the         |"
+        echo "| !!! administrator finishes the configuration for you.             |"
+        echo "+-------------------------------------------------------------------+"
 
         exit 1
     fi
 
     USER_ACCOUNT=$USER
     if [ ! -f $HOME/.ssh/config ] || ! grep -qF $SERVER_IP $HOME/.ssh/config; then
-        echo -n "What's your git account on $SERVER_IP?[$USER_ACCOUNT-git]"
-
         local u
-        read -t 30 u
+
+        read -t 30 -p "What's your git account on $SERVER_IP?[$USER_ACCOUNT-git]" u
+
         [ -n "$u" ] && USER_ACCOUNT=${u%-git}
         echo "Write account settings for $SERVER_IP to $HOME/.ssh/config."
         {
@@ -143,6 +235,7 @@ initialize () {
             echo "    Port $SERVER_PORT"
             echo "    User $USER_ACCOUNT-git"
         } >> $HOME/.ssh/config
+        sleep 2
     else
         local key arg ready
         while read key arg; do
@@ -165,6 +258,14 @@ initialize () {
         PULL_REPOS_PATH=ssh://$USER_ACCOUNT-git@$SERVER_IP:$SERVER_PORT$REPOS_PATH
     fi
     PUSH_REPOS_PATH=ssh://$USER_ACCOUNT-git@$SERVER_IP:$SERVER_PORT$HOT_REPOS_PATH
+
+    # copy new "repo" script to $HOME/repo
+    local new_repo="$PROJECT_ROOT/.repo/repo/repo"
+    local old_repo="$HOME/repo"
+    if [ -x "$new_repo" ]; then
+        [ -x "$old_repo" ] && diff "$old_repo" "$new_repo" >/dev/null 2>&1 ||
+            cp  "$new_repo" "$old_repo" || exit 1
+    fi
 }
 
 
@@ -190,11 +291,19 @@ must_under_module_root () {
 }
 
 
+must_has_git_dir_in_module () {
+    [ ! -d "$PROJECT_ROOT/$1/.git" ] &&
+        echo "No module \"$1\" found." >&2 &&
+        exit 1
+}
+
 cache_ssh_private_key () {
-    [ -z "$SSH_AGENT_PID" ] &&
-        echo "ssh-agent not running, you'd better execute \`eval \$(ssh-agent)'" &&
-        echo "or \`ssh-agent bash', then execute \`ssh-add' to avoid being" &&
-        echo "asked password again and again." &&
+    [ -z "$SSH_AUTH_SOCK" ] &&
+        echo "+-------------------------------------------------------------------+" &&
+        echo "| ssh-agent not running, you'd better execute \`eval \$(ssh-agent)'   |" &&
+        echo "| or \`ssh-agent bash', then execute \`ssh-add' to avoid being        |" &&
+        echo "| asked for password again and again.                               |" &&
+        echo "+-------------------------------------------------------------------+" &&
         eval $(ssh-agent) &&
         IS_NEW_SSH_AGENT=1 &&
         ssh-add
@@ -203,24 +312,39 @@ cache_ssh_private_key () {
 
 local_updated_and_has_new_commit () {
     local module=$1
-    local branch=$USER_ACCOUNT/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH
+    local branch=refs/heads/$USER_ACCOUNT/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH
     local baserev=$(git show-ref -s refs/remotes/$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH)
     local newrev=$(git show-ref -s refs/heads/$DEFAULT_WORKING_BRANCH)
 
     if [ -z "$newrev" ]; then
+        echo
         echo "$module: local branch \`$DEFAULT_WORKING_BRANCH\' not found!" >&2
         return 1
     fi
 
+    [ "$baserev" = "$newrev" ] && return 1
+
     if [ $(git merge-base $baserev $newrev) != $baserev ]; then
-        echo "$module is out of date, please update it first!" >&2
-        return 1
+        {
+            echo
+            echo "$module is out of date, please update it using the command below first!"
+            echo
+            echo "  1. cd $module"
+            echo "  2. git checkout $DEFAULT_WORKING_BRANCH"
+            echo "  3. git fetch $DEFAULT_REMOTE"
+            echo "  4. git rebase $DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH"
+            echo "     or"
+            echo "     git merge $DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH"
+            echo
+        } >&2
+        exit 1      # don't return 1 because this function can be called many times, the tip above
+                    # can be too noisy.
     fi
 
     local oldrev=$(git ls-remote --heads $PUSH_REPOS_PATH/$module $branch)
     oldrev=${oldrev%% *}
 
-    test "$baserev" != "$newrev" -a "$oldrev" != "$newrev"
+    test "$oldrev" != "$newrev"
 }
 
 
@@ -230,8 +354,9 @@ commit_module () {
     git fetch
 
     if local_updated_and_has_new_commit $module; then
+        echo
         run_cmd git push -f $PUSH_REPOS_PATH/$module \
-                $DEFAULT_WORKING_BRANCH:$USER_ACCOUNT/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH
+                $DEFAULT_WORKING_BRANCH:refs/heads/$USER_ACCOUNT/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH
     #else
     #    echo "No new local commits on branch '$DEFAULT_WORKING_BRANCH' of module '$module'."
     fi
@@ -241,13 +366,91 @@ commit_module () {
 uncommit_module () {
     local module=$1
 
-    local branch=$USER_ACCOUNT/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH
+    local branch=refs/heads/$USER_ACCOUNT/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH
     if [ 1 -eq $(git ls-remote --heads $PUSH_REPOS_PATH/$module $branch | wc -l) ]; then
+        echo
         run_cmd git push -f $PUSH_REPOS_PATH/$module \
                 0000000000000000000000000000000000000000:$branch
     #else
     #    echo "No branch '$branch' found in module '$PUSH_REPOS_PATH/$module'."
     fi
+}
+
+
+showbranch () {
+    local path="$1"
+
+    local n rev head heads
+    n=$( (git show-ref -s --heads;
+          git show-ref -s refs/remotes/$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH) | uniq | wc -l)
+
+    [ $n -eq 1 ] && return 0
+
+    heads=$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH
+    while read rev head; do
+        heads="$heads ${head#refs/heads/}"
+    done < <(git show-ref --heads)
+
+    echo "========================================================================"
+    echo "$path"
+    echo
+    git show-branch $heads
+}
+
+
+cherry () {
+    local path="$1"
+
+    local upstream=refs/remotes/$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH
+    local upstream_rev=$(git show-ref -s $upstream)
+    local n
+    n=$( (git show-ref -s --heads; echo $upstream_rev) | uniq | wc -l )
+
+    [ $n -eq 1 ] && return 0
+
+    echo "========================================================================"
+    echo "$path"
+    echo
+
+    local rev head
+    while read rev head; do
+        [ $rev != $upstream_rev ] && run_cmd git cherry -v $upstream $head
+    done < <(git show-ref --heads)
+}
+
+
+whatupdated () {
+    local path="$1"
+
+    local latest_rev prev_rev
+
+    latest_rev=$(git rev-parse -q refs/remotes/$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH@{0} 2>/dev/null)
+    prev_rev=$(git rev-parse -q refs/remotes/$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH@{1} 2>/dev/null)
+
+    [ '0000000000000000000000000000000000000000' = $latest_rev ] && return 1
+
+    echo "========================================================================"
+    echo "$path"
+    echo
+
+    [ '0000000000000000000000000000000000000000' = $prev_rev ] &&
+        git log --color --stat $latest_rev ||
+        git log --color --stat $prev_rev..$latest_rev
+}
+
+
+last_reflog_time () {
+    local log=$(tail -n 1 ".git/logs/refs/remotes/$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH" 2>/dev/null)
+
+    [ -z "$log" ] && return
+
+    local begin end
+    begin=$(expr "$log" : ".*> ")
+    end=$(expr "$log" : ".*> [0-9]\+ ")
+
+    [ $begin -eq 0 -o $end -le $begin ] && return
+
+    echo $(expr substr "$log" $begin $(expr $end - $begin))
 }
 
 ######################## sub commands ##################################
@@ -262,12 +465,22 @@ Usage:
 Available commands:
   checkout  - check out a working copy from repository
   update    - update working copy from repository
-  rebase    - rebase working branch onto upstream branch
+
   commit    - commit changes to repository
   uncommit  - cancel commits to repository
+
+  editlog   - edit log of some commit on current branch
+
   review    - review commits to repository
-  editlog   - edit log text of a local commit
+
   ls        - list modules
+  status    - show the working tree status
+  diff      - show changes between working tree, index and commit
+  cherry    - find commits not merged upstream
+  showbranch    - show branches and their commits
+  whatupdated   - show what changed in the last update or fetch
+
+  forall    - execute command in each module's root directory
 
 See 'rrp help COMMAND' for more information on a specific command.
 EOF
@@ -297,7 +510,7 @@ cmd_checkout () {
 
     # install script "repo" from android.git.kernel.org
     if [ ! -x $REPO ]; then
-        run_cmd git clone --depth=1 git://android.git.kernel.org/tools/repo.git
+        run_cmd git clone --depth 1 $PULL_REPOS_PATH/.repo/repo
         if [ -f repo/repo ]; then
             run_cmd cp -i repo/repo $REPO
         else
@@ -332,8 +545,7 @@ cmd_update () {
     must_under_project_root
     cache_ssh_private_key
 
-    run_cmd $REPO sync &&
-        run_cmd $REPO forall -c git checkout $DEFAULT_WORKING_BRANCH
+    run_cmd $REPO sync
 }
 
 
@@ -343,17 +555,27 @@ cmd_commit () {
 
     local module=${MODULE_ROOT#$PROJECT_ROOT/}
 
-    if [ -z "$module" ]; then     # in project_root directory
+    if [ -z "$module" ]; then   # in project_root directory
         module=$1
         [ -z "$1" ] &&          # no arguments given
             $REPO forall -c pwd | while read module; do
                 module=${module#$PROJECT_ROOT/}
+
+                printf '\r%-60s ... ' "$module"
                 cd "$PROJECT_ROOT/$module" && commit_module $module
+                printf '%d modules processed.' $((++n))
             done ||             # has arguments given
             while shift; do
+                must_has_git_dir_in_module $module
+
+                printf '\r%-60s ... ' "$module"
                 cd "$PROJECT_ROOT/$module" && commit_module $module
+                printf '%d modules processed.' $((++n))
+
                 module=$1
             done
+
+            echo
     else                        # in sub directory of project_root directory
         commit_module $module
     fi
@@ -372,25 +594,76 @@ cmd_uncommit () {
         [ -n "$module" ] && uncommit_module $module ||
             $REPO forall -c pwd | while read module; do
                 module=${module#$PROJECT_ROOT/}
+
+                printf '\r%-60s ... ' "$module"
                 uncommit_module $module
+                printf '%d modules processed.' $((++n))
+
             done
     else                        # has arguments given
         while shift; do
+            printf '\r%-60s ... ' "$module"
             uncommit_module $module
+            printf '%d modules processed.' $((++n))
+
             module=$1
         done
     fi
+
+    echo
 }
 
 
 cmd_review () {
     must_under_module_root
     cache_ssh_private_key
-}
 
+    local author=${1:-$USER_ACCOUNT}
+    local module=${MODULE_ROOT#$PROJECT_ROOT/}
 
-cmd_editlog () {
-    must_under_module_root
+    if ! git remote | grep -qw $DEFAULT_REMOTE-hot; then
+        local url=$(git remote -v | grep -w "^$DEFAULT_REMOTE")
+        url=${url##*.repo/projects/}
+        if [ -z "$url" ]; then
+            echo "GIT remote \`$DEFAULT_REMOTE' not found!" >&2
+            exit 1
+        fi
+
+        url=$PUSH_REPOS_PATH/.repo/projects/$url
+        run_cmd git remote add -m $DEFAULT_UPSTREAM_BRANCH-hot -f $DEFAULT_REMOTE-hot $url
+    fi
+
+    run_cmd git fetch $DEFAULT_REMOTE
+    run_cmd git fetch $DEFAULT_REMOTE-hot
+    run_cmd git remote prune $DEFAULT_REMOTE
+    run_cmd git remote prune $DEFAULT_REMOTE-hot
+
+    local branch=refs/remotes/$DEFAULT_REMOTE-hot/$author/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH
+
+    if [ -n "$(git show-ref -s $branch)" ]; then
+        if [ -z "$DISPLAY" ]; then
+            local answer
+
+            echo "No X server running, you'd better start Xorg or Xming for better review experience!" >&2
+            read -p "Sure to review in text patch mode?[y/N]" answer
+            answer=$(echo "$answer" | tr [:upper:] [:lower:])
+            case "$answer" in
+                y*)
+                    run_cmd git log -p --color $branch
+                    ;;
+                *)
+                    ;;
+            esac
+        else
+            run_cmd gitk $branch \
+                         refs/heads/$DEFAULT_WORKING_BRANCH \
+                         refs/remotes/$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH \
+                         refs/remotes/$DEFAULT_REMOTE-hot/$DEFAULT_UPSTREAM_BRANCH-hot &
+            run_cmd git gui browser $branch &
+        fi
+    else
+        echo "No branch \"$author/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH\" found in remote \"$DEFAULT_REMOTE-hot\"!" >&2
+    fi
 }
 
 
@@ -410,10 +683,191 @@ cmd_ls () {
 }
 
 
+cmd_showbranch () {
+    must_under_project_root
+
+    local module=${MODULE_ROOT#$PROJECT_ROOT/}
+    local path
+
+    if [ -z "$module" ]; then   # in project root directory
+        module="$1"
+        [ -z "$1" ] &&          # no arguments given
+            $REPO forall -c pwd | while read path; do
+                cd "$path" && showbranch "$path"
+            done ||             # has arguments given
+            while shift; do
+                must_has_git_dir_in_module $module
+                path="$PROJECT_ROOT/$module"
+                cd "$path" && showbranch "$path"
+                module="$1"
+            done
+    else
+        showbranch "$MODULE_ROOT"
+    fi
+}
+
+
+cmd_cherry () {
+    must_under_project_root
+
+    local module=${MODULE_ROOT#$PROJECT_ROOT/}
+    local path
+
+    if [ -z "$module" ]; then   # in project root directory
+        module="$1"
+        [ -z "$1" ] &&          # no arguments given
+            $REPO forall -c pwd | while read path; do
+                cd "$path" && cherry "$path"
+            done ||             # has arguments given
+            while shift; do
+                must_has_git_dir_in_module $module
+                path="$PROJECT_ROOT/$module"
+                cd "$path" && cherry "$path"
+                module="$1"
+            done
+    else
+        cherry "$MODULE_ROOT"
+    fi
+}
+
+
+# To emulate behaviour of `git diff ...'
+cmd_diff () {
+    must_under_project_root
+
+    local module=${MODULE_ROOT#$PROJECT_ROOT/}
+
+    if [ -z "$module" ]; then   # in project root directory
+        $REPO forall -c pwd | while read module; do
+            cd "$module" && module=${module#$PROJECT_ROOT/} &&
+                git diff --src-prefix=a/$module/ --dst-prefix=b/$module/ --color "$@"
+        done | less -FRX
+    else
+        git diff --src-prefix=a/$module/ --dst-prefix=b/$module/ "$@"
+    fi
+}
+
+
+cmd_status () {
+    must_under_project_root
+
+    $REPO status "$@"
+}
+
+
+cmd_whatupdated () {
+    must_under_project_root
+
+    local module=${MODULE_ROOT#$PROJECT_ROOT/}
+
+    if [ -z "$module" ]; then   # in project_root directory
+        local path time allpaths alltimes i=0
+
+        module=$1
+        [ -z "$1" ] &&          # no arguments given
+            while read path; do
+                cd "$path" && time=$(last_reflog_time)
+                if [ -n "$time" ]; then
+                    allpaths[$i]="$path"
+                    alltimes[$((i++))]="$time"
+                fi
+            done < <($REPO forall -c pwd) ||    # has arguments given
+            while shift; do
+                must_has_git_dir_in_module $module
+                path="$PROJECT_ROOT/$module"
+                cd "$path" && time=$(last_reflog_time)
+                if [ -n "$time" ]; then
+                    allpaths[$i]="$path"
+                    alltimes[$((i++))]="$time"
+                fi
+                module=$1
+            done
+
+        [ $i -eq 0 ] && return 0
+
+        local maxtime=0
+        for ((i=0; i < ${#allpaths[@]}; ++i)); do
+            [ $maxtime -lt ${alltimes[$i]} ] &&
+                maxtime=${alltimes[$i]}
+        done
+
+        for ((i=0, j=0; i < ${#allpaths[@]}; ++i)); do
+            [ $(expr $maxtime - ${alltimes[$i]}) -le $UPDATE_INTERVAL ] &&
+                cd "${allpaths[$i]}" && whatupdated "${allpaths[$i]}"
+        done | less -FRX
+    else
+        whatupdated "$MODULE_ROOT"
+    fi
+}
+
+
+cmd_forall () {
+    must_under_project_root
+
+    $REPO forall -c "$@"
+}
+
+
+cmd_editlog () {
+    must_under_module_root
+
+    local base
+    local rev=$(git rev-parse $1)
+    local current_branch=$(git symbolic-ref HEAD)
+    local tmp_branch=${current_branch#refs/heads/}-editlog
+
+    if git show-ref $tmp_branch >/dev/null; then
+        echo "$tmp_branch exists! Delete it after you make sure it's useless." >&2
+        return 1
+    fi
+
+    if [ -z "$rev" ]; then
+        echo "Which commit do you want to edit log?" >&2
+        return 1
+    fi
+
+    base=$(git merge-base $rev HEAD)
+    if [ "$base" != "$rev" ]; then
+        echo "Commit \"$1\" isn't on current branch!" >&2
+        return 1
+    fi
+
+    [ "$1" != "$rev" ] && echo "[$1] is commit $rev"
+
+    run_cmd git stash save "\"Before editlog for $rev on $current_branch\""
+    if [ $rev = $(git rev-parse HEAD) ]; then
+        run_cmd git commit --amend
+    else
+        run_cmd git checkout -b $tmp_branch $rev
+        run_cmd git commit --amend
+        run_cmd git checkout ${current_branch#refs/heads/}
+
+        while :; do
+            read -p "Sure to edit log for commit $rev on branch $current_branch?[y/N]"
+            REPLY=$(echo "$REPLY" | tr [:upper:] [:lower:])
+            case "$REPLY" in
+                y*)
+                    run_cmd git rebase --onto $tmp_branch $rev
+                    break
+                    ;;
+                n*)
+                    break
+                    ;;
+                *)
+                    ;;
+            esac
+        done
+
+        run_cmd git branch -D $tmp_branch
+    fi
+    git stash list | head -1 | grep -q "Before editlog" &&
+        run_cmd git stash pop
+}
+
 ######################## main entry ####################################
 trap finalize EXIT
 
-cmd="$1"
+cmd="${1//-}"
 shift
 
 [ -z "$cmd" ] && cmd_help && exit 0
