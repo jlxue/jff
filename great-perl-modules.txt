@@ -145,8 +145,6 @@ Module::Starter
 
 ptkdb
 
-XML::LibXML
-
 Template
 
 DBD::SQLite
@@ -157,8 +155,6 @@ Parse::RecDescent
 List::Utils
 
 List::MoreUtils
-
-Moose
 
 App::Config
 Config::General
@@ -171,15 +167,7 @@ Test::Harness
 
 Test::Simple
 
-Test::More
-
-Test::WWW::Mechanize
-
 Test::WWW::Declare
-
-Devel::Cover
-
-Devel::DProf
 
 Apache::DProf
 
@@ -188,8 +176,6 @@ HTML::TreeBuilder::XPath
 HTML::Selector::XPath
 
 Web::Scraper
-
-Module::Starter
 
 perlcritic
 
