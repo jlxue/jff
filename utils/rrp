@@ -64,7 +64,20 @@
 #       * output colorful important running command
 #       * add module name and branch name to PS1, v0.13
 #
+#   2008-11-17  Liu Yubao
+#       * enclose ANSI escape sequences in PS1 with \[ and \]
+#         to avoid garbled output for long input line
+#       * don't use black background for run_cmd()
+#       * give cmd_update's arguments to `repo sync' to update
+#         explicitly some modules, v0.14
 #
+#   2008-11-26  Liu Yubao
+#       * add `log` command, v0.15
+#       * fix incompatible syntax in expr command, v0.16
+#
+# TODO:
+#   fix many problems in cmd_update().
+#   `bisect' command.
 
 ######################## part executed in $HOME/.bashrc ################
 # To make the pollution to shell environment minimum, I put this code
@@ -105,7 +118,7 @@ if [ "$1" = "ps1" ]; then
         echo "git completion isn't enabled, please check your ~/.bashrc to uncomment" >&2
         echo "'. /etc/bash_completion' or append '. /path/to/git-completion.sh' to .bashrc" >&2
     else
-        PS1='[$SHLVL]\033[01;31m$(__rrp_ps1)\033[00m'"$PS1"
+        PS1='[$SHLVL]\[\033[01;31m\]$(__rrp_ps1)\[\033[00m\]'"$PS1"
     fi
 
     return
@@ -113,7 +126,7 @@ fi
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.13
+RRP_VERSION=0.16
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -162,7 +175,7 @@ IS_NEW_SSH_AGENT=
 
 run_cmd () {
     # see repo/color.py for color ANSI escape sequences
-    echo -ne "\033[31;40m"      # red foreground, black background
+    echo -ne "\033[01;31m"      # bold, red foreground
     echo [CMD] "$@"
     echo -ne "\033[00m"         # reset color
     "$@"
@@ -453,6 +466,7 @@ last_reflog_time () {
     echo $(expr substr "$log" $begin $(expr $end - $begin))
 }
 
+
 ######################## sub commands ##################################
 cmd_help () {
     if [ -z "$1" ]; then
@@ -466,14 +480,15 @@ Available commands:
   checkout  - check out a working copy from repository
   update    - update working copy from repository
 
-  commit    - commit changes to repository
-  uncommit  - cancel commits to repository
+  commit    - commit changes to central repository
+  uncommit  - cancel commits to central repository
 
   editlog   - edit log of some commit on current branch
 
   review    - review commits to repository
 
   ls        - list modules
+  log       - show log for whole android project
   status    - show the working tree status
   diff      - show changes between working tree, index and commit
   cherry    - find commits not merged upstream
@@ -508,6 +523,9 @@ cmd_checkout () {
         exit 1
     fi
 
+    # accessing remote repository requires private key
+    [ "$IS_LOCAL" ] || cache_ssh_private_key
+
     # install script "repo" from android.git.kernel.org
     if [ ! -x $REPO ]; then
         run_cmd git clone --depth 1 $PULL_REPOS_PATH/.repo/repo
@@ -519,9 +537,6 @@ cmd_checkout () {
         chmod u+x $REPO
         rm -rf repo
     fi
-
-    # accessing remote repository requires private key
-    [ "$IS_LOCAL" ] || cache_ssh_private_key
 
     # initialize working copy
     run_cmd $REPO init -u $PULL_REPOS_PATH/.repo/manifests.git \
@@ -545,7 +560,8 @@ cmd_update () {
     must_under_project_root
     cache_ssh_private_key
 
-    run_cmd $REPO sync
+    run_cmd $REPO sync "$@"
+    #run_cmd $REPO start $DEFAULT_WORKING_BRANCH "$@"
 }
 
 
@@ -558,7 +574,7 @@ cmd_commit () {
     if [ -z "$module" ]; then   # in project_root directory
         module=$1
         [ -z "$1" ] &&          # no arguments given
-            $REPO forall -c pwd | while read module; do
+            $REPO forall -c pwd 2>/dev/null | while read module; do
                 module=${module#$PROJECT_ROOT/}
 
                 printf '\r%-60s ... ' "$module"
@@ -862,6 +878,97 @@ cmd_editlog () {
     fi
     git stash list | head -1 | grep -q "Before editlog" &&
         run_cmd git stash pop
+}
+
+
+cmd_log () {
+    must_under_project_root
+
+    local module modules fds i=0 n
+    local buffers dates date j k
+
+    # save names for every modules and open named pipes to `git log' for them
+    while read module; do
+        cd "$module" && module=${module#$PROJECT_ROOT/} && {
+            modules[$i]="$module"
+            eval exec "$((i+100))<" <(git log --color --date=iso --date-order "$@") &&
+                fds[$i]=$((i+100)) ||
+                fds[$i]=0
+            dates[$((i++))]=0
+        }
+    done < <($REPO forall -c pwd 2>/dev/null)
+
+    n=$i
+
+    # initialize 'dates', save lines from "^commit .*" to "^Date: .*" to 'buffers'
+    # because we require the timestamp of each commit to decide whether output it
+    for ((i = 0; i < $n; i++)); do
+        [ ${fds[$i]} -eq 0 ] && continue
+
+        while read -u ${fds[$i]}; do
+            [ -z "${buffers[$i]}" ] && buffers[$i]="module ${modules[$i]}"
+            buffers[$i]="${buffers[$i]}\n$REPLY"
+            [ 8 -eq $(expr "$REPLY" : "Date:   ") ] &&
+                dates[$i]=$(date -d "${REPLY#Date:   }" +%s) &&
+                break
+        done
+    done
+
+    # find the latest commit, in modules[j]
+    date=0
+    j=0
+    for ((i = 0; i < $n; i++)); do
+        [ $date -lt ${dates[$i]} ] && date=${dates[$i]} && j=$i
+    done
+
+    [ $date -eq 0 ] && return 0
+
+    # do a N-way merge sort, output logs of each modules
+    while : ; do
+        # find the next latest commit, in modules[k]
+        date=0
+        k=0
+        for ((i = 0; i < $n; i++)); do
+            [ $i -ne $j -a $date -lt ${dates[$i]} ] && date=${dates[$i]} && k=$i
+        done
+
+        # output logs in modules[j] from dates[j] to dates[k]
+        [ -n "${buffers[$j]}" ] && {
+            echo -e "${buffers[$j]}"
+            buffers[$j]=""
+        }
+        while read -u ${fds[$j]}; do
+            # XXX: how to use group in expr? it's better to write
+            # '^\(\[[0-9;]m\)\?commit '
+            if [ 0 -lt $(expr "$REPLY" : '\?\[\?[0-9;]*m\?commit ') ]; then
+                buffers[$j]="module ${modules[$j]}\n$REPLY"
+
+                while read -u ${fds[$j]}; do
+                    buffers[$j]="${buffers[$j]}\n$REPLY"
+                    [ 8 -eq $(expr "$REPLY" : "Date:   ") ] &&
+                        dates[$j]=$(date -d "${REPLY#Date:   }" +%s) &&
+                        break
+                done
+
+                [ ${dates[$j]} -ge ${dates[$k]} ] && {
+                        echo -e "${buffers[$j]}"
+                        buffers[$j]=""
+                    } ||
+                    break
+            else
+                echo "$REPLY"
+            fi
+        done
+
+        # all logs of modules[j] have been outputed
+        [ -z "${buffers[$j]}" ] && dates[$j]=0
+
+        # no next latest commit
+        [ $date -eq 0 ] && return 0
+
+        # next loop
+        j=$k
+    done | less -FRX
 }
 
 ######################## main entry ####################################
