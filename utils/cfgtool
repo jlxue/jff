@@ -55,6 +55,10 @@
 #       * fix working tree problem, version 0.3.1.
 #   2008-4-29 Liu Yubao
 #       * add core.worktree to workaround git's wired behaviour, version 0.3.2.
+#   2008-11-7 Liu Yubao
+#       * fix a syntax error, bash doesn't allow "&&" at the beginning of line
+#       * move dpkg hook to /etc/apt/apt.conf.d/80cfgtool
+#       * release 0.4
 #   
 # TODO:
 #   * record file permission
