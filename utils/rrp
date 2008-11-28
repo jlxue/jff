@@ -75,9 +75,13 @@
 #       * add `log` command, v0.15
 #       * fix incompatible syntax in expr command, v0.16
 #
+#   2008-11-28  Liu Yubao
+#       * add `heads` and `rollback` commands
+#       * add detailed help information for all commands, v0.17
+#
 # TODO:
 #   fix many problems in cmd_update().
-#   `bisect' command.
+#
 
 ######################## part executed in $HOME/.bashrc ################
 # To make the pollution to shell environment minimum, I put this code
@@ -126,7 +130,7 @@ fi
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.16
+RRP_VERSION=0.17
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -162,10 +166,6 @@ PULL_REPOS_PATH=
 PUSH_REPOS_PATH=
 # user account, eg yubaoliu
 USER_ACCOUNT=
-# user name, eg "Liu Yubao"
-USER_NAME=
-# user email, eg yubao.liu@gmail.com
-USER_EMAIL=
 # is ssh-agent started by this script?
 IS_NEW_SSH_AGENT=
 
@@ -468,47 +468,66 @@ last_reflog_time () {
 
 
 ######################## sub commands ##################################
-cmd_help () {
-    if [ -z "$1" ]; then
-        cat <<EOF
+help_help () {
+    cat <<EOF
 rrp, a not fully wrapper to repo and GIT, v$RRP_VERSION
 
 Usage:
   rrp COMMAND [options] [arguments]
 
 Available commands:
-  checkout  - check out a working copy from repository
-  update    - update working copy from repository
+  checkout      - check out a working copy from repository
+  update        - update working copy from repository
 
-  commit    - commit changes to central repository
-  uncommit  - cancel commits to central repository
+  commit        - commit changes to central repository
+  uncommit      - cancel commits to central repository
 
-  editlog   - edit log of some commit on current branch
+  editlog       - edit log of some commit on current branch
 
-  review    - review commits to repository
+  review        - review commits to repository
 
-  ls        - list modules
-  log       - show log for whole android project
-  status    - show the working tree status
-  diff      - show changes between working tree, index and commit
-  cherry    - find commits not merged upstream
+  rollback      - rollback temporarily to some commit shown by 'rrp log'
+
+  heads         - show heads of all modules
+  ls            - list modules
+
+  log           - show log for whole android project
+  status        - show the working tree status
+  diff          - show changes between working tree, index and commit
+
+  cherry        - find commits not merged into upstream
   showbranch    - show branches and their commits
+
   whatupdated   - show what changed in the last update or fetch
 
-  forall    - execute command in each module's root directory
+  forall        - execute command in each module's root directory
 
-See 'rrp help COMMAND' for more information on a specific command.
+Run 'rrp help COMMAND' for more information on a specific command.
 EOF
+}
+
+cmd_help () {
+    if [ -z "$1" ]; then
+        help_help
     else
         local cmd="$1"
         if has_sub_command "$cmd"; then
-            echo "Sorry, no detailed help yet."
+            help_$cmd
         else
             echo "Unkown command, run 'rrp help' for help information." >&2
         fi
     fi
 }
 
+
+help_checkout () {
+    cat <<EOF
+In a empty directory:
+
+  rrp checkout
+    Clone remote central repository to local empty directory.
+EOF
+}
 
 cmd_checkout () {
     # make sure not in a working copy
@@ -556,6 +575,23 @@ cmd_checkout () {
 }
 
 
+help_update () {
+    cat <<EOF
+Under project root directory:
+
+  rrp update
+    update all modules.
+
+  rrp update MODULE...
+    update specified modules.
+
+Under module root directory:
+
+  rrp update
+    update all modules.
+EOF
+}
+
 cmd_update () {
     must_under_project_root
     cache_ssh_private_key
@@ -564,6 +600,26 @@ cmd_update () {
     #run_cmd $REPO start $DEFAULT_WORKING_BRANCH "$@"
 }
 
+
+help_commit () {
+    cat <<EOF
+Under project root directory:
+
+  rrp commit
+    commit '$DEFAULT_WORKING_BRANCH' branches of all modules to
+    central repository.
+
+  rrp commit MODULE...
+    commit '$DEFAULT_WORKING_BRANCH' branches of specified modules to
+    central repository.
+
+Under module root directory:
+
+  rrp commit
+    commit '$DEFAULT_WORKING_BRANCH' branch of current module to
+    central repository.
+EOF
+}
 
 cmd_commit () {
     must_under_project_root
@@ -598,6 +654,26 @@ cmd_commit () {
 }
 
 
+help_uncommit () {
+    cat <<EOF
+Under project root directory:
+
+  rrp uncommit
+    uncommit '$DEFAULT_WORKING_BRANCH' branches of all modules to
+    central repository.
+
+  rrp uncommit MODULE...
+    uncommit '$DEFAULT_WORKING_BRANCH' branches of specified modules to
+    central repository.
+
+Under module root directory:
+
+  rrp uncommit
+    uncommit '$DEFAULT_WORKING_BRANCH' branch of current module to
+    central repository.
+EOF
+}
+
 cmd_uncommit () {
     cache_ssh_private_key
 
@@ -629,6 +705,20 @@ cmd_uncommit () {
     echo
 }
 
+
+help_review () {
+    cat <<EOF
+Under module root directory:
+
+  rrp review
+    review committed changes of current module by yourself in
+    central repository.
+
+  rrp review ACCOUNT
+    review committed changes of current module by ACCOUNT in
+    central repository.
+EOF
+}
 
 cmd_review () {
     must_under_module_root
@@ -683,21 +773,58 @@ cmd_review () {
 }
 
 
+help_ls () {
+    cat <<EOF
+Under project root directory:
+
+  rrp ls
+    list name of all modules.
+
+  rrp ls PATTERN
+    list names of all modules filtered with 'grep -i PATTERN'.
+
+Under module root directory:
+
+  rrp ls
+    list name of current module.
+
+  rrp ls PATTERN
+    list names of all modules filtered with 'grep -i PATTERN'.
+EOF
+}
+
 cmd_ls () {
     must_under_project_root
 
+    local module=${MODULE_ROOT#$PROJECT_ROOT/}
     local pattern="$1"
 
-    if [ -z "$pattern" ]; then
-        local module=${MODULE_ROOT#$PROJECT_ROOT/}
-        [ -n "$module" ] && echo $module && return 0
+    if [ -n "$pattern" -o -z "$module" ]; then
+        $REPO forall -c pwd | while read d; do
+            echo ${d#$PROJECT_ROOT/}
+        done | grep -i "$pattern"
+    else
+        echo $module
     fi
-
-    $REPO forall -c pwd | while read d; do
-        echo ${d#$PROJECT_ROOT/}
-    done | grep -i "$pattern"
 }
 
+
+help_showbranch () {
+    cat <<EOF
+Under project root directory:
+
+  rrp showbranch
+    show all local branches different with upstream in all modules.
+
+  rrp showbranch MODULE...
+    show all local branches different with upstream in specified modules.
+
+Under module root directory:
+
+  rrp showbranch
+    show all local branches different with upstream in current module.
+EOF
+}
 
 cmd_showbranch () {
     must_under_project_root
@@ -723,6 +850,26 @@ cmd_showbranch () {
 }
 
 
+help_cherry () {
+    cat <<EOF
+Under project root directory:
+
+  rrp showbranch
+    show all changes not merged into upstream in local branches of
+    all modules.
+
+  rrp showbranch MODULE...
+    show all changes not merged into upstream in local branches of
+    specified modules.
+
+Under module root directory:
+
+  rrp showbranch
+    show all changes not merged into upstream in local branches of
+    current module.
+EOF
+}
+
 cmd_cherry () {
     must_under_project_root
 
@@ -747,6 +894,22 @@ cmd_cherry () {
 }
 
 
+help_diff () {
+    cat <<EOF
+Under project root directory:
+
+  rrp diff GIT-DIFF-OPTIONS GIT-DIFF-ARGUMENTS
+    execute 'git diff' in all modules and gather all output to pretend
+    to be operating on one git repository.
+
+Under project root directory:
+
+  rrp diff GIT-DIFF-OPTIONS GIT-DIFF-ARGUMENTS
+    execute 'git diff --src-prefix=a/MODULE/ --dst-prefix=b/MODULE/'
+    in current module.
+EOF
+}
+
 # To emulate behaviour of `git diff ...'
 cmd_diff () {
     must_under_project_root
@@ -764,12 +927,27 @@ cmd_diff () {
 }
 
 
+help_status () {
+    cat <<EOF
+rrp status
+  Check status of indices and work trees in all modules.
+EOF
+}
+
 cmd_status () {
     must_under_project_root
 
     $REPO status "$@"
 }
 
+
+help_whatupdated () {
+    cat <<EOF
+rrp whatupdated
+  Check what has been updated to local from remote central repository
+  since last 'rrp update', 'rrp review' or 'git fetch/pull'.
+EOF
+}
 
 cmd_whatupdated () {
     must_under_project_root
@@ -817,12 +995,28 @@ cmd_whatupdated () {
 }
 
 
+help_forall () {
+    cat <<EOF
+rrp forall SHELL-COMMAND
+  execute a shell command for all modules.
+EOF
+}
+
 cmd_forall () {
     must_under_project_root
 
     $REPO forall -c "$@"
 }
 
+
+help_editlog () {
+    cat <<EOF
+Under module root directory:
+
+  rrp editlog COMMIT
+    edit log of specified COMMIT in current branch of current module.
+EOF
+}
 
 cmd_editlog () {
     must_under_module_root
@@ -880,6 +1074,13 @@ cmd_editlog () {
         run_cmd git stash pop
 }
 
+
+help_log () {
+    cat <<EOF
+rrp log GIT-LOG-OPTIONS GIT-LOG-ARGUMENTS
+  output logs of all modules sorted by date.
+EOF
+}
 
 cmd_log () {
     must_under_project_root
@@ -969,6 +1170,97 @@ cmd_log () {
         # next loop
         j=$k
     done | less -FRX
+}
+
+
+help_heads () {
+    cat <<EOF
+rrp heads
+  show current head in all modules, their SHA1 digests and correspoding
+  module names.
+
+rrp heads BRANCH
+  show SHA1 digests of specified branch head  in all modules, and
+  correspoding module names.
+EOF
+}
+
+cmd_heads () {
+    must_under_project_root
+
+    local module head=$1
+
+    if [ -z "$head" ]; then
+        $REPO forall -c pwd 2>/dev/null | while read module; do
+            cd "$module"
+            head=$(git symbolic-ref -q HEAD) || head=$(git rev-parse --short HEAD)
+            head=${head#refs/heads/}
+            printf "%-15s %s  %s\n" $head $(git rev-parse HEAD) ${module#$PROJECT_ROOT/}
+        done
+    else
+        $REPO forall -c pwd 2>/dev/null | while read module; do
+            cd "$module"
+            printf "%s  %s\n" $(git rev-parse $head) ${module#$PROJECT_ROOT/}
+        done
+    fi | less -FRX
+}
+
+
+help_rollback () {
+    cat <<EOF
+rrp rollback COMMIT
+  rollback temporarily to COMMIT shown by 'rrp log $DEFAULT_WORKING_BRANCH'.
+
+rrp rollback
+  execute 'git checkout $DEFAULT_WORKING_BRANCH' in all modules.
+EOF
+}
+
+cmd_rollback () {
+    must_under_project_root
+
+    local rev="$1" module commit date
+    local m modules r n=0 i
+
+    if [ -z "$rev" ]; then
+        $REPO forall -c git checkout $DEFAULT_WORKING_BRANCH
+    else
+        while : ; do
+            read module && read commit && read date || {
+                echo "Bad input!" >&2
+                exit 1
+            }
+
+            module=${module##* }
+            commit=${commit##* }
+            [ 40 -eq $(expr "$commit" : "[0-9a-f]*") ] || {
+                echo "Bad input!" >&2
+                exit 1
+            }
+
+            m=${module////_}
+            [ -z "$(eval echo \$commit_$m)" ] && modules[$((n++))]=$module
+            eval commit_$m=$commit
+
+            [ "$rev" = "$commit" ] && break
+        done < <(cmd_log --no-color --pretty="format:commit %H%nDate:   %ai" $DEFAULT_WORKING_BRANCH --)
+
+        for ((i = 0; i < $n; ++i)); do
+            m=${modules[$i]}
+            run_cmd cd "$PROJECT_ROOT/$m" && {
+                m=${m////_}
+                r="$(eval echo \$commit_$m)"
+
+                [ "$module" != "${modules[$i]}" ] && {
+                    m=$(git rev-parse "$r~1" 2>/dev/null)
+                    [ 40 -eq $(expr length "$m") ] && r=$m ||
+                        echo "WARNING: NO MORE COMMIT BEFORE $r in ${modules[$i]}."
+                }
+
+                run_cmd git checkout "$r" || exit 1
+            }
+        done
+    fi
 }
 
 ######################## main entry ####################################
