@@ -1,19 +1,3 @@
-;	;;; for AUCTeX
-;	;; from bethoven at newsmth
-;	(load "auctex.el" nil t t)
-;	(require 'tex-mik)
-;	(setq TeX-electric-escape t)
-;	;; from AUCTeX FAQ
-;	(setq-default TeX-master nil)
-;	(setq TeX-parse-self t)
-;	(setq TeX-auto-save t)
-;	
-;	;;; for Preview-LaTeX
-;	(load "preview-latex.el" nil t t)
-
-;;; for PSVN
-(require 'psvn)
-
 ;;; for CPerlMode
 ;; from http://www.emacswiki.org/cgi-bin/wiki/CPerlMode
 ;;
@@ -45,13 +29,13 @@
 (add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
 
 ;;; for Scheme
-(require 'quack)
+;(require 'quack)
 
 ;;; for Common Lisp
-(setq inferior-lisp-program "/usr/bin/sbcl")
+;(setq inferior-lisp-program "/usr/bin/sbcl")
 ;(setq inferior-lisp-program "/usr/bin/clisp")
-(require 'slime)
-(slime-setup)
+;(require 'slime)
+;(slime-setup)
 ;; for cldoc.el
 ;(autoload 'turn-on-cldoc-mode "cldoc" nil t)
 ;(dolist (hook '(lisp-mode-hook

@@ -11,7 +11,7 @@
 ;;;
 ;;; 在窗口的标题栏上显示文件名称
 ;; C-h v to find topic "mode-line-format"
-(setq frame-title-format "Emacs 22@%n%b | %f")
+(setq frame-title-format "Emacs 23@%n%b | %f")
 ;;;
 ;;; Stop at the end of the file, not just add lines
 (setq next-line-add-newlines nil)
@@ -48,7 +48,7 @@
 ;;;
 ;;; 设置有用的个人信息，这在很多地方有用
 (setq user-full-name "Liu Yubao")
-(setq user-mail-address "yubao.liu at gmail dot com")
+(setq user-mail-address "yubao.liu@gmail.com")
 ;;;
 ;;; 让 dired 可以递归的拷贝和删除目录
 (setq dired-recursive-copies 'top)
@@ -107,61 +107,8 @@
 ;# 		    "")))))))
 ;# (wcy-color-theme-adjust-hl-mode-face)
 ; <-----------------------------------------
-;;;
-;;; for display-line-number
-;; 加载显示行号模块
-;(require 'display-line-number)
-;; 所有打开的文件都显示行号
-;(global-display-line-number-mode t)
-;; 设置显示格式
-;(setq display-line-number-format "%4d|")
-;; 在 tool bar 上增加一个图标， 
-;; 注意: 一定要在 load-path 中 可以找到 display-line-number.xpm 文件才行。 
-;(tool-bar-add-item "display-line-number"
-;		   'display-line-number-mode
-;		   'display-line-number-mode
-;		   :help "display line number!"
-;		   :button (cons :toggle  '(and (boundp
-;						  display-line-number-mode) 
-;						display-line-number-mode)))                                              
-;; 使用方法:
-;; 用来切换显示行号的模式
-;; M-x display-line-number-mode 
-;; 启动显示行号的模式
-;; M-x display-line-number-mode-on
-;; 关闭显示行号的模式
-;; M-x display-line-number-mode-off
-;; 仅对某种 mode 启动显示行号的模式
-;; (add-hook 'c-mode-hook 'display-line-number-mode)
-;;;
 ;;;;;;;;;; END from ann77  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-;;;;;;;;;; my custom-set-variables, overrite the settings from emacs ;;;
-(custom-set-variables
-  ;; custom-set-variables was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
-  '(auto-save-default nil)
-  '(auto-save-interval 0)
-  '(auto-save-timeout 0)
-  '(case-fold-search t)
-  '(column-number-mode t)
-  ;; '(cua-mode nil)
-  ;; '(default-input-method "chinese-py-punct")
-  '(global-font-lock-mode t nil (font-lock))
-  '(load-home-init-file t t)
-  '(make-backup-files nil)
-  ;; '(menu-bar-mode t nil (menu-bar))
-  ;; '(scroll-bar-mode nil)
-  '(show-paren-mode t nil (paren))
-  '(text-mode-hook (quote (text-mode-hook-identify)))
-  ;; '(tool-bar-mode nil nil (tool-bar))
-  ;; '(tooltip-mode nil nil (tooltip))
-  '(transient-mark-mode t)
-  '(line-spacing 3 t)
-  )
 
 (setq column-number-mode t)
 (setq mouse-yank-at-point t)
@@ -223,8 +170,7 @@
 	 try-expand-dabbrev-all-buffers 
 	 try-expand-dabbrev-from-kill 
 	 try-complete-lisp-symbol-partially 
-	 try-complete-lisp-symbol)
-      ) 
+	 try-complete-lisp-symbol)) 
 
 
 ;; recentf
@@ -250,7 +196,7 @@
 (add-hook 'diary-hook 'appt-make-list)
 
 ;;default-directory
-(setq default-directory "~/Work")
+(setq default-directory "~/")
 
 ;;; for tree*.el from ann77
 (setq tr-image-directory "~/.emacs.d/site-lisp/tree/images/")
@@ -262,20 +208,6 @@
 (require 'tree-imenu)
 ; M-x tr-mg
 (require 'tree-mode-group)
-
-;;; for eim from happierbee at newsmth
-(autoload 'eim-use-package "eim" "Another emacs input method")
-;; Tooltip 暂时还不好用
-(setq eim-use-tooltip nil)
-(register-input-method
- "eim-wb" "euc-cn" 'eim-use-package
- "五笔" "汉字五笔输入法" "wb.txt")
-(register-input-method
- "eim-py" "euc-cn" 'eim-use-package
- "拼音" "汉字拼音输入法" "py.txt")
-;; 用 ; 暂时输入英文
-(require 'eim-extra)
-(global-set-key ";" 'eim-insert-ascii)
 
 (if (fboundp 'color-theme-calm-forest)
   (color-theme-calm-forest))
