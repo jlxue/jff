@@ -155,6 +155,7 @@ Tie::File
 Time::HiRes
 Tk
 typesafety
+uniread
 Web::Scraper
 Win32::AdminMisc
 Win32::FileOp
