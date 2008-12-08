@@ -1,0 +1,13 @@
+#!/usr/bin/expect --
+
+if { 0 == $argc } {
+    spawn -noecho ssh newsmth
+} else {
+    eval spawn -noecho $argv
+}
+
+# send Ctrl-L
+interact {
+    timeout  60 {send "\014"}
+}
+

@@ -21,12 +21,12 @@ my @expands;
 my $cwd;
 for (@paths) {
     $cwd = cwd();
-    chdir $_ || die "Can't chdir($_): $!\n";
+    chdir $_ || next;
     @expands = glob($ARGV[0]);
     # if expansion fails, glob() returns the pattern, so @expands == 1
     if (@expands > 0 && -e $expands[0]) {
         print $_, "\n\t", join("\n\t", @expands), "\n";
     }
-    chdir $cwd || die "Can't chdir($cwd): $!\n";
+    chdir $cwd || next;
 }
 
