@@ -4,9 +4,13 @@ if { 0 == $argc } {
     spawn -noecho ssh newsmth
 } else {
     eval spawn -noecho $argv
+    #eval [linsert $argv 0 spawn -noecho]
+
+    # for tcl >=8.5
+    #spawn -noecho {*}$argv
 }
 
-# send Ctrl-L
+# send "Ctrl-L"
 interact {
     timeout  60 {send "\014"}
 }
