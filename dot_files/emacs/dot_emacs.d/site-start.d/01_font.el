@@ -48,7 +48,9 @@
 ;; use `alias emacs='emacs -fn "DejaVu Sans Mono:size=14"` to avoid
 ;; frame size switching on startup.
 
-(let ((zh-font "-unknown-AR PL UMing CN-*-*-*-*-16-*-*-*-*-*-*-*")
+;; Way 1
+;(let ((zh-font "-unknown-AR PL UMing CN-*-*-*-*-16-*-*-*-*-*-*-*")
+(let ((zh-font "AR PL UMing CN:pixelsize=16")
       (fontset "fontset-my"))
   (create-fontset-from-fontset-spec
     (concat
@@ -59,14 +61,21 @@
       ",cjk-misc:"      zh-font
       ",bopomofo:"      zh-font))
   (set-default-font fontset)
-  (setq default-frame-alist
-        (append
-          `((font . ,fontset)) default-frame-alist)))
+  (add-to-list 'default-frame-alist `(font . ,fontset)))
+  ;; or set font for new frame like this:
+  ;(add-to-list 'after-make-frame-functions
+  ;             (lambda (new-frame)
+  ;               (select-frame new-frame)
+  ;               (if window-system
+  ;                 (set-frame-font "fontset-my"))))
 
-;; or set font for new frame like this:
-;(add-to-list 'after-make-frame-functions
-;             (lambda (new-frame)
-;               (select-frame new-frame)
-;               (if window-system
-;                 (set-frame-font "fontset-my"))))
 
+;; Way 2
+;(let ((fontset nil)
+;      (zh-font (font-spec :family "AR PL UMing CN" :size 16)))
+;  (set-default-font "DejaVu Sans Mono:pixelsize=14:foundry=unknown")
+;  (setq fontset (frame-parameter nil 'font))
+;  (dolist (charset '(kana han symbol cjk-misc bopomofo))
+;    (set-fontset-font fontset charset zh-font))
+;  (add-to-list 'default-frame-alist `(font . ,fontset)))
+ 
