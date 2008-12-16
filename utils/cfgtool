@@ -155,7 +155,7 @@ cmd_init () {
             root/dpkg--list.txt root/dpkg--get-selections.txt || exit 1)
 
         dpkg --list > /root/dpkg--list.txt || exit 1
-        dpkg --get-selections > /root/dpkg--get-selections.txt || exit 1
+        dpkg --get-selections "*" > /root/dpkg--get-selections.txt || exit 1
 
         $VCS_CMD add root/dpkg--list.txt
         $VCS_CMD add root/dpkg--get-selections.txt
@@ -227,7 +227,7 @@ do_hook () {
     fi
 
     dpkg --list > /root/dpkg--list.txt || exit 1
-    dpkg --get-selections > /root/dpkg--get-selections.txt || exit 1
+    dpkg --get-selections "*" > /root/dpkg--get-selections.txt || exit 1
 
     pid=$PPID
     while [ $pid -gt 0 ]; do
