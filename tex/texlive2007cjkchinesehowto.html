@@ -1,0 +1,402 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <title>Wang Yue - TeXLive 2007 CJK Chinese Howto</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <style type="text/css">
+  #g_title p, #g_footer p, #g_description p {
+    margin: 0;
+  }
+  /*
+
+  	-- -- -- -- -- -- --
+  	Browser Fixes
+  	-- -- -- -- -- -- --
+  	
+  	This file uses CSS filtering methods to fix various
+  	layout bugs.
+
+  	Each of the following three imported files is a 
+  	separate, browser-specific CSS file that keeps all 
+  	hacks out of the main style sheet.
+  	
+  	Over time, as supporting these browsers no longer
+  	remains a priority, cleaning up the hacks is as
+  	easy as deleting the @import statement below, or
+  	simply no longer linking this file from the HTML.
+  	
+  */
+
+  /* 
+    fix ie6 "peekaboo bug" using the "holly hack". 
+    Note, this style only gets applied to ie6
+  */
+  * html .wrapper {
+    height: 0.1%;
+  }
+
+  /* 
+   * IE5 mac - overrides the IE/Win hack 
+   */
+
+  /*\*//*/
+
+  * html #threecolumn div {
+  	height: auto;
+  }
+
+  /**/
+
+
+  /* 
+   * IE5/Win-specific CSS -ensures #container wraps all content on window resize
+   */
+
+  @media tty {
+   i{content:"\";/*" "*/}} * html #container { height: 1%; } /*";}
+  }/* */
+  /* Styling for editable elements. Eventually, this will be part of the style. */
+  .editable {
+    border: 1px dashed blue;
+  }
+  
+  #footer {
+    clear: both;
+  }
+  
+  /* Extra divs hidden by default. The custom CSS can override this though */
+  #extraDiv1, #extraDiv2, #extraDiv3, #extraDiv4, #extraDiv5, #extraDiv6 {
+    display: none;
+  }
+  
+  a img,:link img,:visited img {border: none;}
+
+
+  body {
+    text-align: center;
+  }
+  #container {
+    width: 718px;
+    text-align: left;
+    margin: 0 auto;
+  }
+  /** BEGIN CUSTOM SKIN **/
+    h1,h2,h3,h4,h5,h6,p,ul,ol,dt,dd {font-size: 0.85em;color:#5F7559;}
+    pre,code,kbd {font-size:1em; font-family:"Courier New", Courier, monospace;color:#5F7559;}
+    dl,li,dt,dd,h1,h2,h3,h4,h5,h6,pre,form,body,html,p,blockquote,fieldset,input {margin: 0; padding: 0;}
+    a img,:link img,:visited img {border: none;}
+    address {font-style: normal;}
+    
+    /*
+       Theme: Swirl
+       Color: Green
+    */
+    
+    
+    html {background: #CBD6C9;}
+    body {background:#CBD6C9;font-family:Verdana, Tahoma, Arial, sans-serif;font-size:0.85em;margin:0px;}
+    a {color:#3366FF; text-decoration:none; border-bottom:1px dotted #3366FF;}
+    a:visited {color:#CC33FF; text-decoration:none; border-bottom:1px dotted #CC33FF;}
+    a:hover,a:active{color:#FF6600; text-decoration:none;border-bottom:1px dotted #FF6600;}
+    b, strong {font-weight:bold;}
+    blockquote {border-left:4px double #5F7559;margin:1em 3em;padding-left:1em;font-size:0.9em;color:#5F7559;}
+    blockquote p {line-height:1.45em;color:#5F7559;}
+    em {font-style:italic;}
+    h1, h2, h3, h4, h5, h6 {font-weight:normal;margin:1.5em 0 0.5em 0;}
+    h1 {font-size:2.25em;color:#5F7559;margin:0;border-bottom:4px double #96A892;}
+    h2 {font-size:2em;color:#5F7559;border-bottom:4px double #96A892;}
+    h3 {font-size:1.75em;color:#5F7559;border-bottom:3px double #96A892;}
+    h4 {font-size:1.5em;color:#5F7559;border-bottom:3px double #96A892;}
+    h5 {font-size:1.25em;color:#5F7559;border-bottom:1px solid #96A892;}
+    h6 {font-size:1em; color:#5F7559;border-bottom:1px dotted #96A892;}
+    p, li {color:#5F7559;line-height:1.75em;margin:0 0 1em 0;}
+    blockquote p, table p, dd p, li p, #header p {margin-bottom:0.5em;color:#5F7559;}
+    ul, ol {margin:1em 0; padding-left: 1.6em;}
+    li {margin:0.25em 0;}
+    ul li {list-style-type:disc;}
+    ol li {list-style-type:decimal;}
+    table {border:1px solid #96A892;border-width:1px 1px 0 1px;}
+    table caption {
+  	display:block;
+  	font-style:italic;
+  	white-space:nowrap;
+  	margin:0.5em 1em;
+  	color:#5F7559;
+  	font-size:0.85em;
+  }
+    table td, table th {padding:0.5em 1em;text-align:left;vertical-align:top;background-color:#EFF5ED;}
+    table th {border-top:1px solid #96A892;border-bottom:1px solid #96A892;font-weight:bold;background-color:#CBD6C9;color:#5F7559;font-weight:bold;}
+    table td {border-bottom:1px solid #96A892; color:#5F7559;}
+  
+    dl {margin:1em;line-height:1.5em;list-style-type:disc;color:#5F7559;}
+    dt {font-weight:bold;margin-top:0.5em;color:#5F7559;}
+    dd {margin-left:2em;color:#5F7559;}
+  
+    #adsense {text-align:center;}
+    #container {
+    	  padding: 0px; 
+  	  background:URL("/-/includes/style/swirl/skin_swirl_green_top.gif") no-repeat top left;
+  	  background-color:#dde4db;
+  	  margin:0px auto;
+    }
+    #footer {padding:1em;
+    }
+    
+    #g_footer {
+      padding-top:0.5em;
+  	font-size:0.9em;
+  	font-style:italic;
+  	text-align:center;
+  	color:#96A892;
+    }
+  	
+    #page-title {
+      text-align:left;
+  	font-style:italic;
+  	border:none;
+  	padding-top:80px;
+  	padding-left:15px;
+    }
+    #g_description {
+  	padding-left:30px;
+  	font-style:italic;
+  	color:#96A892;
+  	padding-right:300px;
+    }
+    #sidebar {font-size:0.85em;
+  	padding:5px;
+    }
+    #sidebar :first-child {margin-top:12px;}
+    #sidebar-alternate {font-size:0.85em;
+  	padding:5px;
+    }
+    #sidebar-alternate :first-child {margin-top:12px;}
+    #main-content { 
+  	padding:10px;
+    }
+    
+    #main-content h2:first-child {margin-top:0;}	
+  
+    hr {
+    height:1px;
+    margin:0px 20px;
+    border:none;
+    border-bottom:4px double #96A892;
+    }
+    
+    @media print {
+      html {background:#fff !important;}
+      #container {border-width:0px !important;padding:0 !important;}
+    }
+  
+    /* Tweaks for Three-column layout
+    ----------------------------------------------- */
+    #threecolumn #main-content .wrapper {}  #threecolumn #sidebar {width:118px;}
+    
+    /* Tweaks for Two-column Left layout
+    ----------------------------------------------- */
+    #twocolumn-left #main-content .wrapper {}
+    #twocolumn-left #sidebar {width:218px;}
+  
+    /* Tweaks for Two-column Right layout
+    ----------------------------------------------- */
+    #twocolumn-right #main-content .wrapper {}
+    #twocolumn-right #sidebar {width:218px;}
+    
+    /* Tweaks for Two-column Liquid layout
+    ----------------------------------------------- */
+    #twocolumn-liquid-right #container {}
+    #twocolumn-liquid-right #main-content .wrapper {}
+    #twocolumn-liquid-left #container {}
+    #twocolumn-liquid-left #main-content .wrapper {}
+  
+    /* Tweaks for One-column Liquid layout
+    ----------------------------------------------- */
+  
+    /* Tweaks for One-column layout
+    ----------------------------------------------- */
+    #onecolumn #main-content .wrapper {}
+
+  /** END CUSTOM SKIN **/
+  </style>
+
+  <!-- Hack to avoid flash of unstyled content in IE -->
+  <script> </script>
+</head>
+
+<body id="onecolumn">
+  <div id="container">
+    <div class="wrapper">
+      <div id="header">
+        <div class="wrapper">
+          <h1 id="page-title"><div id='g_title'>TeXLive 2007 CJK Chinese Howto</div></h1>
+          <div style="clear: both;"></div>
+          <p class="description"><div id='g_description'><p>my email address is yulewang \at gmail \dot com </p></div></p>
+          <div style="clear: both"></div>
+        </div>
+      </div>
+      <!-- /editable --><!-- /wrapper --><!-- /header -->
+      <div id="main-content">
+        
+        <div class="wrapper">
+          <div class="content-item "><div id='g_body'><p>TeXLive 2007 CJK Chinese HowTO</p><p>Yue Wang<br></p><div id="message283665" class="t_msgfont"> </div><div id="message283665" class="t_msgfont">Attention:</div><div id="message283665" class="t_msgfont"> </div><div id="message283665" class="t_msgfont">In TeXLive 2007, there is no need to use CJK package anymore, XeTeX is good enough to handle Chinese and Open/TrueType fonts. and the key problem of XeTeX, i.e. the font switching problem, is tend to be fixed in the next release of XeTeX. But many old documents are written using macropackages/styles based on CJK or CCT, some of them are still widely used today, so, in some cases it is essential to install these fonts.<br> </div><div id="message283665" class="t_msgfont"> </div><div id="message283665" class="t_msgfont"> </div><div id="message283665" class="t_msgfont">Install TeXLive<br>
+_________________<br>
+First, install TeXLive.<br><i>
+ </i></div><div id="message283665" class="t_msgfont"><i>wget ftp://ftp.tsinghua.edu.cn/mirror/CTAN/systems/texlive/Images/texlive2007-live-20070212.iso.zip<br></i><i>unzip texlive2007-live-20070212.iso.zip<br>
+mount -o loop texlive2007-live-20070212.iso /mnt<br>
+cd /mnt<br>
+sudo ./install-tl</i> </div><div id="message283665" class="t_msgfont"> </div><div id="message283665" class="t_msgfont">press I to install.<br>
+<br>
+Setup System Path<br>
+_________________<br>
+Set the path. Take debian GNU/Linux as example, modify your /etc/environment like this and make a reboot:<br>
+<br><i>
+PATH=&quot;/usr/local/texlive/2007/bin/i386-linux:/usr/local/matlab/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/X11:/usr/games&quot;<br>
+LANG=&quot;en_US.UTF-8&quot;<br>
+LANGUAGE=&quot;en_US.UTF-8&quot;<br></i>
+<br>
+Copy The Files Needed<br>
+_________________<br>
+make a dir called font, copy the font here.<br><i>
+mkdir ~/font<br>
+cd ~/font<br>
+cp /media/sda/windows/Fonts/simhei.ttf .<br></i>
+<br>
+copy all the files needed.<br><i>
+sudo apt-get install fontforge<br>
+cp /usr/local/texlive/2007/texmf-dist/source/latex/CJK/utils/subfonts/* ~/font/<br>
+cp /usr/local/texlive/2007/texmf/fonts/sfd/*.sfd ~/font/<br></i>
+<i><br></i> </div><div id="message283665" class="t_msgfont"> </div><div id="message283665" class="t_msgfont">Generate Font<br>
+______________<br>
+Then, make the font. It is a good way to test how fast your computer is :) it takes me 3 minutes to generate the fonts[Core Duo 2]. </div><div id="message283665" class="t_msgfont"> </div><div id="message283665" class="t_msgfont">Some one complain that the procedure take them 1 hours to do so, this is because you use the new version of fontforge. so be sure to use fontforge 2005. </div><div id="message283665" class="t_msgfont"><br><i>
+time fontforge -script subfonts.pe simhei.ttf hei Unicode.sfd</i><br>
+<br>
+create a file name makemap like this:<br>
+<i><br>
+for i in *.tfm<br>
+do<br>
+cat &gt;&gt; hei.map &lt;&lt; EOF<br>
+${i%.tfm} ${i%.tfm} &lt; ${i%.tfm}.pfb<br>
+EOF<br>
+done<br></i>
+<br>
+<br>
+Make map file:<br><i>
+chmod +x makemap<br>
+./makemap<br></i>
+<br>
+create a file name c70hei.fd for CJK package:<br>
+<i><br>
+% This is c70hei.fd for CJK package.<br>
+% created by Edward G.J. Lee<br>
+% modify by Yue Wang<br>
+\ProvidesFile{c70hei.fd}<br>
+\DeclareFontFamily{C70}{hei}{\hyphenchar \font\m@ne}<br>
+\DeclareFontShape{C70}{hei}{m}{n}{&lt;-&gt; CJK * hei}{}<br>
+\DeclareFontShape{C70}{hei}{bx}{n}{&lt;-&gt; CJKb * hei}{\CJKbold}<br>
+\endinput<br></i>
+<br>
+<br>
+Copy Fonts into  TEXMF<br>
+_________________<br>
+create the local directory to save the font<br><i>
+cd ~/.texlive2007<br>
+cd texmf-var<br>
+mkdir -p fonts/map/dvips/CJK<br>
+mkdir -p fonts/tfm/CJK/hei<br>
+mkdir -p fonts/type1/CJK/hei<br>
+mkdir -p tex/latex/CJK/UTF8<br>
+cp ~/font/hei.map fonts/map/dvips/CJK/<br>
+cp ~/font/*.tfm fonts/tfm/CJK/hei<br>
+cp ~/font/*.pfb fonts/type1/CJK/hei<br>
+cp ~/font/c70hei.fd tex/latex/CJK/UTF8<br></i>
+<br>
+<br>
+Update The System and Test<br>
+_____________________<br>
+Just run:<br><i>
+texhash<br>
+updmap --enable Map hei.map<br></i>
+<br>
+<br>
+create a test file to test your work.<br>
+<i><br>
+\documentclass{article}<br>
+\usepackage{CJKutf8}<br>
+\begin{document}<br>
+\begin{CJK}{UTF8}{hei}<br>
+你好!<br>
+\end{CJK}<br>
+\end{document}<br></i>
+<br>
+<br><i>
+latex test.tex<br>
+xdvi test.dvi<br>
+dvipdfm test.dvi<br>
+xpdf test.pdf<br>
+pdflatex test.pdf<br>
+......<br><br></i>
+
+<br>
+<br>
+Virtual GBK Font(Not Essential)<br>
+________________________<br>
+<br>
+The main goal of virtual fonts is to make one font for various encoding systems. We still take simhei as an example to tell the reader how to create one UTF8 font for UTF8 and GBK encodings.<br>
+<br>
+first, Let&#39;s suggest that you have finished the task of creating a utf8 heiti font for LaTeX and you are still in the ~/font directory with all the fonts and scripts undeleted. you also copy all the utf8 fonts into your ~/.texlive2007 directory and they are working with no problem.<br>
+<br>
+run these commands. if you do not delete something , *.tfm and uni2sfd.pl are still in your ~/font dir.<br><i>
+perl uni2sfd.pl hei UGBK.sfd gbkhei gbk<br>
+mkdir ~/.texlive2007/texmf-var/fonts/tfm/CJK/gbkhei<br>
+mv gbkhei*.tfm ~/.texlive2007/texmf-var/fonts/tfm/CJK/gbkhei<br>
+mkdir ~/.texlive2007/texmf-var/fonts/vf<br>
+mv gbkhei*.vf ~/.texlive2007/texmf-var/fonts/vf<br>
+mkdir ~/.texlive2007/texmf-var/tex/latex/CJK/GBK<br></i>
+<br>
+create a file named c19hei.fd just like the c70hei.fd in<br>
+~/.texlive2007/texmf-var/tex/latex/CJK/GBK<br>
+<i><br>
+% This is c19hei.fd for CJK package.<br>
+% created by Edward G.J. Lee<br>
+\ProvidesFile{c19hei.fd}<br>
+\DeclareFontFamily{C19}{hei}{\hyphenchar \font\m@ne}<br>
+\DeclareFontShape{C19}{hei}{m}{n}{&lt;-&gt; CJK * gbkhei}{}<br>
+\DeclareFontShape{C19}{hei}{bx}{n}{&lt;-&gt; CJKb * gbkhei}{\CJKbold}<br>
+\endinput<br></i>
+<br>
+<br>
+make a test file in *GBK* encoding like this:<br>
+<br><i>
+\documentclass{article}<br>
+\usepackage{CJK}<br>
+\begin{document}<br>
+\begin{CJK}{GBK}{hei}<br>
+你好<br>
+\end{CJK}<br>
+\end{document}<br></i>
+<br>
+<br>
+if you are lucky, you will get the good outputs without problem (no texhash or updmap needed)</div>
+<p>Use ttf directedly in pdftex/dvipdfmx[not recommended]<br>----------------------------------------------------<br>Well, our pdflatex/dvipdfmx can also use ttf directedly.<br>create ~/.texlive2007/texmf-var/fonts/map/dvipdfm/cid-x.map<br><br><i>gbkhei@UGBK@    UniGB-UCS2-H    :0:simhei.ttf<br>hei@Unicode@    unicode    :0:simhei.ttf<br></i><br>move the font simhei.ttf to the truetype directory:<br>mkdir ~/.texlive2007/texmf-var/fonts/truetype<br>cp simhei.tff ~/.texlive2007/texmf-var/fonts/truetype<br><br> <br>create the map generating file makemap-enc<br><br><i>for i in hei*.tfm<br>do<br>cat &gt;&gt; hei-enc.map &lt;&lt; EOF<br>${i%.tfm} &lt; ${i%.tfm}.enc &lt; simhei.ttf<br>EOF<br>done<br></i><br>generate the map:<br><i>chmod +x makemap-enc<br>./makemap-enc<br></i><br>copy all the file needed<br><i>cp hei-enc.map ~/.texlive2007/texmf-var/fonts/map/pdftex/CJK/<br>mkdir -p ~/.texlive2007/texmf-var/fonts/enc/CJK/hei<br>cp hei*.enc ~/.texlive2007/texmf-var/fonts/enc/CJK/hei<br></i><br>copy the adobe font:<br><i>sudo mkdir ~/.texlive2007/texmf-var/fonts/cmap<br>sudo apt-get install cmap-adobe-*<br>cp -a /usr/share/fonts/cmap/* ~/.texlive2007/texmf-var/fonts/cmap<br></i><br><br><br>test that it works:<br><br>The UTF8 encoding test file:<br><i><br>\pdfoutput=1<br>\pdfmapfile{=hei-enc.map}<br>\documentclass{article}<br>\usepackage{CJKutf8}<br>\begin{document}<br>\begin{CJK}{UTF8}{hei}<br>你好<br>\end{CJK}<br>\end{document}<br></i><br>The GBK encoding test file(save it in gbk first!):<br><i><br>\pdfoutput=1<br>\pdfmapfile{=hei-enc.map}<br>\documentclass{article}<br>\usepackage{CJK}<br>\begin{document}<br>\begin{CJK}{GBK}{hei}<br>你好<br>\end{CJK}<br>\end{document}<br><br></i>Install Ctex macro package<br>-----------------------------------------<br><br>There are two versions of ctex macro package, one for  GBK and one for UTF-8.<br>First, be sure to install all the chinese fonts using simsun.ttf(If you use<br>simsun.ttc, break it) simhei.ttf, simli.ttf, simkai.ttf, simfang.ttf,<br>simyou.ttf just follow the example of simhei before.<br><br>then, copy all the macropackages in Liangzi&#39;s CTeXLive-2005<br>sudo mount -o loop  CTeXLive2005  /mnt<br><i>cp -a /mnt/2005/texmf-local/tex/latex/ctex ~/.texlive2007/texmf-var/tex/latex<br>cp -a /mnt/2005/texmf-local/tex/latex/ctexutf8<br>~/.texlive2007/texmf-var/tex/latex<br>cp -a /mnt/2005/texmf-local/tex/latex/ccmap ~/.texlive2007/texmf-var/tex/latex<br><br></i>modify all the fd files there.<br>for those fd file in ctexutf8 directory, use song,fang ... instead of unisong,<br>unifang, unisongsl,unifangsl....., for those fd files in ctex directory, use<br>gbksong instead of gbksongsl, gbkfang instead of gbkfangsl....<br>And dont use \CJKbold , use hei instead.<br><br><br>an example file should like:<br>in utf8 directory</p><p><i>\ProvidesFile{c70rm.fd}<br>  [2006/06/09 v0.8 ctex<br>   font definition file]<br><br>\DeclareFontFamily{C70}{rm}{\hyphenchar \font\m@ne}<br>\DeclareFontShape{C70}{rm}{m}{n}{&lt;-&gt; CJK * song}{}<br>\DeclareFontShape{C70}{rm}{bx}{n}{&lt;-&gt; CJK * hei}{}<br>\DeclareFontShape{C70}{rm}{m}{sl}{&lt;-&gt; CJK * song}{}<br></i><br><br>in ctex directory<br><br><i>\ProvidesFile{c19sf.fd}<br>  [2006/06/09 v0.8 ctex<br>   font definition file]<br>\DeclareFontFamily{C19}{sf}{\hyphenchar \font\m@ne}<br>\DeclareFontShape{C19}{sf}{m}{n}{&lt;-&gt; CJK * gbkyou}{}<br>\DeclareFontShape{C19}{sf}{bx}{n}{&lt;-&gt; CJKb * gbkhei}{}<br>\DeclareFontShape{C19}{sf}{m}{sl}{&lt;-&gt; CJK * gbkyou}{}<br>\DeclareFontShape{C19}{sf}{bx}{sl}{&lt;-&gt; CJKb * gbkhei}{}<br>\DeclareFontShape{C19}{sf}{m}{it}{&lt;-&gt; CJK * gbkyou}{}<br>\DeclareFontShape{C19}{sf}{bx}{it}{&lt;-&gt; CJKb * gbkhei}{}<br>\endinput<br></i><br><br>Last,run <i>texhash and</i> test the files.<br>Utf8 test file<br><br><i>\documentclass{ctexreputf8}<br>\begin{document}<br>你好<br>\end{document}<br></i><br> GBK test file</p><p><i>\documentclass{ctexrep}<br>\begin{document}<br>你好<br>\end{document}<br> </i></p></div></div>
+          <div style="clear: both"></div>
+        </div>
+      </div>
+      <!-- /wrapper --><!-- /main-content -->
+      <div id="footer"><div class="wrapper">
+        <hr />
+        <p><div id='g_footer'> </div></p>
+        <div style="clear: both"></div>
+      </div></div>
+      <!-- /wrapper --><!-- /footer -->
+    </div>
+  </div>
+<!-- /wrapper --><!-- /container -->
+
+<div id="extraDiv1"><span></span></div><div id="extraDiv2"><span></span></div>
+<div id="extraDiv3"><span></span></div><div id="extraDiv4"><span></span></div>
+<div id="extraDiv5"><span></span></div><div id="extraDiv6"><span></span></div>
+
+</body>
+</html>

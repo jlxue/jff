@@ -1,0 +1,275 @@
+\documentclass[CJK]{beamer}
+\usepackage[boldfont,slantfont,CJKnumber,CJKtextspaces]{xeCJK}
+
+\punctstyle{kaiming}
+\setCJKmainfont{SimSun}
+\setCJKmonofont{STFangsong}
+
+\mode<presentation>
+{
+ % 设置背景
+ \setbeamertemplate{background canvas}[vertical shading][bottom=red!10,top=blue!10]
+
+ % 设置block的特征
+ \setbeamertemplate{blocks}[rounded][shadow=true]
+
+ % 设置主题
+ \usetheme{Warsaw}
+
+ % 设置footline显示页码，但是由于warsaw本身已经定义了一个footline，所以
+ % 这个定义就会覆盖warsaw的定义。另一方面说明，slides的每一部分都是可以
+ % 自己定制的。
+ % \setbeamertemplate{footline}[frame number]
+
+ % 设置覆盖的效果，透明
+ \setbeamercovered{transparent}
+
+ \usefonttheme[onlysmall]{structurebold}
+
+ % 设置数学公式的字体
+ \usefonttheme[onlymath]{serif}
+}
+
+\usepackage{latexsym}
+\usepackage{amssymb}
+
+\setlength{\parindent}{2em}
+
+% 设置用acrobat打开就会全屏显示
+\hypersetup{pdfpagemode=FullScreen}
+
+% 设置logo
+% If you have a file called "university-logo-filename.xxx", where xxx
+% is a graphic format that can be processed by latex or pdflatex,
+% resp., then you can add a logo as follows:
+
+% \pgfdeclareimage[height=0.5cm]{university-logo}{pku_logo}
+% \logo{\pgfuseimage{university-logo}}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Beginning of document
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+% Delete this, if you do not want the table of contents to pop up at
+% the beginning of each subsection:
+\AtBeginSubsection[]
+{
+ \begin{frame}<beamer>
+   \frametitle{主要内容}
+   \tableofcontents[currentsection,currentsubsection]
+ \end{frame}
+}
+
+
+\title[中文Slides模板]
+{\huge 模态逻辑（model logic）\\ \normalsize 中文Slides模板}
+
+\author[沈坚]{沈 坚 \\ \small shenjian@net.pku.edu.cn}
+
+\institute[北京大学]
+{
+ 网络实验室 \\
+ 北京大学
+}
+
+\date[]{2004-11-11}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+ \titlepage
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+ \frametitle{主要内容}
+ \tableofcontents
+ % You might wish to add the option [pausesections]
+\end{frame}
+
+% \begin{frame}
+%   \frametitle{主要内容}
+%   \tableofcontents[currentsection]
+% \end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{引言：从模态词说起}
+
+\begin{frame}
+ \frametitle{为什么需要模态逻辑}
+ \begin{itemize}
+ \item<1-> 从推理的角度来说
+   \begin{itemize}
+   \item 如果认为模态词反映的只是“趋势”、“信念”，不是逻辑概念，那么在日常推理中就寸步难行，因为 “A真但是未必A必然真”
+   \end{itemize}
+ \item<2-> 从历史的角度来说
+   \begin{itemize}
+   \item 模态逻辑的起源：\alert{ \large 亚里士多德}
+   \end{itemize}
+ \item<3-> 从功能性方面来说
+   \begin{itemize}
+   \item 是除了一阶谓词演算，计算机界谈论最多的逻辑系统
+   \item 不仅是程序语义描述的有力工具，时序逻辑和动态逻辑的理论基础，而且在知识的形式表示方面表现出越来越多的优越性
+   \end{itemize}
+ \end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{模态逻辑的非形式讨论}
+
+\subsection{必然A，可能A的含义和性质}
+
+\begin{frame}
+ \frametitle{$\Box A$和$\Diamond A$的意义}
+ \begin{enumerate}
+ \item 必然A（necessarily A），记作$\Box A$
+   \begin{itemize}
+   \item 意思是：无论在什么场合（现实的场合或者可以想象到的非现实的场合）均有事实A
+   \end{itemize}
+ \item 可能A（possibly A），记作$\Diamond A$
+   \begin{itemize}
+   \item 意思是：对某些个场合（也许只是一个，甚至只是想象得到的某个场合）有事实A
+   \end{itemize}
+ \item 公式的例子
+
+\begin{displaymath}
+ g_{C_o}(c_i) = \frac{|\{\bar{d}_j\in C_o | ca_{ij} = 1\}|}{|\{\bar{d}_j\in C_o\}|}
+\end{displaymath}
+
+ \end{enumerate}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{演化的克里普克语义结构}
+
+\begin{frame}
+ \frametitle{克里普克语义结构}
+克里普克结构$\mathcal{K}$可用三元矢$<U,D,I>$来表示
+\begin{itemize}
+\item 非空集合$U$,称为\alert{空间}，$U$上定义了一个偏序关系$\leqslant$。$U$中元素称为阶段
+\item $U$到一非空集合上的映射$D$，即对每一$k\in U$, $D_k$为一非空集合，称为阶段$k$的\alert{个体域}。$D$还满足，对任意$k,l\in U$，若$k \leqslant l $，那么$D_k \subseteq D_l$
+\item $U$到解释的集合上的映射$I$，即对每一$k\in U$，$I_k$表示一个相关于阶段$k$的\alert{解释}
+\end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{模态逻辑正规系统及其语义}
+
+\subsection{模态语言及模态逻辑正规系统NSK}
+
+\begin{frame}
+ \frametitle{几个概念}
+ \begin{itemize}
+ \item 模态语言：模态命题演算的语言的简称
+ \item \alert{正规系统NS：模态逻辑系统NSK及其所有扩充系统}
+ \item 模态逻辑（正规）系统（normal system）NSK
+ \item 模态逻辑（正规）系统的语言$\mathcal{L}$（NSK）
+
+$\mathcal{L}$（NSK）是命题演算形式系统  FSPC的语言$\mathcal{L}$（FSPC）的扩充
+ \end{itemize}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+ \frametitle{NSK的定理}
+ \begin{block}{定理7.1}
+   如果公式$A$是NSK的定理，那么$\Box A$也是NSK的定理，即 $\vdash_{NSK} A$ 蕴含 $\vdash_{NSK} \Box A$
+ \end{block}
+ \begin{block}{定理7.2}
+   设 $A_1,A_2,\cdots,A_n,A$ 均为NSK的公式，如果  $\vdash_{NSK}(A_1 \to (A_2 \to \cdots \to (A_n \to A)\cdots))$ （或 $\vdash_{NSK} A_1 \wedge \cdots \wedge A_n \to A$），那么 $(\Box A_1 \to (\Box A_2 \to \cdots \to (\Box A_n \to A)\cdots))$ （或 $\Box A_1 \wedge \Box A_2 \cdots \wedge A_n \to A$）
+ \end{block}
+ \begin{block}{定理7.3}
+   如果公式 $\neg A$ 是NSK的定理，那么 $\neg \Diamond A$ 也是NSK的定理
+ \end{block}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{正规结构}
+
+\begin{frame}
+ \frametitle{NSK的正规结构}
+正规系统的语义结构称为\alert{正规结构}（称模态逻辑系统NSK及其所有扩充系统为正规系统）
+
+\begin{block}{定义7.2}
+模态逻辑正规系统的正规结构，是指三元矢$<U,R,I>$,其中：
+
+$U$为一非空集合，称为宇宙，其成员称为可能世界，可能世界用$w$，$w'$，$w_1$，$w_2$等表示；
+
+$R$为$U$上的一个二元关系，称为可能世界间的可到达关系（注意，$R$未必为偏序关系）；
+
+$I $为$U\times\{P_1,P_2,P_3,\cdots\}$到$\{0,1\}$上的映射，即对每一个可能世界$w$，对每一原子命题赋值。$ I(w, P_1)=1$表示在可能世界$w$中给$P_1$赋值真。$I$常用$U$的一个子集序列$\mathcal{B}_1,\mathcal{B}_2, \mathcal{B}_3,\cdots$ 来表示，使 $I(w, P_i)=1$ 当且仅当 $w\in \mathcal{B}_i (i=1,2,3,\cdots)$。换言之，$\mathcal{B}_i$是给原子命题$P_i$赋值真的可能世界的集合。
+\end{block}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+ \frametitle{正规系统NSK的性质}
+证明$\Box A \to \Diamond A$不是NSK中的定理：
+\vspace{0.5em}
+
+设$ \mathcal{K}$中有可能世界$w$，它与所有可能世界（包括它自身）均无$R$关系，因此对任何公式$A$必有$\vDash^w_k \Box A$（对所有$w'$, 若$wRw'$ 则 $\vDash^{w'}_k A$ 真， 以及$\nvDash^w_k \Diamond A$ （存在$w'$,$wRw'$ 且$\nvDash^{w'}_k A$ 假），因此$\nvDash^w_k \Box A \to \Diamond A$。
+\vspace{0.5em}
+
+从这个例子可以看出，要使 $\Box A \to \Diamond A$ 永真，必须对正规结构加以限制，即缩小$\mathcal{K}$，使每一结构的可达到关系$R$是“连续”的，即对每一可能世界$w$均有$w'$使$wRw'$。
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{关于正规系统的重要元定理}
+
+
+\begin{frame}
+ \frametitle{关于正规系统的重要元定理}
+ \begin{block}{定理7.8（演绎定理）}
+   对任何NSK中公式集$\Gamma$及公式$A,B$,，$\Gamma \vdash_{NSK} A \to B$，当且仅当$\Gamma$；$A \vdash_{NSK} B$.
+ \end{block}
+ \begin{block}{定理7.9（替换定理）}
+   在NSK中，如果$A$ H $B$，$A$是$C$的子公式，而$D$是$C$中将$A$的若干出现换成$B$的替换式，那么$C$ H $D$
+ \end{block}
+ \begin{block}{定理7.11}
+   NSK是可判定的
+ \end{block}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{总结与回顾}
+
+\begin{frame}
+ \frametitle{总结与回顾}
+ \begin{itemize}
+ \item 引言：从模态词说起
+ \item 模态逻辑的非形式讨论
+   \begin{itemize}
+   \item 必然A，可能A的含义和性质
+   \item 演化的克里普克语义结构
+   \end{itemize}
+ \item 模态逻辑正规系统及其语义
+   \begin{itemize}
+   \item 模态语言及模态逻辑正规系统NSK
+   \item 正规结构
+   \item 关于正规系统的重要元定理
+   \end{itemize}
+ \end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+ \begin{center}
+   \huge Thanks for your attention! \\ Q \& A
+ \end{center}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+
