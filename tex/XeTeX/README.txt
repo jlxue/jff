@@ -11,6 +11,10 @@ mv .texlive2007 .texlive2008
 # 需要重新产生所有的map文件，因为字体包中的是TL07的map
 rm -rf .texlive2008/texmf-var/web2c
 updmap
+
+此字体包默认用了 simsun 一套字体，想用方正书宋那套字体需要修改
+.texlive2008\texmf-var\fonts\map\dvipdfm\cid-x.map，或者直接在
+源文件里指定字体。
 ==========================================
 (2) XeLaTeX + xeCJK
 
