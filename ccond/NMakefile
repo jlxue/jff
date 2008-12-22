@@ -1,0 +1,15 @@
+#
+# for VC > 6.0
+
+CFLAGS=/nologo /DCCOND_DEBUG /ZI
+FOR_CPP=/TP /EHsc
+
+test_ccond: test_ccond.c ccond.c ccond.h
+	cl $(CFLAGS) $(FOR_CPP) test_ccond.c ccond.c
+
+test: test_ccond
+	.\test_ccond.exe
+
+clean:
+	del /Q test_ccond.exe *.obj *.pdb *.idb *.ilk
+
