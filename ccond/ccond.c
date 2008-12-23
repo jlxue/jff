@@ -39,8 +39,8 @@
 #endif
 
 
-HandlerBind*    _last_handler_bind;
-RestartCase*    _last_restart_case;
+CCOND_TLS   HandlerBind*    _last_handler_bind;
+CCOND_TLS   RestartCase*    _last_restart_case;
 
 
 #ifdef  HAVE_EXEC_INFO_H

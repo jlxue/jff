@@ -1,7 +1,7 @@
 #
 # for VC > 6.0
 
-CFLAGS=/nologo /DCCOND_DEBUG /ZI
+CFLAGS=/nologo /DCCOND_DEBUG /ZI /DCCOND_ENABLE_THREAD_SAFE=1
 FOR_CPP=/TP /EHsc
 
 test_ccond: test_ccond.c ccond.c ccond.h

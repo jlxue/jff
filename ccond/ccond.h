@@ -38,7 +38,7 @@
  *
  * Version
  * ~~~~~~~
- *  0.1
+ *  0.2
  *
  * Usage
  * ~~~~~
@@ -57,6 +57,9 @@
  *                              (enabled by default)
  *      defined(CCOND_DEBUG)    enable more debugging information
  *                              (disabled by default)
+ *      CCOND_ENABLE_THREAD_SAFE    whether ccond is thread-safe
+ *                      0       not thread-safe (default)
+ *                      1       is thread-safe
  *      CCOND_ENABLE_CXX_EXCEPTION      only for C++
  *                      0   don't use C++ exception, objects on stack won't be
  *                          destroyed automatically when signal a condition
@@ -138,14 +141,16 @@
  *
  * Todo
  * ~~~~
- *  - use thread local storage for global variables
  *  - implement unwind_protect
  *  - more tests needed!!!
  *
  * ChangeLog
  * ~~~~~~~~~
  *  2008-12-21  Liu Yubao
- *      - initial implementation, not thread safe, v0.1
+ *      - initial implementation, not thread-safe, v0.1
+ *
+ *  2008-12-23  Liu Yubao
+ *      - use thread local storage, now ccond is thread-safe, v0.2
  *
  */
 #ifndef CCOND_H__
@@ -165,12 +170,38 @@ extern "C" {
 
 #else
 #define CCOND_ENABLE_CXX_EXCEPTION  0
-#endif
+#endif  /* __cplusplus  */
 
 /*---------------------------- macro definition ----------------------------*/
 #ifndef STACK_INCREASE_TO_LOW_ADDR
 #define STACK_INCREASE_TO_LOW_ADDR  1
 #endif
+
+#ifndef CCOND_ENABLE_THREAD_SAFE
+#define CCOND_ENABLE_THREAD_SAFE    0
+#endif
+
+
+#if     CCOND_ENABLE_THREAD_SAFE
+
+#if defined(__INTEL_COMPILER) || defined(__ICL) || defined(__ICC) || defined(__ECC)
+#define CCOND_ICC
+#endif
+
+#if defined(_WIN32) || defined(_WIN64) || defined(_WINDOWS)
+#define CCOND_WIN
+#endif
+
+#if defined(__SUNPRO_CC) || defined(__GNUC__) || (defined(CCOND_ICC) && !defined(CCOND_WIN))
+#define CCOND_TLS   __thread
+#else
+#define CCOND_TLS   __declspec(thread)
+#endif
+
+#else
+#define CCOND_TLS
+#endif  /* CCOND_ENABLE_THREAD_SAFE */
+
 
 #if defined(_POSIX_C_SOURCE) || defined(_XOPEN_SOURCE)
 #define CCOND_JMP_BUF               sigjmp_buf
@@ -333,8 +364,8 @@ public:
 #endif
 
 /*---------------------------- external declaration ------------------------*/
-extern HandlerBind*     _last_handler_bind;
-extern RestartCase*     _last_restart_case;
+extern CCOND_TLS    HandlerBind*    _last_handler_bind;
+extern CCOND_TLS    RestartCase*    _last_restart_case;
 
 /*---------------------------- function prototype --------------------------*/
 int ccond_init(void);
