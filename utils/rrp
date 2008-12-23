@@ -79,8 +79,11 @@
 #       * add `heads` and `rollback` commands
 #       * add detailed help information for all commands, v0.17
 #
-# TODO:
-#   fix many problems in cmd_update().
+#   2008-12-03  Liu Yubao
+#       * rewrite cmd_update to avoid many strange problems in repo
+#         script, v0.18
+#       * fix wrong logic in update_module when local branch is newer
+#         than upstream branch, v0.19
 #
 
 ######################## part executed in $HOME/.bashrc ################
@@ -93,7 +96,7 @@ __rrp_find_dir () {
 
     while [ -n "$dir" ]; do
         [ -d "$dir/$d" ] && break
-        dir=$(dirname $dir)
+        dir=$(dirname "$dir")
         [ "$dir" = "/" ] && dir= && break
     done
 
@@ -130,7 +133,7 @@ fi
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.17
+RRP_VERSION=0.19
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -467,6 +470,28 @@ last_reflog_time () {
 }
 
 
+update_module () {
+    git fetch $DEFAULT_REMOTE
+    git remote prune $DEFAULT_REMOTE-hot &>/dev/null
+
+    local merge_base=$(git merge-base refs/remotes/$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH refs/heads/$DEFAULT_WORKING_BRANCH)
+    local work_rev=$(git rev-parse refs/heads/$DEFAULT_WORKING_BRANCH)
+    local remote_rev=$(git rev-parse refs/remotes/$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH)
+
+    [ "$work_rev" = "$remote_rev" ] && return
+
+    if [ "$merge_base" = "$(git rev-parse refs/heads/$DEFAULT_WORKING_BRANCH)" ]; then
+        if [ "$(git symbolic-ref HEAD)" = "refs/heads/$DEFAULT_WORKING_BRANCH" ]; then
+            git merge refs/remotes/$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH
+        else
+            git push .  refs/remotes/$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH:refs/heads/$DEFAULT_WORKING_BRANCH
+        fi
+    elif [ "$merge_base" != "$remote_rev" ]; then   # local branch forked from an old version of upstream branch
+        return 1
+    fi
+}
+
+
 ######################## sub commands ##################################
 help_help () {
     cat <<EOF
@@ -588,7 +613,7 @@ Under project root directory:
 Under module root directory:
 
   rrp update
-    update all modules.
+    update current module.
 EOF
 }
 
@@ -596,8 +621,56 @@ cmd_update () {
     must_under_project_root
     cache_ssh_private_key
 
-    run_cmd $REPO sync "$@"
-    #run_cmd $REPO start $DEFAULT_WORKING_BRANCH "$@"
+    local module=${MODULE_ROOT#$PROJECT_ROOT/}
+    local failed_modules n i=0
+
+    if [ -z "$module" ]; then   # in project_root directory
+        module=$1
+        [ -z "$1" ] &&          # no arguments given
+            while read module; do
+                module=${module#$PROJECT_ROOT/}
+
+                printf '\r%-60s ... ' "$module"
+                cd "$PROJECT_ROOT/$module" && update_module $module ||
+                    failed_modules[$((i++))]="$module"
+                printf '%d modules processed.' $((++n))
+            done < <($REPO forall -c pwd 2>/dev/null) ||     # has arguments given
+            while shift; do
+                must_has_git_dir_in_module $module
+
+                printf '\r%-60s ... ' "$module"
+                cd "$PROJECT_ROOT/$module" && update_module $module ||
+                    failed_modules[$((i++))]="$module"
+                printf '%d modules processed.' $((++n))
+
+                module=$1
+            done
+
+            echo
+    else                        # in sub directory of project_root directory
+        update_module $module || failed_modules[$((i++))]="$module"
+    fi
+
+    if [ -n "$failed_modules" ]; then
+        echo -e "\033[01;31m"   # bold, red foreground
+        echo "Modules listed below require rebasing or merging against $DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH"
+        echo "      cd MODULE-DIR && git checkout $DEFAULT_WORKING_BRANCH"
+        echo "      git rebase $DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH"
+        echo "          or"
+        echo "      git merge $DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH"
+        echo "          or"
+        echo "      git mergetool       (If you want to resolve conflicts)"
+        echo "============================================================="
+
+        for ((i = 0; i < ${#failed_modules[@]}; ++i)); do
+            echo "${failed_modules[$i]}" >&2
+        done
+
+        echo
+        echo "Run 'rrp showbranch' for details."
+        echo -ne "\033[00m"     # reset color
+        return 1
+    fi >&2
 }
 
 
