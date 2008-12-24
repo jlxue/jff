@@ -1,0 +1,87 @@
+性能测试：
+
+1.  winxp + vc9 express edition(vc2008)
+// Microsoft (R) 32-bit C/C++ Optimizing Compiler Version 15.00.21022.08 for 80x86
+
+a) 异常处理开销确实很大，C++ 标准异常处理比 C 方式慢 260 %
+b) ccond 的异常处理比 C++ 的标准异常处理慢 40%
+c) ccond 的 setjmp/longjmp 版本比 try/catch/throw 版本 *快* 23 % !!!
+d) setjmp 居然没有时间消耗，不知道是不是被优化没了
+e) ccond 的 try/catch/throw 版本与 C++ 标准异常处理栈空间消耗一致
+f) ccond 的 setjmp/longjmp 版本居然与无异常处理的 C 版本栈空间消耗一致
+
+
+2. Ubuntu 8.10(linux-2.6.27-7-generic) + GCC 4.3.2-1ubuntu11
+
+a) C++ try/catch/throw 比 C 慢 100%
+b) ccond try/catch/throw 比 C++ try/catch/throw 慢 77%
+c) ccond setjmp/longjmp 比 ccond try/catch/throw *慢* 514% !!!!
+d) setjmp 同样没有时间消耗
+e) 栈空间占用居然颇为一致
+
+
+
+=========================================================================================
+	cl /nologo /TP /EHsc bench_ccond.c ccond.c > NUL
+	.\bench_ccond 10000 10000
+recursion count=10000 loop count=10000
+C, no exception                - got 125010000. Stack occupied: 140060, time spent: 0.656000
+C++ with try/catch/throw       - got 125010000. Stack occupied: 360112, time spent: 2.359000
+ccond with try/catch/throw     - got 125010000. Stack occupied: 360112, time spent: 3.344000
+	rem --------------------------------------------------
+	cl /nologo /TP /EHac bench_ccond.c ccond.c > NUL
+	.\bench_ccond 10000 10000
+recursion count=10000 loop count=10000
+C, no exception                - got 125010000. Stack occupied: 140060, time spent: 0.656000
+C++ with try/catch/throw       - got 125010000. Stack occupied: 340108, time spent: 2.297000
+ccond with try/catch/throw     - got 125010000. Stack occupied: 340108, time spent: 3.312000
+	rem --------------------------------------------------
+	cl /nologo /TC bench_ccond.c ccond.c > NUL
+	.\bench_ccond 10000 10000
+recursion count=10000 loop count=10000
+C, no exception                - got 125010000. Stack occupied: 140060, time spent: 0.640000
+ccond with setjmp/longjmp      - got 125010000. Stack occupied: 140060, time spent: 2.703000
+benchmark setjmp               - got 10000. Stack occupied: 140060, time spent: 0.000000
+	rem --------------------------------------------------
+	cl /nologo /TC /DCCOND_ENABLE_THREAD_SAFE=1 bench_ccond.c ccond.c > NUL
+	.\bench_ccond 10000 10000
+recursion count=10000 loop count=10000
+C, no exception                - got 125010000. Stack occupied: 140060, time spent: 0.640000
+ccond with setjmp/longjmp      - got 125010000. Stack occupied: 140060, time spent: 3.453000
+benchmark setjmp               - got 10000. Stack occupied: 140060, time spent: 0.000000
+	rem --------------------------------------------------
+	cl /nologo /TP /DCCOND_ENABLE_THREAD_SAFE=1 bench_ccond.c ccond.c > NUL
+	.\bench_ccond 10000 10000
+recursion count=10000 loop count=10000
+C, no exception                - got 125010000. Stack occupied: 140060, time spent: 0.656000
+C++ with try/catch/throw       - got 125010000. Stack occupied: 340108, time spent: 2.297000
+ccond with try/catch/throw     - got 125010000. Stack occupied: 340108, time spent: 3.875000
+
+=========================================================================================
+g++ bench_ccond.c ccond.c -o bench_ccond
+./bench_ccond 10000 10000
+recursion count=10000 loop count=10000
+C, no exception                - got 125010000. Stack occupied: 320112, time spent: 0.740000
+C++ with try/catch/throw       - got 125010000. Stack occupied: 320144, time spent: 1.490000
+ccond with try/catch/throw     - got 125010000. Stack occupied: 320144, time spent: 2.640000
+--------------------------------------------------
+gcc bench_ccond.c ccond.c -o bench_ccond
+./bench_ccond 10000 10000
+recursion count=10000 loop count=10000
+C, no exception                - got 125010000. Stack occupied: 320112, time spent: 0.790000
+ccond with setjmp/longjmp      - got 125010000. Stack occupied: 320112, time spent: 16.210000
+benchmark setjmp               - got 10000. Stack occupied: 320112, time spent: 0.000000
+--------------------------------------------------
+gcc -DCCOND_ENABLE_THREAD_SAFE=1 bench_ccond.c ccond.c -o bench_ccond
+./bench_ccond 10000 10000
+recursion count=10000 loop count=10000
+C, no exception                - got 125010000. Stack occupied: 320112, time spent: 0.780000
+ccond with setjmp/longjmp      - got 125010000. Stack occupied: 320112, time spent: 16.370000
+benchmark setjmp               - got 10000. Stack occupied: 320112, time spent: 0.000000
+--------------------------------------------------
+g++ -DCCOND_ENABLE_THREAD_SAFE=1 bench_ccond.c ccond.c -o bench_ccond
+./bench_ccond 10000 10000
+recursion count=10000 loop count=10000
+C, no exception                - got 125010000. Stack occupied: 320112, time spent: 0.750000
+C++ with try/catch/throw       - got 125010000. Stack occupied: 320144, time spent: 1.450000
+ccond with try/catch/throw     - got 125010000. Stack occupied: 320144, time spent: 2.680000

@@ -10,6 +10,27 @@ test_ccond: test_ccond.c ccond.c ccond.h
 test: test_ccond
 	.\test_ccond.exe
 
+bench: bench_ccond.c ccond.c ccond.h
+	cl /nologo /TP /EHsc bench_ccond.c ccond.c > NUL
+	.\bench_ccond 10000 10000
+	@del /Q *.exe *.obj *.pdb *.idb *.ilk
+	rem --------------------------------------------------
+	cl /nologo /TP /EHac bench_ccond.c ccond.c > NUL
+	.\bench_ccond 10000 10000
+	@del /Q *.exe *.obj *.pdb *.idb *.ilk
+	rem --------------------------------------------------
+	cl /nologo /TC bench_ccond.c ccond.c > NUL
+	.\bench_ccond 10000 10000
+	@del /Q *.exe *.obj *.pdb *.idb *.ilk
+	rem --------------------------------------------------
+	cl /nologo /TC /DCCOND_ENABLE_THREAD_SAFE=1 bench_ccond.c ccond.c > NUL
+	.\bench_ccond 10000 10000
+	@del /Q *.exe *.obj *.pdb *.idb *.ilk
+	rem --------------------------------------------------
+	cl /nologo /TP /DCCOND_ENABLE_THREAD_SAFE=1 bench_ccond.c ccond.c > NUL
+	.\bench_ccond 10000 10000
+	@del /Q *.exe *.obj *.pdb *.idb *.ilk
+
 clean:
-	del /Q test_ccond.exe *.obj *.pdb *.idb *.ilk
+	del /Q test_ccond.exe bench_ccond.exe *.obj *.pdb *.idb *.ilk
 
