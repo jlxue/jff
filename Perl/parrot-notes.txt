@@ -1,0 +1,89 @@
+# parrot r34314
+
+* 代码主要结构
+
+parrot/
+    compilers/
+        imcc/
+        nqp/
+        pct/
+        pge/
+        pirc/
+        tge/
+    doc/
+    examples/
+    include/
+    languages/
+    lib/
+    runtime/
+    src/
+    CREDITS
+    NEWS
+    RESPONSIBLE_PARTIES
+
+* docs/intro.pod
+
+Parrot 为动态语言考虑；
+Parrot 为语言间互操作考虑；
+
+四种可执行格式：
+ - PIR (Parrot Intermediate Representation)
+   设计用于手写或者某个语言的编译器生成
+ - PASM (Parrot Assembly)
+   比 PIR 更低级，也能手写或者编译器生成，但是需要考虑函数
+   调用规范以及寄存器分配
+ - PAST (Parrot Abstract Syntax Tree)
+   编译器生成，便于给 Parrot 执行
+ - PBC (Parrot Bytecode)
+   Parrot 内部能直接执行的格式，上面三种都会在虚拟机内部自动
+   转换成 PBC
+
+Parrot 是基于寄存器的，有四种类型的寄存器：
+ - integers (I)
+ - numbers (N)
+ - strings (S)
+ - Parrot Magic Cookies (P)
+每一个寄存器都可以用形如 I0, I1, N0, N1 的形式指代，每个
+函数里所需的寄存器数目是编译时确定的。
+
+* docs/overview.pod
+
+* docs/parrot.pod
+
+* docs/gettingstarted.pod
+
+* docs/running.pod
+
+-o xx.pbc/xxx.pasm      输出 pbc 或者 pasm
+-Ot                     选择最快的 runcore
+-R xxx                  选择 runcore
+--help-debug
+
+* docs/faq.pod
+
+* docs/glossary.pod
+
+                 PGE(like lex + yacc)
+.pg(Perl 6 rule) --------> Syntax Tree ------> PAST?
+
+.pasm, .pir(actions)---------> .pbc ------> vm
+                     IMCC
+TGE? PCT?
+
+* docs/debug.pod
+
+调试 .pasm 或者 .pir: parrot_debugger
+调试 JIT: stabs
+parrot --help-debug
+在 Parrot_confess 函数设置断点
+
+* docs/debugger.pod
+
+nmake parrot_debugger.exe   # 文档里只写了 make perl_debugger, 
+                            # 可以用 nmake 看到所有编译目标
+parrot_debugger foo.pbc
+
+* docs/compiler-faq.pod
+
+http://www.parrotblog.org/2008/03/targeting-parrot-vm.html
+
