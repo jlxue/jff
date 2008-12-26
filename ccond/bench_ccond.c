@@ -117,8 +117,10 @@ int f_setjmp(int a)
     int r;
     jmp_buf env;
 
-    if (a < 0)
+    if (a < 0) {
+        end = &a;
         return 0;
+    }
 
     if (r = setjmp(env)) {
         r = a + r + f_setjmp(a-1);
