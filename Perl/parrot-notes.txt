@@ -28,7 +28,7 @@ Parrot 为语言间互操作考虑；
 
 四种可执行格式：
  - PIR (Parrot Intermediate Representation)
-   设计用于手写或者某个语言的编译器生成
+   设计用于手写或者某个语言的编译器生成(以前叫 IMC, Intermediate Code)
  - PASM (Parrot Assembly)
    比 PIR 更低级，也能手写或者编译器生成，但是需要考虑函数
    调用规范以及寄存器分配
@@ -87,3 +87,55 @@ parrot_debugger foo.pbc
 
 http://www.parrotblog.org/2008/03/targeting-parrot-vm.html
 
+* docs/imcc
+
+IMCC (InterMediate Code Compiler) 最早并不是给 Parrot 开发的。
+现在的 PIR 就是以前的 IMC(现在文档里还有一些地方用 IMC 称呼)，
+IMCC 可以理解是宏汇编器，IMCC 解析 PIR(现在也支持解析 PASM) 
+并编译成 PBC 以供 Parrot VM 执行。
+
+languages/PIR 用 PGE 实现了一个 PIR parser, compilers/pirc
+包含了一个手写的递归下降 PIR parser 和一个 bison 实现的 PIR
+parser，它们都没有实现编译到 PBC 的功能。
+
+IMCC 的 PIR -> PASM 转换功能并不完善，可能产生无效的 PASM。
+
+* docs/pct/gettingstarted.pod
+
+- PASM Parrot 的汇编语言，跟字节码对应，手写麻烦
+- PIR  比 PASM 稍微高级一点，手写仍然比较麻烦
+- PGE  Perl 6 的 rule 实现，类似 lex + yacc，根据语法定义
+       生成一个 parser，并能在碰到某个语法时调用一段代码，
+       也就是被称为 action；
+- NQP  Not Quite Perl，Perl 6 的子集，由于用 PIR 写 action
+       仍嫌麻烦，所以诞生了 NQP 来简化之。注意 NQP 是用来
+       编写高级语言到 PIR 的编译器的，并不在 Parrot VM 上直接
+       运行;
+- PAST 定义了一套类库用来表示抽象语法树，比如 PAST::Val 表示
+       字面值，如“42”，PAST::Var 用来表示变量，比如 Perl 6 中
+       的 my $var，PGE 中的 action 可以构造 PAST 节点，这样在
+       高级语言被编译完时，我们就得到了一个抽象语法树；
+- POST Parrot Opcode Syntax Tree，定义了一套类库来表示 Parrot
+       操作码语法树；
+
+PAST 和 POST 的两套类库都包含于 compilers/pct 中。
+
+创建一个新的语言实现：
+
+set path=D:\source\parrot;C:\Perl\bin;%path%
+"C:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bat" x86
+cd /d D:\source\parrot
+perl Configure.pl
+nmake                  # 编译 Parrot
+perl tools\dev\mk_language_shell.pl Foo languages\foo
+                       # 在 languages\foo 目录下生成 Foo 语言实现
+                       # 默认是放在 languages\XXX 目录下
+perl Configure.pl --languages=foo
+或者
+perl tools\dev\reconfigure.pl  --step=gen::languages --languages=foo
+                       # 为 languages\foo 生成 Makefile
+                       # 如果在上一步中不指定目录，则会自动调用此脚本。
+                       # 第二种生成 Makefile 的办法快得多。
+cd languages\foo
+nmake
+nmake test
