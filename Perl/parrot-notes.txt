@@ -63,12 +63,11 @@ Parrot 是基于寄存器的，有四种类型的寄存器：
 
 * docs/glossary.pod
 
-                 PGE(like lex + yacc)
-.pg(Perl 6 rule) --------> Syntax Tree ------> PAST?
+                 PGE(like lex + yacc) + PAST 类库
+.pg(Perl 6 rule) ---------------------------------> 抽象语法树
 
 .pasm, .pir(actions)---------> .pbc ------> vm
                      IMCC
-TGE? PCT?
 
 * docs/debug.pod
 
