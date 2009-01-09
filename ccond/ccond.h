@@ -38,7 +38,7 @@
  *
  * Version
  * ~~~~~~~
- *  0.2
+ *  0.2.1
  *
  * Usage
  * ~~~~~
@@ -79,12 +79,12 @@
  *
  *      RESTART_CASE_BEGIN("restart1", "restart2") {
  *      #if CCOND_ENABLE_CXX_EXCEPTION
+ *          ... some code that can signal condition...
+ *      } RESTART_CATCH {
+ *      #else
  *      case 0:
  *          ... some code that can signal condition...
  *          break;
- *      #else
- *          ... some code that can signal condition...
- *      } RESTART_CATCH {
  *      #endif
  *      case 1:
  *          ... code for restart 1...
@@ -117,7 +117,7 @@
  *
  *
  *      (c) extends Condition
- *      ~~~~~~~~~~~~~~~~~~~~
+ *      ~~~~~~~~~~~~~~~~~~~~~
  *
  *      typedef struct {
  *          EXTENDS_CONDITION;      // must be the first member!
@@ -152,6 +152,8 @@
  *  2008-12-23  Liu Yubao
  *      - use thread local storage, now ccond is thread-safe, v0.2
  *
+ *  2009-01-09  Liu Yubao
+ *      - fix error in usage document, v0.2.1
  */
 #ifndef CCOND_H__
 #define CCOND_H__
