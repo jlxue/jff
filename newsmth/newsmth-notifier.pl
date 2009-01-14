@@ -28,13 +28,13 @@
 #
 #       2009-01-14
 #           * fix GBK/UTF-8 terminal encoding problem
-#           * support system tray icon for Windows
+#           * support system tray icon for Windows, release 2.0
 #
 #  Dieken at newsmth.net
 #
 #  This script is released under GNU GPL v3.
 #
-#  TODO: put it into system tray
+#  TODO: cleanup code, port to Linux
 #
 use strict;
 use warnings;
