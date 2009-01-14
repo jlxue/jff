@@ -11,6 +11,10 @@
 #    run the command below to start the poll:
 #       perl newsmth-notifier.pl
 #
+#   Note: this script must be in GBK encoding if you add Chinese
+#   characters in it, for example use Chinese characters directly
+#   in regular expressions.
+#         (这个脚本必须是 GBK 编码)
 #
 #  ChangeLog:
 #       2007-10-03      
@@ -21,6 +25,9 @@
 #           (suggested by EOF@newsmth)
 #           * use different terminal encoding according to OS and locale
 #           (reported by sspin@newsmth)
+#
+#       2009-01-14
+#           * fix GBK/UTF-8 terminal encoding problem
 #
 #  Dieken at newsmth.net
 #
@@ -37,15 +44,15 @@ use POSIX qw/setsid strftime/;
 #use Proc::Daemon;
 
 $| = 1;
-my $terminal_encoding = ':utf8';
+my $terminal_encoding;
 if ($^O eq "MSWin32" || 
         (exists($ENV{'LC_MESSAGES'}) && $ENV{'LC_MESSAGES'} =~ /\.GB(?:2312|K|18030)/i) ||
         (exists($ENV{'LANG'})        && $ENV{'LANG'}        =~ /\.GB(?:2312|K|18030)/i) ||
         (exists($ENV{'LC_CTYPE'})    && $ENV{'LC_CTYPE'}    =~ /\.GB(?:2312|K|18030)/i)) {
-    $terminal_encoding = ':gbk';
+    $terminal_encoding = 'GBK';
+} else {
+    $terminal_encoding = 'UTF-8';
 }
-binmode STDOUT, $terminal_encoding;
-binmode STDERR, $terminal_encoding;
 
 my %lastPostIds;
 my $got_sig_hup = 0;
@@ -70,7 +77,6 @@ while (1) {
     for my $board (sort(keys %lastPostIds)) {
         my $content = get('http://www.newsmth.net/bbsdoc.php?board=' . $board);
         next unless defined $content;
-        $content = decode('GBK', $content);
 
         my @posts = parse_page($content);
         
@@ -88,6 +94,8 @@ while (1) {
         sleep rand 5;
     }
     sleep 60;
+
+    save_board_list();
 }
 
 
@@ -122,6 +130,11 @@ sub format_post {
                          $post->[0],    # postId
                          $post->[2],    # author
                          $post->[5];    # title
+
+    if ('GBK' ne $terminal_encoding) {
+        Encode::from_to($result, 'GBK', $terminal_encoding);
+    }
+
     return $result;
 }
 
