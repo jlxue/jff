@@ -113,10 +113,8 @@ while (1) {
         sleep rand 5;
     }
 
-    if (length($message) > 0) {
-        $q->enqueue($message);
-        sendmessage();
-    }
+    $q->enqueue($message);
+    sendmessage();
 
     save_board_list();
     sleep 60;
@@ -265,9 +263,14 @@ sub notify_new_articles {
     my $msg = $q->dequeue_nb();
 
     if (defined $msg) {
-        $main->NI->Change(-balloon_tip => $msg, -tip => $msg);
-        $main->NI->ShowBalloon(0);
-        $main->NI->ShowBalloon(1);
+        if (length($msg) > 0) {
+            $main->NI->Change(-balloon_tip => $msg, -tip => $msg);
+            $main->NI->ShowBalloon(0);
+            $main->NI->ShowBalloon(1);
+        } else {
+            $main->NI->Change(-balloon_tip => 'Checking...', -tip => 'Checking...');
+            $main->NI->ShowBalloon(0);
+        }
     }
 
     return 1;
