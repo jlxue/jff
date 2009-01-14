@@ -28,6 +28,7 @@
 #
 #       2009-01-14
 #           * fix GBK/UTF-8 terminal encoding problem
+#           * support system tray icon for Windows
 #
 #  Dieken at newsmth.net
 #
@@ -42,6 +43,11 @@ use File::Slurp;
 use LWP::Simple;
 use POSIX qw/setsid strftime/;
 #use Proc::Daemon;
+use threads;
+use threads::shared;
+use Thread::Queue;
+use Win32::GUI ();
+use constant WM_NOTIFYICON => 40000;
 
 $| = 1;
 my $terminal_encoding;
@@ -68,13 +74,23 @@ $SIG{INT}  = \&save_board_list;
 $SIG{KILL} = \&save_board_list;
 $SIG{QUIT} = \&save_board_list;
 
+my $q = new Thread::Queue;
+my $thread = threads->create(\&systray_thread);
+$thread->detach();
+$q->dequeue();      # When systray_thread is ready it will give me a message.
+
 while (1) {
     if ($got_sig_hup > 0) {
         load_board_list();
         --$got_sig_hup;
     }
+
     print "# checking...........................\n";
+    my $message = "";
+
     for my $board (sort(keys %lastPostIds)) {
+        my $count = 0;
+
         my $content = get('http://www.newsmth.net/bbsdoc.php?board=' . $board);
         next unless defined $content;
 
@@ -85,17 +101,25 @@ while (1) {
                 if ($lastPostIds{$board} < $post->[0]) {
                     $lastPostIds{$board} = $post->[0];
                     print $board, ': ', format_post($post), "\n";
+                    ++$count;
                 }
             } else {
                 $lastPostIds{$board} = $post->[0];
             }
         }
 
+        $message .= sprintf("%16s %d\n", $board, $count) if $count > 0;
+
         sleep rand 5;
     }
-    sleep 60;
+
+    if (length($message) > 0) {
+        $q->enqueue($message);
+        sendmessage();
+    }
 
     save_board_list();
+    sleep 60;
 }
 
 
@@ -177,5 +201,75 @@ sub save_board_list {
     write_file('board.list', {binmode => ':utf8', atomic => 1}, \@a);
 
     exit 0 if defined $sig;
+}
+
+
+#########################################################
+## system tray notification
+#
+my $main;
+
+sub systray_thread {
+
+    $main = Win32::GUI::Window->new(
+        -name => 'NewSMTH_Notifier',
+        -text => 'NewSMTH Notifier',
+        -width => 200,
+        -height => 200
+    );
+    $main->AddLabel(-text => "I'm NewSMTH Notifier");
+    $main->Hook(WM_NOTIFYICON, \&notify_new_articles);
+
+    my $icon = new Win32::GUI::Icon('GUIPERL.ICO');
+    my $ni = $main->AddNotifyIcon(
+        -name => "NI",
+        -icon => $icon,
+        -tip => "Checking...",
+        -balloon => 1,
+        -balloon_tip => "Checking...",
+        -balloon_title => "NewSMTH Notifier",
+        -balloon_icon => "info",
+        -balloon_timeout => 10000   # 10 s
+    );
+    $ni->SetBehaviour(1);
+
+    $q->enqueue("ready");
+
+    Win32::GUI::Dialog();
+}
+
+sub NewSMTH_Notifier_Terminate {
+    $main->NI->Remove();
+    return -1;
+}
+
+sub NewSMTH_Notifier_Minimize {
+    $main->Disable();
+    $main->Hide();
+    return 1;
+}
+
+sub NI_Click {
+    $main->Enable();
+    $main->Show();
+    return 1;
+}
+
+sub sendmessage {
+    #my $win = Win32::GUI::FindWindow('PerlWin32GUI_STD', 'NewSMTH Notifier');
+    my $win = Win32::GUI::FindWindow('', 'NewSMTH Notifier');
+    Win32::GUI::SendMessage($win, WM_NOTIFYICON, 0, 0);
+}
+
+sub notify_new_articles {
+    my $msg = $q->dequeue_nb();
+
+    if (defined $msg) {
+        $main->NI->Change(-balloon_tip => $msg, -tip => $msg);
+        $main->NI->ShowBalloon(0);
+        $main->NI->ShowBalloon(1);
+    }
+
+    return 1;
 }
 
