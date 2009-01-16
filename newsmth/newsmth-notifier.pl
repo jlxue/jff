@@ -25,7 +25,6 @@
 #           (suggested by EOF@newsmth)
 #           * use different terminal encoding according to OS and locale
 #           (reported by sspin@newsmth)
-#
 #       2009-01-14
 #           * fix GBK/UTF-8 terminal encoding problem
 #           * support system tray icon for Windows, release 2.0
@@ -79,7 +78,7 @@ my $thread = threads->create(\&systray_thread);
 $thread->detach();
 $q->dequeue();      # When systray_thread is ready it will give me a message.
 
-while (1) {
+while ($thread->is_running()) {
     if ($got_sig_hup > 0) {
         load_board_list();
         --$got_sig_hup;
@@ -117,7 +116,7 @@ while (1) {
     sendmessage();
 
     save_board_list();
-    sleep 60;
+    sleep 60 if $thread->is_running();
 }
 
 
