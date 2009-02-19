@@ -89,11 +89,15 @@
 #       * fix problem that last line outputed by `log' in `rollback' command
 #         doesn't end with '\n', shell's read command returns 1 when meets
 #         this kind of line.
-#       * support dashes in module names
+#       * support dashes in module names in `log' and `rollback'
 #       * make `log' and `rollback' only track first parent, so it's easy
 #         to rollback on a master branch
 #       * use CommitDate in `log' and `rollback' commands
 #       * release v0.20
+#
+#   2008-02-18  Liu Yubao
+#       * support dots in module names in `log' and `rollback'
+#       * add `upgrade' command, release v0.21
 #
 
 ######################## part executed in $HOME/.bashrc ################
@@ -143,7 +147,7 @@ fi
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.20
+RRP_VERSION=0.21
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -513,6 +517,7 @@ Usage:
 Available commands:
   checkout      - check out a working copy from repository
   update        - update working copy from repository
+  upgrade       - get new modules to current working copy from repository
 
   commit        - commit changes to central repository
   uncommit      - cancel commits to central repository
@@ -681,6 +686,38 @@ cmd_update () {
         echo -ne "\033[00m"     # reset color
         return 1
     fi >&2
+}
+
+
+help_upgrade () {
+    cat <<EOF
+Under project root directory:
+
+  rrp upgrade
+    get new modules to current working copy from repository
+EOF
+}
+
+
+cmd_upgrade () {
+    must_under_project_root
+    cache_ssh_private_key
+
+    cd $PROJECT_ROOT/.repo/manifests &&
+        run_cmd git pull ||
+        return 1
+
+    cd $PROJECT_ROOT && {
+        while read module; do
+            module=${module#*path=\"}
+            module=${module%%\"*}
+            [ ! -e "$module" ] && {
+                run_cmd $REPO sync "$module" &&
+                    (cd "$module" && git checkout -b $DEFAULT_WORKING_BRANCH $DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH) ||
+                    break
+                }
+        done < <(grep "^[ \t]*<project[ \t]" .repo/manifests/default.xml)
+    } || return 1
 }
 
 
@@ -1323,6 +1360,7 @@ cmd_rollback () {
 
             m=${module////_}
             m=${m//-/_}
+            m=${m//./_}
             [ -z "$(eval echo \$commit_$m)" ] && modules[$((n++))]=$module
             eval commit_$m=$commit
 
@@ -1334,6 +1372,7 @@ cmd_rollback () {
             run_cmd cd "$PROJECT_ROOT/$m" && {
                 m=${m////_}
                 m=${m//-/_}
+                m=${m//./_}
                 r="$(eval echo \$commit_$m)"
 
                 [ "$module" != "${modules[$i]}" ] && {
