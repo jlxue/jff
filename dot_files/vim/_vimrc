@@ -224,6 +224,9 @@ au FileType qf :nnoremap <buffer> v <Enter>zz:wincmd p<Enter>
 " for gf command to open java source file at import clause
 au FileType java :set suffixesadd+=.java
 
+" Keep indentation consistent with erlang-mode in Emacs
+au FileType erlang :set noet ts=8 sts=4 sw=4
+
 " backup last search pattern for each window
 au WinEnter * :if exists("w:blsp") && w:blsp != '' | let @/=w:blsp | endif
 au WinLeave * :let w:blsp=@/
