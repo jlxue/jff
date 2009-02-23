@@ -698,7 +698,6 @@ Under project root directory:
 EOF
 }
 
-
 cmd_upgrade () {
     must_under_project_root
     cache_ssh_private_key
@@ -1402,6 +1401,6 @@ if has_sub_command "$cmd"; then
     # execute the sub command
     cmd_$cmd "$@"
 else
-    echo "Unkown command, run 'rrp help' for help information." >&2
+    echo "Unknown command, run 'rrp help' for help information." >&2
 fi
 
