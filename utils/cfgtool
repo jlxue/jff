@@ -195,7 +195,9 @@ cmd_hook () {
     local f=etc/apt/apt.conf.d/80cfgtool
     local d=$(dirname "$f")
 
-    [ ! -e "$d" ] && mkdir -p "$d" || exit 1
+    [ -d "$d" ] || {
+        mkdir -p "$d" || exit 1
+    }
 
     if [ -e "$f" ]; then
         log "Cfgtool hook exists: $f"
