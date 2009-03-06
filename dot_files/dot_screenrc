@@ -4,6 +4,10 @@ escape ^Jj
 
 startup_message off
 
+# Add this to your .bashrc:
+#   export PROMPT_COMMAND='echo -n -e "\033k\033\\"'
+shelltitle '$ |bash'
+
 # make vim not overwrite the content in screen window after vim exits
 altscreen on
 
