@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+# Purpose:
+#   cache result of find command to avoid heavy load on the disk I/O.
+#
+# Usage:
+#   change your PATH temporarily to use find instead of /usr/bin/find,
+#   delete corresponding file under $CACHE if you add or delete some
+#   files.
+#
+# Author:
+#   yubao.liu@gmail.com
+#
+# License:
+#   BSDL
+#
+# ChangeLog:
+#   2009-03-17  Liu Yubao
+#       * initial version
+#       * don't cache output of find if it goes wrong
+#
+# TODO:
+#   * how to cache return value of find command?
+#
+
+CACHE="$HOME/.find-cache"
+
+cwd="$PWD"
+args="$*"
+md5sum=`echo "$cwd $args" | md5sum | cut -c -32`
+file="$CACHE/$md5sum"
+
+[ -e "$CACHE" ] || mkdir -p "$CACHE"
+
+if [ -f "$file" ]; then
+    sed -ne '2,$p' "$file"
+else
+    echo "command: $cwd $args" > "$file"
+    { /usr/bin/find "$@" || rm "$file"; } | tee -a "$file"
+fi
+
