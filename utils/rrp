@@ -105,6 +105,10 @@
 #         means `git fetch origin', in git 1.6.0, `git fetch' means
 #         `git fetch ALL-REMOTES'
 #       * release v0.22
+#
+#   2009-03-18  Liu Yubao
+#       * remove $HOME/.find-cache when update, upgrade and rollback,
+#         suggested by Dou Chuan, release v0.23
 
 ######################## part executed in $HOME/.bashrc ################
 # To make the pollution to shell environment minimum, I put this code
@@ -153,7 +157,7 @@ fi
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.22
+RRP_VERSION=0.23
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -641,6 +645,7 @@ EOF
 cmd_update () {
     must_under_project_root
     cache_ssh_private_key
+    clear_find_cache
 
     local module=${MODULE_ROOT#$PROJECT_ROOT/}
     local failed_modules n i=0
@@ -707,6 +712,7 @@ EOF
 cmd_upgrade () {
     must_under_project_root
     cache_ssh_private_key
+    clear_find_cache
 
     cd $PROJECT_ROOT/.repo/manifests &&
         run_cmd git pull ||
@@ -1343,6 +1349,7 @@ EOF
 
 cmd_rollback () {
     must_under_project_root
+    clear_find_cache
 
     local rev="$1" module commit date
     local m modules r n=0 i
