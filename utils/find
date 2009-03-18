@@ -8,37 +8,51 @@
 #   delete corresponding file under $CACHE if you add or delete some
 #   files.
 #
+#   You can change REAL_COMMAND below to cache output of other commands,
+#   this script is generalized like Perl's Memoize module:
+#       http://search.cpan.org/~mjd/Memoize-1.01/Memoize.pm
+#
 # Author:
 #   yubao.liu@gmail.com
 #
 # License:
 #   BSDL
 #
+# Version:
+#   0.3
+#
 # ChangeLog:
 #   2009-03-17  Liu Yubao
-#       * initial version
+#       * initial version, v0.1
 #       * don't cache output of find if it goes wrong
 #       * use ed instead of sed, suggested by Invader@newsmth
-#       * record return value, keep cache (conflict with second change above)
+#       * record return value, keep cache (conflict with second change above),
+#         v0.2
 #
+#   2009-03-18  Liu Yubao
+#       * separate output, command and return value into two files
+#       * take $0 into account when calculate MD5 digest, v0.3
 
+REAL_COMMAND=/usr/bin/find
 CACHE="$HOME/.find-cache"
 
 cwd="$PWD"
 args="$*"
-md5sum=`echo "$cwd $args" | md5sum | cut -c -32`
+md5sum=`echo "$cwd $0 $args" | md5sum | cut -c -32`
 file="$CACHE/$md5sum"
 
 [ -e "$CACHE" ] || mkdir -p "$CACHE"
 
 if [ -f "$file" ]; then
-    # The first line is cwd and args.
-    echo '2,$-1p' | ed -s "$file"
-    return `tail -1 "$file"`
+    cat "$file"
+    read < "$file.cmd"
+    exit $REPLY
 else
-    echo "command: $cwd $args" > "$file"
-    # { /usr/bin/find "$@" || rm "$file"; } | tee -a "$file"
-    { /usr/bin/find "$@" ; retval=$?; } | tee -a "$file"
-    echo $retval >> "$file"
+    # { $REAL_COMMAND "$@" || rm "$file"; } | tee "$file"
+    { $REAL_COMMAND "$@" ; retval=$?; } | tee "$file"
+    {
+        echo $retval
+        echo "CWD=$cwd CMD=$0 $args"
+    } > "$file.cmd"
 fi
 
