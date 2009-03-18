@@ -18,9 +18,8 @@
 #   2009-03-17  Liu Yubao
 #       * initial version
 #       * don't cache output of find if it goes wrong
-#
-# TODO:
-#   * how to cache return value of find command?
+#       * use ed instead of sed, suggested by Invader@newsmth
+#       * record return value, keep cache (conflict with second change above)
 #
 
 CACHE="$HOME/.find-cache"
@@ -33,9 +32,13 @@ file="$CACHE/$md5sum"
 [ -e "$CACHE" ] || mkdir -p "$CACHE"
 
 if [ -f "$file" ]; then
-    sed -ne '2,$p' "$file"
+    # The first line is cwd and args.
+    echo '2,$-1p' | ed -s "$file"
+    return `tail -1 "$file"`
 else
     echo "command: $cwd $args" > "$file"
-    { /usr/bin/find "$@" || rm "$file"; } | tee -a "$file"
+    # { /usr/bin/find "$@" || rm "$file"; } | tee -a "$file"
+    { /usr/bin/find "$@" ; retval=$?; } | tee -a "$file"
+    echo $retval >> "$file"
 fi
 
