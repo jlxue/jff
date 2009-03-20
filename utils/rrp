@@ -109,6 +109,10 @@
 #   2009-03-18  Liu Yubao
 #       * remove $HOME/.find-cache when update, upgrade and rollback,
 #         suggested by Dou Chuan, release v0.23
+#
+#   2009-03-20  Liu Yubao
+#       * support multiple upstream branches, enhance __rrp_ps1 to show
+#         default upstream branch, release v0.24
 
 ######################## part executed in $HOME/.bashrc ################
 # To make the pollution to shell environment minimum, I put this code
@@ -131,7 +135,7 @@ __rrp_find_dir () {
 __rrp_ps1 () {
     local PROJECT_ROOT=$(__rrp_find_dir '.repo')
     local MODULE_ROOT=$(__rrp_find_dir '.git')
-    local module
+    local module head upstream
 
     # project_root is empty or module_root is out of project_root, we
     # get a wrong module_root, so set it empty
@@ -140,7 +144,13 @@ __rrp_ps1 () {
         MODULE_ROOT=
 
     module=${MODULE_ROOT#$PROJECT_ROOT/}
-    echo $(__git_ps1 "$module(%s)")
+
+    head=$(git symbolic-ref HEAD 2>/dev/null)
+    head=${head##refs/heads/}
+    [ -n "$head" ] && upstream=$(git config --get branch.$head.merge 2>/dev/null)
+    [ -n "$upstream" ] && upstream=" $upstream"
+
+    echo $(__git_ps1 "$module(%s$upstream)")
 }
 
 
@@ -157,7 +167,7 @@ fi
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.23
+RRP_VERSION=0.24
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -241,6 +251,22 @@ initialize () {
     /sbin/ifconfig | grep -qF $SERVER_IP && IS_LOCAL=1
 
     which git >/dev/null 2>&1 || { echo "git isn't installed!" >&2; exit 1; }
+
+    # get default upstream branch automatically according to .repo/manifests
+    if [ -n "$PROJECT_ROOT" ]; then
+        [ -d "$PROJECT_ROOT/.repo/manifests" ] ||
+            { echo "Broken working tree, please checkout again!" >&2; exit 1; }
+
+        local branch
+        branch=$(cd $PROJECT_ROOT/.repo/manifests && git config --get branch.default.merge)
+        branch=${branch%-local}
+        if [ -z "$branch" ]; then
+            echo "Broken manifests repository, please checkout again!" >&2
+            exit 1
+        else
+            DEFAULT_UPSTREAM_BRANCH="$branch"
+        fi
+    fi
 
     if [ ! -f $HOME/.ssh/id_rsa ]; then
         echo "+-------------------------------------------------------------------+"
@@ -336,6 +362,7 @@ must_has_git_dir_in_module () {
         echo "No module \"$1\" found." >&2 &&
         exit 1
 }
+
 
 cache_ssh_private_key () {
     [ -z "$SSH_AUTH_SOCK" ] &&
@@ -516,6 +543,11 @@ update_module () {
 }
 
 
+clear_find_cache () {
+    rm -rf $HOME/.find-cache
+}
+
+
 ######################## sub commands ##################################
 help_help () {
     cat <<EOF
@@ -574,12 +606,16 @@ help_checkout () {
     cat <<EOF
 In a empty directory:
 
-  rrp checkout
-    Clone remote central repository to local empty directory.
+  rrp checkout UPSTREAM_BRANCH
+    Clone remote central repository to local empty directory, use
+    UPSTREAM_BRANCH as default upstream branch. If not specified,
+    use '$DEFAULT_UPSTREAM_BRANCH' as default upstream branch.
 EOF
 }
 
 cmd_checkout () {
+    [ -n "$1" ] && DEFAULT_UPSTREAM_BRANCH="$1"
+
     # make sure not in a working copy
     if [ -n "$PROJECT_ROOT" ]; then
         echo "Can't checkout into an existed working copy!" >&2
