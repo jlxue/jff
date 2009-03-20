@@ -148,7 +148,7 @@ __rrp_ps1 () {
     head=$(git symbolic-ref HEAD 2>/dev/null)
     head=${head##refs/heads/}
     [ -n "$head" ] && upstream=$(git config --get branch.$head.merge 2>/dev/null)
-    [ -n "$upstream" ] && upstream=" $upstream"
+    [ -n "$upstream" ] && upstream=" ${upstream##refs/heads/}"
 
     echo $(__git_ps1 "$module(%s$upstream)")
 }
