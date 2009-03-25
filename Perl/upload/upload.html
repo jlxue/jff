@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<meta name="robots" content="noindex,nofollow">
+
+<title>Fava Widget Maker</title>
+<style type="text/css">
+<!--
+table * { padding:0; margin:0; border-collapse: collapse; }
+td, th { border: 1px solid #ccc; }
+-->
+</style>
+</head>
+
+<body>
+<h2>上载文件</h2>
+<hr/>
+
+<form action="upload.fcgi" method="POST" accept-charset="UTF-8" enctype="multipart/form-data">
+    <label for="file">文件路径(*.swf, *.zip)</label><br/>
+    <input type="file" name="file" size="50" accept="application/x-shockwave-flash,application/zip"/><p/>
+
+    <label for="content_entry">入口文件(only for .zip file)</label><br/>
+    <input type="text" name="entry" size="50" /><p/>
+
+    <label>动画尺寸(宽 x 高): </label>
+    <input type="text" name="width" size=10 value="100"/> x <input type="text" name="height" size=10 value="100"/><p/>
+
+    <label for="icon">图标路径(*.gif, *.jpg, *.png)</label><br/>
+    <input type="file" name="icon" size="50" accept="image/gif,image/jpeg,image/png"/><p/>
+
+    <label for="network_enabled">是否访问网络？</label>
+    <input type="checkbox" name="network_enabled" value="true"/><p/>
+
+    <label for="name">名字</label>
+    <input type="text" maxlength="32" name="name" size="50"/><p/>
+
+    <label for="description">描述</label><br/>
+    <textarea cols="60" rows="10" name="description">This is a fava widget</textarea><p/>
+
+    <label for="author_name">作者名字</label>
+    <input type="text" name="author_name" size="50" value="Access China"/><p/>
+
+    <label for="author_url">作者主页</label>
+    <input type="text" name="author_url" size="50" value="http://www.accesschina.com.cn"/><p/>
+
+    <label for="author_email">作者 E-Mail</label>
+    <input type="text" name="author_email" size="50" value="madonna.list@accesschina.com.cn"/><p/>
+
+    <label for="license">许可证</label><br/>
+    <textarea cols="60" rows="10" name="license">Public Domain</textarea><p/>
+
+    <input type="submit" value="上载"><br/>
+</form>
+
+</body>
+</html>
+
