@@ -19,7 +19,7 @@
 #   BSDL
 #
 # Version:
-#   0.3
+#   0.4
 #
 # ChangeLog:
 #   2009-03-17  Liu Yubao
@@ -32,6 +32,9 @@
 #   2009-03-18  Liu Yubao
 #       * separate output, command and return value into two files
 #       * take $0 into account when calculate MD5 digest, v0.3
+#
+#   2009-03-27  Liu Yubao
+#       * fix incompatible syntax for /bin/sh, v0.4
 
 REAL_COMMAND=/usr/bin/find
 CACHE="$HOME/.find-cache"
@@ -43,16 +46,13 @@ file="$CACHE/$md5sum"
 
 [ -e "$CACHE" ] || mkdir -p "$CACHE"
 
-if [ -f "$file" ]; then
+if [ -f "$file" -a -f "$file.cmd" ]; then
     cat "$file"
-    read < "$file.cmd"
-    exit $REPLY
+    read retval < "$file.cmd"
+    exit $retval
 else
     # { $REAL_COMMAND "$@" || rm "$file"; } | tee "$file"
-    { $REAL_COMMAND "$@" ; retval=$?; } | tee "$file"
-    {
-        echo $retval
-        echo "CWD=$cwd CMD=$0 $args"
-    } > "$file.cmd"
+    { $REAL_COMMAND "$@" ; echo $? > "$file.cmd"; } | tee "$file"
+    echo "CWD=$cwd CMD=$0 $args" >> "$file.cmd"
 fi
 
