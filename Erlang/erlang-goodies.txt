@@ -1,0 +1,26 @@
+http://amnesia.sourceforge.net/
+AMNESIA is an Erlang library providing an abstraction layer for interfacing relational DBMSs.
+
+web development framework:
+    http://erlyweb.org/
+    http://www.erlang-web.org/
+    http://nitrogenproject.com/
+    http://github.com/davebryson/beepbeep/tree/master
+
+pure template engine:
+    http://code.google.com/p/erlydtl/
+    http://code.google.com/p/sgte/
+
+key-value db:
+    http://couchdb.org/
+    http://code.google.com/p/scalaris/
+
+map-reduce framework:
+    http://discoproject.org/
+
+web server:
+    inets, yaws, mochiweb, crary
+
+web client:
+    ibrowse, inets
+
