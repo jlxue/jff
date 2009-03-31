@@ -1,6 +1,6 @@
 " Script Name: cmdline-complete.vim
-" Version:     1.1
-" Last Change: June 6, 2008
+" Version:     1.1.3
+" Last Change: July 18, 2008
 " Author:      Yuheng Xie <xie_yuheng@yahoo.com.cn>
 "
 " Description: complete command-line (: / etc.) from the current file
@@ -59,7 +59,7 @@ endfunction
 
 " generate completion list in python
 function! s:GenerateCompletionsPython(seed, backward)
-	let success = 1
+	let success = 0
 
 python << EOF
 try:
@@ -68,11 +68,27 @@ try:
 	seed = vim.eval("a:seed")
 	backward = int(vim.eval("a:backward"))
 
-	regexp = re.compile(r'\b' + seed + r'\w+')
+	def chars2range(list):
+		range_text = ""
+		for i in range(len(list)):
+			if i > 0 and list[i - 1] == list[i] - 1 \
+					and i < len(list) - 1 and list[i + 1] == list[i] + 1:
+				if range_text[-1] != "-":
+					range_text += "-"
+			else:
+				range_text += '\\x%02X' % list[i]
+		return "[" + range_text + "]"
+
+	# simulate vim's \k
+	k = chars2range(map(lambda x: int(x), vim.eval( \
+			"filter(range(256), 'nr2char(v:val) =~ \"\\\\k\"')")))
+
+	regexp = re.compile(r'(?<!' + k + r')' + re.escape(seed) + k + r'+')
 	if not seed:
-		regexp = re.compile(r'\b\w\w+')
-	elif re.search(r'\W', seed):
-		regexp = re.compile(r'\b' + re.escape(seed) + r'\w+')
+		regexp = re.compile(r'(?<!' + k + r')' + k + k + r'+')
+	elif int(vim.eval("&ignorecase")) \
+			and not (int(vim.eval("&smartcase")) and re.search(r'[A-Z]', seed)):
+		regexp = re.compile(r'(?i)(?<!' + k + r')' + re.escape(seed) + k + r'+')
 
 	buffer = vim.current.buffer
 	completions_set = vim.eval("s:completions_set")
@@ -118,7 +134,6 @@ try:
 		if candidates:
 			if backward:
 				for candidate in reversed(candidates):
-					candidate = candidate[len(seed):]
 					if candidate not in completions_set:
 						completions_set[candidate] = 1
 						vim.command("let s:completions_set['" + candidate + "'] = 1")
@@ -127,7 +142,6 @@ try:
 						found = True
 			else:
 				for candidate in candidates:
-					candidate = candidate[len(seed):]
 					if candidate not in completions_set:
 						completions_set[candidate] = 1
 						vim.command("let s:completions_set['" + candidate + "'] = 1")
@@ -145,8 +159,9 @@ try:
 		elif r[1] < r[0]: r[0] -= 1
 		else: del r[:2]
 
-except ImportError:
-	vim.command("let success = 0")
+	vim.command("let success = 1")
+
+except ImportError: pass
 EOF
 
 	return success
@@ -154,11 +169,14 @@ endfunction
 
 " generate completion list
 function! s:GenerateCompletions(seed, backward)
-	let regexp = '\<' . a:seed . '\w\+'
+	let regexp = '\<' . a:seed . '\k\+'
 	if empty(a:seed)
-		let regexp = '\<\w\w\+'
-	elseif a:seed =~ '\W'
-		let regexp = '\<\(\V' . escape(a:seed, '\') . '\)\w\+'
+		let regexp = '\<\k\k\+'
+	elseif a:seed =~ '\K'
+		let regexp = '\<\(\V' . a:seed . '\)\k\+'
+	endif
+	if &ignorecase && !(&smartcase && a:seed =~ '\C[A-Z]')
+		let regexp = '\c' . regexp
 	endif
 
 	" backup 'ignorecase', do searching with 'noignorecase'
@@ -197,8 +215,8 @@ function! s:GenerateCompletions(seed, backward)
 		let line = getline(r[0])
 		let start = match(line, regexp)
 		while start != -1
-			let candidate = matchstr(line, '\w\+', start + len(a:seed))
-			let next = start + len(a:seed) + len(candidate)
+			let candidate = matchstr(line, '\k\+', start)
+			let next = start + len(candidate)
 			if r[0] != s:search_cursor[1]
 					\ || a:backward && (!s:sought_bw && start < s:search_cursor[2]
 						\ || s:sought_bw && start >= s:search_cursor[2])
@@ -275,9 +293,9 @@ function! s:CmdlineComplete(backward)
 		let s:last_cmdline = cmdline
 		let s:last_pos = pos
 
-		let s = match(strpart(cmdline, 0, pos - 1), '\w*$')
+		let s = match(strpart(cmdline, 0, pos - 1), '\k*$')
 		let s:seed = strpart(cmdline, s, pos - 1 - s)
-		let s:completions = [""]
+		let s:completions = [s:seed]
 		let s:completions_set = {}
 		let s:comp_i = 0
 		let s:search_cursor = getpos(".")
