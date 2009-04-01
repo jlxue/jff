@@ -110,6 +110,9 @@ let MRU_Max_Entries = 50
 " for showmarks.vim
 let g:showmarks_include="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+" for GetLatestVimScripts
+let g:GetLatestVimScripts_allowautoinstall=1
+
 "--------------------------------------misc settings-----------------------------
 " recursively search tag file upwards, see :help file-searching
 set tags=./tags,tags;
