@@ -113,6 +113,25 @@
 #   2009-03-20  Liu Yubao
 #       * support multiple upstream branches, enhance __rrp_ps1 to show
 #         default upstream branch, release v0.24
+#
+#   2009-04-01  Liu Yubao
+#       * use bash to parse manifests/default.xml to avoid repo crashing
+#         when some module misses
+#
+#         Use 'repo forall -c pwd' or parse .repo/manifests/default.xml
+#         to get module list, cons and pros:
+#           former: correctly parse default.xml forever, but repo crashes
+#                   when some module misses
+#           latter: faster, may parse default.xml wrong, but won't crashes
+#                   when some module misses
+#
+#   2009-04-02  Liu Yubao
+#       * enhance `heads' command to show fetching head information
+#       * add `switch' command, release v0.25
+#
+#   2009-04-03  Liu Yubao
+#       * don't drop uncommitted commits in `switch' command, release v0.26
+#
 
 ######################## part executed in $HOME/.bashrc ################
 # To make the pollution to shell environment minimum, I put this code
@@ -167,7 +186,7 @@ fi
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.24
+RRP_VERSION=0.26
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -179,8 +198,6 @@ REPOS_PATH=/src/android/android
 HOT_REPOS_PATH=/src/android/android-hot
 # default remote
 DEFAULT_REMOTE=origin
-# default upstream branch
-DEFAULT_UPSTREAM_BRANCH=master
 # default working branch
 DEFAULT_WORKING_BRANCH=my
 # path where to place script "repo"
@@ -188,7 +205,6 @@ REPO=$HOME/repo
 # ref updates of upstream branch in every modules happening in
 # $UPDATE_INTERVAL seconds are thought as one update of whole android project
 UPDATE_INTERVAL=300
-
 
 ######################## global vars ###################################
 # The directory that contains .repo
@@ -201,6 +217,8 @@ IS_LOCAL=
 PULL_REPOS_PATH=
 # remote url for temporary repository to push changes
 PUSH_REPOS_PATH=
+# default upstream branch
+DEFAULT_UPSTREAM_BRANCH=master
 # user account, eg yubaoliu
 USER_ACCOUNT=
 # is ssh-agent started by this script?
@@ -255,13 +273,14 @@ initialize () {
     # get default upstream branch automatically according to .repo/manifests
     if [ -n "$PROJECT_ROOT" ]; then
         [ -d "$PROJECT_ROOT/.repo/manifests" ] ||
-            { echo "Broken working tree, please checkout again!" >&2; exit 1; }
+            { echo "Broken working tree, please checkout with rrp again!" >&2; exit 1; }
 
         local branch
         branch=$(cd $PROJECT_ROOT/.repo/manifests && git config --get branch.default.merge)
+        branch=${branch#refs/heads/}
         branch=${branch%-local}
         if [ -z "$branch" ]; then
-            echo "Broken manifests repository, please checkout again!" >&2
+            echo "Broken manifests repository, please checkout with rrp again!" >&2
             exit 1
         else
             DEFAULT_UPSTREAM_BRANCH="$branch"
@@ -548,6 +567,37 @@ clear_find_cache () {
 }
 
 
+list_all_modules () {
+    local module
+
+    grep "^[ \t]*<project[ \t]" $PROJECT_ROOT/.repo/manifests/default.xml |
+        while read module; do
+            module=${module#*path=\"}
+            module=${module%%\"*}
+            echo "$module"
+        done | sort
+}
+
+
+dont_have_uncommitted_commits_against_official_central_repository () {
+    local head="$1"
+    local upstream=$(git config --get branch.$head.merge)
+    local head_rev=$(git rev-parse refs/heads/$head)
+
+    [ -z "$head_rev" ] && return 1
+    shift
+
+    upstream=${upstream#refs/heads/}
+    while [ -n "$upstream" ]; do
+        [ "$(git merge-base $head_rev $DEFAULT_REMOTE/$upstream 2>/dev/null)" = $head_rev ] && return 0
+        upstream="$1"
+        shift
+    done
+
+    return 1
+}
+
+
 ######################## sub commands ##################################
 help_help () {
     cat <<EOF
@@ -560,6 +610,7 @@ Available commands:
   checkout      - check out a working copy from repository
   update        - update working copy from repository
   upgrade       - get new modules to current working copy from repository
+  switch        - switch default upstream branch for default working branch
 
   commit        - commit changes to central repository
   uncommit      - cancel commits to central repository
@@ -684,19 +735,17 @@ cmd_update () {
     clear_find_cache
 
     local module=${MODULE_ROOT#$PROJECT_ROOT/}
-    local failed_modules n i=0
+    local failed_modules n=0 i=0
 
     if [ -z "$module" ]; then   # in project_root directory
         module=$1
         [ -z "$1" ] &&          # no arguments given
             while read module; do
-                module=${module#$PROJECT_ROOT/}
-
                 printf '\r%-60s ... ' "$module"
                 cd "$PROJECT_ROOT/$module" && update_module $module ||
                     failed_modules[$((i++))]="$module"
                 printf '%d modules processed.' $((++n))
-            done < <($REPO forall -c pwd 2>/dev/null) ||     # has arguments given
+            done < <(list_all_modules) ||     # has arguments given
             while shift; do
                 must_has_git_dir_in_module $module
 
@@ -725,7 +774,7 @@ cmd_update () {
         echo "============================================================="
 
         for ((i = 0; i < ${#failed_modules[@]}; ++i)); do
-            echo "${failed_modules[$i]}" >&2
+            echo "${failed_modules[$i]}"
         done
 
         echo
@@ -750,20 +799,16 @@ cmd_upgrade () {
     cache_ssh_private_key
     clear_find_cache
 
-    cd $PROJECT_ROOT/.repo/manifests &&
-        run_cmd git pull ||
-        return 1
+    cd $PROJECT_ROOT/.repo/manifests && git fetch >/dev/null && git reset -q --hard || return 1
 
     cd $PROJECT_ROOT && {
-        while read module; do
-            module=${module#*path=\"}
-            module=${module%%\"*}
-            [ ! -e "$module" ] && {
+        list_all_modules | while read module; do
+            if [ ! -e "$module" ]; then
                 run_cmd $REPO sync "$module" &&
-                    (cd "$module" && git checkout -b $DEFAULT_WORKING_BRANCH $DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH) ||
+                    (cd "$module" && git checkout --track -b $DEFAULT_WORKING_BRANCH $DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH) ||
                     break
-                }
-        done < <(grep "^[ \t]*<project[ \t]" .repo/manifests/default.xml)
+            fi
+        done
     } || return 1
 }
 
@@ -797,9 +842,7 @@ cmd_commit () {
     if [ -z "$module" ]; then   # in project_root directory
         module=$1
         [ -z "$1" ] &&          # no arguments given
-            $REPO forall -c pwd 2>/dev/null | while read module; do
-                module=${module#$PROJECT_ROOT/}
-
+            list_all_modules | while read module; do
                 printf '\r%-60s ... ' "$module"
                 cd "$PROJECT_ROOT/$module" && commit_module $module
                 printf '%d modules processed.' $((++n))
@@ -851,9 +894,7 @@ cmd_uncommit () {
 
         module=${MODULE_ROOT#$PROJECT_ROOT/}
         [ -n "$module" ] && uncommit_module $module ||
-            $REPO forall -c pwd | while read module; do
-                module=${module#$PROJECT_ROOT/}
-
+            list_all_modules | while read module; do
                 printf '\r%-60s ... ' "$module"
                 uncommit_module $module
                 printf '%d modules processed.' $((++n))
@@ -967,9 +1008,7 @@ cmd_ls () {
     local pattern="$1"
 
     if [ -n "$pattern" -o -z "$module" ]; then
-        $REPO forall -c pwd | while read d; do
-            echo ${d#$PROJECT_ROOT/}
-        done | grep -i "$pattern"
+        list_all_modules | grep -i "$pattern"
     else
         echo $module
     fi
@@ -1002,7 +1041,8 @@ cmd_showbranch () {
     if [ -z "$module" ]; then   # in project root directory
         module="$1"
         [ -z "$1" ] &&          # no arguments given
-            $REPO forall -c pwd | while read path; do
+            list_all_modules | while read path; do
+                path="$PROJECT_ROOT/$path"
                 cd "$path" && showbranch "$path"
             done ||             # has arguments given
             while shift; do
@@ -1046,7 +1086,8 @@ cmd_cherry () {
     if [ -z "$module" ]; then   # in project root directory
         module="$1"
         [ -z "$1" ] &&          # no arguments given
-            $REPO forall -c pwd | while read path; do
+            list_all_modules | while read path; do
+                path="$PROJECT_ROOT/$path"
                 cd "$path" && cherry "$path"
             done ||             # has arguments given
             while shift; do
@@ -1084,8 +1125,8 @@ cmd_diff () {
     local module=${MODULE_ROOT#$PROJECT_ROOT/}
 
     if [ -z "$module" ]; then   # in project root directory
-        $REPO forall -c pwd | while read module; do
-            cd "$module" && module=${module#$PROJECT_ROOT/} &&
+        list_all_modules | while read module; do
+            cd "$PROJECT_ROOT/$module" &&
                 git diff --src-prefix=a/$module/ --dst-prefix=b/$module/ --color "$@"
         done | less -FRX
     else
@@ -1127,12 +1168,13 @@ cmd_whatupdated () {
         module=$1
         [ -z "$1" ] &&          # no arguments given
             while read path; do
+                path="$PROJECT_ROOT/$path"
                 cd "$path" && time=$(last_reflog_time)
                 if [ -n "$time" ]; then
                     allpaths[$i]="$path"
                     alltimes[$((i++))]="$time"
                 fi
-            done < <($REPO forall -c pwd) ||    # has arguments given
+            done < <(list_all_modules) ||    # has arguments given
             while shift; do
                 must_has_git_dir_in_module $module
                 path="$PROJECT_ROOT/$module"
@@ -1172,7 +1214,11 @@ EOF
 cmd_forall () {
     must_under_project_root
 
-    $REPO forall -c "$@"
+    local module
+
+    list_all_modules | while read module; do
+        cd "$PROJECT_ROOT/$module" && "$@"
+    done
 }
 
 
@@ -1257,14 +1303,14 @@ cmd_log () {
 
     # save names for every modules and open named pipes to `git log' for them
     while read module; do
-        cd "$module" && module=${module#$PROJECT_ROOT/} && {
+        cd "$PROJECT_ROOT/$module" && {
             modules[$i]="$module"
             eval exec "$((i+100))<" <(git log --color --date=iso --date-order --pretty=fuller --first-parent "$@") &&
                 fds[$i]=$((i+100)) ||
                 fds[$i]=0
             dates[$((i++))]=0
         }
-    done < <($REPO forall -c pwd 2>/dev/null)
+    done < <(list_all_modules)
 
     n=$i
 
@@ -1349,6 +1395,10 @@ rrp heads
 rrp heads BRANCH
   show SHA1 digests of specified branch head  in all modules, and
   correspoding module names.
+
+Output format:
+head  remote/branch  sha1  module
+
 EOF
 }
 
@@ -1358,16 +1408,26 @@ cmd_heads () {
     local module head=$1
 
     if [ -z "$head" ]; then
-        $REPO forall -c pwd 2>/dev/null | while read module; do
-            cd "$module"
+        list_all_modules | while read module; do
+            cd "$PROJECT_ROOT/$module"
             head=$(git symbolic-ref -q HEAD) || head=$(git rev-parse --short HEAD)
             head=${head#refs/heads/}
-            printf "%-15s %s  %s\n" $head $(git rev-parse HEAD) ${module#$PROJECT_ROOT/}
+            remote=$(git config --get branch.$head.remote)
+            merge=$(git config --get branch.$head.merge)
+            merge=${merge#refs/heads/}
+            [ -z "$remote" ] && remote=-
+            [ -z "$merge" ] && merge=-
+            printf "%s  %s/%s  %s  %s\n" $head $remote $merge $(git rev-parse HEAD) $module
         done
     else
-        $REPO forall -c pwd 2>/dev/null | while read module; do
-            cd "$module"
-            printf "%s  %s\n" $(git rev-parse $head) ${module#$PROJECT_ROOT/}
+        list_all_modules | while read module; do
+            cd "$PROJECT_ROOT/$module"
+            remote=$(git config --get branch.$head.remote)
+            merge=$(git config --get branch.$head.merge)
+            merge=${merge#refs/heads/}
+            [ -z "$remote" ] && remote=-
+            [ -z "$merge" ] && merge=-
+            printf "%s  %s/%s  %s  %s\n" $head $remote $merge $(git rev-parse $head) $module
         done
     fi | less -FRX
 }
@@ -1391,7 +1451,7 @@ cmd_rollback () {
     local m modules r n=0 i
 
     if [ -z "$rev" ]; then
-        $REPO forall -c git checkout $DEFAULT_WORKING_BRANCH
+        cmd_forall git checkout $DEFAULT_WORKING_BRANCH
     else
         while : ; do
             read module && read commit && read date || {
@@ -1433,6 +1493,92 @@ cmd_rollback () {
             }
         done
     fi
+}
+
+
+help_switch () {
+    cat <<EOF
+rrp switch UPSTREAM-BRANCH
+  switch default upstream branch for default working branch
+EOF
+}
+
+cmd_switch () {
+    must_under_project_root
+    cache_ssh_private_key
+    clear_find_cache
+
+    local to_upstream="$1"
+    local from_upstream
+
+    [ -z "$1" ] && {
+        echo "No upstream branch specified!" >&2
+        return 1
+    }
+
+    cd $PROJECT_ROOT/.repo/manifests && git fetch >/dev/null && git reset -q --hard && {
+        from_upstream=$(git config --get branch.default.merge)
+        from_upstream=${from_upstream#refs/heads/}
+        from_upstream=${from_upstream%-local}
+
+        git rev-parse --verify -q origin/$to_upstream >/dev/null && {
+                local branch=$to_upstream
+
+                [ "$IS_LOCAL" ] &&  branch=$branch-local
+                git config branch.default.merge refs/heads/$branch &&
+                    git reset -q --hard origin/$branch
+            } || {
+                echo "Upstream branch '$to_upstream' not found in $(pwd)" >&2
+                return 1
+            }
+    } || return 1
+
+    if [ -z "$from_upstream" ]; then
+        echo "Broken manifests repository, please checkout with rrp again!" >&2
+        return 1
+    fi
+
+    cd $PROJECT_ROOT && {
+        local module failed_modules n=0 i=0
+
+        while read module; do
+            cd "$PROJECT_ROOT/$module" 2>/dev/null &&
+                git rev-parse --verify -q refs/heads/$DEFAULT_WORKING_BRANCH >/dev/null &&
+                git rev-parse --verify -q refs/remotes/$DEFAULT_REMOTE/$to_upstream >/dev/null &&
+                [ "$(git symbolic-ref HEAD)" = refs/heads/$DEFAULT_WORKING_BRANCH ] &&
+                dont_have_uncommitted_commits_against_official_central_repository \
+                    $DEFAULT_WORKING_BRANCH $DEFAULT_UPSTREAM_BRANCH "$from_upstream" "$to_upstream" &&
+                git diff --quiet &&
+                git diff --cached --quiet &&
+                git config branch.$DEFAULT_WORKING_BRANCH.remote $DEFAULT_REMOTE &&
+                git config branch.$DEFAULT_WORKING_BRANCH.merge refs/heads/$to_upstream &&
+                git reset -q --hard refs/remotes/$DEFAULT_REMOTE/$to_upstream &&
+                printf "\r%-3d switched '$DEFAULT_WORKING_BRANCH' to track '$DEFAULT_REMOTE/$to_upstream' for %-60s" $((++n)) "$module" ||
+                    failed_modules[$((i++))]="$module"
+        done < <(list_all_modules)
+
+        # cmd_upgrade and cmd_update depend on global variable DEFAULT_UPSTREAM_BRANCH !!!
+        DEFAULT_UPSTREAM_BRANCH=$to_upstream
+        cmd_upgrade && cd "$MODULE_ROOT" && cmd_update
+
+        if [ -n "$failed_modules" ]; then
+            echo -e "\033[01;31m"   # bold, red foreground
+            echo "Modules listed below can't be switched because"
+            echo "      * no branch '$DEFAULT_WORKING_BRANCH' found, or"
+            echo "      * no remote branch '$DEFAULT_REMOTE/$to_upstream' found, or"
+            echo "      * branch '$DEFAULT_WORKING_BRANCH' isn't current branch, or"
+            echo "      * branch '$DEFAULT_WORKING_BRANCH' has commits not committed into official central repository, or"
+            echo "      * dirty working directory, or"
+            echo "      * dirty index"
+            echo "============================================================="
+
+            for ((i = 0; i < ${#failed_modules[@]}; ++i)); do
+                echo "${failed_modules[$i]}"
+            done
+
+            echo -ne "\033[00m"     # reset color
+        fi >&2
+    }
 }
 
 ######################## main entry ####################################
