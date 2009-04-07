@@ -59,6 +59,10 @@ Devel::Cover
 Devel::DProf
 Devel::Hide
 Devel::SmallProf
+Devel::Size
+Devel::Size::Report
+Devel::DumpSizes
+Devel::MemUsed
 Encode
 ExtUtils::Installed
 ExtUtils::MakeMaker
