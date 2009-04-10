@@ -1,0 +1,27 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="SWFDec4J" verbose="2">
+
+    <test name="ByteArrayReader" >
+        <classes>
+            <class name="swf.ByteArrayReaderTest"/>
+        </classes>
+    </test>
+
+    <test name="check uncompressed swf file header">
+        <parameter name="filename" value="test/data/uncompressed.swf"/>
+        <parameter name="expect" value="FWS, version=6, fileLength=27098, frameSize=12800 x 1800, frameRate=23.0, frameCount=231"/>
+        <classes>
+            <class name="swf.FileHeaderTest"/>
+        </classes>
+    </test>
+
+    <test name="check compressed swf file header">
+        <parameter name="filename" value="test/data/compressed.swf"/>
+        <parameter name="expect" value="CWS, version=6, fileLength=27098, frameSize=12800 x 1800, frameRate=23.0, frameCount=231"/>
+        <classes>
+            <class name="swf.FileHeaderTest"/>
+        </classes>
+    </test>
+</suite>
+

@@ -1,0 +1,188 @@
+<project name="swfdec4j" default="compile" basedir=".">
+
+    <description>
+        A decoder/renderer for Adobe Flash animations.
+    </description>
+
+
+    <!-- =================================================================== -->
+    <!-- SWFDec4J build file                                                 -->
+    <!-- Created by Liu Yubao, May 17th, 2008                                -->
+    <!-- =================================================================== -->
+
+
+    <!-- set global properties for this build -->
+    <property name="build" location="build"/>
+    <property name="dist"  location="dist"/>
+
+    <property name="swfdec4j.classes" location="${build}/classes"/>
+    <property name="test.classes" location="${build}/test-classes"/>
+    <property name="test.output" location="${build}/test-output"/>
+    <property name="test.report" location="${build}/test-report"/>
+
+
+    <!-- =================================================================== -->
+    <!-- Init                                                                -->
+    <!-- =================================================================== -->
+    <target name="init">
+        <!-- Create the time stamp -->
+        <tstamp/>
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${swfdec4j.classes}"/>
+    </target>
+
+
+    <!-- =================================================================== -->
+    <!-- Dump                                                                -->
+    <!-- =================================================================== -->
+    <target name="dump" description="Dumps all properties." depends="init">
+        <echoproperties />
+    </target>
+
+
+    <!-- =================================================================== -->
+    <!-- Validate                                                            -->
+    <!-- =================================================================== -->
+    <target name="validate" description="Validates the build environment.">
+        <!-- java greater than 1.5 required to build -->
+        <condition property="requiredJavaVersion">
+            <or>
+                <equals arg1="${ant.java.version}" arg2="1.5" />
+                <equals arg1="${ant.java.version}" arg2="1.6" />
+            </or>
+        </condition>
+        <fail unless="requiredJavaVersion"
+            message="Java version 1.5 required." />
+        <!-- validate ant version too ... -->
+    </target>
+
+
+    <!-- =================================================================== -->
+    <!-- Compile                                                             -->
+    <!-- =================================================================== -->
+    <target name="compile" depends="init,validate"
+            description="compile the source">
+        <!-- Compile the java code from ${src} into ${build} -->
+        <javac srcdir="src" destdir="${swfdec4j.classes}"/>
+    </target>
+
+
+    <!-- =================================================================== -->
+    <!-- Documentation                                                       -->
+    <!-- =================================================================== -->
+    <target name="javadocs">
+        <javadoc destdir="${build}/javadocs" source="1.5" windowtitle="SWFDec4J">
+            <fileset dir="src" defaultexcludes="yes">
+                <include name="swf/**/*.java" />
+            </fileset>
+        </javadoc>
+    </target>
+
+
+    <!-- =================================================================== -->
+    <!-- Distribution                                                        -->
+    <!-- =================================================================== -->
+    <target name="dist" depends="compile,javadocs"
+            description="generate the distribution" >
+        <!-- Create the distribution directory -->
+        <mkdir dir="${dist}/lib"/>
+
+        <!-- Put everything in ${build} into the swfdec4j-${DSTAMP}.jar file -->
+        <jar jarfile="${dist}/lib/swfdec4j-${DSTAMP}.jar"
+             basedir="${swfdec4j.classes}"/>
+    </target>
+
+
+    <!-- =================================================================== -->
+    <!-- Clean                                                               -->
+    <!-- =================================================================== -->
+    <target name="clean" description="clean up" >
+        <!-- Delete the ${build} and ${dist} directory trees -->
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+
+
+    <!-- =================================================================== -->
+    <!-- Init-test                                                           -->
+    <!-- =================================================================== -->
+    <target name="init-test" depends="init">
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${test.classes}"/>
+        <mkdir dir="${test.output}"/>
+        <mkdir dir="${test.report}"/>
+    </target>
+
+
+    <!-- =================================================================== -->
+    <!-- compile-test                                                        -->
+    <!-- =================================================================== -->
+    <path id="compile-test.cp">
+        <pathelement location="lib/testng-5.8-jdk15.jar"/>
+        <pathelement location="${swfdec4j.classes}"/>
+    </path>
+
+    <target name="compile-test" description="compile the tests"
+            depends="compile,init-test">
+        <echo message="                           -- testng-compile-examples --"/>
+        <javac debug="true"
+               fork="true"
+               source="1.5"
+               classpathref="compile-test.cp"
+               srcdir="test"
+               destdir="${test.classes}"/>
+    </target>
+
+
+    <!-- =================================================================== -->
+    <!-- test                                                                -->
+    <!-- =================================================================== -->
+    <path id="test.cp">
+        <path refid="compile-test.cp"/>
+        <pathelement location="${test.classes}"/>
+        <pathelement location="lib/reportng-0.9.6.jar"/>
+        <pathelement location="lib/velocity-dep-1.4.jar"/>
+    </path>
+
+    <target name="test"
+            description="run tests for swfdec4j using TestNG task"
+            depends="compile-test">
+        <echo message="                 -- testng-run using the TestNG task--"/>
+
+        <taskdef name="testng" classpathref="compile-test.cp" 
+                 classname="org.testng.TestNGAntTask"/>
+
+        <testng classpathref="test.cp"
+                outputdir="${test.output}"
+                useDefaultListeners="false"
+                listeners="org.uncommons.reportng.HTMLReporter,org.uncommons.reportng.JUnitXMLReporter"
+                dumpCommand="true">
+            <xmlfileset dir="test" includes="testng.xml"/>
+            <jvmarg value="-ea"/>
+            <sysproperty key="org.uncommons.reportng.title" value="SWFDec4J Test Report"/>
+        </testng>
+
+        <echo>***********************************************************</echo>
+        <echo>Some of these tests should have failed, see the directories</echo>
+        <echo>  ${test.output}</echo>
+        <echo>and</echo>
+        <echo>  ${test.report}</echo>
+        <echo>for the details.</echo>
+        <echo>***********************************************************</echo>
+        <echo/>
+
+        <junitreport todir="${test.report}">
+            <fileset dir="${test.output}">
+                <include name="*/*.xml"/>
+            </fileset>
+            <report todir="${test.report}"/>
+            <!-- seems the "noframes" bug has been fixed.
+             http://testng.org/doc/documentation-main.html#logging-junitreports
+            <report format="noframes" todir="${test.report}"/>
+            -->
+        </junitreport>
+
+    </target>
+
+</project>
+
