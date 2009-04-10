@@ -1,0 +1,10 @@
+alloca
+ed 的 alloca 实现
+利用 C++ 的栈上析构函数
+string 查找转换成 symbol 查找
+thread local storage
+利用 C++ 模板元编程技巧，自动计算 RESTART_CASE 的序号
+initialize 检查库版本，去掉 finalize
+实现 unwind_protect
+vc6 __VA_ARGS__
+
