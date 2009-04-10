@@ -1,0 +1,38 @@
+\startcomponent cons
+\product cl-impl-analysis
+
+\chapter{构造过程}
+
+CL 实现的构造过程可以分成两类：一类尽量用 Lisp 实现一切，一类则
+用 C 等其它语言实现基础功能。Kea-CL, CMU CL, SBCL, Clozure CL 属于前者。
+
+从零实现 Common Lisp，至少要具备如下功能：
+
+\startitemize[1,packed,broad]
+\item 整型、字符、字符串、symbol、function、package、cons、list 等数据类型
+\item read, readtable 以及输入流和输出流
+\item eval, 三种 form 的求值规则
+\stopitemize
+
+\section{Parrot CL}
+
+Parrot CL 使用 PIR (Parrot Intermedia Representation, 相当于 Parrot 上的
+宏汇编语言) 实现了上述三条。
+
+
+\section{Kea-CL}
+
+Kea-CL 汲取了 CMU CL 的实现思路，首先用 Lisp 实现一个 lisp -> PIR 的编译
+器，借助已有的 CMU CL 运行这个编译器，将编译器本身编译到 PIR，然后用这个
+编译器编译 CL runtime，此时得到一个 CL 实现，就可以用这个 CL 实现编译
+lisp -> PIR 编译器，从而实现自举。源码中的 kea-cl.pod 和 README.text 描述了实现
+过程。
+
+\section{CMU CL}
+
+\section{SBCL}
+
+\section{CCL}
+
+\stopcomponent
+

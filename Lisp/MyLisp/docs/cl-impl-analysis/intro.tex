@@ -1,0 +1,69 @@
+\startcomponent intro
+\product cl-impl-analysis
+
+\chapter{开源 CL 实现介绍}
+
+\section{Parrot CL}
+
+Parrot 上的 CL 实现，现在已不大维护：
+
+svn co https://svn.parrot.org/languages/lisp/trunk lisp
+
+\section{Kea-CL}
+
+Parrot 上的另一个 CL 实现，基于 CMUCL/SBCL 的构造原理，现在已
+不大维护：
+
+svn co https://rgrjr.dyndns.org/svn/kea-cl/trunk kea-cl
+
+\section{CMU CL}
+
+高效的 CL 实现，对 i18n 以及 MS Windows 支持不好：
+
+cvs -d :pserver:anonymous@common-lisp.net:\backslash\crlf
+/project/cmucl/cvsroot co src
+
+\section{SBCL}
+
+派生自 CMU CL：
+
+cvs -d :pserver:anonymous@sbcl.cvs.sourceforge.net:\backslash\crlf
+/cvsroot/sbcl co sbcl
+
+\section{Clozure CL}
+
+商业 CL 实现 MCL 的开源版本，以前叫 OpenMCL：
+
+svn co http://svn.clozure.com/publicsvn/openmcl/\backslash\crlf
+trunk/linuxx86/ccl
+
+\section{CLisp}
+
+cvs -d :pserver:anonymous@clisp.cvs.sourceforge.net:\backslash\crlf
+/cvsroot/clisp co clisp
+
+\section{ECL}
+
+cvs -d :pserver:anonymous@ecls.cvs.sourceforge.net:\backslash\crlf
+/cvsroot/ecls co ecl
+
+\section{ABCL}
+
+JVM 上的 Common Lisp 实现：
+
+svn co svn://common-lisp.net/project/armedbear\backslash\crlf
+/svn/trunk/abcl
+
+\section{GCL}
+
+已长时间没有维护，自带一套 ANSI Common Lisp 测试代码。
+
+\section{scmtoy-llvm}
+
+chylli@newsmth 实现的 Scheme -> LLVM Assembly 编译器和解释器，这个
+不是 Common Lisp 实现，但对于理解 Lisp 实现的构造过程不无裨益：
+
+git clone git://github.com/chylli/scmtoy-llvm.git
+
+\stopcomponent
+

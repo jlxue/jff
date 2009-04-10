@@ -1,0 +1,64 @@
+\startenvironment doc-env
+
+\usemodule[bib]
+
+%% --------------------------- 中文字体
+\usetypescriptfile[zhfonts]
+\usetypescript[myfont]
+\setupbodyfont[myfont,rm,12pt]
+
+%% --------------------------- 交互设置
+\setupcolors[state=start]
+\setupinteraction[state=start,
+                  title={开源 Common Lisp 实现分析},
+                  subtitle={Some random notes},
+                  author={Liu Yubao},
+                  keyword={Open Source, Common Lisp, Implementation, Analysis},
+                  focus=standard,
+                  color=blue]
+\setupinteractionscreen[option=bookmark]
+\placebookmarks[chapter,section][chapter]
+
+
+%% --------------------------- 版式
+% 纸张
+\setuppapersize[A4][A4]
+
+% 布局
+\setuplayout[width=fit,height=middle,
+             leftmargin=3cm,rightmargin=3cm,
+             backspace=4cm,topspace=2cm,
+             headerdistance=.5cm,footerdistance=.5cm,
+             leftmargindistance=.5cm,rightmargindistance=.5cm,
+             header=1cm,footer=1cm]
+% 目录
+\setupcombinedlist[content][alternative=c]
+
+% 章节标题
+\setupheads[indentnext=yes]
+\setuphead[chapter][style=\bfb,header=empty,footer=empty]
+\setuphead[title][style=\bfb,header=empty,foote=empty]
+\setuphead[section][style=\bfa]
+\setuphead[subsubject][style=\bf]
+\setupheadtext[en][pubs=参考文献]
+\setupheadtext[en][content=目\;\;录]
+\setupheadtext[en][index=索引]
+\setuplabeltext[en][chapter={第\;,\;章}]
+\setuplabeltext[en][figure=图\;]
+\setuplabeltext[en][table=表\;]
+\setupcaptions[style=\tfx,headstyle=\normal]
+
+% 段落缩进、行间距、段落间距
+\setupinterlinespace[big]
+\setupwhitespace[big]
+\setupindenting[always,first,2em]
+\setupfloats[indentnext=yes] 
+
+%% 代码环境
+\setuplinenumbering[color=darkgray,style=small]
+\setuptyping[option=color,palet=graypretty,
+             before={\blank[.5em]\setupinterlinespace[medium]},
+             after={\blank[.5em]}]
+
+\stopenvironment
+

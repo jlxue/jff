@@ -1,0 +1,17 @@
+from wikipedia, "Lisp machine"
+
+CONS machine(Knight machine)        1973, Richard Greenblatt, Thomas Knight, MIT's AI Lab
+ |
+CADR
+ |
+ |      Symbolics Inc.(Russell Noftsker)                1979
+ |          selling the CADR as the LM-2                1980/1981
+ |--------  Symbolics 3600   (Genera OS)                1982
+ |            |
+ |            |-- Sun, Mac...
+ |
+ |      Lisp machines Inc. (LMI) (Richard Greenblatt)   1979
+ |          selling the CADR as the LMI-CADR            1980/1981
+ |--------  LMI-LAMBDA                                  1983
+ |           |
+ |           |-- TI Explorer (Texas Instruments)
