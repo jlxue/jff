@@ -30,22 +30,22 @@ endfunction
 nnoremap <F2> :g//laddexpr expand("%") . ":" . line(".") . ":" . getline(".")<CR>:lopen<CR>
 
 nnoremap <F3>  :redir @a<CR>:g//<CR>:redir END<CR>:new<CR>:put! a<CR><CR>
-"	Tip #1063 Send results of a g// to a new window
-"	http://www.vim.org/tips/tip.php?tip_id=1063
-"	
-"	How to Use:-
-"	perfect your g/regexp/
-"	The when you are satisfied hit <F3>
-"	
-"	Explanation:-
-"	:redir @a            redirect output to register a
-"	:g//                    repeat last global command
-"	:redir END          end redirection
-"	:new                  create new window
-"	:put! a                paste register a into new window
-"	
-"	Idea  by Peppe (map by me zzapper)
-"	
+"   Tip #1063 Send results of a g// to a new window
+"   http://www.vim.org/tips/tip.php?tip_id=1063
+"
+"   How to Use:-
+"   perfect your g/regexp/
+"   The when you are satisfied hit <F3>
+"
+"   Explanation:-
+"   :redir @a            redirect output to register a
+"   :g//                    repeat last global command
+"   :redir END          end redirection
+"   :new                  create new window
+"   :put! a                paste register a into new window
+"
+"   Idea  by Peppe (map by me zzapper)
+"
 
 " when `paste' is set, filetype indent and autoindent don't work
 nnoremap <F4> :set paste<CR>"*p:set nopaste<CR>
@@ -61,7 +61,7 @@ map <F7> <ESC>\be
 imap <F7> <ESC>\be
 
 " Define g:qb_hotkey before source qbuf.vim
-"   For Putty, <S-F7> may don't work, use 
+"   For Putty, <S-F7> may don't work, use
 "   let g:qb_hotkey="^vS-F7" instead. ^vS-F7
 "   means: press Ctrl-v, then press Shift and F7.
 let g:qb_hotkey="<S-F7>"
@@ -131,15 +131,15 @@ set sidescrolloff=10
 " set sidescrolloff=999
 
 if has("gui_running")
-	colorscheme peachpuff
+    colorscheme peachpuff
     set cursorline
     hi CursorLine guibg=LightGreen
 else
-"	colorscheme murphy
-"	hi link String Comment
-	colorscheme darkblue
-	set cursorline
-	hi MatchParen ctermbg=Blue
+"   colorscheme murphy
+"   hi link String Comment
+    colorscheme darkblue
+    set cursorline
+    hi MatchParen ctermbg=Blue
 endif
 
 set showmatch
@@ -174,6 +174,7 @@ set statusline=%F%*\ %y[%{&ff}][%{&fenc}]\ %2*%r%m%*\ %l,%c\ %=%l/%L\ (%p%%)%*\ 
 
 set virtualedit=block
 
+set fileformats+=mac
 set fencs=ucs-bom,utf-8,prc
 set encoding=utf-8
 set ambiwidth=double
@@ -194,7 +195,7 @@ set updatetime=2000
 
 " for linux kernel source
 if getcwd() =~ 'linux-2.6'
-    set noet ts=8 sw=8
+    set noet tabstop=8 shiftwidth=8
 endif
 if has("cscope")
     if executable('mlcscope')
@@ -228,11 +229,14 @@ au FileType qf :nnoremap <buffer> v <Enter>zz:wincmd p<Enter>
 au FileType java :set suffixesadd+=.java
 
 " Keep indentation consistent with erlang-mode in Emacs
-au FileType erlang :set noet ts=8 sts=4 sw=4
+au FileType erlang :set noet tabstop=8 softtabstop=4 shiftwidth=4
 
 " backup last search pattern for each window
 au WinEnter * :if exists("w:blsp") && w:blsp != '' | let @/=w:blsp | endif
 au WinLeave * :let w:blsp=@/
+
+" make tab characters and trailing whitespace obvious
+au FileType * :if &ft != 'help' | 2match Error /\t\|\s\+$/ | endif
 
 " au BufNewFile,BufRead *.c,*.cpp
 "     \   :setlocal equalprg=d:\program\astyle\bin\AStyle.exe\ --style=kr\ -l
