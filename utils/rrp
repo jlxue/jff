@@ -132,6 +132,9 @@
 #   2009-04-03  Liu Yubao
 #       * don't drop uncommitted commits in `switch' command, release v0.26
 #
+#   2009-04-16  Liu Yubao
+#       * fix bug introduced in v0.25 that cmd_upgrade won't merge
+#         remote branch of manifests into local branch, release v0.27
 
 ######################## part executed in $HOME/.bashrc ################
 # To make the pollution to shell environment minimum, I put this code
@@ -186,7 +189,7 @@ fi
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.26
+RRP_VERSION=0.27
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -799,7 +802,7 @@ cmd_upgrade () {
     cache_ssh_private_key
     clear_find_cache
 
-    cd $PROJECT_ROOT/.repo/manifests && git fetch >/dev/null && git reset -q --hard || return 1
+    cd $PROJECT_ROOT/.repo/manifests && git reset -q --hard && git pull >/dev/null || return 1
 
     cd $PROJECT_ROOT && {
         list_all_modules | while read module; do
