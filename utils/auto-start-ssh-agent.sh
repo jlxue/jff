@@ -1,5 +1,7 @@
 #### start ssh-agent automatically when login
 ##  v1.0
+##  A better alternative is keychain written by drobbins@gentoo.org
+##
 ## add this code snippet to /etc/profile or $HOME/{.profile,.bash_profile,.bashrc}
 
 [ -r $HOME/.ssh-agent-info ] && . $HOME/.ssh-agent-info
