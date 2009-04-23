@@ -1,6 +1,7 @@
 #### start ssh-agent automatically when login
 ##  v1.0
 ##  A better alternative is keychain written by drobbins@gentoo.org
+##      eval `keychain --stop others --quiet --eval id_rsa`
 ##
 ## add this code snippet to /etc/profile or $HOME/{.profile,.bash_profile,.bashrc}
 
