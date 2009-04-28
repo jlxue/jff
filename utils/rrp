@@ -52,7 +52,7 @@
 #       * implement cherry command
 #       * implement reasonable behaviour of whatupdated, v0.12
 #       * use SSH_AUTH_SOCK to tell whether ssh-agent is required
-#         because GNOME seahorse doesn't expose SSH_AUTH_SOCK
+#         because GNOME seahorse doesn't expose SSH_AGENT_PID
 #
 #   2008-11-14  Liu Yubao
 #       * make show-branch and what-updated synonyms for showbranch
@@ -135,6 +135,10 @@
 #   2009-04-16  Liu Yubao
 #       * fix bug introduced in v0.25 that cmd_upgrade won't merge
 #         remote branch of manifests into local branch, release v0.27
+#
+#   2009-04-27  Liu Yubao
+#       * add 'diffstat' command to evaluate risk to merge with
+#         android's official branch, release v0.28
 
 ######################## part executed in $HOME/.bashrc ################
 # To make the pollution to shell environment minimum, I put this code
@@ -189,7 +193,7 @@ fi
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.27
+RRP_VERSION=0.28
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -208,6 +212,8 @@ REPO=$HOME/repo
 # ref updates of upstream branch in every modules happening in
 # $UPDATE_INTERVAL seconds are thought as one update of whole android project
 UPDATE_INTERVAL=300
+## default options to cmd_diffstat
+DIFF_STAT_OPTS="--shortstat --no-color --no-renames -B -a"
 
 ######################## global vars ###################################
 # The directory that contains .repo
@@ -601,6 +607,27 @@ dont_have_uncommitted_commits_against_official_central_repository () {
 }
 
 
+parse_diffstat () {
+    local sep day stat timestamp commit parent_commit other_parent_commits
+
+    while read sep; do
+        [ "$sep" != "--" ] && continue
+
+        read commit parent_commit other_parent_commits
+        read timestamp
+
+        day=`date -d "$timestamp" --rfc-3339=date`
+
+        if [ -n "$other_parent_commits" ]; then
+            stat=`git diff $DIFF_STAT_OPTS $parent_commit $commit`
+        else
+            read stat
+        fi
+
+        echo "$day" "$stat"
+    done
+}
+
 ######################## sub commands ##################################
 help_help () {
     cat <<EOF
@@ -634,6 +661,7 @@ Available commands:
   cherry        - find commits not merged into upstream
   showbranch    - show branches and their commits
 
+  diffstat      - statistics of commits on a branch
   whatupdated   - show what changed in the last update or fetch
 
   forall        - execute command in each module's root directory
@@ -1581,6 +1609,61 @@ cmd_switch () {
 
             echo -ne "\033[00m"     # reset color
         fi >&2
+    }
+}
+
+
+help_diffstat () {
+    cat <<EOF
+Under project root directory:
+
+    rrp diffstat ARGS
+      Analysis output of command \`git log $DIFF_STAT_OPTS \$ARGS\` for
+      all modules.
+
+Under module root directory:
+
+    rrp diffstat ARGS
+      Analysis output of command \`git log $DIFF_STAT_OPTS \$ARGS\` for
+      current module.
+EOF
+}
+
+cmd_diffstat () {
+    must_under_project_root
+
+    local module=${MODULE_ROOT#$PROJECT_ROOT/}
+
+    if [ -z "$module" ]; then   # in project root directory
+        list_all_modules | while read module; do
+            echo "## $module" >&2
+            cd "$PROJECT_ROOT/$module" &&
+                git log $DIFF_STAT_OPTS --first-parent --pretty="format:--%n%H %P%n%ci" "$@" | parse_diffstat
+        done
+    else                        # in module root directory
+        echo "## $module" >&2
+        git log $DIFF_STAT_OPTS --first-parent --pretty="format:--%n%H %P%n%ci" "$@" | parse_diffstat
+    fi | sed -e 's/[a-z,()+]//g' | sort -k 1,1 | {
+        local day files added deleted dash
+        local current_files current_deleted current_added current_deleted
+        declare -i current_files current_deleted current_added current_deleted
+
+        while read day files added deleted dash; do
+            if [ "$current_day" = "$day" ]; then
+                current_files+=$files
+                current_added+=$added
+                current_deleted+=$deleted
+            else
+                [ -n "$current_day" ] &&
+                    echo $current_day $current_files $current_added $current_deleted
+                current_day=$day
+                current_files=$files
+                current_added=$added
+                current_deleted=$deleted
+            fi
+        done
+        [ -n "$current_day" ] &&
+            echo $current_day $current_files $current_added $current_deleted
     }
 }
 
