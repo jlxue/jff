@@ -1655,7 +1655,7 @@ cmd_diffstat () {
                 current_deleted+=$deleted
             else
                 [ -n "$current_day" ] &&
-                    echo $current_day $current_files $current_added $current_deleted
+                    printf "%s %6d %8d %8d\n" $current_day $current_files $current_added $current_deleted
                 current_day=$day
                 current_files=$files
                 current_added=$added
@@ -1663,7 +1663,7 @@ cmd_diffstat () {
             fi
         done
         [ -n "$current_day" ] &&
-            echo $current_day $current_files $current_added $current_deleted
+            printf "%s %6d %8d %8d\n" $current_day $current_files $current_added $current_deleted
     }
 }
 
