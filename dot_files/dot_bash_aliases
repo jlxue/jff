@@ -1,0 +1,8 @@
+# Reference: procps-3.2.7/ps/output.c:1575
+#   {"Std_f",    "uid_hack,pid,ppid,c,stime,tname,time,cmd"},                     /* new -f */
+#
+# uid_hack's width is 8 by default, which is often too short.
+# (procps-3.2.7/proc/pwcache.h:10:#define P_G_SZ 20)
+#
+alias psf='ps -ouid_hack:20,pid,ppid,c,stime,tname,time,cmd'
+
