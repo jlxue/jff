@@ -139,6 +139,10 @@
 #   2009-04-27  Liu Yubao
 #       * add 'diffstat' command to evaluate risk to merge with
 #         android's official branch, release v0.28
+#
+#   2009-05-04  Liu Yubao
+#       * `repo start' now requires '--all' option, add it to `rrp checkout',
+#         release v0.29
 
 ######################## part executed in $HOME/.bashrc ################
 # To make the pollution to shell environment minimum, I put this code
@@ -193,7 +197,7 @@ fi
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.28
+RRP_VERSION=0.29
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -739,7 +743,7 @@ cmd_checkout () {
 
     # fetch android source code and create a working branch
     run_cmd $REPO sync &&
-    run_cmd $REPO start $DEFAULT_WORKING_BRANCH
+    run_cmd $REPO start $DEFAULT_WORKING_BRANCH --all
 }
 
 
