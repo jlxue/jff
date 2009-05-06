@@ -58,6 +58,7 @@ DBD::SQLite
 Devel::Cover
 Devel::DProf
 Devel::Hide
+Devel::NYTProf
 Devel::SmallProf
 Devel::Size
 Devel::Size::Report
