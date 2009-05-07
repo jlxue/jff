@@ -1,20 +1,20 @@
-安装vim 7.1 for windows以及附加程序:
+安装vim 7.2 for windows以及附加程序:
 
 
-vim 7.1; (自带diff 2.7, 似乎就是取自unxutils)
+vim 7.2; (自带diff 2.7, 似乎就是取自unxutils)
 	http://www.vim.org
 
-Exuberant Ctags 5.6; (vim\vim70\ctags.exe)
+Exuberant Ctags 5.6; (vim\vim72\ctags.exe)
 	http://ctags.sourceforge.net
 
-cscope 16.0a; (vim\vim70\cscope.exe, vim\vim70\sort.exe)
+cscope 16.0a; (vim\vim72\cscope.exe, vim\vim72\sort.exe)
 	http://iamphet.nm.ru/cscope/index.html
 
-grep 2.5.1; (vim\vim70\grep.exe)
+grep 2.5.1; (vim\vim72\grep.exe)
 	http://unxutils.sourceforge.net
 	(or http://gnuwin32.sourceforge.net)
 
-iconv.dll (vim\vim70\iconv.dll, charset.dll, iconv.exe)
+iconv.dll (vim\vim72\iconv.dll, charset.dll, iconv.exe)
 	http://sourceforge.net/projects/gettext	[libiconv-1.9.1.bin.woe32.zip]
 
 
@@ -36,9 +36,9 @@ word_complete		单词自动完成，选择“工具”->“Word Complete”才�
 情况修改路径。
 
 编译完后的安装方法：
-将vim7\runtime里面所有文件拷贝到c:\vim\vim71\;
-将vim7\src下以及其子目录下所有dll和exe文件拷贝到c:\vim\vim71\下;
-如果以前没有安装vim71或者装在别的目录下则执行c:\vim\vim71\install.exe
+将vim7\runtime里面所有文件拷贝到c:\vim\vim72\;
+将vim7\src下以及其子目录下所有dll和exe文件拷贝到c:\vim\vim72\下;
+如果以前没有安装vim71或者装在别的目录下则执行c:\vim\vim72\install.exe
 
 然后将上面的可执行程序以及插件等拷贝到c:\vim\下面对应目录里。
 
