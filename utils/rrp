@@ -143,6 +143,12 @@
 #   2009-05-04  Liu Yubao
 #       * `repo start' now requires '--all' option, add it to `rrp checkout',
 #         release v0.29
+#
+#   2009-05-14  Liu Yubao
+#       * optimize `rrp status' to only check specified modules in
+#         .repo/working-modules
+#       * check any pending commits in hot repository in `rrp commit',
+#         release v0.30
 
 ######################## part executed in $HOME/.bashrc ################
 # To make the pollution to shell environment minimum, I put this code
@@ -197,7 +203,7 @@ fi
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.29
+RRP_VERSION=0.30
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -409,6 +415,21 @@ cache_ssh_private_key () {
 }
 
 
+create_hot_remote_if_not_exist () {
+    if ! git remote | grep -qw $DEFAULT_REMOTE-hot; then
+        local url=$(git remote -v | grep -w "^$DEFAULT_REMOTE")
+        url=${url##*.repo/projects/}
+        if [ -z "$url" ]; then
+            echo "GIT remote \`$DEFAULT_REMOTE' not found!" >&2
+            exit 1
+        fi
+
+        url=$PUSH_REPOS_PATH/.repo/projects/$url
+        run_cmd git remote add -m $DEFAULT_UPSTREAM_BRANCH-hot -f $DEFAULT_REMOTE-hot $url
+    fi
+}
+
+
 local_updated_and_has_new_commit () {
     local module=$1
     local branch=refs/heads/$USER_ACCOUNT/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH
@@ -447,12 +468,62 @@ local_updated_and_has_new_commit () {
 }
 
 
+no_pending_hot_commits_or_force_commit () {
+    local module=$1
+
+    tty -s || return 0
+
+    create_hot_remote_if_not_exist &>/dev/null
+
+    git fetch $DEFAULT_REMOTE-hot >/dev/null
+    git remote prune $DEFAULT_REMOTE-hot &>/dev/null
+
+    local baserev=$(git show-ref -s refs/remotes/$DEFAULT_REMOTE/$DEFAULT_UPSTREAM_BRANCH)
+    local refname objectname
+    local branches i=0 answer
+
+    while read refname objectname; do
+        if [ $objectname != $baserev -a $(git merge-base $baserev $objectname) = $baserev ]; then
+            branches[$((i++))]="$refname"
+        fi
+    done < <(git for-each-ref --format="%(refname) %(objectname)" refs/remotes/$DEFAULT_REMOTE-hot/ |
+                grep -v "/$USER_ACCOUNT/" | grep $DEFAULT_UPSTREAM_BRANCH)
+
+    if [ -n "$branches" ]; then
+        echo -e "\033[01;31m"   # bold, red foreground
+        echo "Branches listed below are ahead of upstream branch, this means others have"
+        echo "committed to temporary repository and are waiting another for sending commit"
+        echo "request email, you can check that with command \`rrp review\`."
+        echo "============================================================================"
+
+        for ((i = 0; i < ${#branches[@]}; ++i)); do
+            echo "${branches[$i]}"
+        done
+
+        echo -e "\033[00m"      # reset color
+        read -p "Sure to commit module \"$module\"? [y/N]" answer
+        answer=$(echo "$answer" | tr [:upper:] [:lower:])
+        case "$answer" in
+            y*)
+                return 0;
+                ;;
+            *)
+                return 1
+                ;;
+        esac
+    else
+        return 0
+    fi >&2
+}
+
+
 commit_module () {
     local module=$1
 
     git fetch $DEFAULT_REMOTE
+    git remote prune $DEFAULT_REMOTE &>/dev/null
 
-    if local_updated_and_has_new_commit $module; then
+    if local_updated_and_has_new_commit $module && no_pending_hot_commits_or_force_commit $module; then
         echo
         run_cmd git push -f $PUSH_REPOS_PATH/$module \
                 $DEFAULT_WORKING_BRANCH:refs/heads/$USER_ACCOUNT/$DEFAULT_UPSTREAM_BRANCH/$DEFAULT_WORKING_BRANCH
@@ -970,17 +1041,7 @@ cmd_review () {
     local author=${1:-$USER_ACCOUNT}
     local module=${MODULE_ROOT#$PROJECT_ROOT/}
 
-    if ! git remote | grep -qw $DEFAULT_REMOTE-hot; then
-        local url=$(git remote -v | grep -w "^$DEFAULT_REMOTE")
-        url=${url##*.repo/projects/}
-        if [ -z "$url" ]; then
-            echo "GIT remote \`$DEFAULT_REMOTE' not found!" >&2
-            exit 1
-        fi
-
-        url=$PUSH_REPOS_PATH/.repo/projects/$url
-        run_cmd git remote add -m $DEFAULT_UPSTREAM_BRANCH-hot -f $DEFAULT_REMOTE-hot $url
-    fi
+    create_hot_remote_if_not_exist
 
     run_cmd git fetch $DEFAULT_REMOTE
     run_cmd git fetch $DEFAULT_REMOTE-hot
@@ -994,7 +1055,7 @@ cmd_review () {
             local answer
 
             echo "No X server running, you'd better start Xorg or Xming for better review experience!" >&2
-            read -p "Sure to review in text patch mode?[y/N]" answer
+            read -p "Sure to review in text patch mode? [y/N]" answer
             answer=$(echo "$answer" | tr [:upper:] [:lower:])
             case "$answer" in
                 y*)
@@ -1173,14 +1234,26 @@ cmd_diff () {
 help_status () {
     cat <<EOF
 rrp status
-  Check status of indices and work trees in all modules.
+  if .repo/working-modules can't be read, check status of indices and work trees
+  in all modules, else check modules listed in that file.
+
+rrp status MODULE...
+  check status of indices and work trees for these modules.
+
+rrp status -a|--all|all
+  check status of indices and work trees for all modules.
 EOF
 }
 
 cmd_status () {
     must_under_project_root
 
-    $REPO status "$@"
+    if [ -n "$1" -o ! -r $PROJECT_ROOT/.repo/working-modules ]; then
+        [ 'all' = "$1" -o '--all' = "$1" -o '-a' = "$1" ] && shift
+        time $REPO status "$@"
+    else
+        cd $PROJECT_ROOT && time $REPO status $(cat .repo/working-modules)
+    fi
 }
 
 
