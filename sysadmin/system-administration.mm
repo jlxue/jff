@@ -13,6 +13,12 @@
 <node COLOR="#00b439" CREATED="1241587475580" ID="ID_579845684" MODIFIED="1241589772971" TEXT="&#x6279;&#x91cf;&#x5b89;&#x88c5;">
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
+<node COLOR="#990000" CREATED="1245048243643" ID="ID_669476798" LINK="http://www.informatik.uni-koeln.de/fai/" MODIFIED="1245048258908" TEXT="FAI">
+<font NAME="SansSerif" SIZE="14"/>
+</node>
+<node COLOR="#990000" CREATED="1245049515982" ID="ID_674233858" LINK="http://wiki.systemimager.org/index.php/Main_Page" MODIFIED="1245049521248" TEXT="System Imager">
+<font NAME="SansSerif" SIZE="14"/>
+</node>
 </node>
 <node COLOR="#00b439" CREATED="1241587480908" ID="ID_1799897512" MODIFIED="1241589772971" TEXT="&#x8f6f;&#x4ef6;&#x6e90;&#x955c;&#x50cf;">
 <edge STYLE="bezier" WIDTH="thin"/>
@@ -30,6 +36,16 @@
 <font NAME="SansSerif" SIZE="14"/>
 </node>
 </node>
+<node COLOR="#00b439" CREATED="1245049243241" ID="ID_1299365868" MODIFIED="1245049258380" TEXT="&#x78c1;&#x76d8;&#x955c;&#x50cf;">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+<node COLOR="#990000" CREATED="1245049259849" ID="ID_1883380435" LINK="http://sourceforge.net/projects/g4l" MODIFIED="1245049263771" TEXT="g4l">
+<font NAME="SansSerif" SIZE="14"/>
+</node>
+<node COLOR="#990000" CREATED="1245049307267" ID="ID_291307557" LINK="http://www.feyrer.de/g4u/" MODIFIED="1245049310470" TEXT="g4u">
+<font NAME="SansSerif" SIZE="14"/>
+</node>
+</node>
 </node>
 <node COLOR="#0033ff" CREATED="1241587513943" ID="ID_1431927530" MODIFIED="1241589805255" POSITION="right" TEXT="&#x914d;&#x7f6e;&#x7ba1;&#x7406;">
 <edge STYLE="sharp_bezier" WIDTH="8"/>
@@ -42,11 +58,11 @@
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
 </node>
-<node COLOR="#00b439" CREATED="1241587527960" ID="ID_1665204025" MODIFIED="1241589772987" TEXT="lcfg">
+<node COLOR="#00b439" CREATED="1241587530773" ID="ID_1648846797" MODIFIED="1245134922523" TEXT="bcfg2">
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
 </node>
-<node COLOR="#00b439" CREATED="1241587530773" ID="ID_1648846797" MODIFIED="1241589772987" TEXT="bcfg">
+<node COLOR="#00b439" CREATED="1241587527960" ID="ID_1665204025" MODIFIED="1241589772987" TEXT="lcfg">
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
 </node>
@@ -63,6 +79,14 @@
 <font NAME="SansSerif" SIZE="16"/>
 </node>
 <node COLOR="#00b439" CREATED="1241587553883" ID="ID_598020531" MODIFIED="1241589773003" TEXT="grsecurity">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
+<node COLOR="#00b439" CREATED="1245135881968" ID="ID_768860578" LINK="http://tomoyo.sourceforge.jp/" MODIFIED="1245135895073" TEXT="tomoyo">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
+<node COLOR="#00b439" CREATED="1245136005394" ID="ID_434055411" LINK="http://www.fsckin.com/2007/10/09/smack-for-linux-explained-in-plain-english/" MODIFIED="1245136009549" TEXT="SMACK">
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
 </node>
@@ -106,7 +130,7 @@
 <font NAME="SansSerif" SIZE="16"/>
 </node>
 </node>
-<node COLOR="#0033ff" CREATED="1241588188979" FOLDED="true" ID="ID_618402792" MODIFIED="1241589830460" POSITION="right" TEXT="&#x65e5;&#x5fd7;">
+<node COLOR="#0033ff" CREATED="1241588188979" ID="ID_618402792" MODIFIED="1243835717599" POSITION="right" TEXT="&#x65e5;&#x5fd7;">
 <edge STYLE="sharp_bezier" WIDTH="8"/>
 <font NAME="SansSerif" SIZE="18"/>
 <node COLOR="#00b439" CREATED="1241588194401" ID="ID_62111490" MODIFIED="1241589773034" TEXT="rsyslogd">
@@ -126,6 +150,12 @@
 <font NAME="SansSerif" SIZE="14"/>
 </node>
 <node COLOR="#990000" CREATED="1241588216573" ID="ID_626323014" MODIFIED="1241589773034" TEXT="swatch">
+<font NAME="SansSerif" SIZE="14"/>
+</node>
+<node COLOR="#990000" CREATED="1243835730755" ID="ID_541390942" MODIFIED="1243835734786" TEXT="denyhosts">
+<font NAME="SansSerif" SIZE="14"/>
+</node>
+<node COLOR="#990000" CREATED="1243835735364" ID="ID_1438196622" MODIFIED="1243835737536" TEXT="fail2ban">
 <font NAME="SansSerif" SIZE="14"/>
 </node>
 </node>
@@ -148,6 +178,9 @@
 <node COLOR="#00b439" CREATED="1241588239870" ID="ID_480629942" MODIFIED="1241589773049" TEXT="nagios">
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
+<node COLOR="#990000" CREATED="1241666440635" ID="ID_1270737354" LINK="http://www.icinga.org/" MODIFIED="1241666457697" TEXT="icinga">
+<font NAME="SansSerif" SIZE="14"/>
+</node>
 </node>
 <node COLOR="#00b439" CREATED="1241588241307" ID="ID_327174779" MODIFIED="1241589773049" TEXT="cacti">
 <edge STYLE="bezier" WIDTH="thin"/>
@@ -379,7 +412,7 @@
 <font NAME="SansSerif" SIZE="16"/>
 </node>
 </node>
-<node COLOR="#0033ff" CREATED="1241588891374" FOLDED="true" ID="ID_337498729" MODIFIED="1241589839773" POSITION="right" TEXT="&#x96c6;&#x7fa4;&#x3001;&#x5206;&#x5e03;&#x5f0f;&#x670d;&#x52a1;">
+<node COLOR="#0033ff" CREATED="1241588891374" ID="ID_337498729" MODIFIED="1244548203944" POSITION="right" TEXT="&#x96c6;&#x7fa4;&#x3001;&#x5206;&#x5e03;&#x5f0f;&#x670d;&#x52a1;">
 <edge STYLE="sharp_bezier" WIDTH="8"/>
 <font NAME="SansSerif" SIZE="18"/>
 <node COLOR="#00b439" CREATED="1241588912702" ID="ID_840159480" MODIFIED="1241589773096" TEXT="OpenVPN">
@@ -429,6 +462,28 @@
 <font NAME="SansSerif" SIZE="16"/>
 </node>
 <node COLOR="#00b439" CREATED="1241588988140" ID="ID_368094287" MODIFIED="1241589773096" TEXT="hadoop">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
+<node COLOR="#00b439" CREATED="1244548207756" ID="ID_77285480" MODIFIED="1244548212428" TEXT="single system image">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+<node COLOR="#990000" CREATED="1244548213428" ID="ID_929462077" MODIFIED="1244548216944" TEXT="OSCAR">
+<font NAME="SansSerif" SIZE="14"/>
+</node>
+<node COLOR="#990000" CREATED="1244548217475" ID="ID_1368814255" MODIFIED="1244548219913" TEXT="OpenMosix">
+<font NAME="SansSerif" SIZE="14"/>
+</node>
+</node>
+<node COLOR="#00b439" CREATED="1245046274638" ID="ID_603107155" LINK="http://www.drbd.org/" MODIFIED="1245046285496" TEXT="drbd">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
+<node COLOR="#00b439" CREATED="1245046292073" ID="ID_1695717522" LINK="http://danga.com/gearman/" MODIFIED="1245046945220" TEXT="Gearman">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
+<node COLOR="#00b439" CREATED="1245046309384" ID="ID_535137148" LINK="http://rubyforge.org/projects/starling/" MODIFIED="1245046317602" TEXT="Starling">
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
 </node>
