@@ -1,0 +1,56 @@
+#!/bin/zsh
+
+#命令别名 {{{
+alias cp='cp -i'
+alias mv='mv -i'
+alias rm='rm -i'
+alias ls='ls -F --color=auto'
+alias la='ls --color=always -a'
+alias ll='ls --color=always -l'
+alias lla='ls --color=always -la'
+alias grep='grep --color=auto'
+alias ee='emacsclient '
+alias fd='find . -type d -name'
+alias ff='find . -type f -name'
+#[Esc][h] man 当前命令时，显示简短说明 
+alias run-help >&/dev/null && unalias run-help
+autoload run-help
+
+#历史命令 top10
+alias top10='print -l  ${(o)history%% *} | uniq -c | sort -nr | head -n 10'
+#}}}
+
+#路径别名 {{{
+#进入相应的路径时只要 cd ~xxx
+hash -d WWW="/home/lighttpd/html"
+hash -d ARCH="/mnt/arch"
+hash -d PKG="/var/cache/pacman/pkg"
+hash -d E="/etc/env.d"
+hash -d C="/etc/conf.d"
+hash -d I="/etc/rc.d"
+hash -d X="/etc/X11"
+#}}}
+
+# 文件关联{{{
+autoload -U zsh-mime-setup
+zsh-mime-setup
+
+alias -s rar="unrar l"
+alias -s zip="unzip -l"
+alias -s pdf=xpdf
+alias -s ps=gv
+alias -s png="qiv "
+alias -s c="vim "
+alias -s cpp="vim "
+alias -s cxx="vim "
+alias -s txt="vim "
+alias -s h="vim "
+alias -s hxx="vim "
+alias -s hpp="vim "
+alias -s java="vim "
+alias -s tgz="tar -tf "
+alias -s gz="tar -tf "
+alias -s tar.bz2="tar -tjf "
+alias -s html="w3m"
+alias -s htm="w3m"
+# }}}

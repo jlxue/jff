@@ -1,0 +1,37 @@
+#!/bin/zsh
+
+#Emacs风格 键绑定
+bindkey -e
+#设置 [DEL]键 为向后删除
+bindkey "\e[3~" delete-char
+
+bindkey -v "^[[3~" delete-char
+bindkey -v "^B" backward-char
+bindkey -v "^F" forward-char
+
+bindkey -v "^[[A" history-beginning-search-backward
+bindkey -v "^[[B" history-beginning-search-forward
+
+bindkey -v "^A" beginning-of-line
+bindkey -v "^E" end-of-line
+bindkey -v "^K" kill-line
+bindkey -v "^L" clear-screen
+bindkey -v "^R" history-incremental-search-backward
+bindkey -v "^U" kill-whole-line
+bindkey -v "^V" quoted-insert
+bindkey -v "^W" backward-kill-word
+
+# ALT+N next history
+# ALT+P previous history
+bindkey -v "^N" down-history
+bindkey -v "^P" up-history
+
+# CTRL+h or CTRL+H
+bindkey -v "^[H" run-help
+bindkey -v "^[h" run-help
+
+# alow for editing of the command line
+# http://zshwiki.org/home/examples/zlewidgets
+autoload -U    edit-command-line
+zle -N         edit-command-line
+bindkey -a 'v' edit-command-line

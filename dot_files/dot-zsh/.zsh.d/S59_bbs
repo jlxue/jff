@@ -1,0 +1,5 @@
+#!/bin/zsh
+
+function bbs-smth() {
+    luit -encoding gbk ssh linuxemacs@newsmth.net
+}

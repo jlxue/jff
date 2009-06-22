@@ -1,0 +1,254 @@
+#/bin/zsh
+SMAPI_PATH="/sys/devices/platform/smapi/BAT"
+
+YES="是"
+NO="否"
+IDLE="空闲"
+CHARGING="充电"
+DISCHARGING="放电"
+NOT_DISCHARGING="未放电"
+NOT_CHARGING="未充电"
+NONE="无"
+
+BATTERY_INSTALLED="电池是否安装:"
+BATTERY_STATE="电池状:"
+CYCLE_COUNT="充电次数:"
+CURRENT_NOW="当前电流:"
+CURRENT_AVG="平均电流(每分钟):"
+POWER_NOW="功率:"
+POWER_AVG="平均功率:"
+LAST_FULL_CAPACITY="实际容量:"
+REMAINING_PERCENT="剩余电量:"
+REMAINING_RUNNING_TIME="可用时间:"
+REMAINING_CHARGING_TIME="剩余充电时间:"
+REMAINING_CAPACITY="剩余容量:"
+DESIGN_CAPACITY="设计容量:"
+VOLTAGE="电压:"
+DESIGN_VOLTAGE="设计电压:"
+MANUFACTURER="制造商:"
+MODEL="型号:"
+BARCODING="BARCODING:"
+CHEMISTRY="介质:"
+SERIAL="序列号:"
+MANIFACTURE_DATE="生产日期:"
+FIRST_USE_DATE="首次使用时间:"
+TEMPERATURE="温度:"
+START_CHARGE_THRESH="起始充电阀值:"
+STOP_CHARGE_THRESH="停止充电阀值:"
+
+function calculate() {
+    if (( $1 < 0 )); then
+        echo $[$1/2]
+    else
+        echo $[$1/1000]
+    fi
+}
+
+
+function convert_state() {
+    [ "x$1" = "x" ] && return;
+    local state="$NONE"
+    case $1 in
+        idle)
+        state="$IDLE"
+        ;;
+        charging)
+        state="$CHARGING"
+        ;;
+        discharging)
+        state="$DISCHARGING"
+        ;;
+        not_discharging)
+        state="$NOT_DISCHARGING"
+        ;;
+        not_charging)
+        state="$NOT_CHARGING"
+        ;;  
+        none)
+        state="$NONE"
+        ;;  
+        *)  
+        ;;  
+    esac
+    echo "$state"
+}
+
+
+function check_installed() {
+    if [ "x$1" = "x" ]; then
+        return;
+    fi
+    local state="$NO"
+    if [ "1" =  `cat "$SMAPI_PATH$1/installed"` ]; then
+        state="$YES"
+    fi
+    echo "$BATTERY_INSTALLED $state"
+}
+
+function check_state() {
+    if [ "x$1" = "x" ]; then
+        return;
+    fi
+    local state=`cat $SMAPI_PATH$1/state`
+    echo "$BATTERY_STATE `convert_state $state`"
+}
+
+function check_cycle_count() {
+    [ "x$1" = "x" ] && return;
+    echo "$CYCLE_COUNT `cat $SMAPI_PATH$1/cycle_count`"
+}
+
+function check_current_now() {
+    [ "x$1" = "x" ] && return;
+    echo "$CURRENT_NOW `cat $SMAPI_PATH$1/current_now`"
+}
+
+function check_current_avg() {
+    [ "x$1" = "x" ] && return;
+    echo "$CURRENT_AVG `cat $SMAPI_PATH$1/current_avg`"
+}
+
+function check_power_now() {
+    [ "x$1" = "x" ] && return;
+    echo "$POWER_NOW `cat $SMAPI_PATH$1/power_now`"
+}
+
+function check_power_avg() {
+    [ "x$1" = "x" ] && return;
+    echo "$POWER_AVG `cat $SMAPI_PATH$1/power_avg`"
+}
+
+function check_last_full_capacity() {
+    [ "x$1" = "x" ] && return;
+    local l=`cat $SMAPI_PATH$1/last_full_capacity`
+    echo "$LAST_FULL_CAPACITY `calculate $l`"
+}
+
+function check_remaining_percent() {
+    [ "x$1" = "x" ] && return;
+    echo "$REMAINING_PERCENT `cat $SMAPI_PATH$1/remaining_percent`"
+}
+
+function check_remaining_running_time() {
+    [ "x$1" = "x" ] && return;
+    local state=`cat $SMAPI_PATH$1/remaining_running_time`
+    echo "$REMAINING_RUNNING_TIME `convert_state $state`"
+}
+
+function check_remaining_charging_time() {
+    [ "x$1" = "x" ] && return;
+    local state=`cat $SMAPI_PATH$1/remaining_charging_time`
+    echo "$REMAINING_CHARGING_TIME `convert_state $state`"
+}
+
+function check_remaining_capacity() {
+    [ "x$1" = "x" ] && return;
+    local state=`cat $SMAPI_PATH$1/remaining_capacity`
+    echo "$REMAINING_CAPACITY `calculate $state`"
+}
+
+function check_design_capacity() {
+    [ "x$1" = "x" ] && return;
+    local state=`cat $SMAPI_PATH$1/design_capacity`
+    echo "$DESIGN_CAPACITY `calculate $state`"
+}
+
+function check_voltage() {
+    [ "x$1" = "x" ] && return;
+    local state=`cat $SMAPI_PATH$1/voltage`
+    echo "$VOLTAGE `calculate $state`"
+}
+
+function check_design_voltage() {
+    [ "x$1" = "x" ] && return;
+    local state=`cat $SMAPI_PATH$1/design_voltage`
+    echo "$DESIGN_VOLTAGE `calculate $state`"
+}
+
+function check_manufacturer() {
+    [ "x$1" = "x" ] && return;
+    local manu=`cat $SMAPI_PATH$1/manufacturer`
+    echo "$MANUFACTURER $manu"
+}
+
+function check_model() {
+    [ "x$1" = "x" ] && return;
+    local mod=`cat $SMAPI_PATH$1/model`
+    echo "$MODEL $mod"
+}
+
+function check_barcoding() {
+    [ "x$1" = "x" ] && return;
+}
+
+function check_chemistry() {
+    [ "x$1" = "x" ] && return;
+    local che=`cat $SMAPI_PATH$1/chemistry`
+    echo "$CHEMISTRY $che"
+}
+
+function check_serial() {
+    [ "x$1" = "x" ] && return;
+    local serial=`cat $SMAPI_PATH$1/serial`
+    echo "$SERIAL $serial"
+}
+
+function check_manufacture_date() {
+    [ "x$1" = "x" ] && return;
+    local date=`cat $SMAPI_PATH$1/manufacture_date`
+    echo "$MANIFACTURE_DATE $date"
+}
+
+function check_first_use_date() {
+    [ "x$1" = "x" ] && return;
+    local date=`cat $SMAPI_PATH$1/first_use_date`
+    echo "$FIRST_USE_DATE $date"
+}
+
+function check_temperature() {
+    [ "x$1" = "x" ] && return;
+    local temp=`cat $SMAPI_PATH$1/temperature`
+    echo "$TEMPERATURE $temp"
+}
+
+function check_start_charge_thresh() {
+    [ "x$1" = "x" ] && return;
+    local thresh=`cat $SMAPI_PATH$1/start_charge_thresh`
+    echo "$START_CHARGE_THRESH $thresh"
+}
+
+function check_stop_charge_thresh() {
+    [ "x$1" = "x" ] && return;
+    local thresh=`cat $SMAPI_PATH$1/stop_charge_thresh`
+    echo "$STOP_CHARGE_THRESH $thresh"
+}
+
+function check_battery() {
+    check_installed $1
+    check_state $1
+    check_cycle_count $1
+    check_current_now $1
+    check_current_avg $1
+    check_power_now $1
+    check_power_avg $1
+    check_last_full_capacity $1
+    check_remaining_percent $1
+    check_remaining_running_time $1
+    check_remaining_charging_time $1
+    check_remaining_capacity $1
+    check_design_capacity $1
+    check_voltage $1
+    check_design_voltage $1
+    check_manufacturer $1
+    check_model $1
+    check_serial $1
+    check_manufacture_date $1
+    check_first_use_date $1
+    check_temperature $1
+    check_start_charge_thresh $1
+    check_stop_charge_thresh $1
+}
+
+function ibm_battery() {
+    check_battery 0
+}
