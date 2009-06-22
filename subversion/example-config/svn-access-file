@@ -1,0 +1,14 @@
+[groups]
+admin = cecelia, dieken
+developers = jack, sally
+
+
+# all users can read by default
+[/]
+* = r
+@admin = rw
+
+
+[test:/trunk]
+@developers = rw
+
