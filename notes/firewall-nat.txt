@@ -1,0 +1,30 @@
+1. NAT 分为两种：
+
+** 基本 NAT：将多个公网 IP 临时让对应的多个内网 IP 使用，修改源 IP。
+** NAPT(Network Address/Port Translator)：在 NAT 设备上为每个内网对外
+        分配一个端口号，修改源 IP 和源端口号。
+
+  NAPT 更常用。
+
+2. NAPT 又分为两种：
+
+* Symmetric NAT: 为某内网 IP 的每一个会话分配一个新端口
+* Cone NAT: 重复利用端口
+
+    Cone NAT 更常用。
+
+3. UDP 之 Cone NAT 穿透办法：
+    a. ClientA 向中间人 Server（有公网 IP） 发送一个消息，Server 
+    就知道了 ClientA 的公网 IP 和端口;
+    b. ClientB 向 Server 发送一个消息，Server 就知道了 ClientB 的
+    公网 IP 和端口；
+    c. Server 向 ClientB 发送消息，让 ClientB 往 ClientA 的公网 IP
+    和端口发送一个消息，此消息会被 ClientA 的 NAT 丢弃，但在 ClientB
+    这边的 NAT 上打开了一个洞;
+    d. ClientA 从 Server 处获得 ClientB 的公网 IP 和端口，往 ClientB
+    发送消息，因 c 中打开的洞，此消息能被 ClientB 收到，同时 ClientA 的
+    这个消息也在 ClientA 这边的 NAT 上打开了一个洞；
+    e. 之后双方就能 UDP 正常通信了。
+
+4. UPnP
+
