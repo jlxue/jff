@@ -10,8 +10,11 @@ if { 0 == $argc } {
     #spawn -noecho {*}$argv
 }
 
-# send "Ctrl-L"
+expect_background eof {     # avoid nasty error when the spawned process exits
+    exit
+}
+
 interact {
-    timeout  60 {send "\014"}
+    timeout  60 {send "\x00"}
 }
 

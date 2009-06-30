@@ -2,10 +2,13 @@
 
 [ -z "$1" ] && cmd="spawn -noecho ssh newsmth" ||
     cmd="spawn -noecho $@"
-# send "Ctrl-L"
 cmd="$cmd; "'
+expect_background eof {     # avoid nasty error when the spawned process exits
+    exit
+}
+
 interact {
-    timeout 60 { send "\014"}
+    timeout 60 { send "\x00"}
 }'
 
 LC_ALL=zh_CN.GBK expect -c "$cmd"
