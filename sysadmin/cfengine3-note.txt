@@ -17,28 +17,57 @@ Promise
 A statement about the state we desire to maintain.
 
 Promise bundles
-A collection of promises.
+    A collection of promises.
 
 Promise bodies
-A part of a promise which details and constrains its nature.
+    A part of a promise which details and constrains its nature.
 
 Data types
-An interpretation of a scalar value: string, integer or real number.
+    An interpretation of a scalar value: string, integer or real number.
 
 Variables
-An association of the form "LVALUE represents RVALUE", where rval may be a scalar value or a list of scalar values.
+    An association of the form "LVALUE represents RVALUE", where rval
+    may be a scalar value or a list of scalar values.
 
 Functions
-Built-in parameterized rvalues.
+    Built-in parameterized rvalues.
 
 Classes
-Cfengine's boolean classifiers that describe context.
+    Cfengine's boolean classifiers that describe context.
 
 
 3. Installation
 
-aptitude install libssl-dev libdb-dev libpcre3-dev libselinux-dev flex bison
-./configure --prefix=PREFIX --enable-DCE --enable-selinux --with-sql
-make
-make install
+# aptitude install libssl-dev libdb-dev libpcre3-dev libselinux-dev flex bison
+$ ./configure --prefix=PREFIX --enable-DCE --enable-selinux --with-sql
+$ make
+# make install
+
+
+4. cfengine syntax
+promise-type:       (commands, files, access)
+
+  class-expression::
+  
+   "promiser" -> { "promisee1", "promisee2", ... }
+  
+      attribute_1 => value_1,
+      attribute_2 => value_2,
+      ...
+      attribute_n => value_n;
+
+bundle TYPE xxx     (agent, server)
+{
+....
+}
+
+body TYPE xxx
+{
+... => ....;
+
+classes::
+ ... => ....;
+}
+
+######ch 2.4 when and where are promises makde?
 
