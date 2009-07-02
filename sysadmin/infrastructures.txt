@@ -1,0 +1,37 @@
+http://en.wikipedia.org/wiki/Network-attached_storage
+NAS: SMB/CIFS, NFS, AFS
+FreeNAS (FreeBSD), NASLite(Linux), NexentaStor(NexentaOS)
+Openfiler
+
+http://en.wikipedia.org/wiki/Storage_area_network
+SAN: SCSI, Fibre Channel, iSCSI, ATA over Ethernet(AoE), HyperSCSI
+
+
+http://www.mirkomariotti.it/skels/xen0nfs.html
+
+=====================================================================
+http://www.techforce.com.br/news/layout/set/print/linux_blog/massive_installation_management_tools_p_3
+GOsa2
+http://www.gosa-project.org/
+
+EBox
+http://www.ebox-platform.com/
+
+Webmin
+
+http://www.zabbix.org/
+=====================================================================
+
+Bcfg2 notes
+
+1. quick start
+# aptitude install bcfg2 bcfg2-server
+# bcfg2-admin init
+# /etc/init.d/bcfg2-server start
+# bcfg2 -nqv
+#
+
+=====================================================================
+TeamViewer, UltraVNC
+VNN Client, LogMeIn Hamachi
+

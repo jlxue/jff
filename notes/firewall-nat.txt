@@ -28,3 +28,20 @@
 
 4. UPnP
 
+
+Protocols
+~~~~~~~~~
+STUN: http://en.wikipedia.org/wiki/STUN
+TURN: http://en.wikipedia.org/wiki/Traversal_Using_Relay_NAT
+ICE : http://en.wikipedia.org/wiki/Interactive_Connectivity_Establishment
+
+Implementations
+~~~~~~~~~~~~~~~
+https://stun4j.dev.java.net     No activity after 2006
+http://sourceforge.net/projects/stun
+http://jstun.javawi.de/
+http://www.pjsip.org/pjnath/docs/html/index.htm
+http://nice.freedesktop.org/releases/
+http://www.resiprocate.org/ReTurn_Overview
+http://numb.viagenie.ca/        (STUN/TURN service)
+http://www.turnserver.org/

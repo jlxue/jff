@@ -1,0 +1,44 @@
+1. Cfengine 3 consists of a number of components:
+
+    cf-agent        Active agent
+    cf-execd        Scheduler
+    cf-graph        Graph data extractor
+    cf-know         Knowledge modelling agent
+    cf-monitord     Passive monitoring agent
+    cf-promises     Promise validator
+    cf-runagent     Remote run agent
+    cf-serverd      Server agent
+    cf-report       Self-knowledge extractor
+
+
+2. Concepts
+
+Promise
+A statement about the state we desire to maintain.
+
+Promise bundles
+A collection of promises.
+
+Promise bodies
+A part of a promise which details and constrains its nature.
+
+Data types
+An interpretation of a scalar value: string, integer or real number.
+
+Variables
+An association of the form "LVALUE represents RVALUE", where rval may be a scalar value or a list of scalar values.
+
+Functions
+Built-in parameterized rvalues.
+
+Classes
+Cfengine's boolean classifiers that describe context.
+
+
+3. Installation
+
+aptitude install libssl-dev libdb-dev libpcre3-dev libselinux-dev flex bison
+./configure --prefix=PREFIX --enable-DCE --enable-selinux --with-sql
+make
+make install
+
