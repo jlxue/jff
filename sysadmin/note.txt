@@ -1,0 +1,51 @@
+1. 下载 netinst.iso
+http://www.debian.org/devel/debian-installer/
+http://cdimage.debian.org/cdimage/daily-builds/daily/arch-latest/i386/iso-cd/debian-testing-i386-netinst.iso
+
+
+2. installation
+
+* choose language: English
+  country: Other -> Asia -> China
+
+* partition disks: entire disk with LVM
+                   Separate /home
+
+* tasksel (Software Selection): standard system
+
+
+3. configuration
+
+# dpkg-reconfigure locales，选择 en_US.UTF-8, zh_CN.UTF-8，
+并设置默认语言为 en_US.UTF-8。
+
+    实际是调用 update-locale 更新 /etc/default/locale，并修改
+    /etc/locale.gen，调用 locale-gen (调用 libc6 的 localedef
+    生成 locale 数据）。
+
+# cd /root && wget http://jff.googlecode.com/svn/trunk/utils/cfgtool
+# chmod a+x cfgtool
+# aptitude update && aptitude install git-core
+# /root/cfgtool init
+# cd /etc && /root/cfgtool add . && /root/cfgtool commit -q -m "import /etc"
+# /root/cfgtool hook
+
+# aptitude install openssh-server
+
+# vi /etc/default/rcS: UTC=no
+# aptitude install ntp
+# ntpd -g
+
+4. infrastructures
+http://www.infrastructures.org/
+Version Control:        git
+Gold Server:
+Host Install Tools:     FAI
+Ad Hoc Change Tools:    expect, rsh, rcp, rdist
+Directory Servers:      bind, openldap
+Authentication Server:  openldap
+Time Synchronization:   ntp
+Network File Servers:   NFS v4, AFS, Coda, CacheFS
+
+5. iSCSI, nbd.sf.net
+
