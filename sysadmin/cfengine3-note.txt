@@ -45,23 +45,25 @@ $ make
 
 
 4. cfengine syntax
-promise-type:       (commands, files, access)
-
+promise-type:       (vars, classes, interfaces, processes, storage, packages,
+                     commands, methods, files, access, reports)
+                    (delete_lines, field_edits, replace_patterns, insert_lines)
   class-expression::
   
    "promiser" -> { "promisee1", "promisee2", ... }
   
+      ifvarclass => other-class-expression,
       attribute_1 => value_1,
       attribute_2 => value_2,
       ...
       attribute_n => value_n;
 
-bundle TYPE xxx     (agent, server)
+bundle TYPE name     (common, agent, server)
 {
 ....
 }
 
-body TYPE xxx
+body TYPE name      (common)
 {
 ... => ....;
 
@@ -69,5 +71,5 @@ classes::
  ... => ....;
 }
 
-######ch 2.4 when and where are promises makde?
+######ch 2.9
 
