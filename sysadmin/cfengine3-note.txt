@@ -1,13 +1,13 @@
 1. Cfengine 3 consists of a number of components:
 
     cf-agent        Active agent
+    cf-serverd      Server agent
     cf-execd        Scheduler
-    cf-graph        Graph data extractor
-    cf-know         Knowledge modelling agent
     cf-monitord     Passive monitoring agent
     cf-promises     Promise validator
     cf-runagent     Remote run agent
-    cf-serverd      Server agent
+    cf-graph        Graph data extractor
+    cf-know         Knowledge modelling agent
     cf-report       Self-knowledge extractor
 
 
@@ -58,7 +58,7 @@ promise-type:       (vars, classes, interfaces, processes, storage, packages,
       ...
       attribute_n => value_n;
 
-bundle TYPE name     (common, agent, server)
+bundle TYPE name     (common, agent, server, knowledge, monitor)
 {
 ....
 }
