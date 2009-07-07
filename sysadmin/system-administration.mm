@@ -497,7 +497,7 @@
 <font NAME="SansSerif" SIZE="16"/>
 </node>
 </node>
-<node COLOR="#0033ff" CREATED="1241589023015" FOLDED="true" ID="ID_906613439" MODIFIED="1241589842039" POSITION="right" TEXT="development environment">
+<node COLOR="#0033ff" CREATED="1241589023015" ID="ID_906613439" MODIFIED="1246962715859" POSITION="right" TEXT="development environment">
 <edge STYLE="sharp_bezier" WIDTH="8"/>
 <font NAME="SansSerif" SIZE="18"/>
 <node COLOR="#00b439" CREATED="1241589034969" ID="ID_233497516" MODIFIED="1241589773096" TEXT="gcc, autools">
@@ -517,6 +517,10 @@
 <font NAME="SansSerif" SIZE="16"/>
 </node>
 <node COLOR="#00b439" CREATED="1241589079344" ID="ID_664246860" MODIFIED="1241589773112" TEXT="bugzilla, mantis, redmine">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
+<node COLOR="#00b439" CREATED="1246962720078" ID="ID_1511659017" MODIFIED="1246962722906" TEXT="testlink">
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
 </node>
