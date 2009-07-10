@@ -149,6 +149,12 @@
 #         .repo/working-modules
 #       * check any pending commits in hot repository in `rrp commit',
 #         release v0.30
+#
+#   2009-07-10  Liu Yubao
+#       * when ssh-agent is already running but has no RSA or DSA identities,
+#         make cache_ssh_private_key() call `ssh-add` if neccessary,
+#       * make __rrp_ps1 equivalent with __git_ps1 when no .repo/ found,
+#         release v0.31
 
 ######################## part executed in $HOME/.bashrc ################
 # To make the pollution to shell environment minimum, I put this code
@@ -173,11 +179,14 @@ __rrp_ps1 () {
     local MODULE_ROOT=$(__rrp_find_dir '.git')
     local module head upstream
 
-    # project_root is empty or module_root is out of project_root, we
-    # get a wrong module_root, so set it empty
-    [ -z "$PROJECT_ROOT" ] ||
+    [ -z "$PROJECT_ROOT" ] && {
+        echo $(__git_ps1)
+        return
+    } || {
+        # module_root is out of project_root, we get a wrong module_root, so set it empty
         [ "$PROJECT_ROOT" != "$(expr substr "$MODULE_ROOT" 1 $(expr length "$PROJECT_ROOT"))" ] &&
-        MODULE_ROOT=
+            MODULE_ROOT=
+    }
 
     module=${MODULE_ROOT#$PROJECT_ROOT/}
 
@@ -203,7 +212,7 @@ fi
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.30
+RRP_VERSION=0.31
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -403,7 +412,7 @@ must_has_git_dir_in_module () {
 
 
 cache_ssh_private_key () {
-    [ -z "$SSH_AUTH_SOCK" ] &&
+    [ -z "$SSH_AUTH_SOCK" ] && {
         echo "+-------------------------------------------------------------------+" &&
         echo "| ssh-agent not running, you'd better execute \`eval \$(ssh-agent)'   |" &&
         echo "| or \`ssh-agent bash', then execute \`ssh-add' to avoid being        |" &&
@@ -412,6 +421,9 @@ cache_ssh_private_key () {
         eval $(ssh-agent) &&
         IS_NEW_SSH_AGENT=1 &&
         ssh-add
+    } || {
+        ssh-add -l >/dev/null || ssh-add
+    }
 }
 
 
