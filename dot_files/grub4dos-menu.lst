@@ -1,0 +1,23 @@
+# copy grldr in grub4dos to c:\grldr, append
+# c:\grldr="Grub4Dos" to c:\boot.ini, download
+# linux and initrd.gz from
+# http://http.us.debian.org/debian/dists/testing/main/
+#   installer-i386/current/images/netboot/
+# or
+#  http://www.debian.org/devel/debian-installer/
+#    * other images (netboot, usb stick, floppy, etc)
+#
+default 0
+timeout 0
+
+color cyan/blue white/blue
+
+title   Debian Sid
+root    (hd0,6)
+chainloader +1
+
+title   d-i for netboot
+kernel  /debian/linux vga=normal priority=low
+initrd  /debian/initrd.gz
+boot
+
