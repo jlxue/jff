@@ -38,8 +38,13 @@ Classes
 
 3. Installation
 
-# aptitude install libssl-dev libdb-dev libpcre3-dev libselinux-dev flex bison
-$ ./configure --prefix=PREFIX --enable-DCE --enable-selinux --with-sql
+# aptitude install libssl-dev libdb-dev libpcre3-dev libselinux1-dev \
+           libldap2-dev libmysqlclient15-dev libpq-dev libgraphviz-dev \
+           libacl1-dev flex bison
+ (cfengine-3.0.2b4 要求 /usr/include/pgsql，但是 Debian lenny 在 /usr/include/postgresql)
+
+$ ./configure --prefix=$HOME/usr/local --enable-shared \
+        --enable-DCE --enable-selinux --with-sql
 $ make
 # make install
 
