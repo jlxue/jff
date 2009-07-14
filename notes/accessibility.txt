@@ -1,0 +1,9 @@
+Debian packages:
+    python-dogtail
+    accerciser
+    ldtp
+    python-pythoncard
+    python-at-spi
+    python-pyatspi
+
+
