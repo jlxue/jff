@@ -337,6 +337,16 @@
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
 </node>
+<node COLOR="#00b439" CREATED="1247635875453" ID="ID_1241081851" LINK="http://www.linux-consulting.com/Amd_AutoFS/autofs.html" MODIFIED="1247636004671" TEXT="automounter">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+<node COLOR="#990000" CREATED="1247635881812" ID="ID_430737386" MODIFIED="1247635883609" TEXT="autofs">
+<font NAME="SansSerif" SIZE="14"/>
+</node>
+<node COLOR="#990000" CREATED="1247635884593" ID="ID_851960081" MODIFIED="1247635983484" TEXT="am-utils">
+<font NAME="SansSerif" SIZE="14"/>
+</node>
+</node>
 <node COLOR="#00b439" CREATED="1241588809061" ID="ID_553580268" MODIFIED="1241589773081" TEXT="NFS v4">
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
