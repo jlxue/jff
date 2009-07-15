@@ -71,11 +71,10 @@
 
 
 ;; Way 2
-;(let ((fontset nil)
+;(let ((fontset (frame-parameter nil 'font))
 ;      (zh-font (font-spec :family "AR PL UMing CN" :size 16)))
 ;  (set-default-font "DejaVu Sans Mono:pixelsize=14:foundry=unknown")
-;  (setq fontset (frame-parameter nil 'font))
 ;  (dolist (charset '(kana han symbol cjk-misc bopomofo))
 ;    (set-fontset-font fontset charset zh-font))
 ;  (add-to-list 'default-frame-alist `(font . ,fontset)))
- 
+
