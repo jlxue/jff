@@ -1,0 +1,16 @@
+#
+# promises.cf
+#
+
+body common control
+{
+    bundlesequence  => {
+                        "update"
+                       };
+
+    inputs          => {
+                        "update.cf",
+                        "cf-serverd.cf"
+                       };
+}
+

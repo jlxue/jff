@@ -1,0 +1,28 @@
+#
+# cf-serverd.cf
+#
+
+body server control
+{
+    trustkeysfrom       => { ".*" };
+    allowconnects       => { ".*" };
+    maxconnections      => "10";
+    logallconnections   => "true";
+}
+
+######################################################################
+
+bundle server access_rules
+{
+access:
+
+    "$(g_update.master_location)"
+        admit   => { ".*" };
+
+
+roles:
+
+    ".*"
+        authorize   => { ".*" };
+}
+

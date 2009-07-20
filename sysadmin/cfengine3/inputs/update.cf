@@ -1,0 +1,64 @@
+#
+# update.cf
+#
+
+bundle common g_update
+{
+vars:
+
+    "master_location" string    => "/home/users/yubaoliu/cfengine3";
+    "policy_servers" slist      => { "localhost" };
+}
+
+######################################################################
+
+bundle agent update
+{
+files:
+
+    "$(sys.workdir)/inputs"
+        perms           => u_p("600"),
+        copy_from       => remote("$(g_update.master_location)/inputs",
+                                  "@(g_update.policy_servers)"),
+        depth_search    => recurse("inf"),
+        action          => immediate;
+}
+
+######################################################################
+
+
+body perms u_p(p)
+{
+    mode    => "$(p)";
+}
+
+######################################################################
+
+body depth_search recurse(d)
+{
+    depth   => "$(d)";
+}
+
+######################################################################
+
+body copy_from remote(from, servers)
+{
+    compare         => "digest";
+    copy_backup     => "timestamp";
+    encrypt         => "true";
+    preserve        => "true";
+    purge           => "true";
+    servers         => { @(servers) };
+    source          => "$(from)";
+    stealth         => "true";
+    trustkey        => "true";
+    verify          => "true";
+}
+
+######################################################################
+
+body action immediate
+{
+    ifelapsed   => "1";
+}
+

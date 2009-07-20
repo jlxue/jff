@@ -43,8 +43,7 @@ Classes
            libacl1-dev flex bison
  (cfengine-3.0.2b4 要求 /usr/include/pgsql，但是 Debian lenny 在 /usr/include/postgresql)
 
-$ ./configure --prefix=$HOME/usr/local --enable-shared \
-        --enable-DCE --enable-selinux --with-sql
+$ ./configure --prefix=/usr/local --enable-DCE --enable-selinux --with-sql
 $ make
 # make install
 
