@@ -111,7 +111,7 @@ let Tlist_File_Fold_Auto_Close = 1
 
 
 " for mru.vim
-let MRU_Max_Entries = 50
+let MRU_Max_Entries = 100
 
 " for autopreview.vim, below is default setting
 "let g:AutoPreview_enabled = 0
@@ -125,7 +125,7 @@ let g:GetLatestVimScripts_allowautoinstall=1
 
 "--------------------------------------misc settings-----------------------------
 " recursively search tag file upwards, see :help file-searching
-set tags=./tags,tags;
+set tags=./tags;,tags;
 
 " recursively search file downwards for gf command
 "set path+=/home/dieken/src/vim7/**
@@ -218,8 +218,9 @@ if has("cscope")
     set csto=0
     set nocsverb
     " add any database in current directory
-    if filereadable("cscope.out")
-        cs add cscope.out
+    let cscope_db=findfile("cscope.out", "./;,.;")
+    if filereadable(cscope_db)
+        execute "cs add" cscope_db
     " else add database pointed to by environment
     elseif $CSCOPE_DB != ""
         cs add $CSCOPE_DB
