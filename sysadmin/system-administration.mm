@@ -425,6 +425,9 @@
 <node COLOR="#990000" CREATED="1241588689076" ID="ID_1812213985" MODIFIED="1241589773081" TEXT="roundcube">
 <font NAME="SansSerif" SIZE="14"/>
 </node>
+<node COLOR="#990000" CREATED="1248237885484" ID="ID_574635525" LINK="http://www.open-xchange.org/" MODIFIED="1248237932671" TEXT="Open-Xchange">
+<font NAME="SansSerif" SIZE="14"/>
+</node>
 </node>
 <node COLOR="#00b439" CREATED="1241588611935" ID="ID_466923230" MODIFIED="1241589773081" TEXT="gforge">
 <edge STYLE="bezier" WIDTH="thin"/>
