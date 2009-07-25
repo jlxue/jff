@@ -87,14 +87,14 @@ if version >= 700
 endif
 
 " for cscope, see :h cscope
-nmap <C-u>s :cs find s <C-R>=expand("<cword>")<CR><CR>
-nmap <C-u>g :cs find g <C-R>=expand("<cword>")<CR><CR>
-nmap <C-u>c :cs find c <C-R>=expand("<cword>")<CR><CR>
-nmap <C-u>t :cs find t <C-R>=expand("<cword>")<CR><CR>
-nmap <C-u>e :cs find e <C-R>=expand("<cword>")<CR><CR>
-nmap <C-u>f :cs find f <C-R>=expand("<cfile>")<CR><CR>
-nmap <C-u>i :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
-nmap <C-u>d :cs find d <C-R>=expand("<cword>")<CR><CR>
+nmap <C-k>s :cs find s <C-R>=expand("<cword>")<CR><CR>
+nmap <C-k>g :cs find g <C-R>=expand("<cword>")<CR><CR>
+nmap <C-k>c :cs find c <C-R>=expand("<cword>")<CR><CR>
+nmap <C-k>t :cs find t <C-R>=expand("<cword>")<CR><CR>
+nmap <C-k>e :cs find e <C-R>=expand("<cword>")<CR><CR>
+nmap <C-k>f :cs find f <C-R>=expand("<cfile>")<CR><CR>
+nmap <C-k>i :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+nmap <C-k>d :cs find d <C-R>=expand("<cword>")<CR><CR>
 
 "--------------------------------------for plugins-------------------------------
 
@@ -220,7 +220,7 @@ if has("cscope")
     " add any database in current directory
     let cscope_db=findfile("cscope.out", "./;,.;")
     if filereadable(cscope_db)
-        execute "cs add" cscope_db
+        execute "cs add" cscope_db cscope_db[0:-12]
     " else add database pointed to by environment
     elseif $CSCOPE_DB != ""
         cs add $CSCOPE_DB
