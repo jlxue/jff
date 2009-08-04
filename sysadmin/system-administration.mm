@@ -190,6 +190,14 @@
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
 </node>
+<node COLOR="#00b439" CREATED="1249400387550" ID="ID_482854951" LINK="http://www.zabbix.com/" MODIFIED="1249400406068" TEXT="zabbix">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
+<node COLOR="#00b439" CREATED="1249400424882" ID="ID_549505678" MODIFIED="1249400427704" TEXT="ntop">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
 <node COLOR="#00b439" CREATED="1241588246432" ID="ID_886491515" MODIFIED="1241589773049" TEXT="mrtg">
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>

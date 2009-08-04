@@ -4,7 +4,7 @@ http://www.perlfoundation.org/perl5/index.cgi?recommended_cpan_modules
 http://perl.net.au/wiki/Recommended_Perl_Modules
 http://wiki.perlchina.org/index.php/%E6%A8%A1%E5%9D%97%E6%8E%A8%E4%BB%8B
 
-Parse::RecDescent   (²»ÍÆ¼ö£¬Ì«Âı)
+Parse::RecDescent   (ä¸æ¨èï¼Œå¤ªæ…¢)
 Parse::Yapp
 Parse::Eyapp
 perl-byacc
@@ -38,7 +38,7 @@ Class::MethodMaker
 Apache::DProf
 App::Ack
 App::Config
-BerkeleyDB (±È DB_File µÄ½Ó¿Ú¸üÈ«Ãæ)
+BerkeleyDB (æ¯” DB_File çš„æ¥å£æ›´å…¨é¢)
 Bundle::Test
 CGI
 CGI::Minimal
@@ -51,7 +51,7 @@ Data::Dumper
 Data::FormValidator
 Date::Business
 Date::Calc
-Date::Manip (Ì«ÅÓ´ó£¬²»ÍÆ¼ö)
+Date::Manip (å¤ªåºå¤§ï¼Œä¸æ¨è)
 DateTime
 DBD::RAM
 DBD::SQLite
@@ -64,6 +64,8 @@ Devel::Size
 Devel::Size::Report
 Devel::DumpSizes
 Devel::MemUsed
+Devel::Trace
+Devel::LineTrace
 Encode
 ExtUtils::Installed
 ExtUtils::MakeMaker
@@ -179,7 +181,7 @@ Web::Scraper
 Win32::AdminMisc
 Win32::FileOp
 WWW::Mechanize
-XML::LibXML (²»ÍÆ¼öÓÃ XML::Parser, XML::XPath, XML::DOM, ÍÆ¼öÓÃ XML::LibXML)
+XML::LibXML (ä¸æ¨èç”¨ XML::Parser, XML::XPath, XML::DOM, æ¨èç”¨ XML::LibXML)
 XML::Rules
 XML::Simple
 XML::Twig
