@@ -34,4 +34,5 @@ Bcfg2 notes
 =====================================================================
 TeamViewer, UltraVNC
 VNN Client, LogMeIn Hamachi
+Mikogo
 
