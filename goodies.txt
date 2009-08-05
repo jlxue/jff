@@ -141,9 +141,19 @@ http://www.r-project.org
 http://www.axiom-developer.org
 http://maxima.sourceforge.net
 
+The AXIOM family:
+  Axiom:     http://www.axiom-developer.org/
+  OpenAxiom: http://www.open-axiom.org/
+  FriCAS:    http://fricas.sourceforge.net/
+             http://axiom-wiki.newsynthesis.org/FriCASBinaries
+
 Hoekey, AutoHotKey, Type and Run
 
-Gimp, Inkscape, Scribus
+Gimp, Blender, Inkscape, Scribus
+Krita       http://www.koffice.org/krita/
+MyPaint     http://mypaint.intilinux.com/
+ArtWeaver   http://www.artweaver.de/
+ArtRage     http://www.artrage.com/
 
 bugzilla, mantis, trac, cvstrac, jira
 
@@ -151,16 +161,6 @@ postfix+extmail+extman+courier-authlib+maildrop+cyrus-sasl2
 postfix+cyrus+openldap+gosa2+roundcube
 exim4+squirrelmail
 openwebmail
-
-Octave, SciLab, Maxima, GnuPlot
-http://www.r-project.org
-http://www.sagemath.org
-
-The AXIOM family:
-  Axiom:     http://www.axiom-developer.org/
-  OpenAxiom: http://www.open-axiom.org/
-  FriCAS:    http://fricas.sourceforge.net/
-             http://axiom-wiki.newsynthesis.org/FriCASBinaries
 
 
 * Debian
