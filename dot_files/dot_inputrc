@@ -9,7 +9,7 @@ set bell-style none
 
 ## for console
 # setterm -blength 0
-## for X window
+## for X window, put into ~/.xsessionrc or /etc/X11/Xsession.d/99no-bell
 # xset b off
 
 ## for tcsh: .tcshrc
