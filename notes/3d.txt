@@ -1,0 +1,24 @@
+http://en.wikipedia.org/wiki/3D_modeling
+
+modeling methods:
+    Polygonal modeling
+        用多边形建模，应用广泛，渲染快速，但对于曲面的表现
+        要用大量多边形，不完全精确
+    NURBS modeling
+        能精确表现曲面，但不太容易使用
+    Splines & Patches modeling
+        在弹性和易用性上介于 polygon 和 nurbs 之间
+    Primitives modeling
+        用球、圆柱体、圆锥体、立方体等基本几何体建模，
+        快速、容易、精确，但不适合光滑多变的有机体
+    Sculpt modeling
+        相当新的建模方法
+
+    Mesh
+    Subdivision Surface
+    Smooths 3gons
+    Smooths ngons
+    Bezier curves
+    metaball
+    digital sculpting
+
