@@ -1,17 +1,137 @@
 # This file describes the network interfaces available on your system
 # and how to activate them. For more information, see interfaces(5).
 
+# See:
+#   http://www.debian.org/doc/manuals/debian-reference/ch05.en.html
+#   http://www.debian.org/doc/manuals/debian-reference/ch-gateway.zh-cn.html
+
+# Required software packages:
+#   net-tools, iproute
+#   udev
+#   ifupdown
+#   dhcp3-client
+#   resolvconf
+#   wireless-tools
+#   wpasupplicant
+#   ifplugd
+#   guessnet
+#   ifmetric
+
+# Optional software packages:
+#   iputils*, inetutils*, traceroute
+#   dnsutils, nscd, dnsmasq, pdnsd, bind9, bind9, bind9utils
+#   ifrename
+#   avahi*
+#   laptop-mode-tools
+#   pppd, wvdial/pppconfig, pppoeconf
+
+# Some small utilities that have some overlaps of functionalities:
+#   ethtool, mii-diag, ifupdown-extra, laptop-net
+#   ifscheme, ifupdown-scripts-zg2
+#   dhcpd, pump
+
+
 # The loopback network interface
 auto lo
 iface lo inet loopback
 
-# The primary network interface
-allow-hotplug eth0
-iface eth0 inet dhcp
 
-# for WEP
-allow-hotplug wlan0
-iface wlan0 inet dhcp
-  wireless-essid XXXX
-  wireless-key xxxxxxxxxx
+# Comment out next line because they are managed by ifplugd and udev
+# see /etc/udev/rules.d/z60_ifplugd.rules
+#
+#auto eth0 wlan0
+
+# Used by /lib/udev/net.agent, interface names are set by udev,
+# or you can reference /usr/share/doc/ifupdown/examples/network-interfaces.gz
+# to specify a logic interface for a physical interface.
+#
+allow-hotplug eth0 wlan0
+
+
+#################################################################
+# Check where we are...
+#
+mapping eth0
+    script  guessnet-ifupdown
+    map     interface work-wired home-wired
+    #map     debug: true
+    #map     verbose: true
+    #map     init-time: 20
+    #map     timeout: 20
+    map     default: dhcp
+
+mapping wlan0
+    script  guessnet-ifupdown
+    map     home-wireless work-wireless1 work-wireless2
+    map     debug: true
+    map     verbose: true
+    map     init-time: 10
+    map     timeout: 20
+    map     default: interface
+
+#################################################################
+# network environment at home
+#
+iface home-wired inet dhcp
+    hostname    tsg
+    metric      0
+    test        peer address 192.168.88.1 source 192.168.88.0
+
+#iface home-wired inet static
+#    hostname    tsg
+#    metric      0
+#    address     192.168.88.1
+#    netmask     255.255.255.0
+#    broadcast   192.168.88.255
+#    gateway     192.168.88.1
+#    dns-domain  lan
+#    dns-nameservers     192.168.88.1   \
+#                        208.67.222.222 \
+#                        208.67.220.220
+
+iface home-wireless inet dhcp
+    hostname        tsg
+    metric          1
+    wireless-essid  Google
+    wireless-key    505E1347E0
+    #wpa-ssid        XXXX
+    #wpa-psk         xxxxxxxxxxxxxxxxxxxxxx
+    test            wireless essid "Google"
+
+
+# network environment at work
+#
+iface work-wired inet dhcp
+    hostname        liuyubao
+    metric          0
+    test            peer address 10.64.1.1 source 10.64.1.0
+
+iface work-wireless1 inet dhcp
+    hostname        liuyubao
+    metric          1
+    wireless-essid  asc04
+    wireless-key    6000643910
+    test            wireless essid "asc04"
+
+iface work-wireless2 inet dhcp
+    hostname        liuyubao
+    metric          1
+    wireless-essid  asc01
+    wireless-key    6000643910
+    test            wireless essid "asc01"
+
+#################################################################
+##
+iface interface inet manual
+    test            missing-cable
+    pre-up          echo No link present.
+    pre-up          false
+
+iface dhcp inet dhcp
+
+###############################################
+allow-hotplug usb0
+iface usb0 inet static
+   address 192.168.175.1
+   netmask 255.255.255.0
 
