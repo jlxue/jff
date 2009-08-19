@@ -45,7 +45,7 @@ iface lo inet loopback
 # or you can reference /usr/share/doc/ifupdown/examples/network-interfaces.gz
 # to specify a logic interface for a physical interface.
 #
-allow-hotplug eth0 wlan0
+allow-hotplug wlan0
 
 
 #################################################################
@@ -54,9 +54,9 @@ allow-hotplug eth0 wlan0
 mapping eth0
     script  guessnet-ifupdown
     map     interface work-wired home-wired
-    #map     debug: true
-    #map     verbose: true
-    #map     init-time: 20
+    map     debug: true
+    map     verbose: true
+    #map     init-time: 10
     #map     timeout: 20
     map     default: dhcp
 
@@ -66,6 +66,7 @@ mapping wlan0
     map     debug: true
     map     verbose: true
     map     init-time: 10
+    map     init-delay: 5
     map     timeout: 20
     map     default: interface
 
@@ -73,65 +74,70 @@ mapping wlan0
 # network environment at home
 #
 iface home-wired inet dhcp
-    hostname    tsg
-    metric      0
-    test        peer address 192.168.88.1 source 192.168.88.0
+    hostname            tsg
+    metric              0
+    dns-nameservers     208.67.222.222  208.67.220.220
+    test                peer address 192.168.88.1 source 192.168.88.0
 
 #iface home-wired inet static
-#    hostname    tsg
-#    metric      0
-#    address     192.168.88.1
-#    netmask     255.255.255.0
-#    broadcast   192.168.88.255
-#    gateway     192.168.88.1
-#    dns-domain  lan
+#    hostname            tsg
+#    metric              0
+#    address             192.168.88.1
+#    netmask             255.255.255.0
+#    broadcast           192.168.88.255
+#    gateway             192.168.88.1
+#    dns-domain          lan
 #    dns-nameservers     192.168.88.1   \
 #                        208.67.222.222 \
 #                        208.67.220.220
 
 iface home-wireless inet dhcp
-    hostname        tsg
-    metric          1
-    wireless-essid  Google
-    wireless-key    505E1347E0
-    #wpa-ssid        XXXX
-    #wpa-psk         xxxxxxxxxxxxxxxxxxxxxx
-    test            wireless essid "Google"
+    hostname            tsg
+    metric              1
+    wireless-essid      Google
+    wireless-key        505E1347E0
+    dns-nameservers     208.67.222.222  208.67.220.220
+    #wpa-ssid            XXXX
+    #wpa-psk             xxxxxxxxxxxxxxxxxxxxxx
+    test                wireless essid "Google"
 
 
 # network environment at work
 #
 iface work-wired inet dhcp
-    hostname        liuyubao
-    metric          0
-    test            peer address 10.64.1.1 source 10.64.1.0
+    hostname            liuyubao
+    metric              0
+    dns-nameservers     208.67.222.222  208.67.220.220
+    test                peer address 10.64.1.1 source 10.64.1.0
 
 iface work-wireless1 inet dhcp
-    hostname        liuyubao
-    metric          1
-    wireless-essid  asc04
-    wireless-key    6000643910
-    test            wireless essid "asc04"
+    hostname            liuyubao
+    metric              1
+    wireless-essid      asc04
+    wireless-key        6000643910
+    dns-nameservers     208.67.222.222  208.67.220.220
+    test                wireless essid "asc04"
 
 iface work-wireless2 inet dhcp
-    hostname        liuyubao
-    metric          1
-    wireless-essid  asc01
-    wireless-key    6000643910
-    test            wireless essid "asc01"
+    hostname            liuyubao
+    metric              1
+    wireless-essid      asc01
+    wireless-key        6000643910
+    dns-nameservers     208.67.222.222  208.67.220.220
+    test                wireless essid "asc01"
 
 #################################################################
 ##
 iface interface inet manual
-    test            missing-cable
-    pre-up          echo No link present.
-    pre-up          false
+    test                missing-cable
+    pre-up              echo No link present.
+    pre-up              false
 
 iface dhcp inet dhcp
 
 ###############################################
 allow-hotplug usb0
 iface usb0 inet static
-   address 192.168.175.1
-   netmask 255.255.255.0
+   address              192.168.175.1
+   netmask              255.255.255.0
 
