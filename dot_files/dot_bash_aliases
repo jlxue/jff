@@ -5,4 +5,5 @@
 # (procps-3.2.7/proc/pwcache.h:10:#define P_G_SZ 20)
 #
 alias psf='ps -ouid_hack:20,pid,ppid,c,stime,tname,time,cmd'
+alias apt='aptitude -F "%c%a%M%T %p %V %v %R:%12s %r %D %I - %60d"'
 
