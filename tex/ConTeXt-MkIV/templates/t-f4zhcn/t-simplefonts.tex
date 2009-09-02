@@ -1,0 +1,854 @@
+%D \module
+%D   [      file=t-simplefonts,
+%D        version=2009.05.22,
+%D          title=\CONTEXT\ User Module,
+%D       subtitle=Simplefonts,
+%D         author=Wolfgang Schuster,
+%D           date=\currentdate,
+%D      copyright=Wolfgang Schuster,
+%D          email=schuster.wolfgang@googlemail.com,
+%D        license=Public Domain]
+
+\writestatus{loading}{Context User Module / Simplefonts}
+
+\unprotect
+
+%D Constants and variables
+
+\startinterface all
+  \setinterfaceconstant {regular}            {regular}
+  \setinterfaceconstant {italic}             {italic}
+  \setinterfaceconstant {bold}               {bold}
+  \setinterfaceconstant {bolditalic}         {bolditalic}
+  \setinterfaceconstant {smallcaps}          {smallcaps}
+  \setinterfaceconstant {scale}              {scale}
+  \setinterfaceconstant {range}              {range}
+  \setinterfaceconstant {weight}             {weight}
+  \setinterfaceconstant {features}           {features}
+  \setinterfaceconstant {regularfeatures}    {regularfeatures}
+  \setinterfaceconstant {italicfeatures}     {italicfeatures}
+  \setinterfaceconstant {boldfeatures}       {boldfeatures}
+  \setinterfaceconstant {bolditalicfeatures} {bolditalicfeatures}
+  \setinterfaceconstant {smallcapsfeatures}  {smallcapsfeatures}
+\stopinterface
+
+\startinterface all
+  \setinterfacevariable {simplefonts}        {simplefonts}
+  \setinterfacevariable {serif}              {serif}
+  \setinterfacevariable {sans}               {sans}
+  \setinterfacevariable {mono}               {mono}
+  \setinterfacevariable {math}               {math}
+  \setinterfacevariable {mainfont}           {mainfont}
+  \setinterfacevariable {sansfont}           {sansfont}
+  \setinterfacevariable {monofont}           {monofont}
+  \setinterfacevariable {mathfont}           {mathfont}
+  \setinterfacevariable {cjk}                {cjk}
+\stopinterface
+
+\startinterface all
+  \setinterfaceelement  {set}                {set}
+\stopinterface
+
+\startmodule[\v!simplefonts]
+
+\setupmodule[\c!size=12pt]
+
+%D Messages
+
+\definemessageconstant {simplefonts}
+
+\startinterface all
+  \setinterfacemessage{simplefonts}{title}{simplefonts}
+  \setinterfacemessage{simplefonts}{1}    {font -- not found}
+\stopinterface
+
+%D Namespace
+
+\def\????sf{@@@@sf}
+
+\def\sfparameter#1{\csname\????sf\@@sf@@#1\endcsname}
+
+\def\setupsimplefonts
+  {\dodoubleargument\getparameters[\????sf]}
+
+%\def\setupsimplefonts
+%  {\dosingleargument\dosetupsimplefonts}
+
+%\def\dosetupsimplefonts[#1]%
+%  {\getparameters[\????sf][#1]%
+%   \letvalue{*\v!simplefonts\@@@@sfsize\c!rm\c!tf\c!rm*}\undefined
+%   \sf@setupfont\v!simplefonts}
+
+%D Typescripts
+
+\setvalue{\????sf:\c!family:\v!serif}{\c!rm   }
+\setvalue{\????sf:\c!family:\v!sans }{\c!ss   }
+\setvalue{\????sf:\c!family:\v!mono }{\c!tt   }
+\setvalue{\????sf:\c!style :\v!serif}{\s!Serif}
+\setvalue{\????sf:\c!style :\v!sans }{\s!Sans }
+\setvalue{\????sf:\c!style :\v!mono }{\s!Mono }
+
+\def\sf@family#1{\csname\????sf:\c!family:#1\endcsname}
+\def\sf@style #1{\csname\????sf:\c!style :#1\endcsname}
+
+\starttexdefinition sf@typescript #1#2#3
+    \startexpanded
+    \@NX\starttypescript[#1][#3]
+        \@NX\definefontsynonym[\sf@style{#1}]             [\sfparameter\v!regular]   [\s!features=\sfparameter\c!regularfeatures   ,\s!fallbacks=\????sf#2\v!regular\s!fallbacks]
+        \@NX\definefontsynonym[\sf@style{#1}\s!Italic]    [\sfparameter\c!italic]    [\s!features=\sfparameter\c!italicfeatures    ,\s!fallbacks=\????sf#2\v!italic\s!fallbacks]
+        \@NX\definefontsynonym[\sf@style{#1}\s!Bold]      [\sfparameter\c!bold]      [\s!features=\sfparameter\c!boldfeatures      ,\s!fallbacks=\????sf#2\v!bold\s!fallbacks]
+        \@NX\definefontsynonym[\sf@style{#1}\s!BoldItalic][\sfparameter\c!bolditalic][\s!features=\sfparameter\c!bolditalicfeatures,\s!fallbacks=\????sf#2\v!bolditalic\s!fallbacks]
+        \@NX\definefontsynonym[\sf@style{#1}\s!Caps]      [\sfparameter\c!smallcaps] [\s!features=\sfparameter\c!smallcapsfeatures ,\s!fallbacks=\????sf#2\v!smallcaps\s!fallbacks]
+    \@NX\stoptypescript
+    \@NX\definetypeface[#3][\sf@family{#1}][#1][#3][default][\s!rscale=\sfparameter\c!scale]
+    \stopexpanded
+    \sf@setupfont{#3}
+\stoptexdefinition
+
+\newif\ifsf@setfont \sf@setfontfalse % need a better name
+
+\def\sf@setupfont#1%
+  {\doif{#1}\v!simplefonts
+     {\ifx\currentcomponent\v!component
+        \setupbodyfont[\v!simplefonts,\@@@sfsize]%
+      \else
+        \unless\ifsf@setfont\appendtoks\setupbodyfont[\v!simplefonts,\@@@@sfsize]\to\everystarttext\sf@setfonttrue\fi
+      \fi}}
+
+\def\sf@setupfont#1{\doif{#1}\v!simplefonts{\setupbodyfont[\v!simplefonts,\@@@@sfsize]}}
+
+%D The real code
+
+\def\sf@definetextfont[#1][#2][#3][#4]%
+  {\edef\@@sf@@{#1}%
+   \getparameters
+     [\????sf#1]
+     [\c!regular=,
+      \c!italic=,
+      \c!bold=,
+      \c!bolditalic=,
+      \c!smallcaps=,
+      \c!features=default,
+      \c!regularfeatures=\sfparameter\c!features,
+      \c!italicfeatures=\sfparameter\c!features,
+      \c!boldfeatures=\sfparameter\c!features,
+      \c!bolditalicfeatures=\sfparameter\c!features,
+      \c!smallcapsfeatures=smallcaps,
+      \c!weight=\v!normal,
+      \c!scale=1.0,
+      #4]%
+   \def\sf@dodefinetextfont##1{\modulecode{simplefonts.selectfont("#1","#3","\sfparameter{##1}","##1","\sfparameter\c!weight")}}%
+   \processcommalist[\v!regular,\v!italic,\v!bold,\v!bolditalic,\v!smallcaps]\sf@dodefinetextfont
+   \sf@typescript{\sfparameter\c!style}{#1}{#2}}
+
+\def\sf@definemathfont[#1][#2][#3][#4]%
+  {\edef\@@sf@@{#1}%
+   \getparameters[\????sf#1][\c!scale=1.0,#4]%
+   \lowercase{\edef\@@simplefont{#3}}%
+   \expanded{\definetypeface[#2][\c!mm][\v!math][\@@simplefont][default][\s!rscale=\sfparameter\c!scale]}\sf@setupfont{#2}}
+
+\def\sf@definetypeface[#1][#2][#3][#4]%
+  {\doifelsevalue{\????sf#1\c!style}\v!math
+     {\sf@definemathfont[#1][#2][#3][#4]}
+     {\sf@definetextfont[#1][#2][#3][#4]}}
+
+\def\sf@definefallback[#1][#2][#3][#4]%
+  {\getparameters
+     [\????sf#1]
+     [\c!regular=,
+      \c!italic=,
+      \c!bold=,
+      \c!bolditalic=,
+      \c!smallcaps=,
+      \c!weight=\v!normal,
+      \c!scale=1.0,
+      #4]%
+   \def\sf@dodefinefallback##1%
+     {\modulecode{simplefonts.selectfont("#1","#3","\csname\????sf#1##1\endcsname","##1","\v!normal")}%
+      \definefontfallback[\????sf#2##1\s!fallbacks][\csname\????sf#1##1\endcsname][\csname\????sf#1\c!range\endcsname][\s!rscale=\getvalue{\????sf#1\c!scale}]}%
+   \processcommalist[\v!regular,\v!italic,\v!bold,\v!bolditalic,\v!smallcaps]\sf@dodefinefallback
+   \doifinset{#2}{\v!mainfont,\v!sansfont,\v!monofont}
+     {\letvalue{*\v!simplefonts\@@@@sfsize\c!rm\c!tf\c!rm*}\undefined
+      \sf@setupfont\v!simplefonts}}
+
+%D \starttyping
+%D \definefontcommand[<command>][<typeface>][..,..=..,..]
+%D \stoptyping
+
+\def\definefontcommand
+  {\dotripleempty\dodefinefontcommand}
+
+\def\dodefinefontcommand[#1][#2][#3]%
+  {\getparameters[\????sf#1][\c!style=\v!serif,#3]%
+   \setvalue{\e!set#1}{\doquadrupleempty\sf@definetypeface[#1][#2]}}
+
+%D \starttyping
+%D \definesubfontcommand[<command>][<fontgroup>][..,..=..,..]
+%D \stoptyping
+
+\def\definesubfontcommand
+  {\dotripleempty\dodefinesubfontcommand}
+
+\def\dodefinesubfontcommand[#1][#2][#3]%
+  {\getparameters[\????sf#1][\c!range=,#3]%
+   \setvalue{\e!set#1}{\doquadrupleempty\sf@definefallback[#1][#2]}}
+
+%D \starttyping
+%D \definefontfamily[<command>][<font>][..,..=..,..]
+%D \stoptyping
+
+\def\definefontfamily
+  {\dotripleempty\dodefinefontfamly}
+
+\def\dodefinefontfamly[#1][#2][#3]%
+  {\getparameters[\????sf#1][\c!style=\v!serif]%
+   \sf@definetypeface[#1][#1][#2][#3]}
+
+%D \starttyping
+%D \simplefont[<font>][..,..=..,..]
+%D \stoptyping
+
+\newcounter\sf!default
+
+\def\simplefont
+  {\dodoubleempty\dosimplefont}
+
+\def\dosimplefont[#1][#2]%
+  {\doglobal\increment\sf!default
+   \getparameters[\????sf\s!default][\c!style=\v!serif]%
+   \sf@definetypeface[\s!default][simplefonts@default@\sf!default][#1][#2]\getvalue{simplefonts@default@\sf!default}}
+
+%D Default commands
+
+\definefontcommand[\v!mainfont][\v!simplefonts][\c!style=\v!serif]
+\definefontcommand[\v!sansfont][\v!simplefonts][\c!style=\v!sans ]
+\definefontcommand[\v!monofont][\v!simplefonts][\c!style=\v!mono ]
+\definefontcommand[\v!mathfont][\v!simplefonts][\c!style=\v!math ]
+
+% Direct definition of the main font commands but I prefer the indirect
+% method to be consistent with the subfont commands.
+%
+% \def\setmainfont{\dodoubleempty\dosetmainfont} \def\dosetmainfont[#1][#2]{\sf@definetextfont[\v!mainfont][\v!simplefonts][#1][\c!style=\v!serif,#2]}
+% \def\setsansfont{\dodoubleempty\dosetsansfont} \def\dosetsansfont[#1][#2]{\sf@definetextfont[\v!mainfont][\v!simplefonts][#1][\c!style=\v!sans ,#2]}
+% \def\setmonofont{\dodoubleempty\dosetmonofont} \def\dosetmonofont[#1][#2]{\sf@definetextfont[\v!mainfont][\v!simplefonts][#1][\c!style=\v!mono ,#2]}
+% \def\setmathfont{\dodoubleempty\dosetmathfont} \def\dosetmathfont[#1][#2]{\sf@definemathfont[\v!mainfont][\v!simplefonts][#1][\c!style=\v!math ,#2]}
+
+\definesubfontcommand[\v!cjk\v!mainfont][\v!mainfont][\c!range={0x00400-0x2FA1F}]
+\definesubfontcommand[\v!cjk\v!sansfont][\v!sansfont][\c!range={0x00400-0x2FA1F}]
+\definesubfontcommand[\v!cjk\v!monofont][\v!monofont][\c!range={0x00400-0x2FA1F}]
+
+\startmodulecode
+
+simplefonts = simplefonts or { }
+
+simplefonts.fontlist = {
+    ["aller"] =
+        {
+            ["light"] =
+                {
+                    regular    = "allerlight"       ,
+                    italic     = "allerlightitalic" ,
+                    bold       = "allerlight"       ,
+                    bolditalic = "allerlight"       ,
+                } ,
+            ["normal"] =
+                {
+                    regular    = "aller"           ,
+                    italic     = "alleritalic"     ,
+                    bold       = "allerbold"       ,
+                    bolditalic = "allerbolditalic" ,
+                } ,
+            ["display"] =
+                {
+                    regular    = "allerdisplay" ,
+                } ,
+        } ,
+    ["cambria"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "cambria"           ,
+                    italic     = "cambriaitalic"     ,
+                    bold       = "cambriabold"       ,
+                    bolditalic = "cambriabolditalic" ,
+                } ,
+        } ,
+    ["constantia"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "constantia"           ,
+                    italic     = "constantiaitalic"     ,
+                    bold       = "constantiabold"       ,
+                    bolditalic = "constantiabolditalic" ,
+                } ,
+        } ,
+    ["calibri"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "calibri"           ,
+                    italic     = "calibriitalic"     ,
+                    bold       = "calibribold"       ,
+                    bolditalic = "calibribolditalic" ,
+                } ,
+        } ,
+    ["candara"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "candara"           ,
+                    italic     = "candaraitalic"     ,
+                    bold       = "candarabold"       ,
+                    bolditalic = "candarabolditalic" ,
+                } ,
+        } ,
+    ["charteritcpro"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "charteritcproregular"    ,
+                    italic     = "charteritcproitalic"     ,
+                    bold       = "charteritcprobold"       ,
+                    bolditalic = "charteritcprobolditalic" ,
+                } ,
+            ["bold"] =
+                {
+                    regular    = "charteritcprobold"        ,
+                    italic     = "charteritcprobolditalic"  ,
+                    bold       = "charteritcproblack"       ,
+                    bolditalic = "charteritcproblackitalic" ,
+                } ,
+        } ,
+    ["corbel"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "corbel"           ,
+                    italic     = "corbelitalic"     ,
+                    bold       = "corbelbold"       ,
+                    bolditalic = "corbelbolditalic" ,
+                } ,
+        } ,
+    ["consolas"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "consolas"           ,
+                    italic     = "consolasitalic"     ,
+                    bold       = "consolasbold"       ,
+                    bolditalic = "consolasbolditalic" ,
+                } ,
+        } ,
+    ["dejavusans"] =
+        {
+            ["condensed"] =
+                {
+                    regular    = "dejavusanscondensed"            ,
+                    italic     = "dejavusanscondensedoblique"     ,
+                    bold       = "dejavusanscondensedbold"        ,
+                    bolditalic = "dejavusanscondensedboldoblique" ,
+                } ,
+            ["normal"] =
+                {
+                    regular    = "dejavusans"            ,
+                    italic     = "dejavusansoblique"     ,
+                    bold       = "dejavusansbold"        ,
+                    bolditalic = "dejavusansboldoblique" ,
+                } ,
+        } ,
+    ["dejavusansmono"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "dejavusansmono"            ,
+                    italic     = "dejavusansmonooblique"     ,
+                    bold       = "dejavusansmonobold"        ,
+                    bolditalic = "dejavusansmonoboldoblique" ,
+                } ,
+        } ,
+    ["dejavuserif"] =
+        {
+            ["condensed"] =
+                {
+                    regular    = "dejavuserifcondensed"           ,
+                    italic     = "dejavuserifcondenseditalic"     ,
+                    bold       = "dejavuserifcondensedbold"       ,
+                    bolditalic = "dejavuserifcondensedbolditalic" ,
+                } ,
+            ["normal"] =
+                {
+                    regular    = "dejavuserif"           ,
+                    italic     = "dejavuserifitalic"     ,
+                    bold       = "dejavuserifbold"       ,
+                    bolditalic = "dejavuserifbolditalic" ,
+                } ,
+        } ,
+    ["delicious"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "deliciousroman"      ,
+                    italic     = "deliciousitalic"     ,
+                    bold       = "deliciousbold"       ,
+                    bolditalic = "deliciousbolditalic" ,
+                    smallcaps  = "delicioussmallcaps"  ,
+                } ,
+            ["heavy"] =
+                {
+                    regular    = "deliciousheavy" ,
+                    italic     = "deliciousheavy" ,
+                    bold       = "deliciousheavy" ,
+                    bolditalic = "deliciousheavy" ,
+                } ,
+        } ,
+    ["hiraginominchopro"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "hiraminprow3" ,
+                    italic     = "hiraminprow3" ,
+                    bold       = "hiraminprow6" ,
+                    bolditalic = "hiraminprow6" ,
+                } ,
+        } ,
+    ["hiraginominchopron"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "hiraminpronw3" ,
+                    italic     = "hiraminpronw3" ,
+                    bold       = "hiraminpronw6" ,
+                    bolditalic = "hiraminpronw6" ,
+                } ,
+        } ,
+    ["hiraginomarugothicpro"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "hiramaruprow4" ,
+                    italic     = "hiramaruprow4" ,
+                    bold       = "hiramaruprow4" ,
+                    bolditalic = "hiramaruprow4" ,
+                } ,
+        } ,
+    ["hiraginomarugothicpron"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "hiramarupronw4" ,
+                    italic     = "hiramarupronw4" ,
+                    bold       = "hiramarupronw4" ,
+                    bolditalic = "hiramarupronw4" ,
+                } ,
+        } ,
+    ["hiraginokakugothicpro"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "hirakakuprow3" ,
+                    italic     = "hirakakuprow3" ,
+                    bold       = "hirakakuprow6" ,
+                    bolditalic = "hirakakuprow6" ,
+                } ,
+        } ,
+    ["hiraginokakugothicpron"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "hirakakupronw3" ,
+                    italic     = "hirakakupronw3" ,
+                    bold       = "hirakakupronw6" ,
+                    bolditalic = "hirakakupronw6" ,
+                } ,
+        } ,
+    ["hiraginokakugothicstd"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "hirakakustdw8" ,
+                    italic     = "hirakakustdw8" ,
+                    bold       = "hirakakustdw8" ,
+                    bolditalic = "hirakakustdw8" ,
+                } ,
+        } ,
+    ["hiraginokakugothicstdn"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "hirakakustdnw8" ,
+                    italic     = "hirakakustdnw8" ,
+                    bold       = "hirakakustdnw8" ,
+                    bolditalic = "hirakakustdnw8" ,
+                } ,
+        } ,
+    ["iwona"] =
+        {
+            ["light"] =
+                {
+                    regular    = "iwonalightregular"  ,
+                    italic     = "iwonalightitalic"   ,
+                    bold       = "iwonamediumregular" ,
+                    bolditalic = "iwonamediumitalic"  ,
+                } ,
+            ["normal"] =
+                {
+                    regular    = "iwonaregular"    ,
+                    italic     = "iwonaitalic"     ,
+                    bold       = "iwonabold"       ,
+                    bolditalic = "iwonabolditalic" ,
+                } ,
+            ["medium"] =
+                {
+                    regular    = "iwonamediumregular" ,
+                    italic     = "iwonamediumitalic"  ,
+                    bold       = "iwonaheavyregular"  ,
+                    bolditalic = "iwonaheavyitalic"   ,
+                } ,
+            ["heavy"] =
+                {
+                    regular    = "iwonaheavyregular" ,
+                    italic     = "iwonaheavyitalic"  ,
+                    bold       = "iwonaheavyregular" ,
+                    bolditalic = "iwonaheavyitalic"  ,
+                } ,
+        } ,
+    ["justus"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "justusoldstyle"       ,
+                    italic     = "justusitalicoldstyle" ,
+                    bold       = "justusoldstyle"       ,
+                    bolditalic = "justusoldstyle"       ,
+                    smallcaps  = "justusversalitas"     ,
+                } ,
+        } ,
+    ["kurier"] =
+        {
+            ["light"] =
+                {
+                    regular    = "kurierlightregular"  ,
+                    italic     = "kurierlightitalic"   ,
+                    bold       = "kuriermediumregular" ,
+                    bolditalic = "kuriermediumitalic"  ,
+                } ,
+            ["normal"] =
+                {
+                    regular    = "kurierregular"    ,
+                    italic     = "kurieritalic"     ,
+                    bold       = "kurierbold"       ,
+                    bolditalic = "kurierbolditalic" ,
+                } ,
+            ["medium"] =
+                {
+                    regular    = "kuriermediumregular" ,
+                    italic     = "kuriermediumitalic"  ,
+                    bold       = "kurierheavyregular"  ,
+                    bolditalic = "kurierheavyitalic"   ,
+                } ,
+        } ,
+    ["liberationmono"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "liberationmono"           ,
+                    italic     = "liberationmonoitalic"     ,
+                    bold       = "liberationmonobold"       ,
+                    bolditalic = "liberationmonobolditalic" ,
+                } ,
+        } ,
+    ["liberationsans"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "liberationsans"           ,
+                    italic     = "liberationsansitalic"     ,
+                    bold       = "liberationsansbold"       ,
+                    bolditalic = "liberationsansbolditalic" ,
+                } ,
+        } ,
+    ["liberationserif"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "liberationserif"           ,
+                    italic     = "liberationserifitalic"     ,
+                    bold       = "liberationserifbold"       ,
+                    bolditalic = "liberationserifbolditalic" ,
+                } ,
+        } ,
+    ["linuxbiolinum"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "linuxbiolinumo" ,
+                    italic     = "linuxbiolinumo" ,
+                    bold       = "linuxbiolinumobold" ,
+                    bolditalic = "linuxbiolinumobold" ,
+                } ,
+        } ,
+    ["linuxlibertine"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "linuxlibertineo"           ,
+                    italic     = "linuxlibertineoitalic"     ,
+                    bold       = "linuxlibertineobold"       ,
+                    bolditalic = "linuxlibertineobolditalic" ,
+                    smallcaps  = "linuxlibertineocapitals"   ,
+                } ,
+        } ,
+    ["luximono"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "luximonoregular"     ,
+                    italic     = "luximonooblique"     ,
+                    bold       = "luximonobold"        ,
+                    bolditalic = "luximonoboldoblique" ,
+                } ,
+        } ,
+    ["luxisans"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "luxisansregular"     ,
+                    italic     = "luxisansoblique"     ,
+                    bold       = "luxisansbold"        ,
+                    bolditalic = "luxisansboldoblique" ,
+                } ,
+        } ,
+    ["luxiserif"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "luxiserifregular"     ,
+                    italic     = "luxiserifoblique"     ,
+                    bold       = "luxiserifbold"        ,
+                    bolditalic = "luxiserifboldoblique" ,
+                } ,
+        } ,
+    ["pigiarniq"] =
+        {
+            ["light"] =
+                {
+                    regular    = "pigiarniqlight" ,
+                    italic     = "pigiarniqlight" ,
+                    bold       = "pigiarniqlight" ,
+                    bolditalic = "pigiarniqlight" ,
+                } ,
+            ["normal"] =
+                {
+                    regular    = "pigiarniq"       ,
+                    italic     = "pigiarniqitalic" ,
+                    bold       = "pigiarniqbold"   ,
+                    bolditalic = "pigiarniqbold"   ,
+                } ,
+            ["heavy"] =
+                {
+                    regular    = "pigiarniqheavy" ,
+                    italic     = "pigiarniqheavy" ,
+                    bold       = "pigiarniqheavy" ,
+                    bolditalic = "pigiarniqheavy" ,
+                } ,
+        } ,
+    ["texgyreadventor"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "texgyreadventorregular"    ,
+                    italic     = "texgyreadventoritalic"     ,
+                    bold       = "texgyreadventorbold"       ,
+                    bolditalic = "texgyreadventorbolditalic" ,
+                } ,
+        } ,
+    ["texgyrebonum"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "texgyrebonumregular"    ,
+                    italic     = "texgyrebonumitalic"     ,
+                    bold       = "texgyrebonumbold"       ,
+                    bolditalic = "texgyrebonumbolditalic" ,
+                } ,
+        } ,
+    ["texgyrechorus"] =
+        {
+            ["medium"] =
+                {
+                    regular = "texgyrechorusmediumitalic" ,
+                    italic = "texgyrechorusmediumitalic" ,
+                    bold = "texgyrechorusmediumitalic" ,
+                    bolditalic = "texgyrechorusmediumitalic" ,
+                } ,
+        } ,
+    ["texgyrecursor"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "texgyrecursorregular"    ,
+                    italic     = "texgyrecursoritalic"     ,
+                    bold       = "texgyrecursorbold"       ,
+                    bolditalic = "texgyrecursorbolditalic" ,
+                } ,
+        } ,
+    ["texgyreheros"] =
+        {
+            ["condensed"] =
+                {
+                    regular    = "texgyreheroscondensedregular"    ,
+                    italic     = "texgyreheroscondenseditalic"     ,
+                    bold       = "texgyreheroscondensedbold"       ,
+                    bolditalic = "texgyreheroscondensedbolditalic" ,
+                } ,
+            ["normal"] =
+                {
+                    regular    = "texgyreherosregular"    ,
+                    italic     = "texgyreherositalic"     ,
+                    bold       = "texgyreherosbold"       ,
+                    bolditalic = "texgyreherosbolditalic" ,
+                } ,
+        } ,
+    ["texgyrepagella"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "texgyrepagellaregular"    ,
+                    italic     = "texgyrepagellaitalic"     ,
+                    bold       = "texgyrepagellabold"       ,
+                    bolditalic = "texgyrepagellabolditalic" ,
+                } ,
+        } ,
+    ["texgyreschola"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "texgyrescholaregular"    ,
+                    italic     = "texgyrescholaitalic"     ,
+                    bold       = "texgyrescholabold"       ,
+                    bolditalic = "texgyrescholabolditalic" ,
+                } ,
+        } ,
+    ["texgyretermes"] =
+        {
+            ["normal"] =
+                {
+                    regular    = "texgyretermesregular"    ,
+                    italic     = "texgyretermesitalic"     ,
+                    bold       = "texgyretermesbold"       ,
+                    bolditalic = "texgyretermesbolditalic" ,
+                } ,
+        } ,
+    ["uqammaq"] =
+        {
+            ["light"] =
+                {
+                    regular    = "uqammaqlight" ,
+                    italic     = "uqammaqlight" ,
+                    bold       = "uqammaqlight" ,
+                    bolditalic = "uqammaqlight" ,
+                } ,
+            ["normal"] =
+                {
+                    regular    = "uqammaq"     ,
+                    italic     = "uqammaq"     ,
+                    bold       = "uqammaqbold" ,
+                    bolditalic = "uqammaqbold" ,
+                } ,
+            ["heavy"] =
+                {
+                    regular    = "uqammaqheavy" ,
+                    italic     = "uqammaqheavy" ,
+                    bold       = "uqammaqheavy" ,
+                    bolditalic = "uqammaqheavy" ,
+                } ,
+        } ,
+}
+
+simplefonts.extlist = {
+    ["condensed"] =
+        {
+            regular    = { "condensedregular" , "condregular" , "condensed" } ,
+            italic     = { "condenseditalic" , "condensedoblique" , "conditalic" , "condensedregular" , "condregular" , "condensed" } ,
+            bold       = { "condensedbold" , "condbold" , "condensedregular" , "condregular" , "condensed" } ,
+            bolditalic = { "condensedbolditalic" , "condensedboldoblique" , "condbolditalic" , "condensedbold" , "condbold" , "condensedregular" , "condregular" , "condensed" } ,
+            smallcaps  = { "condensedregular" , "condregular" , "condensed" } ,
+        } ,
+    ["light"] =
+        {
+            regular    = { "lightregular" , "light" } ,
+            italic     = { "lightitalic" , "lightoblique" , "lightregular" , "light" } ,
+            bold       = { "bookregular" , "regular" , "book" , "lightregular" , "light" } ,
+            bolditalic = { "bookitalic" , "book" , "italic" , "oblique" , "bookregular" , "regular" , "book" , "lightregular" , "light" } ,
+            smallcaps  = { "smallcapslight" , "lightregular" , "light" } ,
+        } ,
+    ["normal"] =
+        {
+            regular    = { "regular" , "roman" , "normal" , "book" , "" } ,
+            italic     = { "italic" , "it" , "oblique" , "kursiv" , "bookitalic" , "regular" , "roman" , "normal" , "book" , "" } ,
+            bold       = { "bold" , "bd" , "kraeftig" , "mediumregular" , "semibold" , "demi" , "regular" , "roman" , "normal" , "book" , "" } ,
+            bolditalic = { "bolditalic" , "boldit" , "bdit" , "boldoblique" , "mediumitalic" , "semibolditalic" , "demiitalic" , "bold" , "bd" , "kraeftig" , "mediumregular" , "semibold" , "demi" , "regular" , "roman" , "normal" , "book" , "" } ,
+            smallcaps  = { "smallcaps" , "capitals" , "sc" , "regular" , "roman" , "normal" , "book" , "" } ,
+        } ,
+    ["medium"] =
+        {
+            regular    = { "mediumregular" , "medregular" , "medium" } ,
+            italic     = { "mediumitalic" , "meditalic" , "mediumregular" , "medregular" , "medium" } ,
+            bold       = { "heavyregular" , "heavy" , "mediumregular" , "medregular" , "medium" } ,
+            bolditalic = { "heavyitalic" , "heavyregular" , "heavy" , "mediumregular" , "medregular" , "medium" } ,
+            smallcaps  = { "mediumcaps" , "mediumregular" , "medregular" , "medium" } ,
+        } ,
+}
+
+function simplefonts.selectfont(font,name,extension,style,weight)
+    local fontname = {}
+    local name     = string.lower(string.gsub(name," ",""))
+    if extension ~= "" then
+        ext = string.find(extension,"*")
+        if ext ~= nil then
+            fontname = string.gsub(extension,"*",name)
+        else
+            fontname = extension
+        end
+        fontname = "name:" .. string.lower(string.gsub(fontname," ",""))
+    else
+        if simplefonts.fontlist[name] ~= nil then
+            if simplefonts.fontlist[name][weight] ~= nil then
+                if simplefonts.fontlist[name][weight][style] ~= nil then
+                    fontname = simplefonts.fontlist[name][weight][style]
+                else
+                    fontname = simplefonts.fontlist[name][weight]["regular"]
+                end
+            elseif simplefonts.fontlist[name]["normal"] ~= nil then
+                if simplefonts.fontlist[name]["normal"][style] ~= nil then
+                    fontname = simplefonts.fontlist[name]["normal"][style]
+                else
+                    fontname = simplefonts.fontlist[name]["normal"]["regular"]
+                end
+            end
+            fontname = "name:" .. fontname
+        else
+            -- use comma list
+            for _, v in global.ipairs(simplefonts.extlist[weight][style]) do
+                fontname = name .. v
+                if global.fonts.names.exists(fontname) then
+                    fontname = "name:" .. fontname
+                    break
+                else
+                    fontname = "DefaultFont" -- no font is found
+                end
+            end
+        end
+    end
+    -- global.print(fontname)
+    tex.sprint(string.format("\\setvalue{@@@@sf%s%s}{%s}",font,style,fontname))
+end
+
+\stopmodulecode
+
+\setupsimplefonts[\c!size=\moduleparameter\v!simplefonts\c!size]
+
+\stopmodule
+
+\protect \endinput
