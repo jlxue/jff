@@ -1,3 +1,13 @@
+## seems broken:
+##
+## http://liyanrui.is-programmer.com/posts/10360.html
+## "忙活了很久，现在才发现只要使用 pre_linebreak_filter 回调函数，那么
+## fallback 字体机制就会失去作用，看样子是跟 Hans 的代码有所冲突。 
+## 心灰意冷，不搞了，跟那么一堆很恶心的代码搏斗，实在没有意思。还是把心思放
+## 回 Conote 上来。"
+
+
+
 from http://bbs.ctex.org/viewthread.php?tid=50440
 
 
