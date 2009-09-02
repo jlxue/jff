@@ -1,0 +1,12 @@
+$ dd if=/dev/zero of=lguest.img bs=1M count=2048
+
+# modprobe lg
+# ifconfig eth0 0.0.0.0
+# brctl addbr lg0
+# ifconfig lg0 up
+# brctl addif lg0 eth0
+# dhclient lg0
+
+./lguest 128 /vmlinuz --tunnet=bridge:lg0 --initrd=/initrd.img --block=lguest.img root=/dev/vda
+
+

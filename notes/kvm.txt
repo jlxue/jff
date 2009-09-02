@@ -1,0 +1,5 @@
+aptitude install kvm
+sudo adduser dieken kvm
+kvm-img create -f qcow2 kvm.img 10G
+kvm -hda kvm.img -initrd netboot/initrd.gz -kernel netboot/linux -append debconf/priority=low
+
