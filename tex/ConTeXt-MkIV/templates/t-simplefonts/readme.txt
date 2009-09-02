@@ -1,4 +1,8 @@
+from http://bitbucket.org/wolfs/simplefonts/ at rev e93f68af160e
+
+
 from http://bbs.ctex.org/viewthread.php?tid=49623
+
 
 [ConTeXt] MkIV simplefonts module
 Wolfgang Schuster 最近写了一个用于设定不同语言字体的模块（现在可以用它替
