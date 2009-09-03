@@ -1,0 +1,15 @@
+!! Note:
+!! X server reads ~/.Xresources and X clients read ~/.Xdefaults-`hostname`
+!! See /etc/X11/Xsession.d/30x11-common_xresources and
+!!   strace -o log xeyes; killall xeyes; grep "^open.*$HOME" log
+
+URxvt.font:xft:DejaVu Sans Mono-10:book,xft:AR PL UMing CN-10:medium
+URxvt.boldFont:xft:DejaVu Sans Mono-10:bold,xft:AR PL UMing CN-10:bold
+
+! for ssh-askpass
+!
+SshAskpass*grabServer:              true
+SshAskpass*grabPointer:             true
+SshAskpass*Indicator.minimumCount:  3
+SshAskpass*Indicator.maximumCount:  6
+
