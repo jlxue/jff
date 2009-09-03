@@ -1,0 +1,31 @@
+cd llvm-build
+../llvm-2.5/configure --prefix=/opt --enable-optimized --enable-jit
+    --enable-doxygen
+
+Module* mod = new Module(...);
+Constant* c = mod->getOrInsertFunction(...);
+Function* f = cast<Function>(c);
+f->arg_begin();
+
+BasicBlock* block = BasicBlock::Create("entry", f);
+IRBuilder builder(block);
+builder.CreateBinOp(.....);
+builder.CreateRet(...);
+
+verifyModule(*mod, PrintMessageAction);
+
+PassManager pm;
+pm.add(new PrintModulePass(&llvm::cout));
+pm.run(*mod);
+
+delete mod;
+===============================
+new Module(...)           getOrInsertFunction()
+---------------> Module -----------------------> Function
+                                                    |
+                                                    v
+                                                BasicBlock
+                                                    |
+                                                    v
+                                                   Op
+

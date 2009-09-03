@@ -1,0 +1,73 @@
+* 获取代码
+
+svn checkout https://svn.parrot.org/languages/lisp/trunk lisp
+
+
+* 入口
+
+lisp.pir 的 _common_lisp 子例程被标记上了 :main 属性。
+
+
+* 执行过程
+
+lisp.pir
+  .include 'include/macros.pir'
+    .include "include/macros/assert.pir"
+      定义一些断言
+    .include "include/macros/error.pir"
+      报告错误
+    .include "include/macros/list.pir"
+      定义 NULL, CAR, APPEND, CDR, SECOND, THIRD,
+      FOURTH, LIST_1, LIST_2, LIST_3
+    .include "include/macros/standard.pir"
+      定义 NIL, TRUE, CONSTANT,  CONSTANTP, SPECIAL_FORM,
+      DEFUN, DEFMACRO, DEFVAR
+    .include "include/macros/types.pir"
+      定义 CONS, STRING, STREAM, READTABLE, FLOAT, INTEGER,
+      HASH, PACKAGE, FUNCTION, MACRO
+  .include 'types.pir'
+    定义如下类型：
+      LispCons:		FixedPMCArray 的子类，只有两个元素
+      LispFloat: 	Float 的子类
+      LispFunction: 	拥有 documentation, args, body, name, scope 属性
+      LispMacro: 	LispFunction 的子类
+      LispSpecialForm: 	LispFunction 的子类
+      LispHash: 	Hash 的子类
+      LispInteger: 	Integer 的子类
+      LispPackage:	拥有 external, internal, name 属性
+            external 和 internal 都是 Hash 类的实例
+            _lookup_symbol(string name)
+                在 internal 这个哈希表中查找 name 对应的 value，
+                此 value 是一个 symbol 对象的 ResizablePMCArray，返回最顶层
+                的那个 symbol 对象
+            _import_symbol(Symbol)
+                将此 symbol 存入 internal 哈希表中对应名字的数组中
+            _shadow_symbol(string name)
+                建立一个 symbol 存入 internal 哈希表中对应名字的数组中
+            _unshadow_symbol(string name)
+                将 internal 哈希表中对应名字的数组中最后一个元素去掉
+            _get_exports()
+                返回 external 哈希表中所有 key
+            _export_symbol(name)
+                将 internal 哈希表中 name 对应的数组复制到 external 哈希表中，
+                如果 internal 中 name 对应的数组不存在，则调用_intern_symbol(name),
+                然后将此数组放入 external 中，并返回数组最后一个元素
+            _intern_symbol(name)
+                如果 internal 哈希表中有 name 对应的数组，则返回数组最后一个元素,
+                否则新建一个 symbol，放入数组中，并返回此 symbol
+      LispReadtable:拥有 table, case 属性
+            __init()
+                table 是一个 128 个字符的 Array 对象
+      LispStream:	拥有 stream 属性
+      LispString:	String 的子类
+      LispSymbol:	拥有 documentation, function, name, package, special, value 属性
+  .include 'read.pir'
+     lexing and parsing, reader macros
+     _read()
+  .include 'eval.pir'
+     _eval()
+  .include 'system.pir'
+  .include 'validate.pir'
+  .include 'cl.pir'
+  .include 'internals.pir'
+

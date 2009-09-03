@@ -149,11 +149,20 @@ The AXIOM family:
 
 Hoekey, AutoHotKey, Type and Run
 
-Gimp, Blender, Inkscape, Scribus
+Gimp, Blender, Inkscape, Scribus, Dia, XFig
+Google SketchUp
+
 Krita       http://www.koffice.org/krita/
 MyPaint     http://mypaint.intilinux.com/
-ArtWeaver   http://www.artweaver.de/
+TuxPaint    http://tuxpaint.org/
 ArtRage     http://www.artrage.com/
+ArtWeaver   http://www.artweaver.de/
+DeepPaint
+Gimp Painter Studio     http://code.google.com/p/gps-gimp-paint-studio/
+gimp-painter    http://gimp-painter.blogspot.com/
+Autodesk Sketchbook
+Corel Painter
+http://thedarkmaster.wordpress.com/2007/08/12/painting-programs-for-linux/
 
 bugzilla, mantis, trac, cvstrac, jira
 

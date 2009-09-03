@@ -6,7 +6,7 @@ if [ -z "$1" ] ; then
 fi
 
 while read d; do
-    find "$d" -type f -iregex '.*\.\(c\|h\|cpp\|java\)'
+    /usr/bin/find "$d" -type f -iregex '.*\.\(c\|h\|cpp\|java\|cc\|cxx\)' -print
 done < "$1"  > cscope.files
 
 rm cscope.*out tags

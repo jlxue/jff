@@ -123,6 +123,7 @@ Perl::Critic
 Perl::Tidy
 perlcritic
 POE
+Coro
 POSIX
 ptkdb
 Regex::Assemble

@@ -1,0 +1,21 @@
+lisp 源码
+    bootstrap: flex
+    formal: lisp
+
+lisp 数据类型：
+number, character, string, list, vector
+atom, symbol
+
+lisp function form
+lisp special form
+lisp macro form
+
+25 special operators:
+quote, if, progn
+let, let*, setq, flet, labels, macrolet, symbol-macrolet,
+block, return-from, tagbody, go
+catch, throw, unwind-protect,
+multiple-value-call
+eval-when
+locally, the, load-time-value, progv
+

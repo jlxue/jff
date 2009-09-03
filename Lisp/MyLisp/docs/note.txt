@@ -1,0 +1,52 @@
+变量有如下属性：
+存储地址，值，类型，长度，名字
+
+字面量可以内嵌在代码里，也可能放在数据区，
+对于后者，就跟变量含义一样，只是值不可更改。
+对于前者，代码本身就是一个变量，类型为代码。
+
+值就是一串 octet，长度指 octet 的个数，怎么
+解释这个值看具体什么操作，而这个操作受限于
+变量类型。
+
+地址也是一种数据类型。
+
+基础指令：条件转移，无条件转移
+================
+垃圾回收的处理：
+
+方法一，间接引用型，所有间接引用都处于栈上，
+形成一个链表，当垃圾回收发生数据移动时，遍历
+这个链表修改引用对象里的数据指针。
+
+class DataObject {          /* allocated on heap    */
+    ...data...
+}
+
+class RefObject {           /* allocated on stack   */
+    DataObject* obj;        /* oop map ??           */
+}
+
+缺点，间接引用影响效率。
+
+
+方法二，直接引用型，记录哪个数据，哪个代码引用了某个数据，
+在发生数据移动时，修改引用本身。类似 ELF 的动态链接。
+
+var a = some_data;
+记录 (&some_data, &a) 对应关系，当 some_data 移动位置时，
+修改 &a 的内容。
+
+缺点，可能多占用点内存
+优点，直接引用效率高。
+====================================================
+atom, symbol, character, string, integer, float, fraction, complex
+    ' ` , ,@
+s-exp
+form: function form, special form, macro form
+======================================================
+libgmp, libmpfr, libffi, ffcall, http://mpfi.gforge.inria.fr/,
+http://www.informatik.uni-trier.de/iRRAM/
+http://www.ginac.de/CLN/    Common Lisp Number
+ttmatch
+

@@ -19,7 +19,7 @@ map-reduce framework:
     http://discoproject.org/
 
 web server:
-    inets, yaws, mochiweb, crary
+    inets, yaws, mochiweb, crary, misultin(http://code.google.com/p/misultin/)
 
 web client:
     ibrowse, inets

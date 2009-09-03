@@ -1,0 +1,10 @@
+2009-04-06
+    阅读 LLVM 文档
+
+2009-04-08
+    阅读 parrot/languages/lisp 代码 (https://svn.parrot.org/languages/lisp/trunk)
+
+2009-04-09
+    阅读 kea-cl 代码 (https://rgrjr.dyndns.org/svn/kea-cl/trunk)
+    阅读 scmtoy-llvm 代码 (git://github.com/chylli/scmtoy-llvm.git)
+
