@@ -7,3 +7,13 @@
 alias psf='ps -ouid_hack:20,pid,ppid,c,stime,tname,time,cmd'
 alias apt='aptitude -F "%c%a%M%T %p %V %v %R:%12s %r %D %I - %60d"'
 
+alias newsmth='luit -encoding GBK bbs.sh'
+alias minicom='minicom -w'
+
+alias mv='mv -i'
+alias cp='cp -i'
+. $HOME/bin/safe_rm.sh
+alias rm=safe_rm
+
+alias c=clear
+
