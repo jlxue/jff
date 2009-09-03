@@ -1,0 +1,45 @@
+Learning Perl
+Learning Perl on Win32 System
+
+Intermediate Perl
+
+Advanced Perl Programming (1st ed)
+Advanced Perl Programming (2nd ed)
+
+Mastering Perl (http://www252.pair.com/comdog/mastering_perl/Chapters/)
+
+Programming Perl
+
+Perl Best Practices
+Mastering Regular Expressions
+
+==============================
+
+CGI Programming with Perl
+Effective Perl Programming
+Extending and Embedding Perl
+Graphics Programming with Perl
+Higher Order Perl
+Impatient Perl
+Mastering Algorithms with Perl
+Mastering Perl/Tk
+MySQL and Perl for the Web
+Network Programming with Perl
+Perl 6 and Parrot Essentials
+Perl 6 Essentials
+Perl By Example
+Perl Cookbook
+Perl Hacks, Tips and Tools for Programming Debugging and Surviving
+Perl in a nutshell
+Perl & LWP
+Perl Testing
+Practical Mod Perl
+Programming the Perl DBI
+Spidering Hacks
+The Perl Review
+Win32 Perl Programming - The Standard Extensions
+Writing CGI Applications With Perl
+
+x-13-2
+The Perl CD Bookshelf
+
