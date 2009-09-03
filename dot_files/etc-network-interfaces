@@ -19,7 +19,7 @@
 
 # Optional software packages:
 #   iputils*, inetutils*, traceroute
-#   dnsutils, nscd, dnsmasq, pdnsd, bind9, bind9, bind9utils
+#   dnsutils, nscd, dnsmasq, pdnsd, bind9, bind9utils
 #   ifrename
 #   avahi*
 #   laptop-mode-tools
