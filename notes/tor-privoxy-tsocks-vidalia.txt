@@ -1,0 +1,25 @@
+1. aptitude install -r vidalia
+配置 vidalia 时有两种启动方式，具体见 /usr/share/doc/vidalia/README.Debian
+
+2. echo "forward-socks4a / localhost:9050 ." >> /etc/privoxy/config
+
+3. 设置 firefox 代理为 localhost, 8118
+
+4. sudo /etc/init.d/tor restart (如果让 vidalia 启动 tor 则启动 vidalia)
+   sudo /etc/init.d/privoxy restart
+
+另外可以用 torbutton 或者 foxyproxy 插件，前者可以避免手工设置
+firefox 的代理，后者可以针对不同 url 设置是否使用代理以及哪个代理, 
+而且 foxyproxy 可以直接设置 socks 代理，不使用 privoxy，新版 foxyproxy
+增加了 tor wizard，使用很简单。
+
+参考：
+
+    http://linux.chinaunix.net/techdoc/system/2008/12/17/1053639.shtml
+    http://hi.baidu.com/xiaopaozi/blog/item/966d0403db639781d43f7ca4.html
+
+## 网上说的 tsock 设置对于 firefox 联网不是必须的：
+## /etc/tsocks.conf:
+## server = 127.0.0.1
+## server_type = 5
+## server_port = 9050
