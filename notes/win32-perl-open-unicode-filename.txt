@@ -1,0 +1,37 @@
+发信人: flw (没有“昵”称), 信区: Perl
+标  题: Win32 下 Perl 中打开文件名是 unicode 编码的文件
+发信站: 水木社区 (Fri Jul  3 11:12:05 2009), 站内
+
+【 以下文字转载自 Python 讨论区 】
+发信人: flw (没有“昵”称), 信区: Python
+标  题: Re: Python 的正则表达式支持对 unicode 支持如何？
+发信站: 水木社区 (Fri Jul  3 10:59:33 2009), 转信
+
+你完全错了。你根本就不懂 Perl 这一块的细节。
+
+下面是根据 Dieken 昨天给出的搜索结果里的代码改写的，
+测试通过：
+
+use strict;
+use Fcntl qw(O_RDONLY);
+
+use Win32API::File qw(CreateFileW OsFHandleOpenFd :FILE_ OPEN_EXISTING);
+use Encode qw(encode);
+
+my $h = CreateFileW( encode("UTF-16LE", "\x{2022}.txt\0"), FILE_READ_DATA,
+                           0, [], OPEN_EXISTING, 0, [] );
+my $fd = OsFHandleOpenFd( $h, O_RDONLY );
+
+die if $fd < 0;
+open(my $fh, "<&=$fd");
+print <$fh>;
+
+【 在 ironcool (月半子) 的大作中提到: 】
+: 我觉得99%不行 不是说你不能调用CreateFileW
+: 而是内部如果还是使用char的话，也是白搭
+
+
+--
+
+※ 修改:・flw 于 Jul  3 11:12:58 2009 修改本文・[FROM: 61.135.207.*]
+※ 来源:・水木社区 newsmth.net・[FROM: 61.135.207.*]
