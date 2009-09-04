@@ -1,3 +1,3 @@
-ConTeXt MkIV ÎÄµµÄ£°å£¬´ó²¿·Ö´úÂëÀ´×Ô Liu Yanrui µÄ
-ctxnotes£ºhttp://code.google.com/p/ctxnotes/
+ConTeXt MkIV æ–‡æ¡£æ¨¡æ¿ï¼Œå¤§éƒ¨åˆ†ä»£ç æ¥è‡ª Liu Yanrui çš„
+ctxnotesï¼šhttp://code.google.com/p/ctxnotes/
 
