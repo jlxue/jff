@@ -1,0 +1,96 @@
+See http://www.tug.org/texlive/pretest.html
+
+$ mkdir t && cd t && wget http://ftp.klid.dk/ftp/texlive/tlnet/install-tl-unx.tar.gz
+$ tar xf install-tl-unx.tar.gz
+$ install-tl/install-tl -gui perltk -repository http://ftp.ctex.org/mirrors/texlive/tlnet/
+
+    Selected scheme: scheme-basic
+    Standard collections:
+      *     collection-basic                Essential programs and files
+      ?     collection-bibtexextra          Extra BibTeX styles
+      ?     collection-binextra             TeX auxiliary programs
+            collection-context              ConTeXt format
+      ?     collection-fontsextra           Extra fonts
+      +     collection-fontsrecommended     Recommended fonts
+      ?     collection-fontutils            TeX and Outline font utilities
+            collection-formatsextra         Extra formats
+            collection-games                Games typesetting
+      ?     collection-genericextra         Extra generic packages
+      ?     collection-genericrecommended   shortdesc Recommended generic packages
+            collection-htmlxml              HTML/SGML/XML support
+            collection-humanities           Humanities packages
+      *     collection-latex                Basic LaTeX packages
+            collection-latex3               LaTeX3 packages
+      ?     collection-latexextra           LaTeX supplementary packages
+      +     collection-latexrecommended     LaTeX recommended packages
+            collection-luatex               LuaTeX packages
+      ?     collection-mathextra            Advanced math typesetting
+      ?     collection-metapost             MetaPost (and Metafont) drawing packages
+            collection-music                Music typesetting
+            collection-omega                Omega
+            collection-pictures             Graphics packages and programs.
+            collection-plainextra           Plain TeX supplementary packages
+            collection-pstricks             PSTricks packages
+            collection-publishers           Support for publishers, theses, standards, conferences, etc.
+            collection-science              Typesetting for natural and computer sciences
+            collection-texinfo              GNU Texinfo
+            collection-wintools             Windows support programs
+      +     collection-xetex                XeTeX packages
+
+    Language collections:
+            collection-langcjk
+            collection-langlatin
+
+    Install font/macro doc tree:    No
+    Install font/macro source tree: No
+================================================================================
+    disk spaces required: 273 MB
+
+    time used: 2 min
+
+================================================================================
+安装最后的日志：
+
+Time used for installing the packages: 01:26
+running mktexlsr /home/dieken/texlive/2009/texmf-dist
+/home/dieken/texlive/2009/texmf
+mktexlsr: Updating /home/dieken/texlive/2009/texmf-dist/ls-R...
+mktexlsr: Updating /home/dieken/texlive/2009/texmf/ls-R...
+mktexlsr: Done.
+writing fmtutil.cnf data to
+/home/dieken/texlive/2009/texmf-var/web2c/fmtutil.cnf
+writing updmap.cfg to
+/home/dieken/texlive/2009/texmf-config/web2c/updmap.cfg
+writing language.dat data to
+/home/dieken/texlive/2009/texmf-var/tex/generic/config/language.dat
+writing language.def data to
+/home/dieken/texlive/2009/texmf-var/tex/generic/config/language.def
+running mktexlsr /home/dieken/texlive/2009/texmf-var
+mktexlsr: Updating /home/dieken/texlive/2009/texmf-var/ls-R...
+mktexlsr: Done.
+running updmap-sys... done
+re-running mktexlsr /home/dieken/texlive/2009/texmf-var
+mktexlsr: Updating /home/dieken/texlive/2009/texmf-var/ls-R...
+mktexlsr: Done.
+pre-generating all format files (fmtutil-sys --all), be patient...done
+running package specific postactions
+finished with package specific postactions
+
+ See
+   /home/dieken/texlive/2009/index.html
+ for links to documentation.  The TeX Live web site
+(http://tug.org/texlive/)
+ contains any updates and corrections.
+
+ TeX Live is a joint project of the TeX user groups around the world;
+ please consider supporting it by joining the group best for you. The
+ list of groups is available on the web at
+http://tug.org/usergroups.html.
+
+ Add /home/dieken/texlive/2009/texmf/doc/man to MANPATH.
+ Add /home/dieken/texlive/2009/texmf/doc/info to INFOPATH.
+ Most importantly, add /home/dieken/texlive/2009/bin/i386-linux
+ to your PATH for current and future sessions.
+ 
+ Welcome to TeX Live!
+
