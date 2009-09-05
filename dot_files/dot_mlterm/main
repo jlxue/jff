@@ -29,3 +29,4 @@ bg_color=black
 # ENCODING=auto
 fontsize=14
 line_space=1
+word_separators=" "
