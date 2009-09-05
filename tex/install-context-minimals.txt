@@ -1,0 +1,5 @@
+mkdir context-minimals && cd context-minimals
+wget http://minimals.contextgarden.net/setup/first-setup.sh
+chmod u+x ./first-setup.sh
+./first-setup.sh --extras=all
+
