@@ -5,7 +5,7 @@
 
 ! http://www.newsmth.net/bbscon.php?bid=392&id=663697
 !
-URxvt.font:xft:DejaVu Sans Mono-10:book,xft:AR PL UMing CN-10:medium
+URxvt.font:xft:DejaVu Sans Mono-10:book,xft:WenQuanYi Bitmap Song-10:medium
 !URxvt.boldFont:xft:DejaVu Sans Mono-10:bold,xft:AR PL UMing CN-10:bold
 !URxvt.italicFont:xft:DejaVu Sans Mono-10:italic,xft:AR PL UMing CN-10:italic
 !URxvt.boldItalicFont:xft:DejaVu Sans Mono-10:bold:italic,xft:AR PL UMing CN-10:bold:italic
