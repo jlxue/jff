@@ -186,7 +186,7 @@ set statusline=%F%*\ %y[%{&ff}][%{&fenc}]\ %2*%r%m%*\ %l,%c\ %=%l/%L\ (%p%%)%*\ 
 set virtualedit=block
 
 set fileformats+=mac
-set fencs=ucs-bom,utf-8,prc
+set fencs=ucs-bom,utf-8,gbk
 set encoding=utf-8
 set ambiwidth=double
 

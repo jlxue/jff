@@ -1,0 +1,10 @@
+1. cfengine 3: bundlesequence 是不是要每个 body TYPE 都定义一份？
+
+2. 没有类似 package 这样的名字空间。
+
+3. 参数不能传列表？
+
+4. 缩进很乱
+
+5. struct Attributes?? union Attributes??
+
