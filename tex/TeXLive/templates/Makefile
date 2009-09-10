@@ -2,7 +2,7 @@
 
 makefile-help:
 	@echo Usage:
-	@echo '  make [TOOLCHAINS="xelatx pdflatex dvipdfmx"] [SYNCTEX=0] doc-without-suffix...'
+	@echo '  make [TOOLCHAINS=xelatx,pdflatex,dvipdfmx] [SYNCTEX=0] doc-without-suffix...'
 	@echo
 	@echo xelatex is the default toolchain.
 
