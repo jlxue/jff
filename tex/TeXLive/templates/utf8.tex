@@ -8,8 +8,34 @@
 %  for details about options of ctex macro package.
 
 \documentclass[UTF8,cjkfonts,hyperref]{ctexart}
+\makeatletter
+\ifCTEX@GBK
+  \ifxetex
+    \XeTeXinputencoding "GBK"
+  \fi
+\fi
+\makeatother
+
 \begin{document}
-朱镕基，你好，CTeX 文档类。
+
+\title{LaTeX~中文文档模板}
+\author{作者}
+
+\maketitle
+\tableofcontents
+
+\section{前言}
+
+朱镕基，你好，CTeX~文档类。
+
+\section{正文}
+
+世界你好！
+
+\section{后记}
+
+非常好！
+
 \end{document}
 
 %%%%%%%%%%%%%%%%%%% END %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
