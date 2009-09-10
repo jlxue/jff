@@ -8,13 +8,9 @@
 %  for details about options of ctex macro package.
 
 \documentclass[GBK,cjkfonts,hyperref]{ctexart}
-\makeatletter
-\ifCTEX@GBK
-  \ifxetex
-    \XeTeXinputencoding "GBK"
-  \fi
+\ifxetex
+  \XeTeXinputencoding "GBK"
 \fi
-\makeatother
 
 \begin{document}
 
