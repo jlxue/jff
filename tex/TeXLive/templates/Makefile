@@ -2,43 +2,43 @@
 
 makefile-help:
 	@echo Usage:
-	@echo '  make [TOOLCHAINS="xelatx pdflatex dvipdfmx"] doc-without-suffix...'
+	@echo '  make [TOOLCHAINS="xelatx pdflatex dvipdfmx"] [SYNCTEX=0] doc-without-suffix...'
 	@echo
 	@echo xelatex is the default toolchain.
 
 
 AVAILABLE_TOOLCHAINS := xelatex pdflatex dvipdfmx
-
+SYNCTEX := 1
 
 define xelatex
 %$1.pdf : %.tex
-	xelatex $$< -o $$@
-	xelatex $$< -o $$@
+	xelatex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
+	xelatex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
 endef
 
 define pdflatex
 %$1.pdf : %.tex
-	pdflatex $$< -o $$@
-	pdflatex $$< -o $$@
+	pdflatex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
+	pdflatex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
 endef
 
 define dvipdfmx
 %$1.pdf : %.tex
-	latex $$< -o $$(@:.pdf=.dvi)
-	latex $$< -o $$(@:.pdf=.dvi)
+	latex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
+	latex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
 	dvipdfmx $$(@:.pdf=.dvi)
 endef
 
 
-TOOLCHAINS := $(strip $(TOOLCHAINS))
+override TOOLCHAINS := $(strip $(TOOLCHAINS))
 ifeq ($(TOOLCHAINS),)
-	TOOLCHAINS := xelatex
+	override TOOLCHAINS := xelatex
 endif
 
-comma :=,
+comma := ,
 empty :=
 space := $(empty) $(empty)
-TOOLCHAINS := $(subst $(comma),$(space),$(TOOLCHAINS))
+override TOOLCHAINS := $(subst $(comma),$(space),$(TOOLCHAINS))
 
 ifneq ($(filter-out $(AVAILABLE_TOOLCHAINS),$(TOOLCHAINS)),)
 $(error Unrecognized toolchains: $(TOOLCHAINS) (available: $(AVAILABLE_TOOLCHAINS)))
