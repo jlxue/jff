@@ -7,10 +7,11 @@
 %  or http://ctex-kit.googlecode.com/svn/trunk/ctex/doc/
 %  for details about options of ctex macro package.
 
-\documentclass[GBK,cjkfonts,hyperref]{ctexart}
+\documentclass[GBK,winfonts,hyperref]{ctexart}
 \ifxetex
   \XeTeXinputencoding "GBK"
 \fi
+\InputIfFileExists{zhwinfonts}{}{}
 
 \begin{document}
 
@@ -118,4 +119,8 @@
 % ChangeLog:
 %   2009-09-11  Liu Yubao
 %       * initial version, v0.1
+%
+%   2009-09-11  Liu Yubao
+%       * use zhwinfonts to embed truetype fonts with pdflatex and dvipdfmx
+%
 

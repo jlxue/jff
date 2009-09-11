@@ -9,6 +9,7 @@
 
 % !!! remove UTF8 if you use xelatex because it leads to garbled bookmarks.
 \documentclass[UTF8,cjkfonts,hyperref]{ctexart}
+\InputIfFileExists{zhwinfonts}{}{}
 
 \begin{document}
 
@@ -116,4 +117,8 @@
 % ChangeLog:
 %   2009-09-11  Liu Yubao
 %       * initial version, v0.1
+%
+%   2009-09-11  Liu Yubao
+%       * use zhwinfonts to embed truetype fonts with pdflatex and dvipdfmx
+%
 
