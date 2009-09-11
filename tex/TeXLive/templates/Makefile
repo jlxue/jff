@@ -57,7 +57,7 @@ endif
 endif
 
 clean:
-	rm -f *.log *.aux *.toc *.out *.dvi *.xdv
+	rm -f *.log *.aux *.toc *.out *.dvi *.xdv *.synctex.gz
 
 distclean: clean
 	rm -f *.pdf
