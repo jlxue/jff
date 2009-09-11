@@ -68,5 +68,5 @@ clean:
 	rm -f *.log *.aux *.toc *.out *.dvi *.xdv *.synctex.gz
 
 distclean: clean
-	rm -f *.pdf
+	rm -f *.pdf *.ps
 
