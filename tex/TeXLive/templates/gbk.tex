@@ -7,10 +7,21 @@
 %  or http://ctex-kit.googlecode.com/svn/trunk/ctex/doc/
 %  for details about options of ctex macro package.
 
-\documentclass[GBK,winfonts,hyperref]{ctexart}
+\documentclass[GBK,winfonts,cs4size,a4paper,fancyhdr,fntef]{ctexart}
 \ifxetex
   \XeTeXinputencoding "GBK"
+  \usepackage[CJKbookmarks,xetex]{hyperref}
+\else
+  \ifpdf
+    % pdflatex 编译时，需要使用 gbk2uni 处理才能得到正确的书签
+    \usepackage[CJKbookmarks,pdftex]{hyperref}
+  \else
+    \AtBeginDvi{\special{pdf:tounicode GBK-EUC-UCS2}}
+    \usepackage[CJKbookmarks,dvipdfm]{hyperref}
+    %\usepackage[CJKbookmarks,dvips]{hyperref}
+  \fi
 \fi
+
 \ifpdf\else
   % pdftex 3.1415926-1.40.10-2.2 has trouble with it
   \InputIfFileExists{zhwinfonts.tex}{}{}
