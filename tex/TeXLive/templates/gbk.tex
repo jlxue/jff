@@ -7,12 +7,18 @@
 %  or http://ctex-kit.googlecode.com/svn/trunk/ctex/doc/
 %  for details about options of ctex macro package.
 
-\documentclass[winfonts,GBK,hyperref,cs4size,a4paper,fancyhdr,fntef]{ctexart}
-\ifxetex
+\documentclass[winfonts,GBK,cs4size,a4paper,fancyhdr,fntef]{ctexart}
+\ifxetex    % xelatex
   \XeTeXinputencoding "GBK"
+  \usepackage[xetex,CJKbookmarks]{hyperref}
 \else
-  \ifpdf
-    \usepackage{ccmap}
+  \ifpdf    % pdflatex
+    \usepackage[pdftex,CJKbookmarks]{hyperref}
+    \usepackage{ccmap}      % make chinese characters in pdf searchable
+  \else     % dvipdfmx or dvips
+    \AtBeginDvi{\special{pdf:tounicode GBK-EUC-UCS2}}
+    \usepackage[dvipdfm,CJKbookmarks]{hyperref}
+    %\usepackage[dvips,CJKbookmarks]{hyperref}
   \fi
 \fi
 

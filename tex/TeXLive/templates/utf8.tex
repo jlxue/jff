@@ -7,7 +7,17 @@
 %  or http://ctex-kit.googlecode.com/svn/trunk/ctex/doc/
 %  for details about options of ctex macro package.
 
-\documentclass[winfonts,UTF8,hyperref,cs4size,a4paper,fancyhdr,fntef]{ctexart}
+\documentclass[winfonts,UTF8,cs4size,a4paper,fancyhdr,fntef]{ctexart}
+\ifxetex    % xelatex
+  \usepackage[xetex,unicode]{hyperref}
+\else
+  \ifpdf    % pdflatex
+    \usepackage[pdftex,unicode]{hyperref}
+  \else     % dvipdfmx or dvips
+    \usepackage[dvipdfm,unicode]{hyperref}
+    %\usepackage[dvips,unicode]{hyperref}
+  \fi
+\fi
 
 \ifxetex\else\ifpdf\else
   % pdftex 3.1415926-1.40.10-2.2 has trouble with it
