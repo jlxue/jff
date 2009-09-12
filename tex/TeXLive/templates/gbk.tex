@@ -17,8 +17,8 @@
     \usepackage{ccmap}      % make chinese characters in pdf searchable
   \else     % dvipdfmx or dvips
     \AtBeginDvi{\special{pdf:tounicode GBK-EUC-UCS2}}
-    \usepackage[dvipdfm,CJKbookmarks]{hyperref}
-    %\usepackage[dvips,CJKbookmarks]{hyperref}
+    \usepackage[dvipdfmx,CJKbookmarks]{hyperref}
+    %\usepackage[ps2pdf,CJKbookmarks]{hyperref}
   \fi
 \fi
 
