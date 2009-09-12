@@ -9,7 +9,7 @@
 
 \documentclass[winfonts,UTF8,cs4size,a4paper,fancyhdr,fntef]{ctexart}
 \ifxetex    % xelatex
-  \usepackage[xetex,unicode]{hyperref}
+  \usepackage[xetex,CJKbookmarks]{hyperref} % not "unicode", ctex r167 at ctex-kit is strange:-(
 \else
   \ifpdf    % pdflatex
     \usepackage[pdftex,unicode]{hyperref}
