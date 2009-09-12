@@ -11,7 +11,10 @@
 \ifxetex
   \XeTeXinputencoding "GBK"
 \fi
-\InputIfFileExists{zhwinfonts}{}{}
+\ifpdf\else
+  % pdftex 3.1415926-1.40.10-2.2 has trouble with it
+  \InputIfFileExists{zhwinfonts.tex}{}{}
+\fi
 
 \begin{document}
 

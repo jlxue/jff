@@ -7,9 +7,17 @@
 %  or http://ctex-kit.googlecode.com/svn/trunk/ctex/doc/
 %  for details about options of ctex macro package.
 
-% !!! remove UTF8 if you use xelatex because it leads to garbled bookmarks.
-\documentclass[UTF8,cjkfonts,hyperref]{ctexart}
-\InputIfFileExists{zhwinfonts}{}{}
+\RequirePackage{ifxetex}
+\ifxetex
+  % UTF8 option leads to garbled bookmarks.
+  \documentclass[winfonts,hyperref]{ctexart}
+\else
+  \documentclass[UTF8,winfonts,hyperref]{ctexart}
+\fi
+\ifpdf\else
+  % pdftex 3.1415926-1.40.10-2.2 has trouble with it
+  \InputIfFileExists{zhwinfonts.tex}{}{}
+\fi
 
 \begin{document}
 
