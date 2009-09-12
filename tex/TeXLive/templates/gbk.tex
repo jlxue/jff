@@ -10,6 +10,10 @@
 \documentclass[winfonts,GBK,hyperref,cs4size,a4paper,fancyhdr,fntef]{ctexart}
 \ifxetex
   \XeTeXinputencoding "GBK"
+\else
+  \ifpdf
+    \usepackage{ccmap}
+  \fi
 \fi
 
 \ifxetex\else\ifpdf\else
