@@ -12,35 +12,35 @@ SYNCTEX := 1
 
 define xelatex
 %$1.pdf : %.tex
-	xelatex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
-	xelatex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
+	xelatex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
+	xelatex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
 endef
 
 define pdflatex
 %$1.pdf : %.tex
-	pdflatex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
-	pdflatex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
+	pdflatex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
+	pdflatex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
 	grep -q "^[^%].*\\documentclass\s*\[.*GBK" && gbk2uni $$(@:.pdf=.out)
-	pdflatex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
+	pdflatex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
 endef
 
 define dvipdfmx
 %$1.pdf : %.tex
-	latex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
-	latex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
+	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
+	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
 	grep -q "^[^%].*\\documentclass\s*\[.*GBK" && \
 		{ kpsewhich -format="cmap files" GBK-EUC-UCS2 || gbk2uni $$(@:.pdf=.out) ; }
-	latex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
+	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
 	dvipdfmx $$(@:.pdf=.dvi)
 endef
 
 define dvips
 %$1.pdf : %.tex
-	latex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
-	latex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
+	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
+	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
 	grep -q "^[^%].*\\documentclass\s*\[.*GBK" && \
 		{ kpsewhich -format="cmap files" GBK-EUC-UCS2 || gbk2uni $$(@:.pdf=.out) ; }
-	latex -jobname=$$(basename $$@) -synctex=$(SYNCTEX) $$<
+	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
 	dvips $$(@:.pdf=.dvi)
 	ps2pdf $$(@:.pdf=.ps)
 endef
