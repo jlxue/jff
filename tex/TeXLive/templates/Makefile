@@ -20,7 +20,7 @@ define pdflatex
 %$1.pdf : %.tex
 	pdflatex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
 	pdflatex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
-	grep -q "^[^%].*\\documentclass\s*\[.*GBK" && gbk2uni $$(@:.pdf=.out)
+	grep -q "^[^%].*\\documentclass\s*\[.*GBK" $$< && gbk2uni $$(@:.pdf=.out)
 	pdflatex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
 endef
 
@@ -28,9 +28,11 @@ define dvipdfmx
 %$1.pdf : %.tex
 	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
 	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
-	grep -q "^[^%].*\\documentclass\s*\[.*GBK" && \
-		{ kpsewhich -format="cmap files" GBK-EUC-UCS2 || gbk2uni $$(@:.pdf=.out) ; }
-	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
+	grep -q "^[^%].*\\documentclass\s*\[.*GBK" $$< && \
+		if ! kpsewhich -format="cmap files" GBK-EUC-UCS2 ; then \
+			gbk2uni $$(@:.pdf=.out) ; \
+			latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$< ; \
+		fi
 	dvipdfmx $$(@:.pdf=.dvi)
 endef
 
@@ -38,9 +40,11 @@ define dvips
 %$1.pdf : %.tex
 	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
 	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
-	grep -q "^[^%].*\\documentclass\s*\[.*GBK" && \
-		{ kpsewhich -format="cmap files" GBK-EUC-UCS2 || gbk2uni $$(@:.pdf=.out) ; }
-	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
+	grep -q "^[^%].*\\documentclass\s*\[.*GBK" $$< && \
+		if ! kpsewhich -format="cmap files" GBK-EUC-UCS2 ; then \
+			gbk2uni $$(@:.pdf=.out) ; \
+			latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$< ; \
+		fi
 	dvips $$(@:.pdf=.dvi)
 	ps2pdf $$(@:.pdf=.ps)
 endef
