@@ -1,0 +1,81 @@
+# This file is written by LyX, if you want to make your own
+# modifications you should do them from inside LyX and save
+
+
+#
+# MISC SECTION ######################################
+#
+
+\user_name "Dieken"
+\user_email "Dieken@newsmth.net"
+
+#
+# SCREEN & FONTS SECTION ############################
+#
+
+\screen_font_roman "Adobe 宋体 Std L"
+\screen_font_sans "Adobe 仿宋 Std R"
+\screen_font_typewriter "Adobe 楷体 Std R"
+
+#
+# COLOR SECTION ###################################
+#
+
+
+#
+# PRINTER SECTION ###################################
+#
+
+
+#
+# EXPORT SECTION ####################################
+#
+
+
+#
+# TEX SECTION #######################################
+#
+
+
+#
+# FILE SECTION ######################################
+#
+
+\completion_inline_text true
+\completion_popup_text true
+
+#
+# PLAIN TEXT EXPORT SECTION ##############################
+#
+
+
+#
+# SPELLCHECKER SECTION ##############################
+#
+
+
+#
+# LANGUAGE SUPPORT SECTION ##########################
+#
+
+
+#
+# 2nd MISC SUPPORT SECTION ##########################
+#
+
+
+#
+# FORMATS SECTION ##########################
+#
+
+
+#
+# CONVERTERS SECTION ##########################
+#
+
+\converter "ps" "pdf" "ps2pdf $$i $$o" ""
+
+#
+# COPIERS SECTION ##########################
+#
+
