@@ -1,0 +1,26 @@
+1) xhost
+userA) xhost local:userB   (加号可以省略)
+userB) xeyes
+userA) xhost -local:userB
+
+xhost 的问题是如果赋予的是某个主机的权限，那么这个主机上的所有用户
+都能访问 X server。
+
+2) xauth
+userA) xauth list  (一般有两行，一个是 `hostname`/unix:0，一个是
+                    localhost.localdomain/unix:0）
+userA) xauth extrace some-file `hostname`/unix:0
+userA) chmod a+r some-file
+
+userB) export XAUTHORITY=$HOME/.Xauthority   (注意 su -l userB 会继承
+                userA 的 XAUTHORITY 变量，但是这个文件 userB 是无权访问
+                的，会导致 xauth 等好一会报错无法锁定文件）
+userB) xauth merge some-file
+userB) xeyes
+userA) rm some-file
+
+注意不要 xauth extract 那个 localhost 的条目，我实验了，userB 导入这条
+后还是不能访问，需要 `hostname`/unix:0 那条，原因是 ping
+localhost.localdomain 不通，这个域名可能是 avahi 自动生成的。
+
+

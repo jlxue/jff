@@ -1,0 +1,10 @@
+hardinfo
+discover
+hwinfo
+lshw
+kudzu
+lspci
+lsusb
+hal
+dmidecode
+
