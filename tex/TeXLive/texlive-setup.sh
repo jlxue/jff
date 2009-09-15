@@ -7,6 +7,8 @@
 #   how to add local packages in a systematic way
 #
 
+set -e
+
 has_sub_command () {
     test "$(type -t "cmd_$1")" = 'function'
 }
@@ -19,45 +21,63 @@ cmd_help () {
 }
 
 cmd_backup_texmfcnf () {
+    local last=$(ls $TEXMFYEAR/texmf.cnf-????????-?????? | tail -1 2>/dev/null)
+    local backup=$TEXMFYEAR/texmf.cnf-$(date +%Y%m%d-%H%M%S)
+
     [ -e $TEXMFYEAR/texmf.cnf ] &&
-        cp $TEXMFYEAR/texmf.cnf $TEXMFYEAR/texmf.cnf-$(date +%Y%m%d-%H%M%S)
+        { [ -z "$last" ] || ! cmp -s $TEXMFYEAR/texmf.cnf $last ; } &&
+        cp $TEXMFYEAR/texmf.cnf $backup &&
+        echo "Backuped $TEXMFYEAR/texmf.cnf to $backup."
 }
 
 cmd_create_texmfcnf () {
-    backup_texmfcnf
+    cmd_backup_texmfcnf
+    local texmfhome=$(kpsexpand \$TEXMFHOME)
 
     grep 'SELFAUTOPARENT\|^TEXMF \|^TEXMFDBS ' $TEXMFMAIN/web2c/texmf.cnf |
         grep -v '^%' > $TEXMFYEAR/texmf.cnf
     sed -i -e "s:.SELFAUTOPARENT:$TEXMFYEAR:" $TEXMFYEAR/texmf.cnf
+    echo "TEXMFHOME = $texmfhome" >> $TEXMFYEAR/texmf.cnf
+
+    echo "Created $TEXMFYEAR/texmf.cnf."
 }
 
 cmd_shell () {
+    echo "TEXMFCNF=$TEXMFCNF"
+    echo "MANPATH=$MANPATH"
+    echo "INFOPATH=$INFOPATH"
+    echo "PATH=$PATH"
     [ -z "$SHELL" ] && bash "$@" || $SHELL "$@"
 }
 
-add_texmf_tree () {
+cmd_add_texmf_tree () {
     local name=$1
     local texmf="$2"
     local var
 
-    [ -z "$texmf" ] && {
+    [ -z "$texmf" -o ! -d "$texmf" ] && {
         echo "Usage: add_texmf_tree texmf-xxx DIRECTORY" >&2
         return 1
     }
 
-    var=$(name^^)
-    var=$(name//-)
+    var=${name^^}
+    var=${var//-}
+
     if [ $(kpsexpand \$$var) != \$$var ]; then
         echo "$var is used already!" >&2
         return 1
     fi
 
-    backup_texmfcnf
-
     ln -s "$texmf" $TEXMFYEAR/../$name || return 1
+    echo "Created symbolic link $TEXMFYEAR/../$name pointing to $texmf."
+
+    cmd_backup_texmfcnf
+
     sed -i "/^TEXMFLOCAL/ a\\
 $var = $texmf
-s/^\\(TEXMF = .*\\)}/\1,\$var}/" $TEXMFYEAR/texmf.cnf
+s/^\\(TEXMF = .*\\)}/\1,\$$var}/" $TEXMFYEAR/texmf.cnf
+
+    echo "Added variable $var to $TEXMFYEAR/texmf.cnf and TEXMF in this file."
 
     texhash "$texmf"
 }
@@ -72,13 +92,21 @@ TEXMFMAIN=$(kpsexpand '$TEXMFMAIN')
 TEXMFYEAR=$(dirname $TEXMFMAIN)
 
 TEXMFCNF=$TEXMFYEAR:$TEXMFMAIN/web2c
-MANPATH=$TEXMFMAIN/doc/man:$MANPATH
-INFOPATH=$TEXMFMAIN/doc/info:$INFOPATH
+
+[ 0 -eq $(expr index "$MANPATH" "$TEXMFMAIN/doc/man") ] && {
+    [ -z "$MANPATH" ] && MANPATH=$TEXMFMAIN/doc/man ||
+        MANPATH=$TEXMFMAIN/doc/man:$MANPATH
+}
+
+[ 0 -eq $(expr index "$INFOPATH" "$TEXMFMAIN/doc/info") ] && {
+    [ -z "$INFOPATH" ] && INFOPATH=$TEXMFMAIN/doc/info ||
+        INFOPATH=$TEXMFMAIN/doc/info:$INFOPATH
+}
 
 export TEXMFCNF MANPATH INFOPATH
 
 
-cmd="${1//-}"
+cmd="${1//-/_}"
 shift
 
 if [ "$cmd" ] && has_sub_command "$cmd"; then
