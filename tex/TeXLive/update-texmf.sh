@@ -19,6 +19,7 @@ svn_update () {
 }
 
 svn_export () {
+    mkdir -p "$2"
     svn export --force "$1" "$2"
 }
 
