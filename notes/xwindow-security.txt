@@ -9,7 +9,7 @@ xhost 的问题是如果赋予的是某个主机的权限，那么这个主机�
 2) xauth
 userA) xauth list  (一般有两行，一个是 `hostname`/unix:0，一个是
                     localhost.localdomain/unix:0）
-userA) xauth extrace some-file `hostname`/unix:0
+userA) xauth extract some-file `hostname`/unix:0
 userA) chmod a+r some-file
 
 userB) export XAUTHORITY=$HOME/.Xauthority   (注意 su -l userB 会继承
