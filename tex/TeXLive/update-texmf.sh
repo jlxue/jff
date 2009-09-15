@@ -104,7 +104,7 @@ GBK_EUC_UCS2_DESTDIR="$TEXMFHOME/fonts/cmap/dvipdfmx"
     dir="$TEXMFHOME/fonts/truetype/windows/sim"
     mkdir -p "$dir"
     name=`basename "$f"`
-    name=${name,}   # lower case
+    name=${name,,}   # lower case
     [ -e "$dir/$name" ] || ln -s "$f" "$dir/$name"
 done
 
