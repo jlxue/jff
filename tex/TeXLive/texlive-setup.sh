@@ -82,6 +82,64 @@ s/^\\(TEXMF = .*\\)}/\1,\$$var}/" $TEXMFYEAR/texmf.cnf
     texhash "$texmf"
 }
 
+cmd_install_pdftex () {
+    local prog="$1"
+    local pdflatex="$2"
+    local pdftex
+    local destdir="$(kpsexpand \$TEXMFVAR)"
+
+    [ -z "$prog" ] && prog=pdftex2
+    [ -z "$pdflatex" ] && pdflatex=pdflatex2
+    pdftex=$(basename "$prog")
+    pdflatex=$(basename "$pdflatex")
+    which "$prog" >/dev/null || {
+        echo "Can't find $prog in PATH or it isn't executable!" >&2
+        return 1
+    }
+
+    [ -z "$destdir" ] && {
+        echo "TEXMFVAR is empty, check your texmf.cnf!" >&2
+        return 1
+    }
+    destdir="$destdir/web2c/pdftex"
+    mkdir -p "$destdir"
+
+    local fmt="$(kpsewhich -engine=pdftex $pdftex.fmt || echo)"
+    [ "$fmt" ] && {
+        echo "You already have $fmt!" >&2
+        return 1
+    }
+    fmt="$(kpsewhich -engine=pdftex $pdflatex.fmt || echo)"
+    [ "$fmt" ] && {
+        echo "You already have $fmt!" >&2
+        return 1
+    }
+
+    [ -f "$destdir/$pdftex.fmt" -o -f "$destdir/$pdflatex.fmt" ] && {
+        echo "Find $destdir/$pdftex.fmt or $destdir/$pdflatex.fmt, remove them first if you don't need them." >&2
+        return 1
+    }
+
+    cd "$destdir"
+    "$prog" -ini -translate-file=cp227.tcx '*pdfetex.ini'
+    "$prog" -ini -translate-file=cp227.tcx '*pdflatex.ini'
+    echo; echo; echo
+
+    mv pdfetex.fmt "$pdftex.fmt"
+    echo "Generated $destdir/$pdftex.fmt"
+
+    mv pdflatex.fmt "$pdflatex.fmt"
+    echo "Generated $destdir/$pdflatex.fmt"
+
+    echo
+    echo "Make sure TEXMFCNF environment is $TEXMFCNF,"
+    echo "then you can type"
+    echo "  $prog story \\\\bye"
+    echo "or"
+    echo "  $pdflatex sample2e"
+    echo "to test the new pdftex."
+}
+
 ######################## main entry ####################################
 which kpsexpand >/dev/null || {
     echo "Can't find kpsexpand in PATH!" >&2
@@ -107,7 +165,7 @@ export TEXMFCNF MANPATH INFOPATH
 
 
 cmd="${1//-/_}"
-shift
+shift || true
 
 if [ "$cmd" ] && has_sub_command "$cmd"; then
     # execute the sub command
