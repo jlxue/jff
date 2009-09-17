@@ -1,0 +1,116 @@
+1. 编译
+# Debian 里 latex-xft-font 改名叫 ttf-lyx 了。
+sudo aptitude install automake autoconf libfontconfig1-dev libaiksaurus-dev libqt4-dev zlib1g-dev \
+    libaspell-dev libhunspell-dev ttf-lyx
+./autogen.sh
+./configure --prefix=$HOME/usr --enable-build-type=dev --with-version-suffix=-svn --enable-maintainer-mode
+make
+make doxydoc    # firefox sourcedoc/html/index.html
+src/lyx &
+
+2. 代码注释
+src/frontends/Application.h     描述了主要类之间的关系
+    lyx::Buffer         - Model
+    lyx::BufferView     - Controller
+    lyx::WorkArea       - View
+    lyx::frontend::LyXVew
+    lyx::frontend::Applicatioin     lyx::theApp()
+
+    lyx::Cursor
+    lyx::frontend::Painter
+
+    lyx::Inset
+    lyx::LyXFunc
+    lyx::FuncCode               front end 和 core 交互的机制
+    lyx::Text
+
+src/frontends/FontMetrics.h     描述字体信息
+src/mathed/MathAtom.h           数学公式排版
+src/Session.h                   会话信息
+
+3. 启动流程
+
+main()                          [src/main.cpp]
+  lyx::LyX::LyX()               [src/main.cpp]
+  lyx::LyX::exec()              [src/main.cpp]
+    lyx::createApplication()    [src/LyX.cpp]
+      lyx::frontend::GuiApplication::GuiApplication()   [src/frontends/qt4/GuiApplication.cpp]
+    lyx::LyX::init(...)         [src/LyX.cpp]
+      lyx::LyX::init()          [src/LyX.cpp]
+    lyx::Server::Server()       [src/LyX.cpp]
+    lyx::ServerSocket::ServerSocket()   [src/LyX.cpp]
+    lyx::frontend::GuiApplication::exec()   [src/LyX.cpp]
+      QTimer::singleShot(0, this, SLOT(lyx::execBatchCommands()))    [GuiApplication.cpp]
+      QApplication::exec        [src/frontends/qt4/GuiApplication.cpp]
+
+        GuiApplication::event()
+        GuiApplication::handleRegularEvents()   [GuiApplication.cpp]
+          ForkedCallsController::handleCompletedProcessed()
+
+        GuiApplication::execBatchCommands()
+          GuiApplication::setGuiLanguage()
+          GuiApplication::readUIFile()      # lib/ui/default.ui
+          lyx::execBatchCommands()
+              lyx::LyX::execCommands()
+                lyx::LyXFunc::dispatch(FuncRequest(LFUN_WINDOW_NEW, ...)    [src/LyX.cpp]
+                  GuiApplication::dispatch()
+                    GuiApplication::createView()
+                      GuiView::GuiView(0)
+                        LyXFunc::setLyXView()
+                      GuiView::show()
+                      GuiApplication::setActiveWindow()
+                        GuiView::event()
+                          GuiView::setFocus()
+                            GuiApplication::setCurrentView();
+                            LyXFunc::setLyXView()
+
+        GuiApplication::event()
+        ForkedCallsController::handleCompletedProcessed()
+
+4. 选择菜单 File->New...
+
+lyx::frontend::Action::qt_metacall()    [moc_Action.cpp]
+  lyx::frontend::Action::action()       [Action.cpp]
+    lyx::dispatch()
+      lyx::LyXFunc::dispatch()
+        GuiApplication::dispatch()  // LFUN_BUFFER_NEW
+          GuiView::newDocument()
+            buffer = newUnnamedFile()
+            GuiView::setBuffer()
+              GuiView::addWorkArea()
+                GuiView::addTabWorkArea()
+                    TabWorkArea::TabWorkArea()
+                TabWorkArea::addWorkArea(buffer, view)
+                  GuiWorkArea::GuiWorkArea(buffer, view)
+                    GuiWorkArea::setGuiView(view)
+                    GuiWorkArea::setBuffer(buffer)
+                      BufferView::BufferView(buffer)
+                    GuiWorkArea::init()
+              GuiView::connectBuffer()
+
+5. 按键
+GuiView::event()        // QEvent::ShortcutOverride
+  QMainWindow::event()
+
+GuiWorkArea::event()
+  QAbstractScrollArea::event()
+    QFrame::event()
+      QWidget::event()
+        GuiWorkArea::keyPressEvent()
+          GuiWorkArea::processKeySym()
+            LyXFunc::processKeySym()
+              LyXFunc::dispatch()
+                GuiApplication::dispatch()
+                BufferView::dispatch()
+                Buffer.dispatch()
+                Cursor.dispatch()
+                  Inset::dispatch()
+                    InsetText::doDispatch()
+                      Text::dispatch()      // LFUN_SELF_INSERT
+                        BufferView::translateAndInsert()
+                          TransManager::translateAndInsert()
+                            ...
+                            Text::insertChar()
+                              Paragraph::insertChar()
+                                Paragraph::Private::insertChar()
+
