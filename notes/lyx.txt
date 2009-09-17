@@ -3,7 +3,7 @@
 sudo aptitude install automake autoconf libfontconfig1-dev libaiksaurus-dev libqt4-dev zlib1g-dev \
     libaspell-dev libhunspell-dev ttf-lyx
 ./autogen.sh
-./configure --prefix=$HOME/usr --enable-build-type=dev --with-version-suffix=-svn --enable-maintainer-mode
+CFLAGS="-g -O0" CXXFLAGS="-g -O0" ./configure --prefix=$HOME/usr --enable-build-type=dev --with-version-suffix=-svn --enable-maintainer-mode
 make
 make doxydoc    # firefox sourcedoc/html/index.html
 src/lyx &
@@ -40,8 +40,8 @@ main()                          [src/main.cpp]
     lyx::Server::Server()       [src/LyX.cpp]
     lyx::ServerSocket::ServerSocket()   [src/LyX.cpp]
     lyx::frontend::GuiApplication::exec()   [src/LyX.cpp]
-      QTimer::singleShot(0, this, SLOT(lyx::execBatchCommands()))    [GuiApplication.cpp]
-      QApplication::exec        [src/frontends/qt4/GuiApplication.cpp]
+      QTimer::singleShot(0, this, SLOT(execBatchCommands()))    [GuiApplication.cpp]
+      QApplication::exec()      [src/frontends/qt4/GuiApplication.cpp]
 
         GuiApplication::event()
         GuiApplication::handleRegularEvents()   [GuiApplication.cpp]
@@ -113,4 +113,14 @@ GuiWorkArea::event()
                             Text::insertChar()
                               Paragraph::insertChar()
                                 Paragraph::Private::insertChar()
+
+6. Tools -> Preferences 设置 Screen Fonts
+src/frontends/qt4/ui/PrefSceentFontsUi.ui
+src/frontends/qt4/ui/GuiPrefs.cpp
+
+GuiPreferences::applyView()
+  PrefScreenFonts::apply()
+    GuiPreferences::updateScreenFonts()
+      ...
+      GuiPreferences::dispatchParams()
 
