@@ -48,7 +48,7 @@ VCS=svn
 URL=http://ctex-kit.googlecode.com/svn/trunk/xecjk
 add_package
 
-PKG=xeCJK
+PKG=ctex
 DESTDIR=/tex/latex/ctex
 VCS=svn
 URL=http://ctex-kit.googlecode.com/svn/trunk/ctex
