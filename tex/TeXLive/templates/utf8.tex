@@ -21,7 +21,6 @@
 \fi
 
 \ifxetex\else
-  % pdftex 3.1415926-1.40.10-2.2 has trouble with it
   \InputIfFileExists{zhwinfonts.tex}{}{}
 \fi
 
@@ -57,13 +56,13 @@
 %
 %%%%%%%%%%%%%%%%%%% ENVIRONMENT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Tested with TeXLive 20090909 on Debian Squeeze: (use `tlmgr show xxx` for details)
+% Tested with TeXLive 20090919 on Debian Squeeze: (use `tlmgr show xxx` for details)
 %  xetex        r14602  3.1415926-2.2-0.9995.2
-%  pdftex       r14549  3.1415926-1.40.10-2.2
-%  ctex         r14619  0.93    (buggy, use r167 at http://ctex-kit.googlecode.com/)
+%  pdftex       r15207  3.1415926-1.40.10-2.2
+%  ctex         r15273  0.94
 %  zhmetrics    r14469          (buggy, use r167 at http://ctex-kit.googlecode.com/)
 %  cjk          r15155  4.8.2
-%  xecjk        r14567  2.3.5   (outdated, use r167 at http://ctex-kit.googlecode.com/)
+%  xecjk        r15287  2.3.8
 %  arphic       r13822
 %
 % Way to install TeXLive 2009:
@@ -119,6 +118,11 @@
 %   2009-09-13  Liu Yubao
 %       * use zhwinfonts to embed truetype fonts with pdflatex and dvipdfmx
 %       * set hyperref properly for different encodings and TeX engines to avoid garbled bookmarks
-%       % release v0.2
+%         release v0.2
+%
+%   2009-09-19  Liu Yubao
+%       * pdftex now supports ttc embedding.
+%       * ctex has been improved to support bookmarks better, but I decide to keep them in this
+%         template because ctex doesn't contain ccmap and zhwinfonts yet.
 %
 
