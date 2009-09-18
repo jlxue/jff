@@ -114,7 +114,7 @@ GuiWorkArea::event()
                               Paragraph::insertChar()
                                 Paragraph::Private::insertChar()
 
-6. Tools -> Preferences 设置 Screen Fonts
+6. Tools -> Preferences 设置 Screen Fonts，然后点击 save 按钮
 src/frontends/qt4/ui/PrefSceentFontsUi.ui
 src/frontends/qt4/ui/GuiPrefs.cpp
 
@@ -122,5 +122,34 @@ GuiPreferences::applyView()
   PrefScreenFonts::apply()
     GuiPreferences::updateScreenFonts()
       ...
-      GuiPreferences::dispatchParams()
+GuiDialog::slotOK()
+  Dialog::apply()
+    GuiPreferences::dispatchParams()
+      Dialog::dispatch()    // LFUN_SCREEN_FONT_UPDATE
+        lyx::dispatch()
+          lyx::LyXFunc::dispatch()
+            GuiApplication::dispatch()
+              Buffer::changed()
+                WorkAreaManager::redrawAll()
+                  GuiWorkArea::redraw()
+                    BufferView::updateMetrics()
+                    | TextMetrics::redoParagraph()
+                    |   TextMetrics::rightMargin()
+                    |   | ParagraphMetrics::rightMargin()
+                    |   |   Buffer::params()
+                    |   |   BufferParams::getFont()
+                    |   |   theFontMetrics()
+                    |   |     GuiFontLoader::metrics()
+                    |   |       fontInfo()              [GuiFontLoader.cpp]
+                    |   |         GuiFontInfo::GuiFontInfo()
+                    |   TextMetrics::computeRowMetrics()
+                    GuiWorkArea::updateScreen()
+                      BufferView::draw()
+                        TextMetrics::draw()
+                          TextMetrics::drawParagraph()
+                            RowPainter::paintText()
+                              RowPainter::paintFromPos()
+                                RowPainter::paintChars()
+                                  GuiPainter::text()    [GuiPainter.cpp]
+                                    QPainter::drawText()
 
