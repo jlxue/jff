@@ -46,13 +46,13 @@ PKG=xeCJK
 DESTDIR=/
 VCS=svn
 URL=http://ctex-kit.googlecode.com/svn/trunk/xecjk
-add_package
+#add_package
 
 PKG=ctex
 DESTDIR=/tex/latex/ctex
 VCS=svn
 URL=http://ctex-kit.googlecode.com/svn/trunk/ctex
-add_package
+#add_package
 
 PKG=zhmetrics
 DESTDIR=/
@@ -64,7 +64,7 @@ PKG=CJKpunct
 DESTDIR=/
 VCS=svn
 URL=http://ctex-kit.googlecode.com/svn/trunk/CJKpunct
-add_package
+#add_package
 
 for p in $PACKAGES ; do
     eval vcs=\$${p}_VCS
@@ -81,6 +81,15 @@ for p in $PACKAGES ; do
 
     ${vcs}_export "$REPOS_TEXMFHOME/$p" "$TEXMFHOME/$destdir"
 done
+
+######################################################################
+# change CNNxxxx.fd to cNNxxx.fd
+[ -d "$TEXMFHOME/tex/latex/zhmetrics/" ] && {
+    for f in $TEXMFHOME/tex/latex/zhmetrics/*.fd; do
+        name=$(basename "$f")
+        [ $name != ${name,,} ] && mv $f $(dirname "$f")/${name,,}
+    done
+}
 
 ######################################################################
 LATEX_PREVIEW=/usr/share/texmf/tex/latex/preview
