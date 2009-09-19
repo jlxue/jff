@@ -79,7 +79,7 @@ endif
 endif
 
 clean:
-	rm -f *.log *.aux *.toc *.out *.dvi *.xdv *.synctex.gz *.out.bak
+	rm -f *.log *.aux *.toc *.out *.dvi *.xdv *.synctex.gz *.out.bak *.idx
 
 distclean: clean
 	rm -f *.pdf *.ps
