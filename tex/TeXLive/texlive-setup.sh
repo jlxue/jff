@@ -21,7 +21,7 @@ cmd_help () {
 }
 
 cmd_backup_texmfcnf () {
-    local last=$(ls $TEXMFYEAR/texmf.cnf-????????-?????? | tail -1 2>/dev/null)
+    local last=$(ls $TEXMFYEAR/texmf.cnf-????????-?????? 2>/dev/null | tail -1)
     local backup=$TEXMFYEAR/texmf.cnf-$(date +%Y%m%d-%H%M%S)
 
     [ -e $TEXMFYEAR/texmf.cnf ] &&
@@ -34,9 +34,10 @@ cmd_create_texmfcnf () {
     cmd_backup_texmfcnf
     local texmfhome=$(kpsexpand \$TEXMFHOME)
 
-    grep 'SELFAUTOPARENT\|^TEXMF \|^TEXMFDBS ' $TEXMFMAIN/web2c/texmf.cnf |
+    grep 'SELFAUTOPARENT\|^TEXMF \|^TEXMFDBS \|^SYSTEXMF ' $TEXMFMAIN/web2c/texmf.cnf |
         grep -v '^%' > $TEXMFYEAR/texmf.cnf
     sed -i -e "s:.SELFAUTOPARENT:$TEXMFYEAR:" $TEXMFYEAR/texmf.cnf
+    sed -i -e "s/\(^SYSTEXMF .*\)/\1;\$TEXMFHOME/" $TEXMFYEAR/texmf.cnf
     echo "TEXMFHOME = $texmfhome" >> $TEXMFYEAR/texmf.cnf
 
     echo "Created $TEXMFYEAR/texmf.cnf."
