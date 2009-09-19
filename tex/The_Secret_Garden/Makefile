@@ -1,42 +1,86 @@
-SRC=tsg
+.PHONY: $(MAKECMDGOALS) makefile-help
 
-default: pdflatex
-
-
-# ------------------------------- dvi
-#  使用 gbk2uni 解决书签乱码问题
-#
-dvi: clean
-	latex $(SRC)
-#	bibtex $(SRC)
-#	latex $(SRC)
-	gbk2uni $(SRC).out
-	latex $(SRC)
+makefile-help:
+	@echo Usage:
+	@echo '  make [TOOLCHAINS=xelatx,pdflatex,dvipdfmx,dvips] [SYNCTEX=0] doc-without-suffix...'
+	@echo
+	@echo xelatex is the default toolchain.
 
 
-# 用 GSView 看效果很好
-ps: dvi
-	dvips -P pdf -t A4 -sPAPERSIZE=a4 $(SRC)
+AVAILABLE_TOOLCHAINS := xelatex pdflatex dvipdfmx dvips
+SYNCTEX := 1
+
+define xelatex
+%$1.pdf : %.tex
+	xelatex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
+	xelatex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
+endef
+
+define pdflatex
+%$1.pdf : %.tex
+	pdflatex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
+	pdflatex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
+	if grep -q "^[^%].*\\documentclass\s*\[.*GBK" $$< ; then \
+		gbk2uni $$(@:.pdf=.out) ; \
+		pdflatex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$< ; \
+	fi
+endef
+
+define dvipdfmx
+%$1.pdf : %.tex
+	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
+	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
+	if grep -q "^[^%].*\\documentclass\s*\[.*GBK" $$< ; then \
+		if ! kpsewhich -format="cmap files" GBK-EUC-UCS2 ; then \
+			gbk2uni $$(@:.pdf=.out) ; \
+			latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$< ; \
+		fi ; \
+	fi
+	dvipdfmx $$(@:.pdf=.dvi)
+endef
+
+define dvips
+%$1.pdf : %.tex
+	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
+	latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$<
+	if grep -q "^[^%].*\\documentclass\s*\[.*GBK" $$< ; then \
+		gbk2uni $$(@:.pdf=.out) ; \
+		latex -jobname="$$(@:.pdf=)" -synctex=$(SYNCTEX) $$< ; \
+	fi
+	dvips $$(@:.pdf=.dvi)
+	ps2pdf $$(@:.pdf=.ps)
+endef
 
 
-# 用 acrobat 看效果很好，使用的 Type 1 字体，拷贝乱码
-ps2pdf: ps
-	ps2pdf $(SRC).ps
+override TOOLCHAINS := $(strip $(TOOLCHAINS))
+ifeq ($(TOOLCHAINS),)
+	override TOOLCHAINS := xelatex
+endif
 
+comma := ,
+empty :=
+space := $(empty) $(empty)
+override TOOLCHAINS := $(subst $(comma),$(space),$(TOOLCHAINS))
 
-# 用 acrobat 6 看效果很差，truetype 字体，拷贝正常
-dvipdfmx: dvi
-	dvipdfmx $(SRC)
+ifneq ($(filter-out $(AVAILABLE_TOOLCHAINS),$(TOOLCHAINS)),)
+$(error Unrecognized toolchains: $(TOOLCHAINS) (available: $(AVAILABLE_TOOLCHAINS)))
+endif
 
+SOURCES := $(filter-out clean distclean,$(MAKECMDGOALS))
 
-# ccmap + pdflatex 或者 CJKutf8 + pdflatex，拷贝正常
-pdflatex: clean
-	pdflatex $(SRC)
-#	bibtex $(SRC)
-#	pdflatex $(SRC)
-	gbk2uni $(SRC).out
-	pdflatex $(SRC)
+ifneq ($(SOURCES),)
+ifeq ($(words $(TOOLCHAINS)),1)
+$(SOURCES): % : %.pdf
+$(eval $(call $(TOOLCHAINS)))
+else
+$(SOURCES): % : $(addprefix %-,$(addsuffix .pdf,$(TOOLCHAINS)))
+$(foreach toolchain,$(TOOLCHAINS),$(eval $(call $(toolchain),-$(toolchain))))
+endif
+endif
 
 clean:
-	-rm -f *.log *.aux *.toc *.out *.out.bak
+	rm -f *.log *.aux *.toc *.out *.dvi *.xdv *.synctex.gz *.out.bak *.idx
+
+distclean: clean
+	rm -f *.pdf *.ps
 
