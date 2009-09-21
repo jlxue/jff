@@ -5,7 +5,7 @@
 # (procps-3.2.7/proc/pwcache.h:10:#define P_G_SZ 20)
 #
 alias psf='ps -ouid_hack:20,pid,ppid,c,stime,tname,time,cmd'
-alias apt='aptitude -F "%c%a%M%T %30p %16V %16v %R:%12s %r %D %I - %60d"'
+alias apt='aptitude -F "%c%a%M%T %40p %20V %v %R:%12s %r %D %I - %60d" -w `stty size | sed "s/.* //"`'
 
 alias newsmth='luit -encoding GBK bbs.sh'
 alias minicom='minicom -w'

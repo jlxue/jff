@@ -191,3 +191,4 @@ XML::Twig
 
 Inline
 
+libgd-securityimage-perl (generate CAPTCHA)

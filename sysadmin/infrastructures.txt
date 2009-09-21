@@ -36,3 +36,7 @@ TeamViewer, UltraVNC
 VNN Client, LogMeIn Hamachi
 Mikogo
 
+=====================================================================
+daemontools
+monit
+
