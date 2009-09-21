@@ -1,0 +1,2 @@
+emcast netcat-openbsd netcat6 socat
+memcached, memcachedb
