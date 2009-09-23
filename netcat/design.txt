@@ -1,0 +1,18 @@
+1) 用户启动一个应用，给定如下信息：
+reader -> 读取数据，分成多个数据块
+mapper -> 做 map 的函数
+combiner -> 做 combiner 的函数
+partitioner -> 做 partitioner 的函数
+reducer -> 做 reducer 的函数
+writer -> 写入数据的函数
+额外信息
+
+2) 调用 mapreduce
+2.1) 执行 reader 分解数据成 M 段，每一段对应一个 mapper
+2.2) 寻找 worker，派发一个 mapper
+     mapper 读取输入数据，计算出 (key, value) 对交给 combiner;
+     combiner 组合交给 partitioner 分散到 R 个本地文件；
+     mapper 通知 master 完毕
+2.3) master 派生 R 个 reducer，从 M 个 mapper 那里读取数据，归并
+     后写入 GFS
+
