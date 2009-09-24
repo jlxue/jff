@@ -157,3 +157,6 @@ which gbk2uni >/dev/null || (
     done
 )
 
+######################################################################
+rm -rf "$TEXMFHOME/doc" "$TEXMFHOME/source" "$TEXMFHOME/README" "$TEXMFHOME/setup-win32"
+
