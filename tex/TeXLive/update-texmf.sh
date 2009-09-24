@@ -100,14 +100,14 @@ else
         for f in gbksong gbkhei gbkkai gbkfs gbkli gbkyou; do
             for ((i=0; i < 95; ++i)); do
                 ln gbksong00-tfm $f$(printf %02d $i).tfm
-                ln gbksongsl00-tfm ${f}sl$(printf %02d $i).tfm
+                ln gbksong00-tfm ${f}sl$(printf %02d $i).tfm
             done
         done
 
         for f in unisong unihei unikai unifs unili uniyou; do
             for ((i=0; i < 256; ++i)); do
-                ln unisong00-tfm $f$(printf %02x $i).tfm
-                ln unisongsl00-tfm ${f}sl$(printf %02x $i).tfm
+                ln gbksong00-tfm $f$(printf %02x $i).tfm
+                ln gbksong00-tfm ${f}sl$(printf %02x $i).tfm
             done
         done
     )
