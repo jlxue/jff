@@ -94,6 +94,11 @@ done
     texlua "$REPOS_TEXMFHOME/zhmetrics/source/fonts/zhmetrics/zhtfm.lua"
 )
 
+[ -e "$TEXMFHOME/tex/latex/zhmetrics/c19hei.fd" ] || (
+    cd $TEXMFHOME/tex/latex/zhmetrics/ &&
+        texlua "$REPOS_TEXMFHOME/zhmetrics/source/fonts/zhmetrics/zhfd.lua"
+)
+
 ######################################################################
 LATEX_PREVIEW=/usr/share/texmf/tex/latex/preview
 LATEX_PREVIEW_DESTDIR="$TEXMFHOME/tex/latex"

@@ -73,28 +73,17 @@ function generate_fd (encoding, fdpre, fdname, prefix, cjkname)
 	end
 end
 
-generate_fd("GBK", "C19", "zhsong", "gbk", "song")
-generate_fd("GBK", "C19", "zhhei",  "gbk", "hei")
-generate_fd("GBK", "C19", "zhkai",  "gbk", "kai")
-generate_fd("GBK", "C19", "zhfs",   "gbk", "fs")
-generate_fd("GBK", "C19", "zhli",   "gbk", "li")
-generate_fd("GBK", "C19", "zhyou",  "gbk", "you")
-
-generate_fd("UTF8", "C70", "zhsong", "uni", "song")
-generate_fd("UTF8", "C70", "zhhei",  "uni", "hei")
-generate_fd("UTF8", "C70", "zhkai",  "uni", "kai")
-generate_fd("UTF8", "C70", "zhfs",   "uni", "fs")
-generate_fd("UTF8", "C70", "zhli",   "uni", "li")
-generate_fd("UTF8", "C70", "zhyou",  "uni", "you")
-
+generate_fd("GBK", "C19", "song", "gbk", "song")
 generate_fd("GBK", "C19", "hei",  "gbk", "hei")
 generate_fd("GBK", "C19", "kai",  "gbk", "kai")
 generate_fd("GBK", "C19", "fs",   "gbk", "fs")
 generate_fd("GBK", "C19", "li",   "gbk", "li")
 generate_fd("GBK", "C19", "you",  "gbk", "you")
 
+generate_fd("UTF8", "C70", "song", "uni", "song")
 generate_fd("UTF8", "C70", "hei",  "uni", "hei")
 generate_fd("UTF8", "C70", "kai",  "uni", "kai")
 generate_fd("UTF8", "C70", "fs",   "uni", "fs")
 generate_fd("UTF8", "C70", "li",   "uni", "li")
 generate_fd("UTF8", "C70", "you",  "uni", "you")
+
