@@ -83,8 +83,8 @@ for p in $PACKAGES ; do
 done
 
 ######################################################################
-[ -d "$TEXMFHOME/fonts/tfm/zhmetrics" ] || (
-    if [ "$NOT_USE_FAKE_ZHMETRICS" ]; then
+if [ "$NOT_USE_FAKE_ZHMETRICS" ]; then
+    [ -e "$TEXMFHOME/fonts/tfm/zhmetrics/gbksong/gbksong00.tfm" ] || (
         cd $TEXMFHOME
         which pltotf >/dev/null 2>&1 || {
             [ -e ./pltotf ] || wget http://www.tug.org/svn/texlive/trunk/Master/bin/`tlmgr print-arch`/pltotf
@@ -93,7 +93,9 @@ done
         }
 
         texlua "$REPOS_TEXMFHOME/zhmetrics/source/fonts/zhmetrics/zhtfm.lua"
-    else
+    )
+else
+    [ -e "$TEXMFHOME/fonts/tfm/zhmetrics/fake/gbksong00.tfm" ] || (
         cd "$TEXMFHOME/fonts/tfm/zhmetrics/fake"
         for f in gbksong gbkhei gbkkai gbkfs gbkli gbkyou; do
             for ((i=0; i < 95; ++i)); do
@@ -108,8 +110,8 @@ done
                 ln unisongsl00-tfm ${f}sl$(printf %02x $i).tfm
             done
         done
-    fi
-)
+    )
+fi
 
 [ -e "$TEXMFHOME/tex/latex/zhmetrics/c19hei.fd" ] || (
     cd $TEXMFHOME/tex/latex/zhmetrics/ &&
