@@ -45,26 +45,26 @@ echo "REPOS_TEXMFHOME is $REPOS_TEXMFHOME"
 PKG=xeCJK
 DESTDIR=/
 VCS=svn
-URL=http://ctex-kit.googlecode.com/svn/trunk/xecjk
-#add_package
+URL=http://jff.googlecode.com/svn/trunk/tex/ctex-kit/xecjk
+add_package
 
 PKG=ctex
 DESTDIR=/tex/latex/ctex
 VCS=svn
-URL=http://ctex-kit.googlecode.com/svn/trunk/ctex
-#add_package
+URL=http://jff.googlecode.com/svn/trunk/tex/ctex-kit/ctex
+add_package
 
 PKG=zhmetrics
 DESTDIR=/
 VCS=svn
-URL=http://ctex-kit.googlecode.com/svn/trunk/chinese-fonts
+URL=http://jff.googlecode.com/svn/trunk/tex/ctex-kit/chinese-fonts
 add_package
 
 PKG=CJKpunct
 DESTDIR=/
 VCS=svn
-URL=http://ctex-kit.googlecode.com/svn/trunk/CJKpunct
-#add_package
+URL=http://jff.googlecode.com/svn/trunk/tex/ctex-kit/CJKpunct
+add_package
 
 for p in $PACKAGES ; do
     eval vcs=\$${p}_VCS
@@ -83,13 +83,16 @@ for p in $PACKAGES ; do
 done
 
 ######################################################################
-# change CNNxxxx.fd to cNNxxx.fd
-[ -d "$TEXMFHOME/tex/latex/zhmetrics/" ] && {
-    for f in $TEXMFHOME/tex/latex/zhmetrics/*.fd; do
-        name=$(basename "$f")
-        [ $name != ${name,,} ] && mv $f $(dirname "$f")/${name,,}
-    done
-}
+[ -d "$TEXMFHOME/fonts/tfm/zhmetrics" ] || (
+    cd $TEXMFHOME
+    which pltotf >/dev/null 2>&1 || {
+        [ -e ./pltotf ] || wget http://www.tug.org/svn/texlive/trunk/Master/bin/`tlmgr print-arch`/pltotf
+        chmod a+x ./pltotf
+        export PATH=$PATH:.
+    }
+
+    texlua "$REPOS_TEXMFHOME/zhmetrics/source/fonts/zhmetrics/zhtfm.lua"
+)
 
 ######################################################################
 LATEX_PREVIEW=/usr/share/texmf/tex/latex/preview
