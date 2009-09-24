@@ -10,7 +10,7 @@
 
 -- global settings
 settings = {
-	tfmdir = [[fonts\tfm\chinese]],
+	tfmdir = [[fonts\tfm\zhmetrics]],
 	use_slant = false,
 }
 
