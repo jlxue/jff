@@ -1,8 +1,8 @@
 Index: mupdf/mupdf/pdf_fontfilems.c
 ===================================================================
---- mupdf/mupdf/pdf_fontfilems.c	(版本 1427)
-+++ mupdf/mupdf/pdf_fontfilems.c	(工作副本)
-@@ -871,8 +871,28 @@
+--- mupdf/mupdf/pdf_fontfilems.c	(revision 1427)
++++ mupdf/mupdf/pdf_fontfilems.c	(working copy)
+@@ -871,8 +871,42 @@
  }
  
  static fz_error
@@ -10,29 +10,43 @@ Index: mupdf/mupdf/pdf_fontfilems.c
 +lookupcidfont(pdf_fontdesc *font, int csi, int kind, char **fontpath, int *index, int isbold, int isitalic, int isscript, int isfixed)
  {
 +	if (csi == GB) {
++		fz_error err;
++
 +		if (MINCHO == kind) {	/* serif	*/
 +			const char* name = "SimSun-18030";
++
 +			if (isbold)
 +				name = "SimHei";
 +			else if (isitalic)
 +				name = "FangSong_GB2312";
-+			return lookupwindowsfont(name, fontpath, index);
++
++			err = lookupwindowsfont(name, fontpath, index);
++			if (err == fz_okay) return fz_okay;
++
++			err = lookupwindowsfont("SimSun", fontpath, index);
++			if (err == fz_okay) return fz_okay;
 +		}
 +
 +		if (GOTHIC == kind) {	/* sans serif	*/
 +			const char* name = "KaiTi_GB2312";
++
 +			if (isbold)
 +				name = "SimHei";
 +			else if (isitalic)
 +				name = "FangSong_GB2312";
-+			return lookupwindowsfont(name, fontpath, index);
++
++			err = lookupwindowsfont(name, fontpath, index);
++			if (err == fz_okay) return fz_okay;
++
++			err = lookupwindowsfont("SimSun", fontpath, index);
++			if (err == fz_okay) return fz_okay;
 +		}
 +	}
 +
  	if (MINCHO == kind)
  		return lookupwindowsfont("MS-Mincho", fontpath, index);
  	if (GOTHIC == kind)
-@@ -947,15 +967,15 @@
+@@ -947,15 +981,15 @@
  			kind = GOTHIC;
  
  		if (streq(collection, "Adobe-CNS1"))
