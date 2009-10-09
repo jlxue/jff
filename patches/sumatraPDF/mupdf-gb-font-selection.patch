@@ -1,0 +1,55 @@
+Index: mupdf/mupdf/pdf_fontfilems.c
+===================================================================
+--- mupdf/mupdf/pdf_fontfilems.c	(版本 1427)
++++ mupdf/mupdf/pdf_fontfilems.c	(工作副本)
+@@ -871,8 +871,28 @@
+ }
+ 
+ static fz_error
+-lookupcidfont(pdf_fontdesc *font, int csi, int kind, char **fontpath, int *index)
++lookupcidfont(pdf_fontdesc *font, int csi, int kind, char **fontpath, int *index, int isbold, int isitalic, int isscript, int isfixed)
+ {
++	if (csi == GB) {
++		if (MINCHO == kind) {	/* serif	*/
++			const char* name = "SimSun-18030";
++			if (isbold)
++				name = "SimHei";
++			else if (isitalic)
++				name = "FangSong_GB2312";
++			return lookupwindowsfont(name, fontpath, index);
++		}
++
++		if (GOTHIC == kind) {	/* sans serif	*/
++			const char* name = "KaiTi_GB2312";
++			if (isbold)
++				name = "SimHei";
++			else if (isitalic)
++				name = "FangSong_GB2312";
++			return lookupwindowsfont(name, fontpath, index);
++		}
++	}
++
+ 	if (MINCHO == kind)
+ 		return lookupwindowsfont("MS-Mincho", fontpath, index);
+ 	if (GOTHIC == kind)
+@@ -947,15 +967,15 @@
+ 			kind = GOTHIC;
+ 
+ 		if (streq(collection, "Adobe-CNS1"))
+-			return lookupcidfont(font, CNS, kind, fontpath, index);
++			return lookupcidfont(font, CNS, kind, fontpath, index, isbold, isitalic, isscript, isfixed);
+ 		else if (streq(collection, "Adobe-GB1"))
+-			return lookupcidfont(font, GB, kind, fontpath, index);
++			return lookupcidfont(font, GB, kind, fontpath, index, isbold, isitalic, isscript, isfixed);
+ 		else if (streq(collection, "Adobe-Japan1"))
+-			return lookupcidfont(font, Japan, kind, fontpath, index);
++			return lookupcidfont(font, Japan, kind, fontpath, index, isbold, isitalic, isscript, isfixed);
+ 		else if (streq(collection, "Adobe-Japan2"))
+-			return lookupcidfont(font, Japan, kind, fontpath, index);
++			return lookupcidfont(font, Japan, kind, fontpath, index, isbold, isitalic, isscript, isfixed);
+ 		else if (streq(collection, "Adobe-Korea1"))
+-			return lookupcidfont(font, Korea, kind, fontpath, index);
++			return lookupcidfont(font, Korea, kind, fontpath, index, isbold, isitalic, isscript, isfixed);
+ 
+ 		fz_warn("unknown cid collection: %s", collection);
+ 	}
