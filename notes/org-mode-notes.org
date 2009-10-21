@@ -1,0 +1,92 @@
+
+Emacs Org-mode 手册阅读笔记
+
+* Document Structure
+
+** Visibility cycling
+
+| 按键              | 作用                   |
+|-------------------+------------------------|
+| <TAB>             | 循环展开光标所在的标题 |
+| S-<TAB>           | 循环展开所有标题       |
+| C-u C-u C-u <TAB> | 显示所有               |
+
+** Motion
+
+| 按键    | 作用                             |
+|---------+----------------------------------|
+| C-c C-n | next heading                     |
+| C-c C-p | previous heading                 |
+| C-c C-f | next heading same level          |
+| C-c C-b | previous heading same level      |
+| C-c C-u | backward to higher level heading |
+| C-c C-j | jump to a different place        |
+
+** Structure editing
+
+| 按键        | 作用                                           |
+|-------------+------------------------------------------------|
+| M-<RET>     | insert new heading with same level as current  |
+| C-<RET>     | adding a new heading below the current heading |
+| M-S-<RET>   | new TODO entry                                 |
+| C-S-<RET>   | new TODO entry                                 |
+| M-<Left>    | promote current heading                        |
+| M-<right>   | demote current heading                         |
+| M-S-<left>  | promote current subtree                        |
+| M-S-<right> | demote current subtree                         |
+| M-S-<up>    | move subtree up                                |
+| M-S-<down>  | move subtree down                              |
+| C-c C-x C-w | cut subtree                                    |
+| C-c C-x M-w | copy subtree                                   |
+| C-c C-x C-y | paste subtree                                  |
+| C-c ^       | sort child headings                            |
+
+** Archiving
+*** The ARCHIVE tag
+
+| 按键      | 作用                          |
+|-----------+-------------------------------|
+| C-c C-x a | toggle ARCHIVE tag            |
+| C-TAB     | cycle a tree even if archived |
+
+*** Moving subtrees
+
+| 按键      | 作用                                  |
+|-----------+---------------------------------------|
+| C-c C-x A | move current entry to Archive Sibling |
+
+** Sparse trees
+| 按键    | 作用                                  |
+|---------+---------------------------------------|
+| C-c /   | select a sparse-tree creating command |
+| C-c / r | select by regexp                      |
+
+** Plain lists
+
+ - Unordered list: 以 - 或者 + 开头
+ - Ordered list: 以 1. 或者 2) 开头
+ - Description list: 以 - 或者 + 开头，用::分隔
+
+** Footnotes
+| 按键      | 作用                                             |
+|-----------+--------------------------------------------------|
+| C-c C-x f | footnote action command                          |
+| C-c C-c   | switch between footnote reference and definition |
+
+* Tables
+
+| 按键        | 作用                      |
+|-------------+---------------------------|
+| M-<Left>    | move current column left  |
+| M-<right>   | move current column right |
+| M-S-<left>  | kill current column       |
+| M-S-<right> | insert new column         |
+| M-<up>      | move current row up       |
+| M-<down>    | move current row down     |
+| M-S-<up>    | kill current row          |
+| M-S-<down>  | insert new row            |
+| C-c -       | insert horizontal line    |
+| C-c ^       | sort                      |
+
+  
+#+STARTUP: showeverything
