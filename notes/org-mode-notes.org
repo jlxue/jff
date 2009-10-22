@@ -87,7 +87,18 @@ Emacs Org-mode 手册阅读笔记
 | C-c -       | insert horizontal line    |
 | C-c ^       | sort                      |
 
+* Tags
+
+| 按键    | 作用        |
+|---------+-------------|
+| C-c C-q | modify tags |
+| C-c \   | search tag  |
+
+* Dates and Times
+
 #+STARTUP: showall align lognotedone
 #+SEQ_TODO: TODO(t!) GOING(g!) PAUSED(p@) | DONE(d@) CANCELED(c@)
-
-
+#+TAGS: Programming(p) C CPlusPlus Perl Java Erlang OCaml Lisp
+#+TAGS: Linux(l) { LinuxApp LinuxDev LinuxKernel }
+#+TAGS: TeX(t) { LaTeX ConTeXt }
+#+TAGS: Network(n)
