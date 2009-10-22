@@ -1,4 +1,4 @@
-\startproduct mkiv
+\startproduct my-product
 \environment doc-env
 
 \component cover
@@ -6,7 +6,6 @@
 \startfrontmatter
     \setuppagenumbering[conversion=romannumerals]
     \setuppagenumber[number=1]
-    \pagereference[Content]
 
     \completecontent
     \completelistoffigures
@@ -16,18 +15,16 @@
 \startbodymatter
     \setuppagenumbering[conversion=numbers]
     \setuppagenumber[number=1]
-    \setups{HeaderFooter}
 
     \component ch1
-    \component ch2
 \stopbodymatter
 
-\startappendices
-    \completepublications
-    \completeindex
-\stopappendices
+%\startappendices
+%\stopappendices
 
 \startbackmatter
+    \completepublications
+    \completeindex
 \stopbackmatter
 
 \stopproduct
