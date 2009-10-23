@@ -1,3 +1,11 @@
+#+STARTUP: showall align lognotedone
+#+SEQ_TODO: TODO(t!) GOING(g!) PAUSED(p@) | DONE(d@) CANCELED(c@)
+#+TAGS: Programming(p) C CPlusPlus Perl Java Erlang OCaml Lisp
+#+TAGS: Software(p)
+#+TAGS: Linux(l) { LinuxApp LinuxDev LinuxKernel }
+#+TAGS: TeX(t) { LaTeX ConTeXt }
+#+TAGS: Network(n)
+
 Emacs Org-mode 手册阅读笔记
 
 * Document Structure
@@ -95,10 +103,62 @@ Emacs Org-mode 手册阅读笔记
 | C-c \   | search tag  |
 
 * Dates and Times
+** Timestamps, deadlines, and scheduling
+- 时间点 <timestamp>
+- 周期性时间点 <timestamp +n>
+- 时间范围 <timestamp>--<timestamp>
+- 不显示在日历上的时间 [timestamp]
 
-#+STARTUP: showall align lognotedone
-#+SEQ_TODO: TODO(t!) GOING(g!) PAUSED(p@) | DONE(d@) CANCELED(c@)
-#+TAGS: Programming(p) C CPlusPlus Perl Java Erlang OCaml Lisp
-#+TAGS: Linux(l) { LinuxApp LinuxDev LinuxKernel }
-#+TAGS: TeX(t) { LaTeX ConTeXt }
-#+TAGS: Network(n)
+| 按键      | 作用                                 |
+|-----------+--------------------------------------|
+| C-c .     | 插入或者修改日期，连续两次是时间范围 |
+| C-c !     | 插入或者修改日期，不显示在日历上     |
+| C-u C-c . | 时间                                 |
+| C-u C-c ! | 时间                                 |
+| C-c <     | 插入当前日期                         |
+| C-c \>    | 跳到光标处日期所在的日历             |
+| S-<left>  | 减少一天                             |
+| S-<right> | 增加一天                             |
+| S-<up>    | 增加 timestamp 的某个成员            |
+| S-<down>  | 减少 timestamp 的某个成员            |
+| C-c C-y   | 计算时间范围                         |
+
+在输入日期弹出日历时，可以用如下按键切换日期：
+
+| 按键               | 作用           |
+|--------------------+----------------|
+| > / <              | 以月为单位滚动 |
+| S-<right>/<left>   | 以天为单位滚动 |
+| S-<down>/<up>      | 以周为单位滚动 |
+| M-S-<right>/<left> | 以月为单位滚动 |
+| mouse-1            | 选择某天       |
+| <RET>              | 选择高亮日期   |
+
+*** Inserting deadlines or scheduling
+
+| 按键    | 作用        |
+|---------+-------------|
+| C-c C-d | DEADLINE    |
+| C-c C-s | SCHEDULED   |
+| C-c / d | sparse tree |
+| C-c / b | sparse tree |
+| C-c / a | sparse tree |
+
+
+** Clocking work time
+
+| 按键        | 作用                   |
+|-------------+------------------------|
+| C-c C-x C-i | start clock            |
+| C-c C-x C-o | stop clock             |
+| C-c C-x C-x | cancel clock           |
+| C-c C-x C-j | jump to runnning clock |
+| C-c C-x C-d | 显示消耗时间统计       |
+| C-c C-x C-r | 插入消耗时间报告       |
+| C-c C-c     | 更新报告               |
+
+
+#####################
+
+8.4 Clocking work time，设置持续的记录时间
+设置把 lognote 记录的信息放入 drawer；
