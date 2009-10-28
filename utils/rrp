@@ -155,6 +155,10 @@
 #         make cache_ssh_private_key() call `ssh-add` if neccessary,
 #       * make __rrp_ps1 equivalent with __git_ps1 when no .repo/ found,
 #         release v0.31
+#
+#   2009-10-27  Liu Yubao
+#       * fix corner case in parse_diffstat
+#       * release v0.32
 
 ######################## part executed in $HOME/.bashrc ################
 # To make the pollution to shell environment minimum, I put this code
@@ -212,7 +216,7 @@ fi
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.31
+RRP_VERSION=0.32
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
@@ -695,12 +699,11 @@ dont_have_uncommitted_commits_against_official_central_repository () {
 
 
 parse_diffstat () {
-    local sep day stat timestamp commit parent_commit other_parent_commits
+    local day stat timestamp commit parent_commit other_parent_commits
 
-    while read sep; do
-        [ "$sep" != "--" ] && continue
+    while read commit parent_commit other_parent_commits ; do
+        [ $(expr length "$commit") -ne 40 ] && continue
 
-        read commit parent_commit other_parent_commits
         read timestamp
 
         day=`date -d "$timestamp" --rfc-3339=date`
@@ -711,7 +714,9 @@ parse_diffstat () {
             read stat
         fi
 
-        echo "$day" "$stat"
+        # some commits don't change any files, then 'read stat' will
+        # got '--', skip this case.
+        [ "$stat" != "--" ] && echo "$day" "$stat"
     done
 }
 
