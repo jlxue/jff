@@ -1,0 +1,16 @@
+  userA 建立一个目录 test, 权限为 700，在 test 里建立一个文件hello.txt，
+权限是 otther 可读(其实这个权限根本没关系，发送过去的 fd 不再检查权限）；
+
+  userA 执行 server建立一个 unix domain socket，监听 client 对文件的请求；
+
+  userB 执行 client 连接 server，请求一个文件；
+
+  server 打开文件，发送 fd；
+
+  client 收到 fd，可以成功读取出来。
+
+由于目录 test 是 700 权限，第三者进程如果不是 server 和 client
+告之，是无法访问那个 hello.txt 的，这就提供了安全性。
+
+如果对那个文件作 mmap，就提供了高效性。
+
