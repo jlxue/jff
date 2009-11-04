@@ -1,0 +1,78 @@
+http://www.newsmth.net/bbscon.php?bid=392&id=727018
+http://www.newsmth.net/bbscon.php?bid=392&id=727019
+
+发信人: Dieken (风催草低 - 明月何尝不照人), 信区: LinuxApp
+标  题: 被 network manager 折腾的用户建议详细看看 Debian Reference
+发信站: 水木社区 (Tue Aug 18 02:25:25 2009), 站内
+
+http://www.debian.org/doc/manuals/debian-reference/ch-gateway.zh-cn.html#s-trigger-ifplugd
+旧的中文版。
+
+http://www.debian.org/doc/manuals/debian-reference/ch05.en.html
+新的英文版。
+
+讲的很透彻:
+
+底层设置工具： net-tools(old) / iproute (new)，建议不要直接使用
+网卡命名： udev, ifrename(依赖 udev)
+高层设置工具： ifupdown, network-manager, wicd, laptop-net(??)
+dhcp 客户端: dhcp3-client, dhcpcd, pump
+判断网线插拔状态： ethtool, mii-diag, ifupdown-extra, laptop-net,
+               waproamd(没这个包了??), ifplugd
+自动选择网络配置： guessnet
+无线网配置：wireless-tools
+wpa 支持：wpasupplicant
+
+不想用 network-manager(自动选择配置，最后还是调用 ifupdown) 或 wicd，
+可以用这套基本就够了:
+udev + net-tools + iproute + dhcp3-client + wireless-tools +
+wpasupplicant + ifupdown + ifplugd + guessnet
+
+这里只有 ifplugd 和 guessnet 算是高级点的，其它工具基本是标配，会默认
+安装。 network-manager 和 wicd, laptop-net 主要目的是自动选择网络，
+这个用 ifupdown 的 mapping 功能加上 ifplugd + guessnet 就可以了。
+
+
+btw: ppp 和 pppoe 都没用过，被 adsl modem 自动处理了。这个貌似也没啥
+好选择的，wvdial, pppoeconf。
+
+==============================
+发信人: Dieken (风催草低 - 明月何尝不照人), 信区: LinuxApp
+标  题: Re: 被 network manager 折腾的用户建议详细看看 Debian Refere
+发信站: 水木社区 (Tue Aug 18 02:47:02 2009), 站内
+
+
+ifupdown 框架的网络配置流程基本是这样的：
+
+1) 触发 ifupdown，ifupdown 使用 net-tools(包含 ifconfig 和 route)
+或者 iproute (包含 ip 命令)配置 ip。
+
+* 开机时 /etc/init.d/networking 里的 ifup -a 激活
+  /etc/network/interfaces 里 auto 指定的逻辑网卡;
+
+* udev 的即插即用机制通过 /lib/udev/net.agent 激活
+  /etc/network/interfaces 里 allow-hotplug 指定的逻辑网卡;
+
+* 网线插拔状态被 ifplugd 监视，调用 ifupdown 配置 /etc/default/ifplugd
+  中指定的网卡。
+
+2) ifupdown 根据 /etc/network 配置触发 mapping scripts (使用 guessnet,
+   ifupdown-extra, ethtool, mii-diag, laptop-net 决定物理接口对应到哪个逻辑
+   接口), hook scripts,  wireless-tools, wpasupplicant, dhcp3-client,
+resolvconf。
+
+3) dhcp3-client 在监听到新事件时会触发 resolvconf，见 /etc/dhcp3/
+
+4) resolvconf 运行时会改 bind 等的配置，见 /etc/resolvconf
+
+这套机制的核心在于 /etc/network/interfaces 的配置，至于各种 hook scripts
+基本可以不用关心。
+
+network-manager 除了界面，貌似主要功能就是列出可用网络跟自动切换网络了，
+最后配置网络走的 ifupdown，因为 Debian 上 network-manager 会把配置写入
+/etc/network/interfaces，而 wicd 不依赖 ifupdown/gnome/kde，功能也全面，
+界面友好，怪不得这么多人喜欢了。
+
+期待有人分析下 network-manager 的运行机制，为啥这个老有人出问题，我的
+机器升级自动删除了 network-manager，我也懒的装回去找事了，it just works :-)
+
