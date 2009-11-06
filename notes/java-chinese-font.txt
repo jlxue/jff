@@ -1,0 +1,14 @@
+修正 sun-java6-jdk 中文字体显示成方块的问题：
+
+sudo -e $(dirname $(readlink -f /usr/bin/java))/../lib/fontconfig.properties
+# 其实是 /etc/java-6-sun/fontconfig.properties
+
+对照 xlsfonts 的输出，修改
+allfonts.chinese-arphic2=-arphic-ar pl uming uni-medium-r-normal--*-*-*-*-p-*-iso10646-1
+allfonts.chinese-arphic2.motif=-arphic-ar pl uming uni-medium-r-normal--*-*-*-*-p-*-iso10646-1
+中的 uni-medium 为 cn-light。
+
+
+另外 openjdk-6-jdk 的配置更完善，在 /etc/java-6-openjdk/fontconfig.properties，
+复制到 /etc/java-6-sun/fontconfig.properties 即可。
+
