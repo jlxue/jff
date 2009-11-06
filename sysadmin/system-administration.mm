@@ -214,6 +214,14 @@
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
 </node>
+<node COLOR="#00b439" CREATED="1257500946654" ID="ID_1280178174" MODIFIED="1257500950723" TEXT="rdiff-backup">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
+<node COLOR="#00b439" CREATED="1257500951944" ID="ID_1796706625" MODIFIED="1257500955766" TEXT="rsnapshot">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
 </node>
 <node COLOR="#0033ff" CREATED="1241588350792" ID="ID_258469826" MODIFIED="1241589837882" POSITION="right" TEXT="&#x57fa;&#x7840;&#x670d;&#x52a1;">
 <edge STYLE="sharp_bezier" WIDTH="8"/>
@@ -446,6 +454,10 @@
 <edge STYLE="sharp_bezier" WIDTH="8"/>
 <font NAME="SansSerif" SIZE="18"/>
 <node COLOR="#00b439" CREATED="1241588912702" ID="ID_840159480" MODIFIED="1241589773096" TEXT="OpenVPN">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
+<node COLOR="#00b439" CREATED="1257500918096" ID="ID_390380588" LINK="http://www.ltsp.org/" MODIFIED="1257500929111" TEXT="LTSP">
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
 </node>
