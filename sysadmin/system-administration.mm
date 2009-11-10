@@ -26,10 +26,25 @@
 <node COLOR="#990000" CREATED="1241587489878" ID="ID_768193691" MODIFIED="1241589772971" TEXT="apt-mirror">
 <font NAME="SansSerif" SIZE="14"/>
 </node>
-<node COLOR="#990000" CREATED="1241587496488" ID="ID_1152979540" MODIFIED="1241589772971" TEXT="apt-proxy">
+<node COLOR="#990000" CREATED="1241587496488" ID="ID_1152979540" MODIFIED="1257869155598" TEXT="apt-proxy">
+<richcontent TYPE="NOTE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      buggy, not actively maintained
+    </p>
+  </body>
+</html>
+</richcontent>
 <font NAME="SansSerif" SIZE="14"/>
+<icon BUILTIN="button_cancel"/>
 </node>
 <node COLOR="#990000" CREATED="1241587499082" ID="ID_1091317559" MODIFIED="1241589772971" TEXT="approx">
+<font NAME="SansSerif" SIZE="14"/>
+</node>
+<node COLOR="#990000" CREATED="1257869173405" ID="ID_1266930378" MODIFIED="1257869175999" TEXT="apt-cacher">
 <font NAME="SansSerif" SIZE="14"/>
 </node>
 <node COLOR="#990000" CREATED="1241587505473" ID="ID_1470613416" MODIFIED="1241589772971" TEXT="apt-cacher-ng">
