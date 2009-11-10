@@ -1,0 +1,35 @@
+http://wenq.org/index.cgi?CJKFontList
+http://en.wikipedia.org/wiki/Unicode_typefaces
+http://www.unifont.org/fontguide/
+http://wiki.debian.org.hk/w/Where_can_I_find_fonts_for_GNU/Linux
+
+字体测试：
+http://www.chinesecj.com/code/ext-a.php
+http://www.chinesecj.com/code/ext-b.php
+
+ttf-mscorefonts-installer
+ttf-liberation
+
+* Song
+ttf-arphic-uming (AR PL UMing, 旧版叫 AR PL ShanHeiSun Uni)
+                http://freedesktop.org/wiki/Software/CJKUnifonts
+WenQuanYi Bitmap Song
+                http://wenq.org/
+Han Nom     http://vietunicode.sourceforge.net/fonts/fonts_hannom.html
+Bitstream Cyberbit
+TITUS Cyberbit Unicode
+
+
+* Heiti
+WenQuanYi MicroHei
+WenQuanYi ZenHei
+
+* FangSong
+
+* Kaiti
+ttf-arphic-ukai (AR PL UKai, 旧版叫 AR PL ZenKai Uni)
+                http://freedesktop.org/wiki/Software/CJKUnifonts
+OpenKai         http://open.cosa.org.tw/OPENweb/index.php?option=com_remository&Itemid=30&func=select&id=3
+FZKAI-Z03   http://www.google.com/search?q=allinurl:skqs+download
+            utf-16 编码显示网页，下载 setup.exe 用 cabextract 提取字体。
+
