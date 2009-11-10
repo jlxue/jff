@@ -9,15 +9,14 @@ http://www.chinesecj.com/code/ext-b.php
 
 ttf-mscorefonts-installer
 ttf-liberation
+Bitstream Cyberbit (改进版：TITUS Cyberbit Unicode)
 
 * Song
 ttf-arphic-uming (AR PL UMing, 旧版叫 AR PL ShanHeiSun Uni)
                 http://freedesktop.org/wiki/Software/CJKUnifonts
-WenQuanYi Bitmap Song
-                http://wenq.org/
+WenQuanYi Bitmap Song   http://wenq.org/
+WenQuanYi UniBit        http://wenq.org/
 Han Nom     http://vietunicode.sourceforge.net/fonts/fonts_hannom.html
-Bitstream Cyberbit
-TITUS Cyberbit Unicode
 
 
 * Heiti
