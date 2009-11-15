@@ -229,6 +229,12 @@ if has("cscope")
     set csverb
 endif
 
+"------------------------------ commands "---------------------------------------
+command -range=% -nargs=? Nl :<line1>,<line2>s/^/\=printf(
+    \   strlen("<args>") ? "<args>" :
+    \                      "%" . strlen(<line2> - <line1> + 1) . "d ",
+    \   line(".") - <line1> + 1)/ | nohl
+
 "--------------------------------------for autocmd and filetype------------------
 syntax on
 filetype plugin on
