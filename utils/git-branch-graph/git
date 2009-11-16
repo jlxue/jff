@@ -1,0 +1,39 @@
+#!/bin/sh
+
+GIT_CMD=`which -a git | sed -ne '2p'`
+[ -z "$GIT_CMD" ] && GIT_CMD=/usr/bin/git
+
+# gitk calls 'git log --no-color -z --pretty=raw --parents --boundary ...'
+if [ "$1" = "log" -a "$3" = "-z" ]; then
+    shift 6
+    git-branch-graph.pl "$@" |
+        while read commit parents; do
+            echo "commit $commit $parents"
+
+            "$GIT_CMD" log -1 --no-color --pretty=raw --parents $commit | {
+                read s      # skip commit
+
+                read s      # tree
+                echo "$s"
+
+                for p in $parents; do
+                    echo "parent $p"
+                done
+
+                # skip parents
+                while read s; do
+                    expr "$s" : "parent " >/dev/null || {
+                        echo "$s"
+                        break;
+                    }
+                done
+
+                while read s; do echo "$s"; done
+            }
+
+            /bin/echo -ne "\0"
+        done
+else
+    "$GIT_CMD" "$@"
+fi
+

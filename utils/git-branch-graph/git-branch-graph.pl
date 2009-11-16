@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 
-my $graph = get_rev_graph();
+my $graph = get_rev_graph(@ARGV);
 my $leafs = get_leafs_of_graph($graph);
 
 simplify_graph($graph, @$leafs);
@@ -20,9 +20,12 @@ simplify_graph($graph, @$leafs);
 # in-degree(number of children) of commit1: $graph{commit1}->[1];
 # out-degree(number of parents) of commit1: @{$graph{commit1}} - 2.
 sub get_rev_graph {
+    my $argv = "--all";
     my %graph = ();
 
-    open my $h, "git rev-list --parents --full-history --sparse --all |" or exit(1);
+    $argv = "@_" if @_ > 0;
+
+    open my $h, "git rev-list --parents --full-history --sparse $argv |" or exit(1);
     while (<$h>) {
         chomp;
         my @a = split;          # commit, parent1, parent2...
@@ -92,7 +95,7 @@ sub simplify_graph {
 
             push @leafs, $parent;
         } elsif ($len == 2) {   # has no parent
-            next;
+            print $leaf, "\n";
         } else {                # has more than one parents
             print $leaf;
             for my $parent (@$info[2..$len - 1]) {
