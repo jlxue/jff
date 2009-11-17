@@ -26,7 +26,7 @@ expect_background {
 }
 
 interact {
-    timeout  10 {
+    timeout  60 {
             if $pendingMsg {
                 send "\n(Robot) Sorry, I'm not around.\n"
                 set pendingMsg [expr {$pendingMsg - 1}]
