@@ -1,0 +1,89 @@
+From 2ebf0f652cfd3e6a86074d2f1cbdf5523aecbfc6 Mon Sep 17 00:00:00 2001
+From: Liu Yubao <yubao.liu@gmail.com>
+Date: Tue, 17 Nov 2009 11:38:49 +0800
+Subject: [PATCH 1/2] add url distinguishment feature
+
+---
+ src/lxterminal.c |   52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 52 insertions(+), 0 deletions(-)
+
+diff --git a/src/lxterminal.c b/src/lxterminal.c
+index 1a42f59..24390ef 100644
+--- a/src/lxterminal.c
++++ b/src/lxterminal.c
+@@ -618,6 +618,47 @@ gboolean terminal_vte_button_press(VteTerminal *vte, GdkEventButton *event, gpoi
+ 
+ 		gtk_menu_popup(GTK_MENU(gtk_ui_manager_get_widget(manager, "/VTEMenu")), NULL, NULL, NULL, NULL, event->button, event->time);
+ 	}
++
++	/* steal from tilda-0.09.6/src/tilda_terminal.c:743 */
++	else if (event->button == 1) {	/* left click */
++		gint tag;
++		gint xpad, ypad;
++		gchar* match;
++		gchar* cmd;
++		gboolean ret = FALSE;
++
++		vte_terminal_get_padding(vte, &xpad, &ypad);
++		match = vte_terminal_match_check(vte,
++				(event->x - xpad) / vte->char_width,
++				(event->y - ypad) / vte->char_height,
++				&tag);
++
++		/* Check if we can launch a web browser, and do so if possible */
++		if ((event->state & GDK_CONTROL_MASK) && match != NULL)
++		{
++#if DEBUG
++			g_print ("Got a Ctrl+Left Click -- Matched: `%s' (%d)\n", match, tag);
++#endif
++			cmd = g_strdup_printf("%s %s", "xdg-open", match);
++#if DEBUG
++			g_print ("Launching command: `%s'\n", cmd);
++#endif
++			ret = g_spawn_command_line_async(cmd, NULL);
++
++			/* Check that the command launched */
++			if (! ret)
++			{
++				g_printerr (_("Failed to launch the web browser. The command was `%s'\n"), cmd);
++			}
++
++			g_free (cmd);
++		}
++
++		/* Always free match if it is non NULL */
++		if (match)
++			g_free (match);
++	}
++
+ #if 0
+ 	GtkItemFactory *item_factory;
+ 
+@@ -635,6 +676,7 @@ gboolean terminal_vte_button_press(VteTerminal *vte, GdkEventButton *event, gpoi
+ Term *terminal_new(LXTerminal *terminal, const gchar *label, const gchar *pwd, gchar **env, const gchar *exec)
+ {
+ 	Term *term;
++	int ret;
+ 
+ 	/* create terminal */
+ 	term = g_new0(Term, 1);
+@@ -688,6 +730,16 @@ Term *terminal_new(LXTerminal *terminal, const gchar *label, const gchar *pwd, g
+ 		vte_terminal_set_opacity((VteTerminal *)term->vte, 65535);
+ 	}
+ 
++	/* steal from tilda-0.09.6/src/tilda_terminal.c:36 */
++#define DINGUS1 "(((news|telnet|nttp|file|http|ftp|https)://)|(www|ftp)[-A-Za-z0-9]*\\.)[-A-Za-z0-9\\.]+(:[0-9]*)?"
++#define DINGUS2 "(((news|telnet|nttp|file|http|ftp|https)://)|(www|ftp)[-A-Za-z0-9]*\\.)[-A-Za-z0-9\\.]+(:[0-9]*)?/[-A-Za-z0-9_\\$\\.\\+\\!\\*\\(\\),;:@&=\\?/~\\#\\%]*[^]'\\.}>\\) ,\\\"]"
++	/* steal from tilda-0.09.6/src/tilda_terminal.c:145 */
++	/* Match URL's, etc */
++	ret = vte_terminal_match_add((VteTerminal *)term->vte, DINGUS1);
++	vte_terminal_match_set_cursor_type((VteTerminal *)term->vte, ret, GDK_HAND2);
++	ret = vte_terminal_match_add((VteTerminal *)term->vte, DINGUS2);
++	vte_terminal_match_set_cursor_type((VteTerminal *)term->vte, ret, GDK_HAND2);
++
+ 	/* create label for tab */
+ 	term->label = lxterminal_tab_label_new(label);
+ 	lxterminal_tab_label_close_button_clicked(G_CALLBACK(terminal_childexit), term);
+-- 
+1.6.5.2
+

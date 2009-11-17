@@ -1,0 +1,49 @@
+From 7253c1535002530d4560c4289f5a240e5e16dce6 Mon Sep 17 00:00:00 2001
+From: Liu Yubao <yubao.liu@gmail.com>
+Date: Tue, 17 Nov 2009 12:07:33 +0800
+Subject: [PATCH 2/2] replace deprecated vte_terminal_match_add with vte_terminal_match_add_gregex
+
+---
+ src/lxterminal.c |   14 +++++++++++---
+ 1 files changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/src/lxterminal.c b/src/lxterminal.c
+index 24390ef..3d7f633 100644
+--- a/src/lxterminal.c
++++ b/src/lxterminal.c
+@@ -676,7 +676,6 @@ gboolean terminal_vte_button_press(VteTerminal *vte, GdkEventButton *event, gpoi
+ Term *terminal_new(LXTerminal *terminal, const gchar *label, const gchar *pwd, gchar **env, const gchar *exec)
+ {
+ 	Term *term;
+-	int ret;
+ 
+ 	/* create terminal */
+ 	term = g_new0(Term, 1);
+@@ -733,13 +732,22 @@ Term *terminal_new(LXTerminal *terminal, const gchar *label, const gchar *pwd, g
+ 	/* steal from tilda-0.09.6/src/tilda_terminal.c:36 */
+ #define DINGUS1 "(((news|telnet|nttp|file|http|ftp|https)://)|(www|ftp)[-A-Za-z0-9]*\\.)[-A-Za-z0-9\\.]+(:[0-9]*)?"
+ #define DINGUS2 "(((news|telnet|nttp|file|http|ftp|https)://)|(www|ftp)[-A-Za-z0-9]*\\.)[-A-Za-z0-9\\.]+(:[0-9]*)?/[-A-Za-z0-9_\\$\\.\\+\\!\\*\\(\\),;:@&=\\?/~\\#\\%]*[^]'\\.}>\\) ,\\\"]"
++	{
++	int ret;
++
++	GRegex* dingus1 = g_regex_new(DINGUS1, G_REGEX_OPTIMIZE, 0, NULL);
++	GRegex* dingus2 = g_regex_new(DINGUS2, G_REGEX_OPTIMIZE, 0, NULL);
+ 	/* steal from tilda-0.09.6/src/tilda_terminal.c:145 */
+ 	/* Match URL's, etc */
+-	ret = vte_terminal_match_add((VteTerminal *)term->vte, DINGUS1);
++	ret = vte_terminal_match_add_gregex((VteTerminal *)term->vte, dingus1, 0);
+ 	vte_terminal_match_set_cursor_type((VteTerminal *)term->vte, ret, GDK_HAND2);
+-	ret = vte_terminal_match_add((VteTerminal *)term->vte, DINGUS2);
++	ret = vte_terminal_match_add_gregex((VteTerminal *)term->vte, dingus2, 0);
+ 	vte_terminal_match_set_cursor_type((VteTerminal *)term->vte, ret, GDK_HAND2);
+ 
++	g_regex_unref(dingus1);
++	g_regex_unref(dingus2);
++	}
++
+ 	/* create label for tab */
+ 	term->label = lxterminal_tab_label_new(label);
+ 	lxterminal_tab_label_close_button_clicked(G_CALLBACK(terminal_childexit), term);
+-- 
+1.6.5.2
+
