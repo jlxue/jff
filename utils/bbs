@@ -25,16 +25,17 @@ expect_background {
         }
 }
 
-interact {
-    timeout  60 {
+for {} 1 {} {
+    interact {
+        timeout  60 {
             if $pendingMsg {
                 send "\n(Robot) Sorry, I'm not around.\n"
-                set pendingMsg [expr {$pendingMsg - 1}]
+                    set pendingMsg [expr {$pendingMsg - 1}]
             }
             set timeOut 1
-            send "\x00"
+                send "\x00"
         }
 
-    -nobuffer -re "." { set timeOut 0; set pendingMsg 0 }
+        -nobuffer -re "." { set timeOut 0; set pendingMsg 0 }
+    }
 }
-
