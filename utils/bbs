@@ -10,11 +10,31 @@ if { 0 == $argc } {
     #spawn -noecho {*}$argv
 }
 
-expect_background eof {     # avoid nasty error when the spawned process exits
-    exit
+set timeOut 0
+set pendingMsg 0
+
+# avoid nasty error when the spawned process exits
+expect_background {
+    eof     exit
+    -re {第 [0-9]+ 条消息 / 共 [0-9]+ 条消息}   {
+            if $timeOut {
+                send "\n(Robot) Sorry, I'm not around.\n"
+            } else {
+                incr pendingMsg
+            }
+        }
 }
 
 interact {
-    timeout  60 {send "\x00"}
+    timeout  10 {
+            if $pendingMsg {
+                send "\n(Robot) Sorry, I'm not around.\n"
+                set pendingMsg [expr {$pendingMsg - 1}]
+            }
+            set timeOut 1
+            send "\x00"
+        }
+
+    -nobuffer -re "." { set timeOut 0; set pendingMsg 0 }
 }
 
