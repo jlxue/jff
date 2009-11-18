@@ -3,7 +3,7 @@ use Expect;
 use IO::Pty;
 use strict;
 use warnings;
-use constant TIMEOUT => 60;
+use constant TIMEOUT => 10;
 
 if (@ARGV == 0) {
     print "Usage: $0 ssh username\@newsmth.net\n";
@@ -11,29 +11,37 @@ if (@ARGV == 0) {
 }
 
 
-# reference Expect.pm:interact()
-my ($infile, $inobject, $outfile, $outobject);
-$infile = new IO::File;
-$outfile = new IO::File;
-{
-    no strict 'subs';
-    $infile->IO::File::fdopen(STDIN, 'r');
-    $outfile->IO::File::fdopen(STDOUT, 'w');
-}
-$inobject = Expect->exp_init($infile);
-$outobject = Expect->exp_init($outfile);
+my $inobject = Expect->exp_init(\*STDIN);
+my $outobject = Expect->exp_init(\*STDOUT);
+
+$inobject->manual_stty(1);
+$inobject->raw_pty(1);
+$inobject->stty(qw(raw -echo));
+$inobject->log_stdout(0);
+
 $outobject->manual_stty(1);
+$outobject->raw_pty(1);
+$outobject->stty(qw(raw -echo));
+$outobject->log_stdout(0);
 
 
 my $bbs = new Expect;
+#$Expect::Debug = 3;
+#$Expect::Exp_Internal = 1;
 #$bbs->debug(3);
 #$bbs->exp_internal(1);
-$bbs->log_file("logbbs.log", "w");
+$bbs->manual_stty(1);
 $bbs->raw_pty(1);
+$bbs->stty(qw(raw -echo));
+$bbs->log_stdout(0);
+$bbs->log_file("logbbs.log", "w");
+
 $bbs->slave->clone_winsize_from(\*STDIN);
 $SIG{WINCH} = \&sigwinch_handler;
+
 $bbs->restart_timeout_upon_receive(1);
 $bbs->max_accum(100 * 1024);
+
 $bbs->spawn(@ARGV);
 
 
@@ -41,14 +49,20 @@ $bbs->spawn(@ARGV);
 $bbs->set_group($outobject);
 # input from STDIN goes to ssh or telnet
 $inobject->set_group($bbs);
-$bbs->manual_stty(1);
-$bbs->log_stdout(0);
-$inobject->log_stdout(0);
 
 
 main_loop();
 exit;
 
+END {
+    $inobject->raw_pty(0);
+    $inobject->stty(qw(sane));
+    $outobject->raw_pty(0);
+    $outobject->stty(qw(sane));
+    $bbs->hard_close();
+    $inobject->hard_close();
+    $outobject->hard_close();
+}
 
 ######################################################################
 sub sigwinch_handler {
@@ -61,17 +75,40 @@ sub sigwinch_handler {
 
 
 sub main_loop {
-    my @result;
-    my @bbs_patterns = (
-        [ 'eof'  ,   sub { $bbs->soft_close(); exit; } ],
-        [ 'timeout', sub { $bbs->print_log_file("{{{bbs timeout}}}"); } ],
+    my @common_patterns = (
+       [ 'eof'      , \&cb_cleanup ],
+       [ 'timeout'  , \&cb_timeout ],
     );
 
+    my @bbs_patterns = (
+        [ 'hello'   , sub { $bbs->print_log_file("got hello\n"); } ],
+    );
+
+    my @stdin_patterns = (
+        #[ 'hello'   , sub { $bbs->print_log_file("stdin: got hello\n"); } ],
+    );
+
+
     while (1) {
-        @result = expect(TIMEOUT,
-                         '-i', $bbs, @bbs_patterns,
-                         '-i', $inobject);
-        $bbs->print_log_file("{{{got @result}}}\n");
+        my @result = expect(TIMEOUT,
+            '-i', [$bbs, $inobject], @common_patterns,
+            #'-i', $bbs, @bbs_patterns,
+        );
+
+        if (defined $result[1] && $result[1] ne '1:TIMEOUT') {
+            $bbs->print_log_file("\n\nDEBUG: got error: $result[1]!\n");
+            last;
+        }
     }
+}
+
+
+sub cb_cleanup {
+}
+
+
+sub cb_timeout {
+    $bbs->print_log_file("exp objects: bbs=$bbs, inobject=$inobject, outobject=$outobject\n");
+    $bbs->print_log_file("timeout: @_\n");
 }
 
