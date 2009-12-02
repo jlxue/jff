@@ -36,8 +36,7 @@
       buggy, not actively maintained
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 <font NAME="SansSerif" SIZE="14"/>
 <icon BUILTIN="button_cancel"/>
 </node>
@@ -557,6 +556,10 @@
 <font NAME="SansSerif" SIZE="16"/>
 </node>
 <node COLOR="#00b439" CREATED="1245046309384" ID="ID_535137148" LINK="http://rubyforge.org/projects/starling/" MODIFIED="1245046317602" TEXT="Starling">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
+<node COLOR="#00b439" CREATED="1259745875025" ID="ID_1087445639" LINK="http://www.rocksclusters.org/" MODIFIED="1259745886617" TEXT="Rocks">
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
 </node>
