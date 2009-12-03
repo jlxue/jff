@@ -69,3 +69,9 @@ let
 
 6. Higher Order Functions
 
+zipWith flip map filter foldl foldr foldl1 foldr1
+scanl scanr scanl1 scanr1
+takeWhile
+
+lambda
+
