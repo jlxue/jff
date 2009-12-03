@@ -1,0 +1,71 @@
+http://learnyouahaskell.com/chapters
+
+1. Introduction
+
+aptitude install ghc6 libghc6-mtl-dev
+
+ghci, :edit, :load, :reload
+
+ghc --make hello
+
+
+2. Starting Out
+
++ - * / div mod ^ **
+&& || > < >= <= == /= not True False
+
+succ min max
+
+在 ghci 里绑定要使用 let 关键字。
+
+定义函数:
+addThree a b c = a + b + c
+
+if 表达式，注意缩进：
+if ...
+    then ...
+    else ...
+
+列表(list):     [1, 2, 3]
+
+++ : !! head tail last init length null reverse take drop
+maximum minimum sum product elem cycle repeat replicate
+
+range:      [1 .. 20]       [1 ..]
+            [1, 3 .. 20]    [1, 3 ..]
+
+列表推导：
+[ x | x <- [1 .. 10], x * 2 >= 12]
+[ 1 | _ <- xs]
+
+tuple: (1, 2, 3)
+
+fst snd zip
+
+
+3. Types and Typeclasses
+
+:type
+
+基础类型：
+Int Integer Float Double Bool Char ()
+
+typeclass:
+Eq Ord Show Read Enum Bounded Num Integral Floating
+
+函数：compare show read fromIntegral
+
+
+4. Syntax in Functions
+
+foo name@pattern = ...
+
+| otherwise
+where
+let
+
+
+5. Recursion
+
+6. Higher Order Functions
+
