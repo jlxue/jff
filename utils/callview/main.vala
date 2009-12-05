@@ -8,7 +8,7 @@ static int main(string[] args) {
     }
 
     CObjectFile obj = new CObjectFile(args[1]);
-    obj.parse();
+    obj.load();
 
     return 0;
 }
