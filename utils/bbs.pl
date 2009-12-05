@@ -26,10 +26,10 @@ $outobject->log_stdout(0);
 
 
 my $bbs = new Expect;
-#$Expect::Debug = 3;
-#$Expect::Exp_Internal = 1;
-#$bbs->debug(3);
-#$bbs->exp_internal(1);
+$Expect::Debug = 3;
+$Expect::Exp_Internal = 1;
+$bbs->debug(3);
+$bbs->exp_internal(1);
 $bbs->manual_stty(1);
 $bbs->raw_pty(1);
 $bbs->stty(qw(raw -echo));
@@ -82,6 +82,8 @@ sub main_loop {
 
     my @bbs_patterns = (
         [ 'hello'   , sub { $bbs->print_log_file("got hello\n"); } ],
+        [ '-re', '^(\w+)\s*\((.*)\)\s*\r?\n?(.*)第 \d+ 条消息 / 共 \d+ 条消息\r?$'
+                    , \&cb_newmessage ],
     );
 
     my @stdin_patterns = (
@@ -92,7 +94,7 @@ sub main_loop {
     while (1) {
         my @result = expect(TIMEOUT,
             '-i', [$bbs, $inobject], @common_patterns,
-            #'-i', $bbs, @bbs_patterns,
+            '-i', $bbs, @bbs_patterns,
         );
 
         if (defined $result[1] && $result[1] ne '1:TIMEOUT') {
@@ -110,5 +112,9 @@ sub cb_cleanup {
 sub cb_timeout {
     $bbs->print_log_file("exp objects: bbs=$bbs, inobject=$inobject, outobject=$outobject\n");
     $bbs->print_log_file("timeout: @_\n");
+}
+
+sub cb_newmessage {
+    $bbs->print_log_file("got new message:{{{", $bbs->match(), "}}}\n");
 }
 
