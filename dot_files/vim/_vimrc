@@ -123,6 +123,14 @@ let g:showmarks_include="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 " for GetLatestVimScripts
 let g:GetLatestVimScripts_allowautoinstall=1
 
+" for syntax/vala.vim
+"let vala_ignore_valadoc = 1
+let vala_comment_strings = 1
+let vala_space_errors = 1
+"let vala_no_trail_space_error = 1
+let vala_no_tab_space_error = 1
+"let vala_minlines = 120
+
 "--------------------------------------misc settings-----------------------------
 " recursively search tag file upwards, see :help file-searching
 set tags=./tags;,tags;
@@ -255,6 +263,11 @@ au WinLeave * :let w:blsp=@/
 
 " make tab characters and trailing whitespace obvious
 au FileType * :if &ft != 'help' | 2match Error /\t\|\s\+$/ | endif
+
+au BufRead *.vala set efm=%f:%l.%c-%[%^:]%#:\ %t%[%^:]%#:\ %m
+au BufRead *.vapi set efm=%f:%l.%c-%[%^:]%#:\ %t%[%^:]%#:\ %m
+au BufRead,BufNewFile *.vala            setfiletype vala
+au BufRead,BufNewFile *.vapi            setfiletype vala
 
 " au BufNewFile,BufRead *.c,*.cpp
 "     \   :setlocal equalprg=d:\program\astyle\bin\AStyle.exe\ --style=kr\ -l
