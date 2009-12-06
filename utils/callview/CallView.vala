@@ -8,6 +8,12 @@ public delegate void CSymbolProcessor(uint address, uint size,
                                       string signature,
                                       string? file, uint line);
 
+public delegate void CCalleeProcessor(Array<Callee> callees,
+                                      uint callee_addr,
+                                      string? callee_signature,
+                                      string? file,
+                                      uint line);
+
 
 public static bool pipe(string[] argv, string[]? envp,
                         LineProcessor processor) {
@@ -101,6 +107,56 @@ private class NmOutputParser : Object {
     }
 }
 
+
+private class ObjdumpOutputParser : Object {
+    private Regex   _regex1;
+    private Regex   _regex2;
+    private CSymbol _caller;
+    private unowned Array<Callee> _callees;
+    private CCalleeProcessor _proc;
+    private string _file;
+    private uint _line;
+
+    public ObjdumpOutputParser(CSymbol caller, Array<Callee> callees,
+                               CCalleeProcessor proc) {
+        _caller = caller;
+        _callees = callees;
+        _proc = proc;
+        _file = null;
+        _line = 0;
+
+        try {
+            _regex1 = new Regex("""^(\/.+):(\d+)$""",
+                                RegexCompileFlags.OPTIMIZE, 0);
+            _regex2 = new Regex(""" [0-9a-f]{7}:\t(?:[0-9a-f]{2}\s)+\s*call\s+([0-9a-f]+)(?:\s+<(.+)>)?""",
+                                RegexCompileFlags.OPTIMIZE, 0);
+        } catch (RegexError e) {
+            stderr.printf("Bad regex: %s\n", e.message);
+        }
+    }
+
+    public bool parseLine(string s) {
+        stdout.printf("Objdump output: %s", s);
+
+        MatchInfo match_info;
+        if (_regex1.match(s, 0, out match_info)) {
+            _file = match_info.fetch(1);
+            _line = (uint)(match_info.fetch(2).to_ulong());
+        } else if (_regex2.match(s, 0, out match_info)) {
+            uint  callee_addr = (uint)(match_info.fetch(1).to_ulong(null, 16));
+            string? callee_signature = match_info.fetch(2);
+
+            if (_caller.file == _file) {
+                _proc(_callees, callee_addr, callee_signature, null, _line);
+            } else {
+                _proc(_callees, callee_addr, callee_signature, _file, _line);
+            }
+        }
+
+        return true;
+    }
+}
+
 public class Symbol : Object {
     /** code size   */
     public uint size { get; set; }
@@ -177,6 +233,20 @@ public class CModule: Module {
                         new CSymbol(address, size, signature, file, line));
     }
 
+    private void addCallee(Array<Callee> callees,
+                           uint callee_address,
+                           string? signature = null,
+                           string? file = null, uint line = 0) {
+        Symbol? symbol = _symbols.lookup(callee_address);
+        if (null == symbol) {
+            symbol = new CSymbol(0, 0, signature, "-* external *-", 0);
+        }
+
+        Callee callee = new Callee(symbol, file, line);
+        callee.ref();      // XXX: why can't append_val((owned)callee) ?
+        callees.append_val(callee);
+    }
+
     public CModule(string file) {
         base(file);
         _symbols = new HashTable<uint, CSymbol>(null, null);
@@ -190,6 +260,38 @@ public class CModule: Module {
                                     "-n", "-S", file, null},
                              null,
                              parser.parseLine);
+    }
+
+    public unowned Array<Callee>? queryCallees(Symbol symbol) {
+        if (! (symbol is CSymbol)) {
+            return null;
+        }
+
+        CSymbol caller = (CSymbol)symbol;
+        unowned Array<Callee>? callees = _callees.lookup(caller.address);
+        if (null != callees) {
+            return callees;
+        }
+
+        _callees.insert(caller.address, new Array<Callee>(false, false,
+                                                          (uint)sizeof(Callee)));
+        callees = _callees.lookup(caller.address);
+
+        ObjdumpOutputParser parser = new ObjdumpOutputParser(caller,
+                                                             callees,
+                                                             addCallee);
+
+        if (CallView.pipe({"objdump", "-d", "-C", "-F", "-l", "-w",
+                           "--start-address",
+                           caller.address.to_string(),
+                           "--stop-address",
+                           (caller.address + caller.size).to_string(), null},
+                          null,
+                          parser.parseLine)) {
+            return callees;
+        } else {
+            return null;
+        }
     }
 }
 
