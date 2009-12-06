@@ -56,11 +56,15 @@ static int main(string[] args) {
             }
 
             if (! search_callees) {
-                callees = module.findCallees(symbols.index(n - 1));
-                file = symbols.index(n - 1).file;
+                Symbol sym = symbols.index(n - 1);
+                sym.ref();
+                callees = module.findCallees(sym);
+                file = sym.file;
             } else {
-                callees = module.findCallees(callees.index(n - 1).symbol);
-                file = callees.index(n - 1).symbol.file;
+                Callee callee = callees.index(n - 1);
+                callee.ref();
+                callees = module.findCallees(callee.symbol);
+                file = callee.symbol.file;
             }
 
             search_callees = true;
@@ -83,6 +87,7 @@ static int main(string[] args) {
             stdout.printf("callview: %u lines\n", callees.length);
             for (uint i = 0; i < callees.length; ++i) {
                 Callee callee = callees.index(i);
+                callee.ref();
                 stdout.printf("%3u %s:%u %s\n",
                               i + 1,
                               callee.file != null ?  callee.file : file,
@@ -93,6 +98,7 @@ static int main(string[] args) {
             stdout.printf("callview: %u lines\n", symbols.length);
             for (uint i = 0; i < symbols.length; ++i) {
                 Symbol sym = symbols.index(i);
+                sym.ref();
                 stdout.printf("%3u %s:%u %s\n",
                               i + 1,
                               sym.file,

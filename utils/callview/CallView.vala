@@ -272,8 +272,10 @@ public class CModule: Module {
                                                   (uint)sizeof(Symbol));
         _symbols.for_each((key, val) => {
                             Symbol sym = (Symbol)val;
-                            if (regex.match(sym.signature, 0, null))
+                            if (regex.match(sym.signature, 0, null)) {
+                                sym.ref();
                                 symbols.append_val(sym);
+                            }
                            });
 
         return (owned)symbols;
