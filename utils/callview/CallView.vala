@@ -114,16 +114,12 @@ public class Symbol : Object {
     /** line number in file */
     public uint line { get; set; }
 
-    /** callees of this function    */
-    public Callee[]? callees { get; set; }
-
     public Symbol(uint size, string signature,
                   string? file = null, uint line = 0) {
         _size = size;
         _signature = signature;
         _file = file;
         _line = line;
-        _callees = null;
     }
 }
 
@@ -169,7 +165,8 @@ public class Module : Object {
 
 
 public class CModule: Module {
-    private HashTable<uint, CSymbol> _symbols;
+    private HashTable<uint, CSymbol>        _symbols;
+    private HashTable<uint, Array<Callee>>  _callees;
 
     private void addSymbol(uint address, uint size,
                            string signature,
@@ -183,6 +180,7 @@ public class CModule: Module {
     public CModule(string file) {
         base(file);
         _symbols = new HashTable<uint, CSymbol>(null, null);
+        _callees = new HashTable<uint, Array<Callee>>(null, null);
     }
 
     public bool load() {
