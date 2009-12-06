@@ -135,8 +135,9 @@ private class ObjdumpOutputParser : Object {
         }
     }
 
+
     public bool parseLine(string s) {
-        stdout.printf("Objdump output: %s", s);
+        //stdout.printf("Objdump output: %s", s);
 
         MatchInfo match_info;
         if (_regex1.match(s, 0, out match_info)) {
@@ -262,6 +263,20 @@ public class CModule: Module {
                              parser.parseLine);
     }
 
+
+    public Array<Symbol> findSymbol(Regex regex) {
+        Array<Symbol> symbols = new Array<Symbol>(false, false,
+                                                  (uint)sizeof(Symbol));
+        _symbols.for_each((key, val) => {
+                            Symbol sym = (Symbol)val;
+                            if (regex.match(sym.signature, 0, null))
+                                symbols.append_val(sym);
+                           });
+
+        return (owned)symbols;
+    }
+
+
     public unowned Array<Callee>? queryCallees(Symbol symbol) {
         if (! (symbol is CSymbol)) {
             return null;
@@ -285,7 +300,8 @@ public class CModule: Module {
                            "--start-address",
                            caller.address.to_string(),
                            "--stop-address",
-                           (caller.address + caller.size).to_string(), null},
+                           (caller.address + caller.size).to_string(),
+                           file, null},
                           null,
                           parser.parseLine)) {
             return callees;
