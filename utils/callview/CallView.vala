@@ -225,6 +225,9 @@ public class CModule: Module {
     private HashTable<uint, CSymbol>        _symbols;
     private HashTable<uint, Array<Callee>>  _callees;
 
+    private Array<Callee> EMPTY_CALLEES = new Array<Callee>(
+            false, false, (uint)sizeof(Callee));
+
     private void addSymbol(uint address, uint size,
                            string signature,
                            string? file = null, uint line = 0) {
@@ -264,7 +267,7 @@ public class CModule: Module {
     }
 
 
-    public Array<Symbol> findSymbol(Regex regex) {
+    public Array<Symbol> findSymbols(Regex regex) {
         Array<Symbol> symbols = new Array<Symbol>(false, false,
                                                   (uint)sizeof(Symbol));
         _symbols.for_each((key, val) => {
@@ -277,13 +280,13 @@ public class CModule: Module {
     }
 
 
-    public unowned Array<Callee>? queryCallees(Symbol symbol) {
+    public unowned Array<Callee> findCallees(Symbol symbol) {
         if (! (symbol is CSymbol)) {
-            return null;
+            return EMPTY_CALLEES;
         }
 
         CSymbol caller = (CSymbol)symbol;
-        unowned Array<Callee>? callees = _callees.lookup(caller.address);
+        unowned Array<Callee> callees = _callees.lookup(caller.address);
         if (null != callees) {
             return callees;
         }
@@ -306,7 +309,7 @@ public class CModule: Module {
                           parser.parseLine)) {
             return callees;
         } else {
-            return null;
+            return EMPTY_CALLEES;
         }
     }
 }
