@@ -7,8 +7,8 @@ static int main(string[] args) {
         return -1;
     }
 
-    CObjectFile obj = new CObjectFile(args[1]);
-    obj.load();
+    CModule module = new CModule(args[1]);
+    module.load();
 
     return 0;
 }

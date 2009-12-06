@@ -4,9 +4,9 @@ namespace CallView {
 
 public delegate bool LineProcessor(string line);
 
-public delegate void CFunctionProcessor(uint address, uint size,
-                                        string signature,
-                                        string? file, uint line);
+public delegate void CSymbolProcessor(uint address, uint size,
+                                      string signature,
+                                      string? file, uint line);
 
 
 public static bool pipe(string[] argv, string[]? envp,
@@ -64,9 +64,9 @@ public static bool pipe(string[] argv, string[]? envp,
 
 private class NmOutputParser : Object {
     private Regex               _regex;
-    private CFunctionProcessor  _proc;
+    private CSymbolProcessor    _proc;
 
-    public NmOutputParser(CFunctionProcessor proc) {
+    public NmOutputParser(CSymbolProcessor proc) {
         _proc = proc;
         try {
             _regex = new Regex("""^([0-9a-f]{8}) ([0-9a-f]{8}) . (.+?)(?:\s+(\/.+):(\d+))?$""",
@@ -101,7 +101,7 @@ private class NmOutputParser : Object {
     }
 }
 
-public class Function : Object {
+public class Symbol : Object {
     /** code size   */
     public uint size { get; set; }
 
@@ -114,8 +114,8 @@ public class Function : Object {
     /** line number in file */
     public uint line { get; set; }
 
-    public Function(uint size, string signature,
-                    string? file = null, uint line = 0) {
+    public Symbol(uint size, string signature,
+                  string? file = null, uint line = 0) {
         _size = size;
         _signature = signature;
         _file = file;
@@ -124,47 +124,47 @@ public class Function : Object {
 }
 
 
-public class CFunction : Function {
+public class CSymbol : Symbol {
     /** virtual address in object file  */
     public uint address { get; set; }
 
-    public CFunction(uint address, uint size, string signature,
-                     string? file = null, uint line = 0) {
+    public CSymbol(uint address, uint size, string signature,
+                   string? file = null, uint line = 0) {
         base(size, signature, file, line);
         _address = address;
     }
 }
 
 
-public class ObjectFile : Object {
-    /** file path of this object file   */
+public class Module : Object {
+    /** file path of this module file   */
     public string file { get; set; }
 
-    public ObjectFile(string file) {
+    public Module(string file) {
         _file = file;
     }
 }
 
 
-public class CObjectFile: ObjectFile {
-    private HashTable<uint, CFunction> _symbols;
+public class CModule: Module {
+    private HashTable<uint, CSymbol> _symbols;
 
-    private void addFunction(uint address, uint size,
-                             string signature,
-                             string? file = null, uint line = 0) {
-        //stdout.printf("addFunction: %u %u %s %s:%u\n", address, size,
+    private void addSymbol(uint address, uint size,
+                           string signature,
+                           string? file = null, uint line = 0) {
+        //stdout.printf("addSymbol: %u %u %s %s:%u\n", address, size,
         //              signature, file, line);
         _symbols.insert(address,
-                        new CFunction(address, size, signature, file, line));
+                        new CSymbol(address, size, signature, file, line));
     }
 
-    public CObjectFile(string file) {
+    public CModule(string file) {
         base(file);
-        _symbols = new HashTable<uint, CFunction>(null, null);
+        _symbols = new HashTable<uint, CSymbol>(null, null);
     }
 
     public bool load() {
-        NmOutputParser parser = new NmOutputParser(addFunction);
+        NmOutputParser parser = new NmOutputParser(addSymbol);
 
         return CallView.pipe({"nm", "-C", "--defined-only", "-l",
                                     "-n", "-S", file, null},
