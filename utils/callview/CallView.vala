@@ -114,10 +114,32 @@ public class Symbol : Object {
     /** line number in file */
     public uint line { get; set; }
 
+    /** callees of this function    */
+    public Callee[]? callees { get; set; }
+
     public Symbol(uint size, string signature,
                   string? file = null, uint line = 0) {
         _size = size;
         _signature = signature;
+        _file = file;
+        _line = line;
+        _callees = null;
+    }
+}
+
+
+public class Callee : Object {
+    /** file path where this function is called  */
+    public string? file { get; set; }
+
+    /** line number in file where this function is called   */
+    public uint line { get; set; }
+
+    /** information about this function */
+    public Symbol symbol { get; set; }
+
+    public Callee(Symbol symbol, string? file = null, uint line = 0) {
+        _symbol = symbol;
         _file = file;
         _line = line;
     }
