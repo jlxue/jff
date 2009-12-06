@@ -1,4 +1,4 @@
-using GLib;
+using Gee;
 
 namespace CallView {
 
@@ -8,7 +8,7 @@ public delegate void CSymbolProcessor(uint address, uint size,
                                       string signature,
                                       string? file, uint line);
 
-public delegate void CCalleeProcessor(Array<Callee> callees,
+public delegate void CCalleeProcessor(Gee.List<Callee> callees,
                                       uint callee_addr,
                                       string? callee_signature,
                                       string? file,
@@ -112,12 +112,12 @@ private class ObjdumpOutputParser : Object {
     private Regex   _regex1;
     private Regex   _regex2;
     private CSymbol _caller;
-    private unowned Array<Callee> _callees;
+    private Gee.List<Callee> _callees;
     private CCalleeProcessor _proc;
     private string _file;
     private uint _line;
 
-    public ObjdumpOutputParser(CSymbol caller, Array<Callee> callees,
+    public ObjdumpOutputParser(CSymbol caller, Gee.List<Callee> callees,
                                CCalleeProcessor proc) {
         _caller = caller;
         _callees = callees;
@@ -222,11 +222,10 @@ public class Module : Object {
 
 
 public class CModule: Module {
-    private HashTable<uint, CSymbol>        _symbols;
-    private HashTable<uint, Array<Callee>>  _callees;
+    private HashTable<uint, CSymbol>            _symbols;
+    private HashTable<uint, Gee.List<Callee>>   _callees;
 
-    private Array<Callee> EMPTY_CALLEES = new Array<Callee>(
-            false, false, (uint)sizeof(Callee));
+    private Gee.List<Callee> EMPTY_CALLEES = new ArrayList<Callee>();
 
     private void addSymbol(uint address, uint size,
                            string signature,
@@ -237,7 +236,7 @@ public class CModule: Module {
                         new CSymbol(address, size, signature, file, line));
     }
 
-    private void addCallee(Array<Callee> callees,
+    private void addCallee(Gee.List<Callee> callees,
                            uint callee_address,
                            string? signature = null,
                            string? file = null, uint line = 0) {
@@ -247,14 +246,13 @@ public class CModule: Module {
         }
 
         Callee callee = new Callee(symbol, file, line);
-        callee.ref();      // XXX: why can't append_val((owned)callee) ?
-        callees.append_val(callee);
+        callees.add(callee);
     }
 
     public CModule(string file) {
         base(file);
         _symbols = new HashTable<uint, CSymbol>(null, null);
-        _callees = new HashTable<uint, Array<Callee>>(null, null);
+        _callees = new HashTable<uint, Gee.List<Callee>>(null, null);
     }
 
     public bool load() {
@@ -267,34 +265,31 @@ public class CModule: Module {
     }
 
 
-    public Array<Symbol> findSymbols(Regex regex) {
-        Array<Symbol> symbols = new Array<Symbol>(false, false,
-                                                  (uint)sizeof(Symbol));
+    public Gee.List<Symbol> findSymbols(Regex regex) {
+        Gee.List<Symbol> symbols = new ArrayList<Symbol>();
         _symbols.for_each((key, val) => {
                             Symbol sym = (Symbol)val;
                             if (regex.match(sym.signature, 0, null)) {
-                                sym.ref();
-                                symbols.append_val(sym);
+                                symbols.add(sym);
                             }
                            });
 
-        return (owned)symbols;
+        return symbols;
     }
 
 
-    public unowned Array<Callee> findCallees(Symbol symbol) {
+    public Gee.List<Callee> findCallees(Symbol symbol) {
         if (! (symbol is CSymbol)) {
             return EMPTY_CALLEES;
         }
 
         CSymbol caller = (CSymbol)symbol;
-        unowned Array<Callee> callees = _callees.lookup(caller.address);
+        Gee.List<Callee> callees = _callees.lookup(caller.address);
         if (null != callees) {
             return callees;
         }
 
-        _callees.insert(caller.address, new Array<Callee>(false, false,
-                                                          (uint)sizeof(Callee)));
+        _callees.insert(caller.address, new ArrayList<Callee>());
         callees = _callees.lookup(caller.address);
 
         ObjdumpOutputParser parser = new ObjdumpOutputParser(caller,
