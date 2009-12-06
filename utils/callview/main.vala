@@ -32,6 +32,10 @@ static int main(string[] args) {
         if (null == (input = stdin.read_line()))
             break;
 
+        if (input.length == 0) {
+            continue;
+        }
+
         if (numbers.match(input, 0, null)) {
             if (! search_callees && (symbols == null || symbols.length == 0)) {
                 stderr.printf("No symbols found, input a search pattern please!\n");
@@ -76,6 +80,14 @@ static int main(string[] args) {
             } catch (RegexError e) {
                 stderr.printf("Bad regex: %s\n", e.message);
                 continue;
+            }
+
+            if (symbols != null) {
+                for (uint i = 0; i < symbols.length; ++i) {
+                    /* to unref element */
+                    Symbol t = symbols.index(i);
+                    (void)t;
+                }
             }
 
             symbols = module.findSymbols(regex);
