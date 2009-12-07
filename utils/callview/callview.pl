@@ -18,9 +18,11 @@ my ($addrinfo, $syminfo) = retrieve_symbols('addrinfo', 'syminfo', $ARGV[0]);
 
 my @addrs;
 
-print "> ";
+print ">> ";
 while (<STDIN>) {
     chomp;
+
+    next if length == 0;
 
     if (/\d+/) {
         if ($_ < 1 || $_ > @addrs) {
@@ -29,7 +31,7 @@ while (<STDIN>) {
         }
         my $callees = retrieve_callee_info($addrinfo, $addrs[$_ - 1], $ARGV[0]);
         @addrs = ();
-        for (my $i = 1; $i < @$callees; $i +=2) {
+        for (my $i = 1; $i < @$callees; $i +=3) {
             push @addrs, $callees->[$i];
         }
     } else {
@@ -56,7 +58,7 @@ while (<STDIN>) {
         }
     }
 
-    print "> ";
+    print ">> ";
 }
 
 
@@ -81,7 +83,7 @@ sub extract_symbols {
         chomp;
 
         my ($addr, $size, $type, $signature, $path, $line) =
-            $_ =~ /^([0-9a-f]{8}) ([0-9a-f]{8}) (.) (.*?)(?:\s+(\/.*):(\d+))?$/;
+            $_ =~ /^([0-9a-f]{8}) ([0-9a-f]{8}) (.) (.+?)(?:\s+(\/.+):(\d+))?$/;
 
         next if ! defined $signature;
 
@@ -133,9 +135,9 @@ sub extract_callee_info {
     while (<$fh>) {
         if (/^\/.*:(\d+)/) {
             $line = $1;
-        } elsif (/^ [0-9a-f]{7}:\t(?:[0-9a-f]{2}\s)+\s*call\s+([0-9a-f]+)/) {
+        } elsif (/^ [0-9a-f]{7}:\t(?:[0-9a-f]{2}\s)+\s+call\s+([0-9a-f]+)(?:\s+<(.+)>)?/) {
             $callee = ('0' x (8 - length($1))) . $1;
-            push @$callees, $line, $callee;
+            push @$callees, $line, $callee, $2;
         }
     }
 
