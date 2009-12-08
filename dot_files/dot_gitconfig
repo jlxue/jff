@@ -21,6 +21,7 @@
 
 [alias]
 	b  = branch
+    l  = log --graph --pretty=format:'%Cred%h%Creset-%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
 	st = status
 	ci = commit
 	co = checkout
