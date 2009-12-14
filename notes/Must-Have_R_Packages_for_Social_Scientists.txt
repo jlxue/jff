@@ -1,0 +1,139 @@
+http://www.drewconway.com/zia/?p=1614
+
+Must-Have R Packages for Social Scientists
+By Drew Conway, on December 11th, 2009
+
+After recently having to think critically about the value of various R
+packages for social science research, I realized that others might find
+value in a post on “must-have” R packages for social scientists. After
+the immensely popular post on this topic for Python packages a follow-up
+seemed appropraite. If you conduct social science research but are
+desperately clinging onto your SAS, SPSS or Matlab licenses; waiting for
+someone to convince you of R’s value, please allow me to be the first
+to try.
+
+R is a functional programming language that allows for seamless data
+exploration, manipulation, analysis and visualization. The community
+using and supporting the language has exploded over the last several
+years, which has lead to the development of several immensely useful
+packages, many of which have direct application in the social sciences.
+Below are the R packages I use on a weekly/daily/monthly basis (in no
+particular order) and highly recommend to any R users; new or old.
+
+   1.
+      Zelig
+
+      Put simply, Zelig is a one-stop statistical shop for nearly all
+regression model specifications. Using a uniform syntax across model
+types, and several extremely useful plotting functions, the package’s
+autor Gary King (Political Science and Statistics at Harvard University)
+calls Zelig “everyone’s statistical software,” which is a very
+accurate description. if there is one R package that every social
+scientist should have it is Zelig!
+
+      Download Zelig
+   2.
+      ggplot2
+
+      One of the advantages of R as a functional language is it contains
+a set of convenient base functions for plotting data. While useful when
+exploring a dataset, they are–for lack of a better word–ugly, and this
+is where ggplot2 comes in. Using the Grammar of Graphics manifesto as a
+guide, creator Hadley Wickham designed ggplot2 to “take the good parts
+of base and lattice graphics and none of the bad parts,” and he
+succeed. This is the premier R package for conveying your analysis
+visually.
+
+      Download ggplot2
+   3.
+      Statnet/igraph
+
+      I have combined the two competing network analysis packages in R
+into a single bullet because each has its strengths and weaknesses, and
+as such there is value in leaning and using both. The igraph package
+approaches network analysis from the mathematics/physics/graph theoretic
+perspective, including several advanced metrics and random graph models.
+In contrast, Statnet was primarily designed for social science, and its
+primary advantage is the inclusion of a series of functions for
+estimating and testing ERGM/p* graph models.
+
+      Download igraph
+      Download Statnet
+   4.
+      plyr
+
+      Also brought to you by R guru Hadley Wickham, the plyr package
+assist reachers in the least glamorous aspect of their work—data
+manipulation and cleaning. One of R’s great advantages is its ability t
+handle very large datasets, and plyr is there to help you break these
+large data problems into smaller and more manageable pieces.
+
+      Download plyr
+   5.
+      Amelia II
+
+      Also developed by Gary Kind, Amelia II contains a sets of
+algorithms for multiple imputation of missing data across a wide range
+of data types, such as survey, time series and cross sectional. As
+missing data problems are ubiquitous in social science research the
+functions contained in this package provide a powerful solution to these
+issues.
+
+      Download Amelia II
+   6.
+      nlme
+
+      This package is used to fit and compare Gaussian linear and
+nonlinear mixed-effects models. For those examining complex time series
+data with various correlation structures the nlme provides a number of
+options for fits, tests and plotting.
+
+      Download nlme
+   7.
+      SNOW/Rmpi
+
+      Unlike newer version of Python, the current build of R does not
+contain native functionality for distributing jobs across
+high-performance computing clusters. The SNOW and Rmpi packages provide
+this functionality, and are highly recommended to any researcher with
+access to an HPC environment running R.
+
+      Download SNOW
+      Download Rmpi
+   8.
+      xtable/apsrtable
+
+      Both of these packages convert R summary results into LaTeX/HTML
+table format. The xtable package is a general solution, while the
+apsrtable package, developed by fellow political science grad student
+Michael Malecki, will output tables in the APSR format&mdas;for those of
+you fortunate enough to need to use this format.
+
+      Download xtable
+      Download apsrtable
+   9.
+      plm
+
+      Got panel data? If so, you need plm, which contains all of the
+necessary model specifications and tests for fitting a panel data model;
+including specifications for instrumental variable models.
+
+      Download plm
+  10.
+      sqldf
+
+      As I stated, R is great for dealing with large datasets; however,
+occasionally you will encounter a dataset so large that it can grind R’
+s base I/O functions to a halt. As the name suggests, the sqldf packages
+overcomes this by allowing uses to perfrom SQL statements directly on R
+data frames, greatly increasing efficiency.
+
+      Download sqldf 
+
+I hope that you will explore and use the packages above that you do not
+already have familiarity with. To those who have never used R and/or
+have an irrational phobia of the language, let this list provide the
+appropriate motivation. Also, to those R experts out there, I welcome
+any suggestions for more useful R packages for the social science
+inclined!
+
