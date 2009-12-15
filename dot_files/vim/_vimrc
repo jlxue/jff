@@ -223,8 +223,6 @@ if has("cscope")
         set cscopeprg=cscope\ -d\ -k\ -q
     endif
     set cscopequickfix=s-,c-,d-,i-,t-,e-
-    set cst
-    set csto=0
     set nocsverb
     " add any database in current directory
     let cscope_db=findfile("cscope.out", "./;,.;")
