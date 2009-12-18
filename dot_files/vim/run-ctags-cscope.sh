@@ -9,7 +9,7 @@ while read d; do
     /usr/bin/find "$d" -type f -iregex '.*\.\(c\|h\|cpp\|java\|cc\|cxx\)' -print
 done < "$1"  > cscope.files
 
-rm cscope.*out tags
+rm -f cscope.*out tags
 cscope -b -q -k
 ctags -L cscope.files --extra=+fq --c-kinds=+px --totals
 
