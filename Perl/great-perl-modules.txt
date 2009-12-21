@@ -8,6 +8,8 @@ http://search.cpan.org/~perigrin/Task-Kensho-0.18/lib/Task/Kensho.pm
 local::lib
 Task::Kensho    推荐模块
 
+AnyEvent
+
 Parse::RecDescent   (不推荐，太慢)
 Parse::Yapp
 Parse::Eyapp
