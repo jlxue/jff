@@ -1,7 +1,24 @@
 #!/usr/bin/perl
 #
-#  See show_usage().
+# Purpose:
+#   Evaluate ocuppied disk space by Debian packages and their dependencies.
 #
+# Usage:
+#   See show_usage().
+#
+# Author:
+#   Liu Yubao <yubao.liu@gmail.com>
+#
+# License:
+#   GPL v3
+#
+# Version:
+#   1.0
+#
+# ChangeLog:
+#   2009-12-25  Liu Yubao
+#       * first release
+
 use AptPkg::Cache;
 use Getopt::Long;
 use Smart::Comments;
@@ -14,9 +31,9 @@ my $cache = new AptPkg::Cache();
 
 if (@ARGV == 0) {
     show_usage();
-} elsif ($ARGV[0] eq 'stat') {
+} elsif ($ARGV[0] =~ /^s/i ) {  # stat
     stat_installed_size($cache);
-} elsif ($ARGV[0] eq 'depends') {
+} elsif ($ARGV[0] =~ /^d/i ) {  # depends
     shift;
     check_depends($cache);
 } else {
@@ -29,11 +46,13 @@ if (@ARGV == 0) {
 #----------------------------------------------------------------
 sub show_usage {
     print STDERR <<EOF;
+$self 1.0
+
 Usage:
     $self stat
         check space usage of all installed packages.
 
-    $self depends FILE...
+    $self depends [OPTIONS] FILE...
         check space usage by specified packages and their dependency.
 
         FILE contains a list of package names, one per line,
@@ -41,6 +60,17 @@ Usage:
 
         If the first FILE doesn't exist, then the file arguments
         are thought as package names.
+
+        Options:
+        -r, --recommends
+            Consider recommended packages as dependency. (default on)
+        -s, --suggests
+            Consider suggested packages as dependency. (default off)
+        -h, --header
+            Output header information. (default on)
+
+        Add "no-" prefix to long options to negate them, for example:
+            $self depends --no-suggests
 EOF
 }
 
@@ -79,11 +109,11 @@ sub check_depends {
 
     my $opt_recommends = 1;
     my $opt_suggests = 0;
-    my $opt_core = 0;
+    my $opt_header = 1;
 
     GetOptions("recommends!"   => \$opt_recommends,
                "suggests!"     => \$opt_suggests,
-               "core!"         => \$opt_core);
+               "header!"       => \$opt_header);
 
     # collect pkg names specified by user
     if (@ARGV > 0 && ! -r $ARGV[0]) {
@@ -169,12 +199,15 @@ sub check_depends {
         }
     }
 
-    $installed_installed_size /= 1024 * 1024;
-    print <<EOF;
+    if ($opt_header) {
+        $installed_installed_size /= 1024 * 1024;
+        print <<EOF;
 Already installed packages' installed size: $installed_installed_size MB
 EOF
-    output_installed_size($total_installed_size, $core_installed_size, $libs_installed_size);
-    output_package_list($cache, %flags);
+        output_installed_size($total_installed_size, $core_installed_size, $libs_installed_size);
+    }
+
+    output_package_list($cache, \%flags, $opt_header);
 }
 
 
@@ -215,16 +248,19 @@ EOF
 
 
 sub output_package_list {
-    my ($cache, %flags) = @_;
+    my ($cache, $flags, $opt_header) = @_;
     my $policy = $cache->policy();
 
-    my @names = sort keys %flags;
+    my @names = sort keys %$flags;
 
     my ($flag, $name, $version, $section, $priority, $installed_size, $count);
 
-    printf "    %-35s %-25s %-20s %-9s %-14s %-s\n",
-            "Name", "Version", "Section", "Priority", "Installed-Size", "Direct-Depends";
-    print '=' x 120, "\n";
+    if ($opt_header) {
+        printf "    %-35s %-25s %-20s %-9s %-14s %-s\n",
+                "Name", "Version", "Section", "Priority", "Installed-Size", "Direct-Depends";
+        print '=' x 120, "\n";
+    }
+
     for (@names) {
         my $pkg = $cache->{$_};
         my $candidate = $policy->candidate($pkg);
@@ -238,7 +274,7 @@ sub output_package_list {
         $section = $pkg->{Section};
         $priority = $candidate->{Priority};
         $installed_size = $candidate->{InstalledSize};
-        $count = $flags{$name};
+        $count = $flags->{$name};
 
         printf "%-s %-35s %-25s %-20s %-9s %14d %d\n",
                 $flag, $name, $version, $section, $priority, $installed_size, $count;
