@@ -95,7 +95,7 @@ sub check_depends {
         }
     }
 
-    # add all packages specified by user to @candidates
+    # filter duplicate package names
     for my $name (@pkg_names) {
         if (! exists $cache->{$name}) {
             print STDERR "Warning: \"$name\" not found!\n";
@@ -104,9 +104,12 @@ sub check_depends {
 
         next if exists $flags{$name};
         $flags{$name} = 0;
+    }
 
+    # add all packages specified by user to @candidates
+    while (my ($name, $count) = each %flags) {
         my $pkg = $cache->{$name};
-        my $candidate = $policy->candidate($pkg);
+        my $candidate = get_candidate($cache, $pkg, \%flags);
         push @candidates, $candidate if defined $candidate;
     }
 
@@ -123,7 +126,7 @@ sub check_depends {
 
         # process dependency
         my $depends = $candidate->{DependsList};
-        my $is_alternative = 0;
+        my @alternatives = ();
         for my $depend (@$depends) {
             my $depType = $depend->{DepType};
 
@@ -140,11 +143,15 @@ sub check_depends {
             }
 
             # process alternative dependency: pkgA | pkgB | pkgC
-            if ($is_alternative) {
-                $is_alternative = 0 if AptPkg::Dep::Or != ($depend->{CompType} & AptPkg::Dep::Or);
-                next;   # XXX: always install first alternative
+            if (AptPkg::Dep::Or == ($depend->{CompType} & AptPkg::Dep::Or)) {
+                push @alternatives, $depend;
+                next;
             } else {
-                $is_alternative = 1 if AptPkg::Dep::Or == ($depend->{CompType} & AptPkg::Dep::Or);
+                if (@alternatives > 0) {
+                    push @alternatives, $depend;
+                    $depend = select_alternative($cache, \%flags, @alternatives);
+                    @alternatives = ();
+                }
             }
 
             # ignore dependency that has already been processed
@@ -157,7 +164,7 @@ sub check_depends {
             }
 
             # add new dependency to @candidates
-            my $candidate = $policy->candidate($pkg);
+            my $candidate = get_candidate($cache, $pkg, \%flags);
             push @candidates, $candidate if defined $candidate;
         }
     }
@@ -271,12 +278,96 @@ sub generate_state_flag {
         $s .= '-';
     }
 
+    # XXX: AptPkg::Cache::Package->{Flags} never contains ::Auto
     if (($Flags & AptPkg::Flag::Auto) == AptPkg::Flag::Auto) {
-        $s .= '-';
-    } else {
         $s .= 'A';
+    } elsif (($Flags & AptPkg::Flag::Essential) == AptPkg::Flag::Essential) {
+        $s .= 'E';
+    } else {
+        $s .= '-';
     }
 
     return $s;
+}
+
+
+# $policy->candidate() can't deal with virtual package,
+# so it's this subroutine.
+sub get_candidate {
+    my ($cache, $pkg, $flags) = @_;
+    my $policy = $cache->policy();
+    my $candidate = $policy->candidate($pkg);
+
+    return $candidate if defined $candidate;
+
+    my $provides = $pkg->{ProvidesList};
+
+    return undef if !defined $provides;
+
+    # prefer installed package
+    for my $provide (@$provides) {
+        $pkg = $provide->{OwnerPkg};
+        next if !defined $pkg or !defined $provide->{OwnerVer};
+        return $provide->{OwnerVer} if AptPkg::State::Installed == $pkg->{CurrentState};
+    }
+
+    # prefer selected package by user
+    for my $provide (@$provides) {
+        $pkg = $provide->{OwnerPkg};
+        next if !defined $pkg or !defined $provide->{OwnerVer};
+        return $provide->{OwnerVer} if exists $flags->{$pkg->{Name}};
+    }
+
+    # select the first provider
+    return $provides->[0]{OwnerVer};
+}
+
+
+sub select_alternative {
+    my ($cache, $flags, @alternatives) = @_;
+
+    # prefer installed package
+    for my $alternative (@alternatives) {
+        return $alternative if AptPkg::State::Installed == $alternative->{TargetPkg}{CurrentState};
+    }
+
+    # prefer selected package by user
+    for my $alternative (@alternatives) {
+        return $alternative if exists $flags->{$alternative->{TargetPkg}{Name}};
+    }
+
+    # check any virtual package that has been satisfied
+    for my $alternative (@alternatives) {
+        my $pkg = $alternative->{TargetPkg};
+        my $provides = $pkg->{ProvidesList};
+        next if ! defined $provides;    # not a virtual package
+        return $alternative if virtual_package_satisfied($cache, $provides, $flags);
+    }
+
+    # select the first alternative
+    return $alternatives[0];
+}
+
+
+sub virtual_package_satisfied {
+    my ($cache, $provides, $flags) = @_;
+    my $pkg;
+
+    # has any installed package satisfied this virtual package?
+    for my $provide (@$provides) {
+        $pkg = $provide->{OwnerPkg};
+        next if !defined $pkg;
+        return 1 if AptPkg::State::Installed == $pkg->{CurrentState};
+    }
+
+    # has any user specified package satisfied this virtual package?
+    for my $provide (@$provides) {
+        $pkg = $provide->{OwnerPkg};
+        next if !defined $pkg;
+        return 1 if exists $flags->{$pkg->{Name}};
+    }
+
+    # not satisfied
+    return 0;
 }
 
