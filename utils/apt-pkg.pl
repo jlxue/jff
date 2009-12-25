@@ -21,7 +21,7 @@
 
 use AptPkg::Cache;
 use Getopt::Long;
-use Smart::Comments;
+#use Smart::Comments;
 use strict;
 use warnings;
 
