@@ -1,0 +1,26 @@
+《面对软件错误构建可靠的分布式系统》 段先德 译，邓辉 审
+Making reliable distributed systems in the presence of software errors,
+Joe Armstrong
+======================================================================
+
+1. quit erlang shell: 
+* init.stop()   (别名是 q())
+* halt().       (强制退出)
+* Ctrl + G to access menus.
+* Ctrl + C to access menu on Unix like OS.
+
+2. toolbar:start().
+3. rb:start().
+   rb:help().
+4. appmon:start().
+5. debugger:start().
+
+appmon 没有自动调整窗口大小以及刷新；
+debugger 设置断点时不能一次设置多个函数。
+6. help().
+   b(). f().  f(X).
+7. webtool:start(). 分析 erl_crash.dump 文件。
+8. register/2, unregister/1, whereis/1, registered/0
+9. spawn_link/1, process_flag/2, link/1, unlink/1, exit/1, exit/2,
+monitor/2
+
