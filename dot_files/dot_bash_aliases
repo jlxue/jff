@@ -17,3 +17,6 @@ alias rm=safe_rm
 
 alias c=clear
 
+export ACK_PAGER="less -R"
+alias ack=ack-grep
+

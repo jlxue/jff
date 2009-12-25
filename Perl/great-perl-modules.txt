@@ -31,7 +31,10 @@ Maypole
 Catalyst
 Mason
 Mojo
+Web::Simple
+Dancer
 CGI::Application
+CGI::Application::Structured
 CGI::Prototype
 Gantry
 Jifty

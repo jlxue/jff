@@ -1,20 +1,38 @@
-% download simplefonts module at http://modules.contextgarden.net/
-
 \usemodule[simplefonts]
 \setupsimplefonts[size=12pt]
 
-\setmainfont{TeXGyrePagella}
-\setsansfont{TeXGyreHeros}
-\setmonofont{TeXGyreCursor}
+%\setmainfont{TeX Gyre Pagella}
+%\setsansfont{TeX Gyre Heros}
+%\setmonofont{TeX Gyre Cursor}
 
-\setcjkmainfont[AdobeSongStd][regularfont={* Light},italicfont={AdobeKaitiStd Regular},boldfont={AdobeHeitiStd Regular},bolditalicfont={AdobeHeitiStd Regular}]
-\setcjksansfont[AdobeKaitiStd][boldfont={AdobeHeitiStd Regular},bolditalicfont={AdobeHeitiStd Regular}]
-\setcjkmonofont[AdobeFangsongStd][boldfont={AdobeHeitiStd Regular},bolditalicfont={AdobeHeitiStd Regular}]
+%\setmainfont[DejaVu Serif]
+%\setsansfont[DejaVu Sans]
+%\setmonofont[DejaVu Sans Mono]
 
-% 启用中文断行
+\setcjkmainfont[AdobeSongStd][regularfont={* Regular},
+                              italicfont={AdobeKaitiStd Regular},
+                              boldfont={AdobeHeitiStd Regular},
+                              bolditalicfont={AdobeHeitiStd Regular}]
+\setcjksansfont[AdobeKaitiStd][boldfont={AdobeHeitiStd Regular},
+                               bolditalicfont={AdobeHeitiStd Regular}]
+\setcjkmonofont[AdobeFangsongStd][boldfont={AdobeHeitiStd Regular},
+                                  bolditalicfont={AdobeHeitiStd Regular}]
 \setscript[hanzi]
+\mainlanguage[cn]
 
+% ----------------------------------------------------------
 \starttext
+
+\startlines
+{\simplefont[TeX Gyre Pagella]TeX Gyre Pagella}
+{\simplefont[TeX Gyre Termes]TeX Gyre Termes}
+{\simplefont[TeX Gyre Heros]TeX Gyre Heros}
+{\simplefont[TeX Gyre Bonum]TeX Gyre Bonum}
+{\simplefont[TeX Gyre Schola]TeX Gyre Schola}
+{\simplefont[TeX Gyre Adventor]TeX Gyre Adventor}
+{\simplefont[TeX Gyre Cursor]TeX Gyre Cursor}
+{\simplefont[TeX Gyre Chorus]TeX Gyre Chorus}
+\stoplines
 
 {\rm\tf roman \it italic \bf bold \bi bolditalic}
 
@@ -32,6 +50,11 @@
 
 \blank
 
-20 世纪 70 年代的时候，一些神奇的科学家在 MIT 人工智能实验室 (AI Lab) 开发了一个神奇的编辑工具，它被叫作 Emacs  (The extensible customizable self-documenting display editor)。其中一位就是著名的自由软件基金会 (FSF) 创始人 Richard Stallman。想要了解更多 Richard 和他的自由软件的读者可以去读他写的 Free as in Freedom。
+20 世纪 70 年代的时候，一些神奇的科学家在 MIT 人工智能实验室 (AI Lab) 开
+发了一个神奇的编辑工具，它被叫作 Emacs  (The extensible customizable
+self-documenting display editor)。其中一位就是著名的自由软件基金会 (FSF)
+创始人 Richard Stallman。想要了解更多 Richard 和他的自由软件的读者可以去
+读他写的 Free as in Freedom。
 
 \stoptext
+

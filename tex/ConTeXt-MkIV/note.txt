@@ -1,47 +1,47 @@
 1. http://code.google.com/p/ctxnotes/
-zhfonts.tex ºÍ ctxnotes.pdf
-±àÒëĞèÒª http://modules.contextgarden.net/t-layout ¡£
-¶îÍâµÄ tex ÎÄ¼ş·Åµ½ $TEXMFLOCAL/tex/context/third/ Ä¿Â¼ÏÂ£¬
-È»ºóÖ´ĞĞ luatools --generate && context --make¡£
+zhfonts.tex å’Œ ctxnotes.pdf
+ç¼–è¯‘éœ€è¦ http://modules.contextgarden.net/t-layout ã€‚
+é¢å¤–çš„ tex æ–‡ä»¶æ”¾åˆ° $TEXMFLOCAL/tex/context/third/ ç›®å½•ä¸‹ï¼Œ
+ç„¶åæ‰§è¡Œ luatools --generate && context --makeã€‚
 
-×îĞÂ°æ luatex for windows:
+æœ€æ–°ç‰ˆ luatex for windows:
 http://www.fsci.fuk.kindai.ac.jp/kakuto/win32-ptex/web2c75-e.html
 luaTeX-DEV for W32
-ÏÂÔØÄÇ¸ö¡°luatex-dev-w32.tar.bz2¡±£¬ÓÃÀïÃæµÄ\bin\luatex.dll
-Ìæ»»context minimals ÀïÃæµÄ \tex\texmf-mswin\bin\luatex.dll
-È»ºóÔÙGenerate Formats (LuaTeX)¾ÍĞĞÁË
+ä¸‹è½½é‚£ä¸ªâ€œluatex-dev-w32.tar.bz2â€ï¼Œç”¨é‡Œé¢çš„\bin\luatex.dll
+æ›¿æ¢context minimals é‡Œé¢çš„ \tex\texmf-mswin\bin\luatex.dll
+ç„¶åå†Generate Formats (LuaTeX)å°±è¡Œäº†
 
 
 2. http://wiki.contextgarden.net/Main_Page
-ConTeXt ÎÄµµ
+ConTeXt æ–‡æ¡£
 
 3. mtxrun --script fonts --list
-¿´×ÖÌåÁĞ±í
-   mtxrun --script fonts --help ¿´¸ü¶àÑ¡Ïî
+çœ‹å­—ä½“åˆ—è¡¨
+   mtxrun --script fonts --help çœ‹æ›´å¤šé€‰é¡¹
 
-4. ±àÒëÎÄµµ
+4. ç¼–è¯‘æ–‡æ¡£
 context a.tex       or      texexec --lua a.tex
 texmfstart.exe texexec --lua a.tex
 
-context --mode=screen a.tex     ÎªÆÁÄ»ÔÄ¶ÁÄ£Ê½±àÒë
+context --mode=screen a.tex     ä¸ºå±å¹•é˜…è¯»æ¨¡å¼ç¼–è¯‘
 context --purge
 
-5. ¹¤¾ß³ÌĞò
-luatools --generate         Mark IV µÄ mktexlsr Ìæ´úÆ·
-context --make              Mark IV µÄ fmtutil Ìæ´úÆ·
+5. å·¥å…·ç¨‹åº
+luatools --generate         Mark IV çš„ mktexlsr æ›¿ä»£å“
+context --make              Mark IV çš„ fmtutil æ›¿ä»£å“
 
-6. ±àÒë luatex:
-svn checkout svn://scm.foundry.supelec.fr/svn/luatex/trunk luatex
+6. ç¼–è¯‘ luatex:
+svn checkout http://foundry.supelec.fr/svn/luatex
 cd luatex
 ./build.sh
 
-±àÒëºÃµÄ°æ±¾£º
+ç¼–è¯‘å¥½çš„ç‰ˆæœ¬ï¼š
 http://foundry.supelec.fr/frs/?group_id=10
 
-7. ¼õÉÙ luatex ÄÚ´æÏûºÄ
+7. å‡å°‘ luatex å†…å­˜æ¶ˆè€—
 \let\synchronizetext\relax
 \synchronizemathfontsfalse
 
-8. Éı¼¶ ConTeXt Minimals
+8. å‡çº§ ConTeXt Minimals
 ctxtools --updatecontext
 
