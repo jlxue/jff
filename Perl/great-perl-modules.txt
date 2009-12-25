@@ -24,6 +24,8 @@ DBIx::Class
 Rose::DB::Object
 DBIx::Simple
 
+Continuity
+
 Apache::PageKit
 Maypole
 Catalyst
