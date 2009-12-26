@@ -13,17 +13,28 @@
 #   GPL v3
 #
 # Version:
-#   1.0
+#   1.1
 #
 # ChangeLog:
 #   2009-12-25  Liu Yubao
-#       * first release
+#       * first release, v1.0
+#   2009-12-26  Liu Yubao
+#       * add $opt_installed option to decide whether to prefer
+#         installed packages as dependency.
+#       * prefer user specified packages to installed packages
+#       * turn off Smart::Comments
+#       * release v1.1
 
 use AptPkg::Cache;
 use Getopt::Long;
 #use Smart::Comments;
 use strict;
 use warnings;
+
+my $opt_recommends = 1;
+my $opt_suggests   = 0;
+my $opt_header     = 1;
+my $opt_installed  = 0;
 
 (my $self = $0) =~ s#.*/##;
 
@@ -46,7 +57,7 @@ if (@ARGV == 0) {
 #----------------------------------------------------------------
 sub show_usage {
     print STDERR <<EOF;
-$self 1.0
+$self 1.1
 
 Usage:
     $self stat
@@ -62,15 +73,17 @@ Usage:
         are thought as package names.
 
         Options:
+        -h, --header
+            Output header information. (default on)
+        -i, --installed
+            Prefer installed package for dependency. (default off)
         -r, --recommends
             Consider recommended packages as dependency. (default on)
         -s, --suggests
             Consider suggested packages as dependency. (default off)
-        -h, --header
-            Output header information. (default on)
 
         Add "no-" prefix to long options to negate them, for example:
-            $self depends --no-suggests
+            $self depends --no-header
 EOF
 }
 
@@ -107,13 +120,10 @@ sub check_depends {
     my $libs_installed_size = 0;
     my $installed_installed_size = 0;
 
-    my $opt_recommends = 1;
-    my $opt_suggests = 0;
-    my $opt_header = 1;
-
     GetOptions("recommends!"   => \$opt_recommends,
                "suggests!"     => \$opt_suggests,
-               "header!"       => \$opt_header);
+               "header!"       => \$opt_header,
+               "installed!"    => \$opt_installed);
 
     # collect pkg names specified by user
     if (@ARGV > 0 && ! -r $ARGV[0]) {
@@ -207,7 +217,7 @@ EOF
         output_installed_size($total_installed_size, $core_installed_size, $libs_installed_size);
     }
 
-    output_package_list($cache, \%flags, $opt_header);
+    output_package_list($cache, \%flags);
 }
 
 
@@ -248,7 +258,7 @@ EOF
 
 
 sub output_package_list {
-    my ($cache, $flags, $opt_header) = @_;
+    my ($cache, $flags) = @_;
     my $policy = $cache->policy();
 
     my @names = sort keys %$flags;
@@ -340,18 +350,20 @@ sub get_candidate {
 
     return undef if !defined $provides;
 
-    # prefer installed package
-    for my $provide (@$provides) {
-        $pkg = $provide->{OwnerPkg};
-        next if !defined $pkg or !defined $provide->{OwnerVer};
-        return $provide->{OwnerVer} if AptPkg::State::Installed == $pkg->{CurrentState};
-    }
-
     # prefer selected package by user
     for my $provide (@$provides) {
         $pkg = $provide->{OwnerPkg};
         next if !defined $pkg or !defined $provide->{OwnerVer};
         return $provide->{OwnerVer} if exists $flags->{$pkg->{Name}};
+    }
+
+    # prefer installed package
+    if ($opt_installed) {
+        for my $provide (@$provides) {
+            $pkg = $provide->{OwnerPkg};
+            next if !defined $pkg or !defined $provide->{OwnerVer};
+            return $provide->{OwnerVer} if AptPkg::State::Installed == $pkg->{CurrentState};
+        }
     }
 
     # select the first provider
@@ -362,14 +374,16 @@ sub get_candidate {
 sub select_alternative {
     my ($cache, $flags, @alternatives) = @_;
 
-    # prefer installed package
-    for my $alternative (@alternatives) {
-        return $alternative if AptPkg::State::Installed == $alternative->{TargetPkg}{CurrentState};
-    }
-
     # prefer selected package by user
     for my $alternative (@alternatives) {
         return $alternative if exists $flags->{$alternative->{TargetPkg}{Name}};
+    }
+
+    # prefer installed package
+    if ($opt_installed) {
+        for my $alternative (@alternatives) {
+            return $alternative if AptPkg::State::Installed == $alternative->{TargetPkg}{CurrentState};
+        }
     }
 
     # check any virtual package that has been satisfied
@@ -389,18 +403,20 @@ sub virtual_package_satisfied {
     my ($cache, $provides, $flags) = @_;
     my $pkg;
 
-    # has any installed package satisfied this virtual package?
-    for my $provide (@$provides) {
-        $pkg = $provide->{OwnerPkg};
-        next if !defined $pkg;
-        return 1 if AptPkg::State::Installed == $pkg->{CurrentState};
-    }
-
     # has any user specified package satisfied this virtual package?
     for my $provide (@$provides) {
         $pkg = $provide->{OwnerPkg};
         next if !defined $pkg;
         return 1 if exists $flags->{$pkg->{Name}};
+    }
+
+    # has any installed package satisfied this virtual package?
+    if ($opt_installed) {
+        for my $provide (@$provides) {
+            $pkg = $provide->{OwnerPkg};
+            next if !defined $pkg;
+            return 1 if AptPkg::State::Installed == $pkg->{CurrentState};
+        }
     }
 
     # not satisfied
