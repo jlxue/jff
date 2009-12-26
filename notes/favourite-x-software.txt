@@ -1,0 +1,68 @@
+DE/WM:  Gnome/Metacity, KDE SC, XFCE, fluxbox, openbox, blackbox
+文件管理器: nautilus, dolphin, thunar, rox-filer, pcmanfm, emacs dired
+终端模拟器: gnome-terminal, mlterm, urxvt, lxterminal, konsole, roxterm
+Web 浏览器：iceweasel, epiphany, konqueror
+邮件客户端：icedove, kontact, gnus, mutt
+办公软件：openoffice, 永中 Office
+视频播放器: totem, smplayer, vlc
+音乐播放器：rhythmbox, banshee, amarok, mpd/mpc, audacity
+聊天工具：pidgin, emesene, gajim, empathy, kopete, QQ?
+面板: gnome-panel
+密钥管理：seahorse
+自动 mount: gnome-volume-manager
+蓝牙：bluez-gnome
+打印机: cups
+PDF 阅读器： evince, okular
+CHM 阅读器: chmsee, iceweasel chmreader, kchmview, xchm
+辞典：stardict, goldendict
+图片查看：eog, gthumb, gwenview, gpicview, geeqie, comix, qcomicbook
+图片编辑：gimp, inkscape
+BBS: qterm, fqterm, gemanx, pcmanx
+网络管理：network-manager, wicd
+远程登录：rdesktop
+编辑器: vim, emacs
+小工具：conky, dmenu
+归档管理：file-roller
+输入法：scim, fcitx, ibus
+IRC: xchat, iceweasel chatzilla, konversation
+下载：deluge-gtk, transmission, amule, mldonkey-server
+光盘刻录：k3b, brasero
+流媒体: pplive?, ppstream?
+中文字体：ttf-arphic-uming ttf-arphic-ukai ttf-wqy-microhei
+
+
+: gnome-core        (增加 eog, gedit, gnome-terminal 会多安装约 40 MB)
+#eog                        太弱
+#gedit                      太弱
+gnome-applets
+gnome-control-center
+gnome-icon-theme
+gnome-menus
+gnome-panel                 面板
+gnome-power-manager
+gnome-session
+gnome-settings-daemon
+#gnome-terminal             太耗内存
+gvfs
+metacity                    换 mutter ?
+nautilus                    文件管理器
+yelp
+
+# aptitude install xserver-xorg gnome-core
+# aptitude install gdm
+# aptitude install gnome-volume-manager iceweasel icedove \
+    flashplugin-nonfree seahorse evince brasero totem \
+    rhythmbox pidgin cups openoffice.org goldendict \
+    vim-full file-roller scim-pinyin mldonkey-server \
+    ttf-arphic-uming ttf-arphic-ukai ttf-wqy-microhei
+
+rxvt-unicode-ml             支持标签页，Perl 扩展，url 识别
+gthumb
+emacs23-gtk
+# firefox chmreader
+# firefox chatzilla
+#rdesktop
+
+conky
+dmenu
+
