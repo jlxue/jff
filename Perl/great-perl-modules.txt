@@ -25,7 +25,6 @@ Rose::DB::Object
 DBIx::Simple
 
 Continuity
-
 Apache::PageKit
 Maypole
 Catalyst
@@ -38,7 +37,18 @@ CGI::Application::Structured
 CGI::Prototype
 Gantry
 Jifty
+Solstice
 http://perl.apache.org/products/app-server.html
+
+Net::Server
+HTTP::Daemon
+HTTP::Server::Simple
+
+Dist::Zilla     *****
+Module::Starter + Module::Release   ****
+ExtUtils::ModuleMaker   较长时间没有维护
+基础模块：ExtUtils::MakeMaker / Module::Install / Module::Build
+            老旧                依赖 Make       只依赖 Perl，更好
 
 Moose
 Class::Struct
@@ -122,9 +132,6 @@ Mail::Send
 Markdown
 Memorize
 mocked
-Module::Build
-Module::Starter
-Dist::Zilla
 Net::*
 Object::Destroyer***
 ops

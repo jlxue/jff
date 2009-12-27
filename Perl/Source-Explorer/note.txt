@@ -1,0 +1,47 @@
+objdump -C -d -F -l -w shell_g
+objdump -C -d -F -S -w  shell_g
+
+objdump -d -C -F -l -w --start-address FROM --stop-address TO PROGRAM
+
+nm -C --defined-only -l -n -S shell_g
+
+Graph
+GraphViz
+libpoe-component-server-http-perl
+libhttp-server-simple*
+libhttp-daemon-ssl-perl
+libwww-perl (HTTP::Daemon)
+
+Log::Log4Perl   xxx
+Smart::Comments xxx
+CGI::Carp
+Carp
+Class::Struct
+Module::Pluggable   xxx
+Params::Check
+Params::Validate
+Data::FormValidator
+App::Cmd
+
+Switch  use feature 'switch'
+
+IPC::Cmd
+Time::Piece
+Test
+Test::Simple
+Test::More      xxx
+Devel::Cover
+Test::Unit
+Test::Inline
+SelfTest
+Carp::Assert
+Test::MockObject
+podchecker
+Test::Perl::Critic::Progressive
+Test::Pod
+Test::Pod::Coverage
+Perl::Tidy
+
+
+psgi, web app framework
+

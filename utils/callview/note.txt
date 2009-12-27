@@ -1,7 +1,0 @@
-objdump -C -d -F -l -w shell_g
-objdump -C -d -F -S -w  shell_g
-
-objdump -d -C -F -l -w --start-address FROM --stop-address TO PROGRAM
-
-nm -C --defined-only -l -n -S shell_g
-
