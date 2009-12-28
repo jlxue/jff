@@ -80,8 +80,8 @@ inoremap <S-F9> <ESC>:AutoPreviewToggle<CR>i
 " inspired by flw@newsmth
 nmap <Left> <C-W><
 nmap <Right> <C-W>>
-nmap <Up> <C-W>-
-nmap <Down> <C-W>+
+nmap <Up> <C-W>+
+nmap <Down> <C-W>-
 function FlwRestoreLayout()
     if exists("t:flwwinlayout")
         execute t:flwwinlayout
