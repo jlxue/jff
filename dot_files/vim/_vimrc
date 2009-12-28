@@ -86,8 +86,8 @@ function FlwRestoreLayout()
     if exists("t:flwwinlayout")
         execute t:flwwinlayout
         unlet t:flwwinlayout
-    else
-        execute "normal \<C-W>="
+    "else
+    "    execute "normal \<C-W>="
     endif
 endfunction
 nmap <silent> <F11> :let t:flwwinlayout=winrestcmd()<CR><C-W>_<C-W>\|
