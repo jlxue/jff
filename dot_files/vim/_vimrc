@@ -82,6 +82,12 @@ nmap <Left> <C-W><
 nmap <Right> <C-W>>
 nmap <Up> <C-W>+
 nmap <Down> <C-W>-
+function FlwSaveLayout()
+    if ! exists("t:flwwinlayout")
+        let t:flwwinlayout=winrestcmd()
+        execute "normal \<C-W>_\<C-W>|"
+    endif
+endfunction
 function FlwRestoreLayout()
     if exists("t:flwwinlayout")
         execute t:flwwinlayout
@@ -90,9 +96,9 @@ function FlwRestoreLayout()
     "    execute "normal \<C-W>="
     endif
 endfunction
-nmap <silent> <F11> :let t:flwwinlayout=winrestcmd()<CR><C-W>_<C-W>\|
+nmap <silent> <F11> :call FlwSaveLayout()<CR>
 nmap <silent> <F12> :call FlwRestoreLayout()<CR>
-imap <silent> <F11> <ESC>:let t:flwwinlayout=winrestcmd()<CR><C-W>_<C-W>\|a
+imap <silent> <F11> <ESC>:call FlwSaveLayout()<CR>a
 imap <silent> <F12> <ESC>:call FlwRestoreLayout()<CR>a
 
 nnoremap <TAB>      gt
