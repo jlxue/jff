@@ -78,10 +78,10 @@ inoremap <S-F9> <ESC>:AutoPreviewToggle<CR>i
 
 
 " inspired by flw@newsmth
-nmap <Left> <C-W><
-nmap <Right> <C-W>>
-nmap <Up> <C-W>+
-nmap <Down> <C-W>-
+nmap <Left>  <C-W><:unlet! t:flwwinlayout<CR>
+nmap <Right> <C-W>>:unlet! t:flwwinlayout<CR>
+nmap <Up>    <C-W>+:unlet! t:flwwinlayout<CR>
+nmap <Down>  <C-W>-:unlet! t:flwwinlayout<CR>
 function FlwSaveLayout()
     if ! exists("t:flwwinlayout")
         let t:flwwinlayout=winrestcmd()
