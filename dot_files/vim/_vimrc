@@ -76,6 +76,25 @@ nnoremap <silent> <F9> :TlistToggle<CR>
 nnoremap <S-F9> :AutoPreviewToggle<CR>
 inoremap <S-F9> <ESC>:AutoPreviewToggle<CR>i
 
+
+" inspired by flw@newsmth
+nmap <Left> <C-W><
+nmap <Right> <C-W>>
+nmap <Up> <C-W>-
+nmap <Down> <C-W>+
+function FlwRestoreLayout()
+    if exists("t:flwwinlayout")
+        execute t:flwwinlayout
+        unlet t:flwwinlayout
+    else
+        execute "normal \<C-W>="
+    endif
+endfunction
+nmap <silent> <F11> :let t:flwwinlayout=winrestcmd()<CR><C-W>_<C-W>\|
+nmap <silent> <F12> :call FlwRestoreLayout()<CR>
+imap <silent> <F11> <ESC>:let t:flwwinlayout=winrestcmd()<CR><C-W>_<C-W>\|a
+imap <silent> <F12> <ESC>:call FlwRestoreLayout()<CR>a
+
 nnoremap <TAB>      gt
 nnoremap <S-TAB>    gT
 nnoremap <C-N>      <C-W>w
