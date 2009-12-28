@@ -20,3 +20,5 @@ alias c=clear
 export ACK_PAGER="less -R"
 alias ack=ack-grep
 
+alias locallib='eval $(perl -Mlocal::lib)'
+

@@ -45,3 +45,7 @@ Perl::Tidy
 
 psgi, web app framework
 
+Parallel::Prefork
+Parallel::ForkManager
+Proc::ProcessTable
+

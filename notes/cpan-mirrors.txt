@@ -1,0 +1,4 @@
+http://mirrors.sohu.com/CPAN/
+http://mirrors.sdo.com/CPAN/
+http://cpan.wenzk.com
+
