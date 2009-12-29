@@ -15,8 +15,8 @@ my $pm = Parallel::Prefork->new({
         max_workers     => 10,
         fork_delay      => 1,
         trap_signals    => {
-            TERM    => 'TERM',
             HUP     => 'TERM',
+            TERM    => 'TERM',
             USR1    => undef,
         }
     });
@@ -28,11 +28,14 @@ my $master = new HTTP::Daemon(
 
 print "Please contact me at: <URL:", $master->url(), ">\n";
 
-while ($pm->signal_received ne 'TERM') {
+while ($pm->signal_received() ne 'TERM') {
     $pm->start() and next;
 
-    worker_loop($master);
+    eval {
+        worker_loop($master);
+    };
 
+    print $@ if $@;
     $pm->finish();
 }
 
@@ -52,12 +55,13 @@ sub worker_loop {
         next if !defined $c;
 
         while (my $r = $c->get_request) {
-            if ($r->method eq 'GET') {
+            if ($r->method eq 'GET' && -f $r->uri->path) {
                 $c->send_file_response($r->uri->path);
             } else {
                 $c->send_error(RC_FORBIDDEN);
             }
         }
+
         $c->close();
         undef $c;
     }

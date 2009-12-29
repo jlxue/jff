@@ -11,5 +11,5 @@ done < "$1"  > cscope.files
 
 rm -f cscope.*out tags
 cscope -b -q -k
-ctags -L cscope.files --extra=+fq --c-kinds=+px --totals
+ctags -L cscope.files --fields=+ainS --extra=+fq --c-kinds=+px --c++-kinds=+px --totals
 
