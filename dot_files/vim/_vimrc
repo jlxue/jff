@@ -76,30 +76,22 @@ nnoremap <silent> <F9> :TlistToggle<CR>
 nnoremap <S-F9> :AutoPreviewToggle<CR>
 inoremap <S-F9> <ESC>:AutoPreviewToggle<CR>i
 
-
 " inspired by flw@newsmth
 nmap <Left>  <C-W><:unlet! t:flwwinlayout<CR>
 nmap <Right> <C-W>>:unlet! t:flwwinlayout<CR>
 nmap <Up>    <C-W>+:unlet! t:flwwinlayout<CR>
 nmap <Down>  <C-W>-:unlet! t:flwwinlayout<CR>
-function FlwSaveLayout()
-    if ! exists("t:flwwinlayout")
+function FlwSaveOrRestoreLayout()
+    if exists("t:flwwinlayout")
+        execute t:flwwinlayout
+        unlet t:flwwinlayout
+    else
         let t:flwwinlayout=winrestcmd()
         execute "normal \<C-W>_\<C-W>|"
     endif
 endfunction
-function FlwRestoreLayout()
-    if exists("t:flwwinlayout")
-        execute t:flwwinlayout
-        unlet t:flwwinlayout
-    "else
-    "    execute "normal \<C-W>="
-    endif
-endfunction
-nmap <silent> <F11> :call FlwSaveLayout()<CR>
-nmap <silent> <F12> :call FlwRestoreLayout()<CR>
-imap <silent> <F11> <ESC>:call FlwSaveLayout()<CR>a
-imap <silent> <F12> <ESC>:call FlwRestoreLayout()<CR>a
+nmap <silent> <F12> :call FlwSaveOrRestoreLayout()<CR>
+imap <silent> <F12> <ESC>:call FlwSaveOrRestoreLayout()<CR>a
 
 nnoremap <TAB>      gt
 nnoremap <S-TAB>    gT

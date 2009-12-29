@@ -29,6 +29,7 @@ IRC: xchat, iceweasel chatzilla, konversation
 光盘刻录：k3b, brasero
 流媒体: pplive?, ppstream?
 中文字体：ttf-arphic-uming ttf-arphic-ukai ttf-wqy-microhei
+抓图：scrot
 
 
 : gnome-core        (增加 eog, gedit, gnome-terminal 会多安装约 40 MB)
@@ -54,7 +55,8 @@ yelp
     flashplugin-nonfree seahorse evince brasero totem \
     rhythmbox pidgin cups openoffice.org goldendict \
     vim-full file-roller scim-pinyin mldonkey-server \
-    ttf-arphic-uming ttf-arphic-ukai ttf-wqy-microhei
+    ttf-arphic-uming ttf-arphic-ukai ttf-wqy-microhei \
+    scrot
 
 rxvt-unicode-ml             支持标签页，Perl 扩展，url 识别
 gthumb
