@@ -1,0 +1,194 @@
+From 73cd2912200164ce1086132fdf681186b3706245 Mon Sep 17 00:00:00 2001
+From: Liu Yubao <yubao.liu@accesschina.com.cn>
+Date: Tue, 5 Jan 2010 12:58:31 +0800
+Subject: [PATCH] implement PeekNamedPipe() for PipeDev/PipeLib
+
+Patch against
+http://cegcc.svn.sourceforge.net/viewvc/cegcc/trunk/cegcc/tools/PipeLib/
+r1416.
+---
+ PipeDev.cpp |   53 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ PipeDev.h   |   13 +++++++++++++
+ PipeLib.cpp |   23 ++++-------------------
+ PipeLib.h   |    8 ++++++++
+ 4 files changed, 78 insertions(+), 19 deletions(-)
+
+diff --git a/PipeDev.cpp b/PipeDev.cpp
+index fe51cdc..ff69cf5 100644
+--- a/PipeDev.cpp
++++ b/PipeDev.cpp
+@@ -31,6 +31,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  */
+ #include <set>
+ #include <string>
+ 
++extern "C" LPVOID MapCallerPtr(LPVOID ptr, DWORD dwLen);
++
+ #ifndef min
+ #define min(A, B) ((A) < (B) ? (A) : (B))
+ #endif
+@@ -353,6 +355,14 @@ public:
+     return fit;
+   }
+ 
++  DWORD peekBytes (BYTE* buf, DWORD bsize)
++  {
++    DWORD fit = min (bsize, size ());
++    for (DWORD i = 0; i < fit; i++)
++      buf[i] = buffer[(head + i) & (sizeof (buffer) - 1)];
++    return fit;
++  }
++
+ public:
+   DWORD OpenCount;
+   DWORD WROpenCount;
+@@ -935,6 +945,49 @@ IOControl (PipeOpenContext* pOpenContext, DWORD dwCode,
+       *pdwActualOut = (wcslen (dev->DeviceName) + 1) * sizeof (WCHAR);
+       bRet = TRUE;
+       break;
++
++    case PIPE_IOCTL_PEEK_NAMED_PIPE:
++      *pdwActualOut = sizeof(PeekStruct);
++
++      if (dwLenOut != sizeof(PeekStruct))
++          break;
++
++      DWORD actual = 0;
++      PeekStruct* data = (PeekStruct*)pBufOut;
++      if (data->dwSize != sizeof(PeekStruct))
++          break;
++
++      if (data->nBufferSize > 0 && data->lpBuffer != NULL) {
++          LPVOID lpBuffer = MapCallerPtr(data->lpBuffer, data->nBufferSize);
++          if (NULL == lpBuffer)
++              break;
++
++          actual = dev->peekBytes((BYTE*)lpBuffer, data->nBufferSize);
++
++          if (data->lpBytesRead != NULL) {
++              LPDWORD lpBytesRead = (LPDWORD)MapCallerPtr(data->lpBytesRead, sizeof(LPDWORD));
++              if (NULL == lpBytesRead)
++                  break;
++              *lpBytesRead = actual;
++          }
++      }
++
++      if (data->lpTotalBytesAvail != NULL) {
++          LPDWORD lpTotalBytesAvail = (LPDWORD)MapCallerPtr(data->lpTotalBytesAvail, sizeof(LPDWORD));
++          if (NULL == lpTotalBytesAvail)
++              break;
++          *lpTotalBytesAvail = dev->size();
++      }
++
++      if (data->lpBytesLeftThisMessage != NULL) {
++          LPDWORD lpBytesLeftThisMessage = (LPDWORD)MapCallerPtr(data->lpBytesLeftThisMessage, sizeof(LPDWORD));
++          if (NULL == lpBytesLeftThisMessage)
++              break;
++          *lpBytesLeftThisMessage = dev->size() - actual;
++      }
++
++      bRet = TRUE;
++      break;
+     }
+ 
+   return bRet;
+diff --git a/PipeDev.h b/PipeDev.h
+index c3672f3..dc3954b 100644
+--- a/PipeDev.h
++++ b/PipeDev.h
+@@ -39,6 +39,19 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  */
+ #define PIPE_IOCTL_SET_PIPE_TAG \
+ 	CTL_CODE(FILE_DEVICE_STREAMS, 2050, METHOD_BUFFERED, FILE_ANY_ACCESS)
+ 
++#define PIPE_IOCTL_PEEK_NAMED_PIPE \
++	CTL_CODE(FILE_DEVICE_STREAMS, 2051, METHOD_BUFFERED, FILE_ANY_ACCESS)
++
+ #define DEVICE_DLL_NAME L"PipeDev.dll"
+ 
++struct PeekStruct
++{
++    DWORD dwSize; /* for future extension */
++    LPVOID lpBuffer;
++    DWORD nBufferSize;
++    LPDWORD lpBytesRead;
++    LPDWORD lpTotalBytesAvail;
++    LPDWORD lpBytesLeftThisMessage;
++};
++
+ #endif
+diff --git a/PipeLib.cpp b/PipeLib.cpp
+index 7f0f2e0..ff7826b 100644
+--- a/PipeLib.cpp
++++ b/PipeLib.cpp
+@@ -191,19 +191,6 @@ CreatePipe (PHANDLE hReadPipe,
+   return TRUE;
+ }
+ 
+-#if 0
+-
+-struct PeekStruct
+-{
+-  DWORD Size; /* for future extension */
+-  PVOID lpBuffer,
+-    DWORD nBufferSize,
+-
+-    /* TODO: We need to use MapPtr for this to work */
+-    LPDWORD lpBytesRead,
+-    LPDWORD lpTotalBytesAvail,
+-    LPDWORD lpBytesLeftThisMessage
+-    };
+ 
+ PIPELIB_API BOOL
+ PeekNamedPipe (HANDLE hNamedPipe,
+@@ -214,27 +201,25 @@ PeekNamedPipe (HANDLE hNamedPipe,
+ 	       LPDWORD lpBytesLeftThisMessage
+ 	       )
+ {
+-  DWORD avail;
+   DWORD actual;
+ 
+   PeekStruct data;
+-  data.Size = sizeof (PeekStruct);
++  data.dwSize = sizeof (PeekStruct);
+   data.lpBuffer = lpBuffer;
+   data.nBufferSize = nBufferSize;
+   data.lpBytesRead = lpBytesRead;
+   data.lpTotalBytesAvail = lpTotalBytesAvail;
+   data.lpBytesLeftThisMessage = lpBytesLeftThisMessage;
+ 
+-  if (!DeviceIoControl (hNamedPipe, PIPE_IOCTRL_PEEK_NAMED_PIPE,
++  if (!DeviceIoControl (hNamedPipe, PIPE_IOCTL_PEEK_NAMED_PIPE,
+ 			NULL, 0,
+ 			(LPVOID)&data, sizeof (PeekStruct), &actual, NULL))
+     return FALSE;
+ 
+   /* We can detect here if we are talking to an older driver.  */ 
+-  if (actual != data.Size)
++  if (actual != data.dwSize)
+     return FALSE;
+ 
+-  return FALSE;
++  return TRUE;
+ }
+ 
+-#endif
+diff --git a/PipeLib.h b/PipeLib.h
+index b4bee70..8bdf7cb 100644
+--- a/PipeLib.h
++++ b/PipeLib.h
+@@ -39,5 +39,13 @@ PIPELIB_API BOOL GetPipeName (HANDLE, WCHAR*);
+ /* Internal, for pipedev.dll debugging purposes.  */
+ PIPELIB_API BOOL SetPipeTag (HANDLE, const WCHAR*);
+ 
++PIPELIB_API BOOL
++PeekNamedPipe (HANDLE hNamedPipe,
++	       LPVOID lpBuffer,
++	       DWORD nBufferSize,
++	       LPDWORD lpBytesRead,
++	       LPDWORD lpTotalBytesAvail,
++	       LPDWORD lpBytesLeftThisMessage
++	       );
+ 
+ #endif
+-- 
+1.6.5.4
+
