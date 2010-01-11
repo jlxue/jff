@@ -7,10 +7,6 @@ nm -C --defined-only -l -n -S shell_g
 
 Graph
 GraphViz
-libpoe-component-server-http-perl
-libhttp-server-simple*
-libhttp-daemon-ssl-perl
-libwww-perl (HTTP::Daemon)
 
 Log::Log4Perl   xxx
 Smart::Comments xxx
@@ -41,11 +37,4 @@ Test::Perl::Critic::Progressive
 Test::Pod
 Test::Pod::Coverage
 Perl::Tidy
-
-
-psgi, web app framework
-
-Parallel::Prefork
-Parallel::ForkManager
-Proc::ProcessTable
 

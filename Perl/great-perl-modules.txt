@@ -61,9 +61,16 @@ Jifty
 Solstice
 http://perl.apache.org/products/app-server.html
 
+PSGI, Plack
+
 Net::Server
 HTTP::Daemon
 HTTP::Server::Simple
+POE::Component::Server::HTTP
+POE::Component::Server::SimpleHTTP
+POE::Loop::EV
+POE::Loop::Event
+POE::XS::Queue::Array
 
 Dist::Zilla     *****
 Module::Starter + Module::Release   ****
