@@ -1,0 +1,6 @@
+
+sudo tcpdump -i eth0 | tee eth0.log
+
+perl -ne 'if (/([^:\s]+)\.\d+ > ([^:\s]+)\.\d+/) { printf "%-40s %s\n", $1, $2, "\n"; }' eth0.log |
+    grep -v tsg.local | sort | uniq -c | sort -r -n -k 1,1 | less
+
