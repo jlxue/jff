@@ -1,0 +1,33 @@
+cfgtool
+no-recommends-suggests
+etckeeper changetrack filetraq diffmon metastore
+apt-listbugs
+keychain
+aptitude install -R
+
+x-window-system: xserver-xorg
+x-display-manager: slim
+    xdm 相当简单、丑陋
+    wdm 功能丰富，但丑陋
+    slim 默认配置很漂亮，没有在 dm 里关机、重启的选项
+
+x-session-manager: openbox
+    openbox
+    lxsession
+    ~/.xsession 执行 xsm :  太简陋
+
+x-window-manager: openbox
+    openbox     提供 x-session-manager 功能，被 LXDE 采用，
+                干净，默认配置符合通常习惯。
+    sawfish     Lisp
+    fvwm
+    blackbox
+    fluxbox
+    awesome     对鼠标操作不友好，无法移动 xeyes 和 xsm。
+
+x-terminal-emulator: rxvt-unicode-ml
+    rxvt-unicode-ml     支持 Perl 扩展
+    mlterm
+
+panel: tint2, conky, dmenu, fbpanel
+
