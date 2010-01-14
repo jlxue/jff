@@ -70,10 +70,9 @@ win 系统菜单
 
 支持标签页、url 识别、CLIPBOARD、Primary 复制粘贴。
 
-(6) panel: tint2
+(6) panel: tint2 + conky
     fbpanel
     xfce4-panel     体积大了点
-    conky, dmenu
 
 主菜单, 快速启动, cpu 温度，硬盘温度，CPU/memory/network/swap/load/disk
 使用情况监测，天气预报，网络连接，托盘区，日期，音量，注销，锁屏，
