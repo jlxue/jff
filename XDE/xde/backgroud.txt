@@ -1,0 +1,5 @@
+desktop-base:
+
+moreblue-orbit-grub.png  moreblue-orbit-splash.png
+moreblue-orbit-wallpaper.png  moreblue-orbit-wallpaper-widescreen.png
+
