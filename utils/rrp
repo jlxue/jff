@@ -159,6 +159,19 @@
 #   2009-10-27  Liu Yubao
 #       * fix corner case in parse_diffstat
 #       * release v0.32
+#
+#   2010-01-13  Liu Yubao
+#       * support speficied upstream repository
+#       * release v0.33
+#
+#   2010-01-14  Liu Yubao
+#       * add cmd_extra subcommand
+#       * release v0.34
+#
+#   2010-01-15  Liu Yubao
+#       * support simple bash command completion for rrp, inspired by
+#         Obi Wong <tao.huang@accesschina.com.cn>
+#       * release v0.35
 
 ######################## part executed in $HOME/.bashrc ################
 # To make the pollution to shell environment minimum, I put this code
@@ -211,27 +224,30 @@ if [ "$1" = "ps1" ]; then
         PS1='[$SHLVL]\[\033[01;31m\]$(__rrp_ps1)\[\033[00m\]'"$PS1"
     fi
 
+    self=${BASH_SOURCE[0]}
+    [ -f "$self" ] || self=/usr/local/bin/rrp
+    [ -f "$self" ] && complete -W "$(sed -ne '/^cmd_/s/cmd_\(\w\+\).*/\1/p' $self)" rrp
+    unset self
+
     return
 fi
 
 ######################## constant vars #################################
 # version of this little script
-RRP_VERSION=0.32
+RRP_VERSION=0.35
 
 # IP of the server containing central repository
 SERVER_IP=192.168.88.5
 # Port of the ssh service on the server
 SERVER_PORT=22
-# path of the official repository
-REPOS_PATH=/src/android/android
-# path of the temporary repository
-HOT_REPOS_PATH=/src/android/android-hot
 # default remote
 DEFAULT_REMOTE=origin
 # default working branch
 DEFAULT_WORKING_BRANCH=my
 # path where to place script "repo"
 REPO=$HOME/repo
+# path where to push and pull
+RRP_REPOS_INFO_FILE=.repo/rrp-repos-info
 # ref updates of upstream branch in every modules happening in
 # $UPDATE_INTERVAL seconds are thought as one update of whole android project
 UPDATE_INTERVAL=300
@@ -245,6 +261,10 @@ PROJECT_ROOT=
 MODULE_ROOT=
 # Does the working copy lie in same machine with central repository?
 IS_LOCAL=
+# path of the official repository
+REPOS_PATH=/src/android/android
+# path of the temporary repository
+HOT_REPOS_PATH=${REPOS_PATH}-hot
 # remote url for official repository to pull baseline code
 PULL_REPOS_PATH=
 # remote url for temporary repository to push changes
@@ -369,12 +389,29 @@ initialize () {
         done < $HOME/.ssh/config
     fi
 
-    if [ "$IS_LOCAL" ]; then
-        PULL_REPOS_PATH=$REPOS_PATH
-    else
-        PULL_REPOS_PATH=ssh://$USER_ACCOUNT-git@$SERVER_IP:$SERVER_PORT$REPOS_PATH
+    # get repos url info
+    if [ -n "$PROJECT_ROOT" ]; then
+        if [ -r "$PROJECT_ROOT/$RRP_REPOS_INFO_FILE" ]; then
+            . "$PROJECT_ROOT/$RRP_REPOS_INFO_FILE"
+        else
+            local remote
+            remote=$(cd $PROJECT_ROOT/.repo/manifests && git config --get remote.origin.url)
+            # remote is "$REPOS_PATH/.repo/manifests.git" or
+            #           "ssh://$SERVER_IP$REPOS_PATH/.repo/manifests.git"
+            remote=${remote%/.repo*}
+            remote=${remote#*://*/}
+            if [ -z "$remote" ]; then
+                echo "Broken manifests repository, please checkout with rrp again!" >&2
+                exit 1
+            else
+                [ ${remote:0:1} != '/' ] && remote="/$remote"
+                REPOS_PATH="$remote"
+                HOT_REPOS_PATH="${REPOS_PATH}-hot"
+            fi
+        fi
     fi
-    PUSH_REPOS_PATH=ssh://$USER_ACCOUNT-git@$SERVER_IP:$SERVER_PORT$HOT_REPOS_PATH
+
+    setup_pull_and_push_repos_url
 
     # copy new "repo" script to $HOME/repo
     local new_repo="$PROJECT_ROOT/.repo/repo/repo"
@@ -720,6 +757,24 @@ parse_diffstat () {
     done
 }
 
+
+setup_pull_and_push_repos_url () {
+    if [ "$IS_LOCAL" ]; then
+        PULL_REPOS_PATH=$REPOS_PATH
+    else
+        PULL_REPOS_PATH=ssh://$USER_ACCOUNT-git@$SERVER_IP:$SERVER_PORT$REPOS_PATH
+    fi
+    PUSH_REPOS_PATH=ssh://$USER_ACCOUNT-git@$SERVER_IP:$SERVER_PORT$HOT_REPOS_PATH
+}
+
+
+find_extra_git_repositories () {
+    diff -U 0 <(list_all_modules) \
+        <(/usr/bin/find . \( -wholename ./.repo -o -wholename ./out \) -prune \
+            -o -type d -name .git -print -prune | sed -e 's|^\./||' -e 's|/\.git||' | sort) |
+        grep -v '^\(@@\|+++\|---\)' | sed -e 's/^+//'
+}
+
 ######################## sub commands ##################################
 help_help () {
     cat <<EOF
@@ -780,15 +835,26 @@ help_checkout () {
     cat <<EOF
 In a empty directory:
 
-  rrp checkout UPSTREAM_BRANCH
+  rrp checkout UPSTREAM_BRANCH  UPSTREAM_REPOS_DIR  UPSTREAM_TEMP_REPOS_DIR
     Clone remote central repository to local empty directory, use
     UPSTREAM_BRANCH as default upstream branch. If not specified,
     use '$DEFAULT_UPSTREAM_BRANCH' as default upstream branch.
+
+    By default, UPSTREAM_REPOS_DIR is '$REPOS_PATH' and
+    UPSTREAM_TEMP_REPOS_DIR is \${UPSTREAM_REPOS_DIR}-hot.
 EOF
 }
 
 cmd_checkout () {
     [ -n "$1" ] && DEFAULT_UPSTREAM_BRANCH="$1"
+
+    if [ -n "$2" ]; then
+        REPOS_PATH="$2"
+        REPOS_PATH=${REPOS_PATH%/}
+        [ -z "$3" ] && HOT_REPOS_PATH=${REPOS_PATH}-hot || HOT_REPOS_PATH="$3"
+        HOT_REPOS_PATH=${HOT_REPOS_PATH%/}
+        setup_pull_and_push_repos_url
+    fi
 
     # make sure not in a working copy
     if [ -n "$PROJECT_ROOT" ]; then
@@ -832,6 +898,14 @@ cmd_checkout () {
     # fetch android source code and create a working branch
     run_cmd $REPO sync &&
     run_cmd $REPO start $DEFAULT_WORKING_BRANCH --all
+
+    # store repository info
+    {
+        echo "# DON'T EDIT THIS FILE, IT'S GENERATED BY RRP!"
+        echo
+        echo "REPOS_PATH=\"$REPOS_PATH\""
+        echo "HOT_REPOS_PATH=\"$HOT_REPOS_PATH\""
+    } > $RRP_REPOS_INFO_FILE
 }
 
 
@@ -1759,6 +1833,50 @@ cmd_diffstat () {
         [ -n "$current_day" ] &&
             printf "%s %6d %8d %8d\n" $current_day $current_files $current_added $current_deleted
     }
+}
+
+
+help_extra () {
+    cat <<EOF
+    rrp extra [--all] [--git] [--file]
+      Find extra git repositories and files not managed by Google repo.
+
+      --all     Default option, equals to '--git --files'
+      --git     Show extra git repositories not managed by Google repo.
+      --file    Show extra files that not managed by GIT and Google repo.
+EOF
+}
+
+cmd_extra () {
+    must_under_project_root
+    local show_git show_file
+
+    [ -z "$1" ] && {
+        show_git=1
+        show_file=1
+    } || while [ "$1" ]; do
+        case "$1" in
+            --all)  show_git=1; show_file=1 ;;
+            --git)  show_git=1  ;;
+            --file) show_file=1 ;;
+            *)      echo "Unknown option \"$1\", use \`rrp help extra\` for help." >&2
+                    exit 1 ;;
+        esac
+
+        shift;
+    done
+
+    cd "$PROJECT_ROOT" && {
+        [ "$show_git" ] && find_extra_git_repositories
+        [ "$show_file" ] && {
+            local prunes d
+            prunes='-wholename ./.repo -o -wholename ./out'
+            while read d; do
+                prunes="$prunes -o -wholename $d"
+            done < <( { list_all_modules; find_extra_git_repositories; } | sed -e 's/^/\.\//' )
+            /usr/bin/find . \( $prunes \) -prune -o -type f -print | sed -e 's|^\./||'
+        }
+    } | sort
 }
 
 ######################## main entry ####################################
