@@ -82,3 +82,7 @@ devicekit-disks
 devicekit-power
 policykit
 
+dzen2
+xli
+xloadimage
+
