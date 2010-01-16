@@ -59,8 +59,8 @@ taskbar_active_background_id = 2
 # TASK
 #---------------------------------------------
 task_icon = 1
-task_text = 0
-task_maximum_size = 50 35
+task_text = 1
+#task_maximum_size = 50 35
 task_centered = 1
 task_padding = 4 2
 task_font = sans 8
@@ -76,7 +76,7 @@ task_active_background_id = 3
 # SYSTRAYBAR
 #---------------------------------------------
 systray = 1
-systray_padding = 8 4 5
+systray_padding = 1 1 1
 systray_background_id = 1
 systray_sort = left2right
 systray_icon_size = 0
