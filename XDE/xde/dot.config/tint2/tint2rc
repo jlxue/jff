@@ -1,3 +1,5 @@
+# Modified from tint2-0.9-rc1/sample/default.tint2rc
+
 #---------------------------------------------
 # TINT2 CONFIG FILE
 #---------------------------------------------
@@ -61,7 +63,7 @@ task_text = 0
 task_maximum_size = 50 35
 task_centered = 1
 task_padding = 4 2
-task_font = kiloji 8
+task_font = sans 8
 task_font_color = #a0a0a0 100
 task_active_font_color = #d4d4d4 100
 #task_icon_asb = 0 -45 -10
@@ -97,7 +99,7 @@ battery_background_id = 2
 time1_format = %H:%M
 time1_font = sans 8
 time2_format = %A %d %B
-time2_font = sans 6
+time2_font = sans 7
 clock_font_color = #ffffff 76
 clock_padding = 1 0
 clock_background_id = 1
@@ -122,8 +124,8 @@ tooltip_font = sans 10
 #---------------------------------------------
 # MOUSE ACTION ON TASK
 #---------------------------------------------
-mouse_middle = none
-mouse_right = close
+mouse_middle = close
+mouse_right = none
 mouse_scroll_up = toggle
 mouse_scroll_down = iconify
 
