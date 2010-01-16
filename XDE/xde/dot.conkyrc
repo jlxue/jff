@@ -56,7 +56,7 @@ template1 ${if_up \1}\1: down ${downspeedf \1} KiB/s ${offset 100}up ${upspeedf 
 #    ${top_mem name 3} ${top_mem pid 3} ${top_mem cpu 3} ${top_mem mem 3}
 
 #   hardware info:  hddtemp,hwmon,i2c,i8k,ibm,nvidia,pb_battery,platform
-#                   smapi*,sony*
+#                   smapi*,sony*, apm*, acpi*, apcupsd*
 #   music player:   audacious..., bmpx..., mixer, moc*, mpd, xmms*
 #   filesystem:     fs*
 
@@ -80,7 +80,7 @@ ${template1 eth0}
 ${endif}${template1 wlan0}
 ESSID: ${wireless_essid wlan0} - Quality: ${wireless_link_qual_perc wlan0}%${endif}
 ${stippled_hr 1}
-AC adapter: $acpiacadapter - Battery: $battery ${battery_percent}% $battery_time
+Battery: $battery ${battery_percent}% $battery_time
 Temperature: CPU ${acpitemp}C - HDD /dev/sda ${hddtemp sda}C
   (hwmon cpu temp: ${hwmon temp 1}C - i8k cpu temp: ${i8k_cpu_temp}C)
 Fans: left ${i8k_left_fan_rpm}rpm $i8k_left_fan_status - right ${i8k_right_fan_rpm}rpm $i8k_right_fan_status
