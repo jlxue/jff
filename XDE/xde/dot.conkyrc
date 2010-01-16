@@ -10,6 +10,7 @@ draw_borders no
 draw_graph_borders yes
 draw_outline no
 draw_shades no
+if_up_strictness address
 minimum_size 5 5
 net_avg_samples 2
 no_buffers yes
@@ -21,7 +22,7 @@ own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
 own_window_transparent yes
 own_window_type desktop
 own_window yes
-show_graph_range no 
+show_graph_range no
 show_graph_scale no
 stippled_borders 3
 update_interval 1
@@ -30,6 +31,14 @@ use_spacer none
 use_xft yes
 xftalpha 0.8
 xftfont DejaVu Sans Mono:size=7
+
+# left-right graphs
+# ${template0 cmd1 dev1 cmd2 dev2}
+template0 ${\1 \2 25,150 ff0000 0000ff} $alignr${\3 \4 25,150 0000ff ff0000}
+
+# network speed info
+# ${template1 net}
+template1 ${if_up \1}\1: down ${downspeedf \1} KiB/s ${offset 100}up ${upspeedf \1} KiB/s\n${template0 downspeedgraph \1 upspeedgraph \1}
 
 # extra text
 #
@@ -45,7 +54,7 @@ xftfont DejaVu Sans Mono:size=7
 #    ${top_mem name 1} ${top_mem pid 1} ${top_mem cpu 1} ${top_mem mem 1}
 #    ${top_mem name 2} ${top_mem pid 2} ${top_mem cpu 2} ${top_mem mem 2}
 #    ${top_mem name 3} ${top_mem pid 3} ${top_mem cpu 3} ${top_mem mem 3}
-   
+
 #   hardware info:  hddtemp,hwmon,i2c,i8k,ibm,nvidia,pb_battery,platform
 #                   smapi*,sony*
 #   music player:   audacious..., bmpx..., mixer, moc*, mpd, xmms*
@@ -55,25 +64,25 @@ TEXT
 $nodename - $sysname $kernel on $machine
 Uptime: $uptime - Load: $loadavg
 ${loadgraph ff0000 0000ff}
-$stippled_hr
-cpu1: ${cpu 1}% ${freq_g 1}GHz ${alignr}cpu2: ${cpu 2}% ${freq_g 2}GHz 
-${cpugraph 1 25,150 ff0000 0000ff} $alignr${cpugraph 2 25,150 0000ff ff0000}
-$stippled_hr
+${stippled_hr 1}
+cpu1: ${cpu 1}% ${freq_g 1}GHz ${alignr}cpu2: ${cpu 2}% ${freq_g 2}GHz
+${template0 cpugraph 1 cpugraph 2}
+${stippled_hr 1}
 RAM Usage: $mem/$memmax - $memperc%
 ${memgraph ff0000 0000ff}
 Buffer: $buffers - Cache: $cached
 Swap Usage: $swap/$swapmax - $swapperc%
-$stippled_hr
+${stippled_hr 1}
 /dev/sda: read ${diskio_read sda} ${alignr}write ${diskio_write sda}
-${diskiograph_read sda 25,150 ff0000 0000ff} $alignr${diskiograph_write sda 25,150 0000ff ff0000}
-$stippled_hr
-${if_up eth0}eth0: down ${downspeedf eth0} KiB/s ${offset 100}up ${upspeedf eth0} KiB/s
-${downspeedgraph eth0 25,150 ff0000 0000ff} $alignr${upspeedgraph eth0 25,150 0000ff ff0000}${endif}
-${if_up wlan0}wlan0: down ${downspeedf wlan0} KiB/s ${offset 100}up ${upspeedf wlan0} KiB/s
-${downspeedgraph wlan0 25,150 ff0000 0000ff} $alignr${upspeedgraph wlan0 25,150 0000ff ff0000}
+${template0 diskiograph_read sda diskiograph_write sda}
+${stippled_hr 1}
+${template1 eth0}
+${endif}${template1 wlan0}
 ESSID: ${wireless_essid wlan0} - Quality: ${wireless_link_qual_perc wlan0}%${endif}
-$stippled_hr
+${stippled_hr 1}
 AC adapter: $acpiacadapter - Battery: $battery ${battery_percent}% $battery_time
 Temperature: CPU ${acpitemp}C - HDD /dev/sda ${hddtemp sda}C
   (hwmon cpu temp: ${hwmon temp 1}C - i8k cpu temp: ${i8k_cpu_temp}C)
 Fans: left ${i8k_left_fan_rpm}rpm $i8k_left_fan_status - right ${i8k_right_fan_rpm}rpm $i8k_right_fan_status
+${stippled_hr 1}
+Volume: ${if_mixer_mute}mute${else}${mixer}%$endif

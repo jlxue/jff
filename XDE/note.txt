@@ -56,7 +56,7 @@ win 系统菜单
 
 支持标签页、url 识别、CLIPBOARD、Primary 复制粘贴。
 
-(6) panel: tint2 + conky
+(6) panel: tint2 + conky + hddtemp
     fbpanel
     xfce4-panel     体积大了点
 
