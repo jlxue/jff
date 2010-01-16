@@ -78,3 +78,7 @@ faubackup
 
 jff dot_files
 
+devicekit-disks
+devicekit-power
+policykit
+
