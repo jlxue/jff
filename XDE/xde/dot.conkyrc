@@ -21,7 +21,7 @@ own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
 own_window_transparent yes
 own_window_type desktop
 own_window yes
-show_graph_range no
+show_graph_range no 
 show_graph_scale no
 stippled_borders 3
 update_interval 1
@@ -29,7 +29,7 @@ uppercase no
 use_spacer none
 use_xft yes
 xftalpha 0.8
-xftfont DejaVu Sans Mono:size=9
+xftfont DejaVu Sans Mono:size=7
 
 # extra text
 #
@@ -46,20 +46,10 @@ xftfont DejaVu Sans Mono:size=9
 #    ${top_mem name 2} ${top_mem pid 2} ${top_mem cpu 2} ${top_mem mem 2}
 #    ${top_mem name 3} ${top_mem pid 3} ${top_mem cpu 3} ${top_mem mem 3}
    
-#   hddtemp
-#   hwmon
-#   i2c
-#   i8k
-#   ibm
-#   platform
-#   
-#   audacious..., bmpx...
-#   mixer
-#   moc*
-#   mpd
-#   xmms*
-#   
-#   fs*
+#   hardware info:  hddtemp,hwmon,i2c,i8k,ibm,nvidia,pb_battery,platform
+#                   smapi*,sony*
+#   music player:   audacious..., bmpx..., mixer, moc*, mpd, xmms*
+#   filesystem:     fs*
 
 TEXT
 $nodename - $sysname $kernel on $machine
@@ -67,23 +57,23 @@ Uptime: $uptime - Load: $loadavg
 ${loadgraph ff0000 0000ff}
 $stippled_hr
 cpu1: ${cpu 1}% ${freq_g 1}GHz ${alignr}cpu2: ${cpu 2}% ${freq_g 2}GHz 
-${cpugraph 1 32,150 ff0000 0000ff} $alignr${cpugraph 2 32,150 0000ff ff0000}
+${cpugraph 1 25,150 ff0000 0000ff} $alignr${cpugraph 2 25,150 0000ff ff0000}
 $stippled_hr
 RAM Usage: $mem/$memmax - $memperc%
 ${memgraph ff0000 0000ff}
 Buffer: $buffers - Cache: $cached
 Swap Usage: $swap/$swapmax - $swapperc%
 $stippled_hr
-/dev/hda: read ${diskio_read hda} ${alignr}write ${diskio_write hda}
-${diskiograph_read hda 32,150 ff0000 0000ff} $alignr${diskiograph_write hda 32,150 0000ff ff0000}
+/dev/sda: read ${diskio_read sda} ${alignr}write ${diskio_write sda}
+${diskiograph_read sda 25,150 ff0000 0000ff} $alignr${diskiograph_write sda 25,150 0000ff ff0000}
 $stippled_hr
 ${if_up eth0}eth0: down ${downspeedf eth0} KiB/s ${offset 100}up ${upspeedf eth0} KiB/s
-${downspeedgraph eth0 32,150 ff0000 0000ff} $alignr${upspeedgraph eth0 32,150 0000ff ff0000}${endif}
-${if_up wlan0}wlan0: down ${downspeedf wlan0} k/s ${offset 100}up ${upspeedf wlan0} k/s
-${downspeedgraph wlan0 32,150 ff0000 0000ff} $alignr${upspeedgraph wlan0 32,150 0000ff ff0000}
-ESSID: ${wireless_essid_net wlan0} ${alignr}Quality: ${wireless_link_qual_perc wlan0}${endif}\
+${downspeedgraph eth0 25,150 ff0000 0000ff} $alignr${upspeedgraph eth0 25,150 0000ff ff0000}${endif}
+${if_up wlan0}wlan0: down ${downspeedf wlan0} KiB/s ${offset 100}up ${upspeedf wlan0} KiB/s
+${downspeedgraph wlan0 25,150 ff0000 0000ff} $alignr${upspeedgraph wlan0 25,150 0000ff ff0000}
+ESSID: ${wireless_essid wlan0} - Quality: ${wireless_link_qual_perc wlan0}%${endif}
 $stippled_hr
-$acpiacadapter $acpifan $acpitemp
-$battery ${battery_percent}% $battery_time
-$hdd_temp $hwmon
- CPU: ${i2c temp 2}C - MB: ${i2c temp 1}C
+AC adapter: $acpiacadapter - Battery: $battery ${battery_percent}% $battery_time
+Temperature: CPU ${acpitemp}C - HDD /dev/sda ${hddtemp sda}C
+  (hwmon cpu temp: ${hwmon temp 1}C - i8k cpu temp: ${i8k_cpu_temp}C)
+Fans: left ${i8k_left_fan_rpm}rpm $i8k_left_fan_status - right ${i8k_right_fan_rpm}rpm $i8k_right_fan_status
