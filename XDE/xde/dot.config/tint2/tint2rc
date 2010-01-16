@@ -7,19 +7,19 @@
 #---------------------------------------------
 # BACKGROUND AND BORDER
 #---------------------------------------------
-rounded = 0
+rounded = 7
 border_width = 1
 #background_color = #5E5E5E 25
-#background_color = #ffffff 20
-background_color = #000000 50
+background_color = #ffffff 20
+#background_color = #000000 50
 border_color =  #9b9b9b 35
 
-rounded = 1
+rounded = 7
 border_width = 1
 background_color = #000000 70
 border_color =  #9b9b9b 75
 
-rounded = 1
+rounded = 7
 border_width = 0
 background_color = #OOOOOO 70
 border_color = #ffffff 20
@@ -59,8 +59,8 @@ taskbar_active_background_id = 2
 # TASK
 #---------------------------------------------
 task_icon = 1
-task_text = 1
-#task_maximum_size = 50 35
+task_text = 0
+task_maximum_size = 50 35
 task_centered = 1
 task_padding = 4 2
 task_font = sans 8
