@@ -65,3 +65,16 @@ win 系统菜单
 待机、休眠、重启、关机、切换用户、显示桌面、回收站、虚拟桌面切换、
 任务栏、按虚拟桌面分类的窗口栏。
 
+
+feh
+gliv
+gthumb
+gqview
+
+rsnapshot
+rdiff-backup
+flexbackup
+faubackup
+
+jff dot_files
+
