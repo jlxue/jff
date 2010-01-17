@@ -25,7 +25,7 @@ liveUSB: rm -rf /usr/share/doc, /usr/share/locale/...
     lxsession
     ~/.xsession 执行 xsm :  太简陋
 
-(4) x-window-manager: openbox obconf
+(4) x-window-manager: openbox
     openbox     提供 x-session-manager 功能，被 LXDE 采用，
                 干净，默认配置符合通常习惯。
     icewm
@@ -40,7 +40,7 @@ liveUSB: rm -rf /usr/share/doc, /usr/share/locale/...
 显示桌面：Win + d
 运行：Alt-F2, Win + r
 ctrl-alt-left/right: 切换虚拟桌面
-ctrl-alt-shift-left/right: 将当前窗口移动到指定虚拟桌面
+shift-alt-left/right: 将当前窗口移动到指定虚拟桌面
 可以置顶显示
 可以在所有虚拟桌面都显示
 alt-tab 显示当前虚拟桌面的窗口
@@ -65,11 +65,16 @@ win 系统菜单
 待机、休眠、重启、关机、切换用户、显示桌面、回收站、虚拟桌面切换、
 任务栏、按虚拟桌面分类的窗口栏。
 
+电池充电阈值。
 
 feh
+mtpaint
 gliv
-gthumb
-gqview
+gthumb      too many dependencies
+gqview      too many dependencies
+xpaint      too old
+gpaint      no rect selection tool
+scrot
 
 rsnapshot
 rdiff-backup
