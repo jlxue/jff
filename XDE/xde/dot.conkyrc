@@ -18,6 +18,7 @@ net_avg_samples 2
 no_buffers yes
 out_to_console no
 out_to_stderr no
+override_utf8_locale yes
 own_window_class Conky
 own_window_colour hotpink
 own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
@@ -64,9 +65,6 @@ template1 ${if_up \1}\1: total down ${totaldown \1}${offset 40}total up ${totalu
 #   filesystem:     fs*
 
 TEXT
-#
-#   Basic system info
-#
 $nodename - $sysname $kernel on $machine
 Uptime: $uptime - Load: $loadavg
 ${loadgraph ff0000 0000ff}
@@ -103,8 +101,8 @@ ${stippled_hr 1}
 #   Battery, temperature
 #
 Battery: $battery ${battery_percent}% $battery_time
-Temperature: CPU ${acpitemp}C - HDD /dev/sda ${hddtemp sda}C
-  (hwmon cpu temp: ${hwmon temp 1}C - i8k cpu temp: ${i8k_cpu_temp}C)
+Temperature: CPU ${acpitemp}°C - HDD /dev/sda ${hddtemp sda}°C
+  (hwmon cpu temp: ${hwmon temp 1}°C - i8k cpu temp: ${i8k_cpu_temp}°C)
 Fans: left ${i8k_left_fan_rpm}rpm $i8k_left_fan_status - right ${i8k_right_fan_rpm}rpm $i8k_right_fan_status
 ${stippled_hr 1}
 #
