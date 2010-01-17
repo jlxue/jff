@@ -1,39 +1,49 @@
 # vi: ft=conf
 
-alignment top_right
-background no
-border_width 1
-cpu_avg_samples 2
-default_color blue
-default_outline_color black
-default_shade_color black
-double_buffer yes
-draw_borders no
-draw_graph_borders yes
-draw_outline no
-draw_shades no
-if_up_strictness address
-minimum_size 5 5
-net_avg_samples 2
-no_buffers yes
-out_to_console no
-out_to_stderr no
-override_utf8_locale yes
-own_window_class Conky
-own_window_colour hotpink
-own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
-own_window_transparent yes
-own_window_type desktop
-own_window yes
-show_graph_range no
-show_graph_scale no
-stippled_borders 3
-update_interval 1
-uppercase no
-use_spacer none
-use_xft yes
-xftalpha 0.8
-xftfont DejaVu Sans Mono:size=7
+# Bugs:
+#   When no app such as nautilus, pcmanfm and rox is used as desktop,
+# own_window can't be yes when double_buffer is true for conky 1.7.2.
+# (For 1.7.1, own_window can be yes if double_buffer is true and
+# own_window_type isn't normal)
+#
+#    When pcmanfm is used as desktop, own_window can't be yes when
+#  double_buffer is true and own_window_type is desktop, because conky
+#  will disappear when click the desktop.
+#
+alignment               top_right
+background              no
+border_width            1
+cpu_avg_samples         2
+default_color           blue
+default_outline_color   black
+default_shade_color     black
+double_buffer           yes
+draw_borders            no
+draw_graph_borders      yes
+draw_outline            no
+draw_shades             no
+if_up_strictness        address
+minimum_size            25 25
+net_avg_samples         2
+no_buffers              yes
+out_to_console          no
+out_to_stderr           no
+override_utf8_locale    yes
+own_window              yes
+own_window_class        Conky
+own_window_colour       hotpink
+own_window_hints        undecorated,below,sticky,skip_taskbar,skip_pager
+own_window_transparent  yes
+own_window_type         desktop
+show_graph_range        no
+show_graph_scale        no
+stippled_borders        3
+update_interval         1
+uppercase               no
+use_spacer              none
+use_xft                 yes
+xftalpha                0.8
+xftfont                 DejaVu Sans Mono:size=7
 
 # left-right graphs
 # Usage: ${template0 cmd1 dev1 cmd2 dev2}
