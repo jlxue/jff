@@ -255,12 +255,12 @@
     </keybind>
     <keybind key="Print">
       <action name="Execute">
-        <execute>gnome-screenshot</execute>
+        <execute>scrot -e 'feh -F -d $f' '%Y-%m-%d_%H%M%S_$wx$h_scrot.png'</execute>
       </action>
     </keybind>
     <keybind key="A-Print">
       <action name="Execute">
-        <execute>gnome-screenshot -w</execute>
+        <execute>scrot -u -b -e 'feh -F -d $f' '%Y-%m-%d_%H%M%S_$wx$h_scrot.png'</execute>
       </action>
     </keybind>
     <!-- Keybindings for window switching -->
@@ -593,7 +593,7 @@
     </context>
     <context name="Root">
       <!-- Menus -->
-      <mousebind button="Middle" action="Press">
+      <mousebind button="Left" action="Press">
         <action name="ShowMenu">
           <menu>client-list-combined-menu</menu>
         </action>
