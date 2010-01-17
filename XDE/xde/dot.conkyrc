@@ -1,3 +1,5 @@
+# vi: ft=conf
+
 alignment top_right
 background no
 border_width 1
@@ -33,13 +35,14 @@ xftalpha 0.8
 xftfont DejaVu Sans Mono:size=7
 
 # left-right graphs
-# ${template0 cmd1 dev1 cmd2 dev2}
+# Usage: ${template0 cmd1 dev1 cmd2 dev2}
 template0 ${\1 \2 25,150 ff0000 0000ff} $alignr${\3 \4 25,150 0000ff ff0000}
 
 # network speed info
-# ${template1 net}
-template1 ${if_up \1}\1: down ${downspeedf \1} KiB/s ${offset 100}up ${upspeedf \1} KiB/s\n${template0 downspeedgraph \1 upspeedgraph \1}
+# Usage: ${template1 net}
+template1 ${if_up \1}\1: total down ${totaldown \1}${offset 40}total up ${totalup \1}\n    down ${downspeedf \1} KiB/s ${offset 90}up ${upspeedf \1} KiB/s\n${template0 downspeedgraph \1 upspeedgraph \1}
 
+##################################################################################
 # extra text
 #
 #   ${font Dungeon:style=Bold:pixelsize=12}MPD: ${alignc}$mpd_artist - $mpd_title
@@ -61,28 +64,50 @@ template1 ${if_up \1}\1: down ${downspeedf \1} KiB/s ${offset 100}up ${upspeedf 
 #   filesystem:     fs*
 
 TEXT
+#
+#   Basic system info
+#
 $nodename - $sysname $kernel on $machine
 Uptime: $uptime - Load: $loadavg
 ${loadgraph ff0000 0000ff}
 ${stippled_hr 1}
+#
+#   CPU usage
+#
 cpu1: ${cpu 1}% ${freq_g 1}GHz ${alignr}cpu2: ${cpu 2}% ${freq_g 2}GHz
 ${template0 cpugraph 1 cpugraph 2}
+Processes: total $processes - running $running_processes
 ${stippled_hr 1}
+#
+#   Ram, swap usage
+#
 RAM Usage: $mem/$memmax - $memperc%
 ${memgraph ff0000 0000ff}
 Buffer: $buffers - Cache: $cached
 Swap Usage: $swap/$swapmax - $swapperc%
 ${stippled_hr 1}
+#
+#   Hard disk I/O
+#
 /dev/sda: read ${diskio_read sda} ${alignr}write ${diskio_write sda}
 ${template0 diskiograph_read sda diskiograph_write sda}
 ${stippled_hr 1}
+#
+#   Network I/O
+#
 ${template1 eth0}
 ${endif}${template1 wlan0}
 ESSID: ${wireless_essid wlan0} - Quality: ${wireless_link_qual_perc wlan0}%${endif}
 ${stippled_hr 1}
+#
+#   Battery, temperature
+#
 Battery: $battery ${battery_percent}% $battery_time
 Temperature: CPU ${acpitemp}C - HDD /dev/sda ${hddtemp sda}C
   (hwmon cpu temp: ${hwmon temp 1}C - i8k cpu temp: ${i8k_cpu_temp}C)
 Fans: left ${i8k_left_fan_rpm}rpm $i8k_left_fan_status - right ${i8k_right_fan_rpm}rpm $i8k_right_fan_status
 ${stippled_hr 1}
+#
+#   Volume, multimedia info
+#
 Volume: ${if_mixer_mute}mute${else}${mixer}%$endif
