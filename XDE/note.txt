@@ -28,6 +28,7 @@ liveUSB: rm -rf /usr/share/doc, /usr/share/locale/...
 (4) x-window-manager: openbox
     openbox     提供 x-session-manager 功能，被 LXDE 采用，
                 干净，默认配置符合通常习惯。
+                obconf + obmenu
     icewm
     sawfish     Lisp
     fvwm
@@ -49,6 +50,31 @@ win 系统菜单
 桌面背景
 桌面快捷方式
 
+(4.1) 系统菜单
+菜单：Debian menu, menu-xdg 包，man update-menus, /usr/share/doc/menu/
+xdg-utils 的 xdg-desktop-menu
+x11-utils 的 xprop, xwininfo...
+gnome-main-menu, gnome-menus, lxmenu-data
+devscripts 的 desktop2menu + libfile-desktopentry-perl, libx11-freedesktop-desktopentry-perl
+
+FD menu 的 .menu + .desktop + .directory 和 Debian /usr/lib/menu
+数据用于互补生成菜单:
+* menu-xdg 由 /etc/menu-methods/menu-xdg 生成 .menu 文件，供符合 FD menu
+  标准的程序读取。
+* devscripts 的 desktop2menu: desktop -> menu 然后由 /etc/menu-methods/
+  生成 WM 菜单。
+
+方案：解析 gnome-menus 包的 .menu 文件，建立菜单放置规则，读取 .desktop 文件，
+      输出菜单树，转换成 WM 支持的方式。
+      /usr/share/menu 是 Debian 独有的，放入 Debian 子菜单，并利用
+      desktop2menu 的映射关系，将菜单放入菜单树，与第一步的菜单树合并。
+
+(4.2) 自动启动
+/etc/xdg/autostart
+
+(4.3) 文件关联
+
+(4.4) startup notification
 
 (5) x-terminal-emulator: rxvt-unicode-ml
     rxvt-unicode-ml     支持 Perl 扩展
@@ -67,14 +93,17 @@ win 系统菜单
 
 电池充电阈值。
 
+(7) 软件
+scrot
 feh
 mtpaint
+wicd
+
 gliv
 gthumb      too many dependencies
 gqview      too many dependencies
 xpaint      too old
 gpaint      no rect selection tool
-scrot
 
 rsnapshot
 rdiff-backup
