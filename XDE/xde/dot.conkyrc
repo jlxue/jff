@@ -42,7 +42,8 @@ draw_graph_borders      yes
 draw_outline            no
 draw_shades             no
 if_up_strictness        address
-minimum_size            25 25
+maximum_width           310
+minimum_size            310 100
 net_avg_samples         2
 no_buffers              yes
 out_to_console          no
@@ -145,3 +146,9 @@ ${stippled_hr 1}
 #   Volume, multimedia info
 #
 Volume: ${if_mixer_mute}mute${else}${mixer}%$endif
+${stippled_hr 1}
+#
+#  Date, calendar
+#
+${font Sans:pixelsize=24}${time %H:%M:%S}${font} ${time %Y-%m-%d}
+${execi 3600 cal -h}
