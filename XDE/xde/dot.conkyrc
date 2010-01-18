@@ -10,6 +10,25 @@
 #  double_buffer is true and own_window_type is desktop, because conky
 #  will disappear when click the desktop.
 #
+#   Comments produce blank lines on Conky 1.7.1 but not on Conky 1.7.2
+#   which is good:-)
+#
+#   ${if... false}
+#   ...
+#   ${endif}
+#   This produces a blank line which is bad, that's one of the reasons
+#   why I use many long templates and long text lines, it's very tricky!
+#
+# License:
+#   BSDL ( http://opensource.org/licenses/bsd-license.php )
+#
+# Author:
+#   Liu Yubao <yubao.liu@gmail.com>     2010-01-18
+#
+# References:
+#   http://conky.sourceforge.net/conkyrc-brenden
+#   oicu@newsmth's conkyrc: http://www.newsmth.net/bbscon.php?bid=392&id=763569
+
 alignment               top_right
 background              no
 border_width            1
@@ -50,8 +69,16 @@ xftfont                 DejaVu Sans Mono:size=7
 template0 ${\1 \2 25,150 ff0000 0000ff} $alignr${\3 \4 25,150 0000ff ff0000}
 
 # network speed info
-# Usage: ${template1 net}
-template1 ${if_up \1}\1: total down ${totaldown \1}${offset 40}total up ${totalup \1}\n    down ${downspeedf \1} KiB/s ${offset 90}up ${upspeedf \1} KiB/s\n${template0 downspeedgraph \1 upspeedgraph \1}
+# Usage: ${template1 net isNotLeading}...${endif}
+template1 ${if_up \1}${if_match \2 != 0}\n${endif}\1: total down ${totaldown \1}${offset 40}total up ${totalup \1}\n    down ${downspeedf \1} KiB/s ${offset 90}up ${upspeedf \1} KiB/s\n${template0 downspeedgraph \1 upspeedgraph \1}
+
+# hard disk I/O info
+# Usage: ${template2 dev isNotLeading}
+template2 ${if_existing /proc/partitions \1}${if_match \2 != 0}\n${endif}/dev/\1: read ${diskio_read \1} ${alignr}write ${diskio_write \1}\n${template0 diskiograph_read \1 diskiograph_write \1}${endif}
+
+# bar
+# Usage: ${template3 bar_cmd}
+template3 ${alignr}${\1 6,120}
 
 ##################################################################################
 # extra text
@@ -82,29 +109,28 @@ ${stippled_hr 1}
 #
 #   CPU usage
 #
-cpu1: ${cpu 1}% ${freq_g 1}GHz ${alignr}cpu2: ${cpu 2}% ${freq_g 2}GHz
-${template0 cpugraph 1 cpugraph 2}
+${if_existing /proc/cpuinfo processor	: 1}cpu1: ${cpu 1}% ${freq_g 1}GHz ${alignr}cpu2: ${cpu 2}% ${freq_g 2}GHz
+${template0 cpugraph 1 cpugraph 2}${else}cpu: ${cpu}% ${freq_g}GHz ${template3 cpubar}
+${cpugraph ff0000 0000ff}${endif}
 Processes: total $processes - running $running_processes
 ${stippled_hr 1}
 #
 #   Ram, swap usage
 #
-RAM Usage: $mem/$memmax - $memperc%
+RAM Usage: $mem/$memmax - $memperc% ${template3 membar}
 ${memgraph ff0000 0000ff}
 Buffer: $buffers - Cache: $cached
-Swap Usage: $swap/$swapmax - $swapperc%
+Swap Usage: $swap/$swapmax - $swapperc% ${template3 swapbar}
 ${stippled_hr 1}
 #
 #   Hard disk I/O
 #
-/dev/sda: read ${diskio_read sda} ${alignr}write ${diskio_write sda}
-${template0 diskiograph_read sda diskiograph_write sda}
+${template2 sda 0}${template2 sdb 1}${template2 hda 1}${template2 hdb 1}
 ${stippled_hr 1}
 #
 #   Network I/O
 #
-${template1 eth0}
-${endif}${template1 wlan0}
+${template1 eth0 0}${endif}${template1 wlan0 1}
 ESSID: ${wireless_essid wlan0} - Quality: ${wireless_link_qual_perc wlan0}%${endif}
 ${stippled_hr 1}
 #
