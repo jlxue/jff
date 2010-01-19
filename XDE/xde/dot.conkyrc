@@ -42,8 +42,8 @@ draw_graph_borders      yes
 draw_outline            no
 draw_shades             no
 if_up_strictness        address
-maximum_width           310
-minimum_size            310 100
+maximum_width           270
+minimum_size            270 100
 net_avg_samples         2
 no_buffers              yes
 out_to_console          no
@@ -67,7 +67,7 @@ xftfont                 DejaVu Sans Mono:size=7
 
 # left-right graphs
 # Usage: ${template0 cmd1 dev1 cmd2 dev2}
-template0 ${\1 \2 25,150 ff0000 0000ff} $alignr${\3 \4 25,150 0000ff ff0000}
+template0 ${\1 \2 25,130 ff0000 0000ff} $alignr${\3 \4 25,130 0000ff ff0000}
 
 # network speed info
 # Usage: ${template1 net isNotLeading}...${endif}
@@ -79,7 +79,7 @@ template2 ${if_existing /proc/partitions \1}${if_match \2 != 0}\n${endif}/dev/\1
 
 # bar
 # Usage: ${template3 bar_cmd}
-template3 ${alignr}${\1 6,120}
+template3 ${alignr}${\1 6,70}
 
 ##################################################################################
 # extra text
@@ -143,12 +143,7 @@ Temperature: CPU ${acpitemp}°C - HDD /dev/sda ${hddtemp sda}°C
 Fans: left ${i8k_left_fan_rpm}rpm $i8k_left_fan_status - right ${i8k_right_fan_rpm}rpm $i8k_right_fan_status
 ${stippled_hr 1}
 #
-#   Volume, multimedia info
+#   Volume, multimedia info, date, calendar
 #
-Volume: ${if_mixer_mute}mute${else}${mixer}%$endif
-${stippled_hr 1}
-#
-#  Date, calendar
-#
-${font Sans:pixelsize=24}${time %H:%M:%S}${font} ${time %Y-%m-%d}
-${execi 3600 cal -h}
+${font Sans:pixelsize=24}${time %H:%M:%S}${font} ${time %Y-%m-%d}${alignr}Volume: ${if_mixer_mute}mute${else}${mixer}%$endif
+${execpi 1800 cal -h | sed -e "s/\<\(`date +%-d`\)\>/\${color red}\1\${color}/"}
