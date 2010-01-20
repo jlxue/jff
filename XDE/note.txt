@@ -64,7 +64,8 @@ FD menu 的 .menu + .desktop + .directory 和 Debian /usr/lib/menu
 * devscripts 的 desktop2menu: desktop -> menu 然后由 /etc/menu-methods/
   生成 WM 菜单。
 
-方案：解析 gnome-menus 包的 .menu 文件，建立菜单放置规则，读取 .desktop 文件，
+方案：libxml2-utils 的 xmllint --format 处理 .menu 文件；
+      解析 gnome-menus 包的 .menu 文件，建立菜单放置规则，读取 .desktop 文件，
       输出菜单树，转换成 WM 支持的方式。
       /usr/share/menu 是 Debian 独有的，放入 Debian 子菜单，并利用
       desktop2menu 的映射关系，将菜单放入菜单树，与第一步的菜单树合并。
