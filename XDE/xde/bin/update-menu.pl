@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+{
 use XML::SAX;
 use strict;
 use warnings;
@@ -7,15 +8,45 @@ BEGIN {
     MenuXMLHandler->import();
 };
 
-die "Usage: $0 filename\n" if @ARGV == 0;
+die "Usage: $0 menu-file\n" if @ARGV == 0;
 
-XML::SAX::ParserFactory->parser(
-    Handler => MenuXMLHandler->new())->parse_uri($ARGV[0]);
+my $handler = new MenuXMLHandler();
+
+XML::SAX::ParserFactory->parser(Handler => $handler)->parse_uri($ARGV[0]);
+
+my $app = { Filename => 'feh.desktop', Categories => ['Graphics', 'Viewer']};
+
+match($app, $handler->{root_menu});
+
 exit 0;
+
+###############################################################
+sub match {
+    my ($app, $menu) = @_;
+
+    if (defined $menu->matchsub) {
+        if ($menu->matchsub->($app)) {
+            print "matched: ", $menu->name, "\n";
+            return 1;
+        }
+    }
+
+    for my $child (@{$menu->children}) {
+        return 1 if (match($app, $child))
+    }
+
+    return 0;
+}
+
+}
 
 ###############################################################
 # http://standards.freedesktop.org/menu-spec/latest
 { # begin package
+=pod
+After XML::SAX parsed a XML file, this handler contains:
+{ root_menu   => Root_Menu_Object }
+=cut
 package MenuXMLHandler;
 use base qw/XML::SAX::Base/;
 use Class::Struct Menu => [parent   => 'Menu',
@@ -28,7 +59,8 @@ use Class::Struct Menu => [parent   => 'Menu',
                            matchsub => '$',     # subroutine reference
                           ];
 use File::Spec;
-use Smart::Comments;
+use List::Util;
+#use Smart::Comments;
 use strict;
 use warnings;
 
@@ -41,8 +73,8 @@ sub start_document {
 
 sub end_document {
     my $self = $_[0];
-    $self->{characters} = '';
-    $self->{current_menu} = $self->{root_menu};
+    delete $self->{characters};
+    delete $self->{current_menu};
     ### end_document: @_
 }
 
@@ -88,20 +120,17 @@ sub handle_start_Menu {
 }
 
 sub handle_end_Menu {
-    $_[0]{current_menu} = $_[0]{current_menu}->parent;
-
     my $stack = $_[0]{stack};
+
     if (defined $stack) {
         my $exp = join(' && ', @$stack);
-        if (length($exp) > 0) {
-            $_[0]{current_menu}->matchsub("eval {sub { return $exp; }");
-        }
+        die "Empty patterns for $_[0]{current_menu}->name!\n" if length($exp) == 0;
+        $_[0]{current_menu}->matchsub(eval "sub { $exp }");
     }
-    #for my $s (@$stack) {
-    #    print "=== $s\n";
-    #}
-    #print "==================\n";
+
     delete $_[0]{stack};
+
+    $_[0]{current_menu} = $_[0]{current_menu}->parent;
 }
 
 sub handle_end_Name {
