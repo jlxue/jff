@@ -14,6 +14,7 @@ XML::SAX::ParserFactory->parser(
 exit 0;
 
 ###############################################################
+# http://standards.freedesktop.org/menu-spec/latest
 { # begin package
 package MenuXMLHandler;
 use base qw/XML::SAX::Base/;
@@ -21,9 +22,12 @@ use Class::Struct Menu => [parent   => 'Menu',
                            children => '*@',
                            name     => '$',
                            directory=> '$',
-                           condition=> '*@',
+                           appdirs  => '*@',
+                           dirdirs  => '*@',
+                           mergedirs=> '*@',
+                           matchsub => '$',     # subroutine reference
                           ];
-use Data::Dumper;
+use File::Spec;
 use Smart::Comments;
 use strict;
 use warnings;
@@ -36,6 +40,9 @@ sub start_document {
 }
 
 sub end_document {
+    my $self = $_[0];
+    $self->{characters} = '';
+    $self->{current_menu} = $self->{root_menu};
     ### end_document: @_
 }
 
@@ -76,10 +83,25 @@ sub handle_start_Menu {
 
     push @{$parent->children()}, $menu;
     $self->{current_menu} = $menu;
+
+    $self->{stack} = [];
 }
 
 sub handle_end_Menu {
     $_[0]{current_menu} = $_[0]{current_menu}->parent;
+
+    my $stack = $_[0]{stack};
+    if (defined $stack) {
+        my $exp = join(' && ', @$stack);
+        if (length($exp) > 0) {
+            $_[0]{current_menu}->matchsub("eval {sub { return $exp; }");
+        }
+    }
+    #for my $s (@$stack) {
+    #    print "=== $s\n";
+    #}
+    #print "==================\n";
+    delete $_[0]{stack};
 }
 
 sub handle_end_Name {
@@ -91,62 +113,134 @@ sub handle_end_Directory {
 }
 
 sub handle_start_Include {
-    $_[0]{expression} = ["(Include"];
+    push @{$_[0]{stack}}, '(';
 }
 
 sub handle_end_Include {
-    push @{$_[0]{expression}}, ")";
-    push @{$_[0]{current_menu}->condition}, $_[0]{expression};
+    process_pattern_varargs($_[0]{stack}, '||');
 }
 
 sub handle_start_Exclude {
-    $_[0]{expression} = ["(Exclude"];
-    push @{$_[0]{current_menu}->condition}, $_[0]{expression};
+    push @{$_[0]{stack}}, '(';
 }
 
 sub handle_end_Exclude {
-    push @{$_[0]{expression}}, ")";
-    push @{$_[0]{current_menu}->condition}, $_[0]{expression};
+    process_pattern_varargs($_[0]{stack}, '||');
+    my $stack = $_[0]{stack};
+    my $exp = pop @$stack;
+    push @$stack, "(! $exp)";
 }
 
 sub handle_start_And {
-    push @{$_[0]{expression}}, "(And";
+    push @{$_[0]{stack}}, '(';
 }
 
 sub handle_end_And {
-    push @{$_[0]{expression}}, ")";
-}
-
-sub handle_start_Not {
-    push @{$_[0]{expression}}, "(Not";
+    process_pattern_varargs($_[0]{stack}, '&&');
 }
 
 sub handle_end_Not {
-    push @{$_[0]{expression}}, ")";
+    my $stack = $_[0]{stack};
+    my $exp = pop @$stack;
+    push @$stack, "(! $exp)";
 }
 
 sub handle_start_Or {
-    push @{$_[0]{expression}}, "(Or";
+    push @{$_[0]{stack}}, '(';
 }
 
 sub handle_end_Or {
-    push @{$_[0]{expression}}, ")";
-}
-
-sub handle_start_Category {
-    push @{$_[0]{expression}}, "(Category";
+    process_pattern_varargs($_[0]{stack}, '||');
 }
 
 sub handle_end_Category {
-    push @{$_[0]{expression}}, $_[0]{characters}, ")";
-}
-
-sub handle_start_Filename {
-    push @{$_[0]{expression}}, "(Filename";
+    push @{$_[0]{stack}}, "Category(\$_[0], \'$_[0]{characters}\')";
 }
 
 sub handle_end_Filename {
-    push @{$_[0]{expression}}, $_[0]{characters}, ")";
+    push @{$_[0]{stack}}, "Filename(\$_[0], \'$_[0]{characters}\')";
+}
+
+sub handle_end_DefaultAppDirs {
+    my @appdirs = map { File::Spec->catdir($_, "applications") } xdg_data_dirs();
+    push @{$_[0]{current_menu}->appdirs}, @appdirs;
+}
+
+sub handle_end_DefaultDirectoryDirs {
+    my @dirdirs = map { File::Spec->catdir($_, "desktop-directories") } xdg_data_dirs();
+    push @{$_[0]{current_menu}->dirdirs}, @dirdirs;
+}
+
+sub handle_end_DefaultMergeDirs {
+    my @mergedirs = map { File::Spec->catdir($_, "menus/applications-merged") } xdg_config_dirs();
+    push @{$_[0]{current_menu}->mergedirs}, @mergedirs;
+}
+
+# http://standards.freedesktop.org/basedir-spec/latest/
+my @xdg_config_dirs;
+sub xdg_config_dirs {
+    if (! @xdg_config_dirs) {
+        if (exists $ENV{XDG_CONFIG_DIRS}) {
+            my $dirs = $ENV{XDG_CONFIG_DIRS};
+            $dirs =~ s/^[\s:]//g;
+            $dirs =~ s/[\s:]$//g;
+            @xdg_config_dirs = split /:/, $dirs;
+        } else {
+            @xdg_config_dirs = "/etc/xdg";
+        }
+
+        if (exists $ENV{XDG_CONFIG_HOME}) {
+            unshift @xdg_config_dirs, $ENV{XDG_CONFIG_HOME};
+        } else {
+            unshift @xdg_config_dirs, "$ENV{HOME}/.config";
+        }
+    }
+
+    return @xdg_config_dirs;
+}
+
+my @xdg_data_dirs;
+sub xdg_data_dirs {
+    if (! @xdg_data_dirs) {
+        if (exists $ENV{XDG_DATA_DIRS}) {
+            my $dirs = $ENV{XDG_DATA_DIRS};
+            $dirs =~ s/^[\s:]//g;
+            $dirs =~ s/[\s:]$//g;
+            @xdg_data_dirs = split /:/, $dirs;
+        } else {
+            @xdg_data_dirs = qw(usr/local/share/ /usr/share/);
+        }
+
+        if (exists $ENV{XDG_DATA_HOME}) {
+            unshift @xdg_data_dirs, $ENV{XDG_DATA_HOME};
+        } else {
+            unshift @xdg_data_dirs, "$ENV{HOME}/.data/share";
+        }
+    }
+
+    return @xdg_data_dirs;
+}
+
+sub process_pattern_varargs {
+    my ($stack, $op) = @_;
+    my @args = ();
+
+    while (my $exp = pop @$stack) {
+        if ($exp eq '(') {
+            push @$stack, '(' . join(" $op ", @args) . ')';
+            last;
+        } else {
+            unshift @args, $exp;
+        }
+    }
+}
+
+sub Category {
+    return defined(List::Util::first { $_ eq $_[1] } @{$_[0]{Categories}});
+}
+
+sub Filename {
+    return $_[0]{Filename} eq $_[1];
 }
 
 } # end package
