@@ -172,7 +172,7 @@ if has("gui_running")
 else
 "   colorscheme murphy
 "   hi link String Comment
-    colorscheme darkblue
+    colorscheme torte   "elflord murphy
     set cursorline
     hi MatchParen ctermbg=Blue
 endif

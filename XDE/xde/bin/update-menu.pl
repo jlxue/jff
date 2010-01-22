@@ -21,6 +21,7 @@ use Class::Struct Menu => [parent   => 'Menu',
                            children => '*@',
                            name     => '$',
                            directory=> '$',
+                           condition=> '*@',
                           ];
 use Data::Dumper;
 use Smart::Comments;
@@ -45,7 +46,11 @@ sub start_element {
     $self->{characters} = '';
 
     my $sub = $self->can("handle_start_$localname");
-    $sub->(@_) if defined $sub;
+    if (defined $sub) {
+        $sub->(@_);
+    } else {
+        warn "<$localname> not processed!\n" if !defined $self->can("handle_end_$localname");
+    }
 }
 
 sub end_element {
@@ -53,7 +58,11 @@ sub end_element {
     my $localname = $e->{LocalName};
 
     my $sub = $self->can("handle_end_$localname");
-    $sub->(@_) if defined $sub;
+    if (defined $sub) {
+        $sub->(@_);
+    } else {
+        warn "</$localname> not processed!\n" if !defined $self->can("handle_start_$localname");
+    }
 }
 
 sub characters {
@@ -82,31 +91,62 @@ sub handle_end_Directory {
 }
 
 sub handle_start_Include {
-    $_[0]{operators} = [];
-    $_[0]{operands} = [];
-    $_[0]{expression} = "";
+    $_[0]{expression} = ["(Include"];
 }
 
 sub handle_end_Include {
+    push @{$_[0]{expression}}, ")";
+    push @{$_[0]{current_menu}->condition}, $_[0]{expression};
+}
+
+sub handle_start_Exclude {
+    $_[0]{expression} = ["(Exclude"];
+    push @{$_[0]{current_menu}->condition}, $_[0]{expression};
+}
+
+sub handle_end_Exclude {
+    push @{$_[0]{expression}}, ")";
+    push @{$_[0]{current_menu}->condition}, $_[0]{expression};
 }
 
 sub handle_start_And {
-    push @{$_[0]{operators}}, 'Or';
-    push @{$_[0]{operands}}, 'Or';
+    push @{$_[0]{expression}}, "(And";
+}
+
+sub handle_end_And {
+    push @{$_[0]{expression}}, ")";
 }
 
 sub handle_start_Not {
-    push @{$_[0]{operators}}, 'Not';
+    push @{$_[0]{expression}}, "(Not";
+}
+
+sub handle_end_Not {
+    push @{$_[0]{expression}}, ")";
+}
+
+sub handle_start_Or {
+    push @{$_[0]{expression}}, "(Or";
+}
+
+sub handle_end_Or {
+    push @{$_[0]{expression}}, ")";
+}
+
+sub handle_start_Category {
+    push @{$_[0]{expression}}, "(Category";
 }
 
 sub handle_end_Category {
-    push @{$_[0]{operators}}, 'Category';
-    push @{$_[0]{operands}}, $_[0]{characters};
+    push @{$_[0]{expression}}, $_[0]{characters}, ")";
+}
+
+sub handle_start_Filename {
+    push @{$_[0]{expression}}, "(Filename";
 }
 
 sub handle_end_Filename {
-    push @{$_[0]{operators}}, 'Filename';
-    push @{$_[0]{operands}}, $_[0]{characters};
+    push @{$_[0]{expression}}, $_[0]{characters}, ")";
 }
 
 } # end package
