@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 {
+use File::Find;
+use Smart::Comments;
 use XML::SAX;
 use strict;
 use warnings;
@@ -14,19 +16,85 @@ my $handler = new MenuXMLHandler();
 
 XML::SAX::ParserFactory->parser(Handler => $handler)->parse_uri($ARGV[0]);
 
-my $app = { Filename => 'feh.desktop', Categories => ['Graphics', 'Viewer']};
+#my $app = { Filename => 'feh.desktop', Categories => ['Graphics', 'Viewer']};
+#place_application($handler->root_menu, $app);
 
-match($app, $handler->{root_menu});
-
+place_applications($handler->root_menu, [], []);
 exit 0;
 
 ###############################################################
-sub match {
-    my ($app, $menu) = @_;
+# $menu     a Menu object
+# $apps     [
+#               {   # applications found in this menu's application dirs
+#                   Filename    => {    # a parsed .desktop file
+#                                   Name => ...,
+#                                  },
+#                   ...
+#               },
+#               ....
+#           }
+# $dirs     [
+#               {   # directories found in this menu's directory dirs
+#                   Filename    => {    # a parsed .directory file
+#                                   ....
+#                                   },
+#                   ...
+#               },
+#               ...
+#           ]
+sub place_applications {
+    my ($menu, $apps, $dirs) = @_;
+
+    if (@{$menu->appdirs} > 0) {
+        push @$apps, find_entries('\.desktop', @{$menu->appdirs});
+    }
+
+    if (@{$menu->dirdirs} > 0) {
+        push @$dirs, find_entries('\.directory', @{$menu->dirdirs});
+    }
+
+    if (defined $menu->matchsub) {
+        for my $entries (@$apps) {
+            for my $entry (values %$entries) {
+                if ($menu->matchsub->($entry)) {
+                    print STDERR "desktop:\t", $menu->name, " ", $entry->{Fullpath}, "\n";
+                    delete $entries->{$entry->{Filename}};
+                    $menu->menu_items($entry->{Filename}, $entry);
+                }
+            }
+        }
+    }
+
+    if (defined $menu->directory) {
+        for (my $i = @$dirs - 1; $i >= 0; --$i) {
+            my $entries = $dirs->[$i];
+
+            while (my ($Filename, $entry) = each %$entries) {
+                if ($menu->directory eq $Filename) {
+                    print STDERR "directory:\t", $menu->name, " ", $entry->{Fullpath}, "\n";
+                    $menu->menu_dir($entry);
+                    last;
+                }
+            }
+
+            last if defined $menu->menu_dir;
+        }
+    }
+
+    for my $child (@{$menu->children}) {
+        place_applications($child, $apps, $dirs);
+    }
+
+    pop @$apps if @{$menu->appdirs} > 0;
+    pop @$dirs if @{$menu->dirdirs} > 0;
+}
+
+sub place_application {
+    my ($menu, $app) = @_;
 
     if (defined $menu->matchsub) {
         if ($menu->matchsub->($app)) {
-            print "matched: ", $menu->name, "\n";
+            print STDERR "matched: ", $menu->name, "\n";
             return 1;
         }
     }
@@ -38,15 +106,48 @@ sub match {
     return 0;
 }
 
+sub find_entries {
+    my ($suffix, @dirs) = @_;
+    my %entries = ();
+
+    for my $d (@dirs) {
+        $d =~ s/[\\\/]+$//g;
+        next if ! -d $d;
+
+        find(sub {
+                return if -d $_;
+                return if ! /$suffix$/;
+
+                open my $fh, $_ or return;
+                my %entry = ();
+                while (my $line = <$fh>) {
+                    chomp $line;
+                    my ($k, $v) = split /=/, $line, 2;
+                    next if !defined $v;
+                    $entry{$k} = $v;
+                }
+
+                if (exists $entry{Categories}) {
+                    my $categories = $entry{Categories};
+                    $categories =~ s/^;+|;+$//g;
+                    $entry{Categories} = [split /;/, $categories];
+                }
+
+                $entry{Fullpath} = $File::Find::name;
+                $entry{Filename} = $File::Find::name;
+                $entry{Filename} =~ s/^\Q$d\E\///;
+                $entries{$entry{Filename}} = \%entry;
+            }, $d);
+    }
+
+    return \%entries;
+}
+
 }
 
 ###############################################################
 # http://standards.freedesktop.org/menu-spec/latest
 { # begin package
-=pod
-After XML::SAX parsed a XML file, this handler contains:
-{ root_menu   => Root_Menu_Object }
-=cut
 package MenuXMLHandler;
 use base qw/XML::SAX::Base/;
 use Class::Struct Menu => [parent   => 'Menu',
@@ -57,6 +158,8 @@ use Class::Struct Menu => [parent   => 'Menu',
                            dirdirs  => '*@',
                            mergedirs=> '*@',
                            matchsub => '$',     # subroutine reference
+                           menu_items   => '*%',    # hash ref of .desktop infos
+                           menu_dir     => '$',     # hash ref to a .directory info
                           ];
 use File::Spec;
 use List::Util;
@@ -75,7 +178,6 @@ sub end_document {
     my $self = $_[0];
     delete $self->{characters};
     delete $self->{current_menu};
-    ### end_document: @_
 }
 
 sub start_element {
@@ -272,5 +374,17 @@ sub Filename {
     return $_[0]{Filename} eq $_[1];
 }
 
+
+sub root_menu {
+    return $_[0]{root_menu};
+}
+
+
+=pod
+After XML::SAX parsed a XML file, this handler contains:
+    { root_menu   => Root_Menu_Object }
+use root_menu() method to obtain the root menu object.
+
+=cut
 } # end package
 
