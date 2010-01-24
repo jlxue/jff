@@ -1,28 +1,52 @@
 #!/usr/bin/perl
-{
+{ # begin package
+use Getopt::Long;
+use strict;
+use warnings;
+
+BEGIN {
+    MenuBuilder->import();
+}
+
+
+my $root_menu = MenuBuilder::build_from_uri($ARGV[0]);
+
+
+exit 0;
+
+} # end package
+
+################ MenuBuilder ###################################
+{ # begin package
+package MenuBuilder;
 use File::Find;
-use Smart::Comments;
+#use Smart::Comments;
 use XML::SAX;
 use strict;
 use warnings;
 
 BEGIN {
     MenuXMLHandler->import();
-};
+}
 
-die "Usage: $0 menu-file\n" if @ARGV == 0;
+sub build_from_uri {
+    my $uri = shift;
 
-my $handler = new MenuXMLHandler();
+    die "No uri specified!\n" if ! defined $uri;
 
-XML::SAX::ParserFactory->parser(Handler => $handler)->parse_uri($ARGV[0]);
+    my $handler = new MenuXMLHandler();
 
-#my $app = { Filename => 'feh.desktop', Categories => ['Graphics', 'Viewer']};
-#place_application($handler->root_menu, $app);
+    XML::SAX::ParserFactory->parser(Handler => $handler)->parse_uri($ARGV[0]);
 
-place_applications($handler->root_menu, [], []);
-exit 0;
+    #my $app = { Filename => 'feh.desktop', Categories => ['Graphics', 'Viewer']};
+    #place_application($handler->root_menu, $app);
 
-###############################################################
+    place_applications($handler->root_menu, [], []);
+
+    return $handler->root_menu;
+}
+
+#--------------------------------------------------------------
 # $menu     a Menu object
 # $apps     [
 #               {   # applications found in this menu's application dirs
@@ -81,8 +105,12 @@ sub place_applications {
         place_applications($child, $apps, $dirs);
     }
 
-    pop @$apps;
     pop @$dirs;
+    my $entries = pop @$apps;
+
+    while (my ($Filename, $entry) = each %$entries) {
+        print STDERR "WARN: application: ", $entry->{Fullpath}, " not placed!\n";
+    }
 }
 
 sub place_application {
@@ -139,9 +167,9 @@ sub find_entries {
     return \%entries;
 }
 
-}
+} # end package
 
-###############################################################
+############## MenuXMLHandler #################################
 # http://standards.freedesktop.org/menu-spec/latest
 { # begin package
 package MenuXMLHandler;
@@ -153,7 +181,7 @@ use Class::Struct Menu => [parent   => 'Menu',
                            appdirs  => '*@',
                            dirdirs  => '*@',
                            mergedirs=> '*@',
-                           matchsub => '$',     # subroutine reference
+                           matchsub => '$',         # subroutine reference, accept a hash ref to a .desktop info
                            menu_items   => '*%',    # hash ref of .desktop infos
                            menu_dir     => '$',     # hash ref to a .directory info
                           ];
