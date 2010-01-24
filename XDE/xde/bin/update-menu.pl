@@ -45,25 +45,8 @@ exit 0;
 sub place_applications {
     my ($menu, $apps, $dirs) = @_;
 
-    if (@{$menu->appdirs} > 0) {
-        push @$apps, find_entries('\.desktop', @{$menu->appdirs});
-    }
-
-    if (@{$menu->dirdirs} > 0) {
-        push @$dirs, find_entries('\.directory', @{$menu->dirdirs});
-    }
-
-    if (defined $menu->matchsub) {
-        for my $entries (@$apps) {
-            for my $entry (values %$entries) {
-                if ($menu->matchsub->($entry)) {
-                    print STDERR "desktop:\t", $menu->name, " ", $entry->{Fullpath}, "\n";
-                    delete $entries->{$entry->{Filename}};
-                    $menu->menu_items($entry->{Filename}, $entry);
-                }
-            }
-        }
-    }
+    push @$apps, find_entries('\.desktop', @{$menu->appdirs});
+    push @$dirs, find_entries('\.directory', @{$menu->dirdirs});
 
     if (defined $menu->directory) {
         for (my $i = @$dirs - 1; $i >= 0; --$i) {
@@ -71,7 +54,7 @@ sub place_applications {
 
             while (my ($Filename, $entry) = each %$entries) {
                 if ($menu->directory eq $Filename) {
-                    print STDERR "directory:\t", $menu->name, " ", $entry->{Fullpath}, "\n";
+                    print "  " x (@$dirs - 1), $menu->name, " ", $entry->{Fullpath}, "\n";
                     $menu->menu_dir($entry);
                     last;
                 }
@@ -81,12 +64,24 @@ sub place_applications {
         }
     }
 
+    if (defined $menu->matchsub) {
+        for my $entries (@$apps) {
+            for my $entry (values %$entries) {
+                if ($menu->matchsub->($entry)) {
+                    print "  " x @$apps, $menu->name, " ", $entry->{Fullpath}, "\n";
+                    delete $entries->{$entry->{Filename}};
+                    $menu->menu_items($entry->{Filename}, $entry);
+                }
+            }
+        }
+    }
+
     for my $child (@{$menu->children}) {
         place_applications($child, $apps, $dirs);
     }
 
-    pop @$apps if @{$menu->appdirs} > 0;
-    pop @$dirs if @{$menu->dirdirs} > 0;
+    pop @$apps;
+    pop @$dirs;
 }
 
 sub place_application {
