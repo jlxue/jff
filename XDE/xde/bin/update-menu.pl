@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 { # begin package
+use File::BaseDir qw/:lookup/;
 use Getopt::Long;
+#use Smart::Comments;
 use strict;
 use warnings;
 
@@ -11,8 +13,9 @@ BEGIN {
 
 my $uri = $ARGV[0];
 if (!defined($uri) && exists $ENV{XDG_MENU_PREFIX}) {
-    $uri = "/etc/xdg/menus/" . $ENV{XDG_MENU_PREFIX} .  "applications.menu";
+    $uri = config_files('menus', $ENV{XDG_MENU_PREFIX} .  "applications.menu");
 }
+### $uri
 my $root_menu = MenuBuilder::build_from_uri($uri);
 
 
@@ -40,7 +43,7 @@ sub build_from_uri {
 
     my $handler = new MenuXMLHandler();
 
-    XML::SAX::ParserFactory->parser(Handler => $handler)->parse_uri($ARGV[0]);
+    XML::SAX::ParserFactory->parser(Handler => $handler)->parse_uri($uri);
 
     #my $app = { Filename => 'feh.desktop', Categories => ['Graphics', 'Viewer']};
     #place_application($handler->root_menu, $app);
@@ -189,6 +192,7 @@ use Class::Struct Menu => [parent   => 'Menu',
                            menu_items   => '*%',    # hash ref of .desktop infos
                            menu_dir     => '$',     # hash ref to a .directory info
                           ];
+use File::BaseDir qw/:vars/;
 use File::Spec;
 use List::Util;
 #use Smart::Comments;
@@ -335,50 +339,50 @@ sub handle_end_DefaultMergeDirs {
     push @{$_[0]{current_menu}->mergedirs}, @mergedirs;
 }
 
-# http://standards.freedesktop.org/basedir-spec/latest/
-my @xdg_config_dirs;
-sub xdg_config_dirs {
-    if (! @xdg_config_dirs) {
-        if (exists $ENV{XDG_CONFIG_DIRS}) {
-            my $dirs = $ENV{XDG_CONFIG_DIRS};
-            $dirs =~ s/^[\s:]//g;
-            $dirs =~ s/[\s:]$//g;
-            @xdg_config_dirs = split /:/, $dirs;
-        } else {
-            @xdg_config_dirs = "/etc/xdg";
-        }
-
-        if (exists $ENV{XDG_CONFIG_HOME}) {
-            unshift @xdg_config_dirs, $ENV{XDG_CONFIG_HOME};
-        } else {
-            unshift @xdg_config_dirs, "$ENV{HOME}/.config";
-        }
-    }
-
-    return @xdg_config_dirs;
-}
-
-my @xdg_data_dirs;
-sub xdg_data_dirs {
-    if (! @xdg_data_dirs) {
-        if (exists $ENV{XDG_DATA_DIRS}) {
-            my $dirs = $ENV{XDG_DATA_DIRS};
-            $dirs =~ s/^[\s:]//g;
-            $dirs =~ s/[\s:]$//g;
-            @xdg_data_dirs = split /:/, $dirs;
-        } else {
-            @xdg_data_dirs = qw(usr/local/share/ /usr/share/);
-        }
-
-        if (exists $ENV{XDG_DATA_HOME}) {
-            unshift @xdg_data_dirs, $ENV{XDG_DATA_HOME};
-        } else {
-            unshift @xdg_data_dirs, "$ENV{HOME}/.data/share";
-        }
-    }
-
-    return @xdg_data_dirs;
-}
+## http://standards.freedesktop.org/basedir-spec/latest/
+#my @xdg_config_dirs;
+#sub xdg_config_dirs {
+#    if (! @xdg_config_dirs) {
+#        if (exists $ENV{XDG_CONFIG_DIRS}) {
+#            my $dirs = $ENV{XDG_CONFIG_DIRS};
+#            $dirs =~ s/^[\s:]//g;
+#            $dirs =~ s/[\s:]$//g;
+#            @xdg_config_dirs = split /:/, $dirs;
+#        } else {
+#            @xdg_config_dirs = "/etc/xdg";
+#        }
+#
+#        if (exists $ENV{XDG_CONFIG_HOME}) {
+#            unshift @xdg_config_dirs, $ENV{XDG_CONFIG_HOME};
+#        } else {
+#            unshift @xdg_config_dirs, "$ENV{HOME}/.config";
+#        }
+#    }
+#
+#    return @xdg_config_dirs;
+#}
+#
+#my @xdg_data_dirs;
+#sub xdg_data_dirs {
+#    if (! @xdg_data_dirs) {
+#        if (exists $ENV{XDG_DATA_DIRS}) {
+#            my $dirs = $ENV{XDG_DATA_DIRS};
+#            $dirs =~ s/^[\s:]//g;
+#            $dirs =~ s/[\s:]$//g;
+#            @xdg_data_dirs = split /:/, $dirs;
+#        } else {
+#            @xdg_data_dirs = qw(usr/local/share/ /usr/share/);
+#        }
+#
+#        if (exists $ENV{XDG_DATA_HOME}) {
+#            unshift @xdg_data_dirs, $ENV{XDG_DATA_HOME};
+#        } else {
+#            unshift @xdg_data_dirs, "$ENV{HOME}/.data/share";
+#        }
+#    }
+#
+#    return @xdg_data_dirs;
+#}
 
 sub process_pattern_varargs {
     my ($stack, $op) = @_;
