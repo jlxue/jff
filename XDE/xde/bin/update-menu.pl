@@ -56,6 +56,7 @@ sub place_applications {
                 if ($menu->directory eq $Filename) {
                     print "  " x (@$dirs - 1), $menu->name, " ", $entry->{Fullpath}, "\n";
                     $menu->menu_dir($entry);
+                    keys %$entries;     # reset hash iterator
                     last;
                 }
             }
@@ -66,11 +67,11 @@ sub place_applications {
 
     if (defined $menu->matchsub) {
         for my $entries (@$apps) {
-            for my $entry (values %$entries) {
+            while (my ($Filename, $entry) = each %$entries) {
                 if ($menu->matchsub->($entry)) {
                     print "  " x @$apps, $menu->name, " ", $entry->{Fullpath}, "\n";
-                    delete $entries->{$entry->{Filename}};
-                    $menu->menu_items($entry->{Filename}, $entry);
+                    delete $entries->{$Filename};
+                    $menu->menu_items($Filename, $entry);
                 }
             }
         }
