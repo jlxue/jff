@@ -56,6 +56,8 @@ xdg-utils 的 xdg-desktop-menu
 x11-utils 的 xprop, xwininfo...
 gnome-main-menu, gnome-menus, lxmenu-data
 devscripts 的 desktop2menu + libfile-desktopentry-perl, libx11-freedesktop-desktopentry-perl
+libfile-basedir-perl
+libfile-mimeinfo-perl
 
 FD menu 的 .menu + .desktop + .directory 和 Debian /usr/lib/menu
 数据用于互补生成菜单:
@@ -74,6 +76,7 @@ FD menu 的 .menu + .desktop + .directory 和 Debian /usr/lib/menu
 /etc/xdg/autostart
 
 (4.3) 文件关联
+Debian mime-support
 
 (4.4) startup notification
 

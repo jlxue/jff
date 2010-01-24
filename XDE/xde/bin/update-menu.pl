@@ -9,7 +9,11 @@ BEGIN {
 }
 
 
-my $root_menu = MenuBuilder::build_from_uri($ARGV[0]);
+my $uri = $ARGV[0];
+if (!defined($uri) && exists $ENV{XDG_MENU_PREFIX}) {
+    $uri = "/etc/xdg/menus/" . $ENV{XDG_MENU_PREFIX} .  "applications.menu";
+}
+my $root_menu = MenuBuilder::build_from_uri($uri);
 
 
 exit 0;
