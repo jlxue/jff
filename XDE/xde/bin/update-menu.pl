@@ -67,8 +67,11 @@ sub generate_openbox_menu {
     @items = sort { $a->{Name} cmp $b->{Name} } @items;
 
     for my $item (@items) {
+        my $cmd = $item->{Exec};
+        $cmd =~ s/\s*%[fFuUdDnNickvm]\b//g;
+
         print $fd "$prefix  <item label='", xml_escape($item->{Name}), "'>\n";
-        print $fd "$prefix     <action name='Execute'><execute>", xml_escape($item->{Exec}), "</execute></action>\n";
+        print $fd "$prefix     <action name='Execute'><execute>", xml_escape($cmd), "</execute></action>\n";
         print $fd "$prefix  </item>\n";
     }
 
@@ -107,6 +110,8 @@ sub install_openbox_menu {
             my $prefix=$1;
             my @children = @{$menu->children};
             @children = sort {$a->menu_dir->{Name} cmp $b->menu_dir->{Name}} @children;
+
+            print $menu_fd "$prefix<!-- installed by $0  BEGIN -->\n";
             for my $child (@children) {
                 next if keys %{$child->menu_items} == 0 && @{$child->children} == 0;
                 my $id = $child->menu_dir->{Filename};
@@ -114,6 +119,8 @@ sub install_openbox_menu {
                 $id =~ s/\.directory$//g;
                 print $menu_fd "$prefix<menu id=\"freedesktop-", xml_escape($id), "\" />\n";
             }
+            print $menu_fd "$prefix<!-- installed by $0  END -->\n";
+
         } else {
             print $menu_fd $_;
         }
