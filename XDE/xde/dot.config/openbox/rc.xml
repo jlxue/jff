@@ -626,6 +626,7 @@
     <!-- system menu files on Debian systems -->
     <file>/var/lib/openbox/debian-menu.xml</file>
     <file>debian-menu.xml</file>
+    <file>fd-menu.xml</file>
     <file>menu.xml</file>
     <hideDelay>200</hideDelay>
     <!-- if a press-release lasts longer than this setting (in milliseconds), the

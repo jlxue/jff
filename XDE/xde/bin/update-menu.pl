@@ -2,7 +2,7 @@
 { # begin package
 use File::BaseDir qw/:lookup/;
 use Getopt::Long;
-#use Smart::Comments;
+use Smart::Comments;
 use strict;
 use warnings;
 
@@ -10,16 +10,118 @@ BEGIN {
     MenuBuilder->import();
 }
 
+my $fd_menu_filename = 'fd-menu.xml';
+my $ob_menu_filename = 'menu.xml';
+my $ob_menu_template = 'menu.xml.tmpl';
+
+GetOptions("template=s"     => \$ob_menu_template,
+           "menu=s"         => \$ob_menu_filename,
+           "output=s"       => \$fd_menu_filename);
+
 
 my $uri = $ARGV[0];
 if (!defined($uri) && exists $ENV{XDG_MENU_PREFIX}) {
     $uri = config_files('menus', $ENV{XDG_MENU_PREFIX} .  "applications.menu");
 }
-### $uri
+
 my $root_menu = MenuBuilder::build_from_uri($uri);
 
+open my $fd, '>', $fd_menu_filename or die "$!\n";
+print $fd <<END;
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Automatically generated file by $0. Do not edit! -->
+
+<openbox_menu xmlns="http://openbox.org/"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://openbox.org/
+                file:///usr/share/openbox/menu.xsd">
+
+END
+
+generate_openbox_menu(${$root_menu->children(0)}, {level => 0, fd => $fd});
+print $fd "\n</openbox_menu>\n";
+close $fd;
+
+install_openbox_menu(${$root_menu->children(0)}, $ob_menu_filename, $ob_menu_template);
 
 exit 0;
+
+
+#--------------------------------------------------------------
+sub generate_openbox_menu {
+    my ($menu, $info) = @_;
+
+    return if keys %{$menu->menu_items} == 0 && @{$menu->children} == 0;
+
+    my $id = $menu->menu_dir->{Filename};
+    my $label = $menu->menu_dir->{Name};
+    $id =~ s/[\\\/]/-/g;
+    $id =~ s/\.directory$//g;
+
+    my $prefix = "  " x $info->{level};
+    my $fd = $info->{fd};
+
+    print $fd "$prefix<menu id='freedesktop-", xml_escape($id), "' label='", xml_escape($label), "'>\n";
+    my @items = values %{$menu->menu_items};
+    @items = sort { $a->{Name} cmp $b->{Name} } @items;
+
+    for my $item (@items) {
+        print $fd "$prefix  <item label='", xml_escape($item->{Name}), "'>\n";
+        print $fd "$prefix     <action name='Execute'><execute>", xml_escape($item->{Exec}), "</execute></action>\n";
+        print $fd "$prefix  </item>\n";
+    }
+
+    my @children = @{$menu->children};
+    @children = sort {$a->menu_dir->{Name} cmp $b->menu_dir->{Name}} @children;
+
+    $info->{level}++;
+    for my $child (@children) {
+        generate_openbox_menu($child, $info);
+    }
+    $info->{level}--;
+
+    print $fd "$prefix</menu>\n";
+}
+
+sub xml_escape {
+    my $s = shift;
+
+    $s =~ s/&/&amp;/g;
+    $s =~ s/>/&gt;/g;
+    $s =~ s/</&lt;/g;
+    $s =~ s/'/&apos;/g;
+    $s =~ s/\\"/&quot;/g;
+
+    return $s;
+}
+
+sub install_openbox_menu {
+    my ($menu, $menu_file, $tmpl_file) = @_;
+
+    open my $tmpl_fd, $tmpl_file or die "$!\n";
+    open my $menu_fd, ">", $menu_file or die "$!\n";
+
+    while (<$tmpl_fd>) {
+        if (/^(\s*)\Q<!-- install menu here -->\E/) {
+            my $prefix=$1;
+            my @children = @{$menu->children};
+            @children = sort {$a->menu_dir->{Name} cmp $b->menu_dir->{Name}} @children;
+            for my $child (@children) {
+                next if keys %{$child->menu_items} == 0 && @{$child->children} == 0;
+                my $id = $child->menu_dir->{Filename};
+                $id =~ s/[\\\/]/-/g;
+                $id =~ s/\.directory$//g;
+                print $menu_fd "$prefix<menu id=\"freedesktop-", xml_escape($id), "\" />\n";
+            }
+        } else {
+            print $menu_fd $_;
+        }
+    }
+
+    close $tmpl_fd;
+    close $menu_fd;
+}
 
 } # end package
 
