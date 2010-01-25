@@ -59,6 +59,13 @@ devscripts 的 desktop2menu + libfile-desktopentry-perl, libx11-freedesktop-desk
 libfile-basedir-perl
 libfile-mimeinfo-perl
 
+http://wiki.archlinux.org/index.php/XdgMenu
+http://archlinux-stuff.googlecode.com/svn/trunk/xdg-menu
+Perl 编写，支持多个 wm
+
+http://cvs.fedoraproject.org/viewvc/devel/openbox/xdg-menu?view=log
+Python 编写，只支持 openbox
+
 FD menu 的 .menu + .desktop + .directory 和 Debian /usr/lib/menu
 数据用于互补生成菜单:
 * menu-xdg 由 /etc/menu-methods/menu-xdg 生成 .menu 文件，供符合 FD menu
