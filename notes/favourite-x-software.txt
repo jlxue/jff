@@ -65,6 +65,30 @@ emacs23-gtk
 # firefox chatzilla
 #rdesktop
 
+tint2
 conky
 dmenu
+dzen2
+
+===========================================
+wmii    (Mod: alt)
+    需要 9base 软件包才能使用 ~/.wmii-3.5/rc.wmii.local 配置，
+    没有安装则用 wmiirc 配置。而且 rc.wmii.local 中用 # Overrides
+    配置按键的做法是过时的，建议用 Action-overridekeys 函数定义。
+
+    按键绑定容易记忆，功能简洁实用，支持浮动窗口
+
+awesome     默认配置比较友好，自带 panel、tray，可定制性非常强
+ion3
+
+musca       类似 screen、emacs、vim 的窗口管理，支持浮动窗口
+===========================================
+xmonad      安装依赖 ghc(听说装完可以卸载 ghc），配置语言是 Haskell
+dwm         配置需要编译
+ratpoison   类似 GNU screen，不支持浮动窗口，难以使用 Gimp
+scrotwm     pcmanfm -d、tint2、lxpanel 都显示成单独窗口，lxpanel 显示混乱，
+            也许能通过 quirk 配置解决。快捷键功能稍嫌混乱。
+i3-wm       太简单，不支持左右布局，不支持窗口大小调整
+larswm      buggy, 按键被 urxvt 拦截，而不是 wm
+stumpwm     can't startup
 
