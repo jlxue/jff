@@ -130,4 +130,30 @@ policykit
 dzen2
 xli
 xloadimage
+=========================================
+safe_rm
+no-recommends-suggests
+apt-listbugs
+
+X 服务端  ： xserver-xorg
+登录管理器： slim
+窗口管理器： openbox
+面板      ： tint2
+状态检测  ： conky hddtemp
+系统菜单  ： # gnome-menu
+             libfile-basedir-perl
+文件管理器： rox-filer/pcmanfm/nautilus
+终端模拟器： rxvt-unicode-ml/mlterm
+Web 浏览器： iceweasel
+Java 支持 ： icedtea6-plugin
+Flash 支持： flashplugin-nonfree
+邮件客户端： icedove
+视频播放器： mplayer
+音乐播放器： mpd ario/gmpc
+办公软件  ： openoffice.org
+Windows 模拟： wine
+聊天工具：   emesene/pidgin
+密钥管理： keychain
+自动 mount：
+配置管理： cfgtool ....
 

@@ -30,6 +30,7 @@ IRC: xchat, iceweasel chatzilla, konversation
 流媒体: pplive?, ppstream?
 中文字体：ttf-arphic-uming ttf-arphic-ukai ttf-wqy-microhei
 抓图：scrot
+计算器：extcalc gcalctool galculator qalculator gnome-genius speedcrunch
 
 
 : gnome-core        (增加 eog, gedit, gnome-terminal 会多安装约 40 MB)
