@@ -1,0 +1,32 @@
+http://insanecoding.blogspot.com/2009/06/state-of-sound-in-linux-not-so-sorry.html
+http://insanecoding.blogspot.com/2009/05/perfect-sound-with-oss-version-4.html
+http://0pointer.de/blog/projects/guide-to-sound-apis.html
+
+http://www.opensound.com/wiki/index.php/Configuring_Applications_for_OSSv4
+http://wiki.archlinux.org/index.php/OSS
+ 
+oss (v3 and v4) oss4-* liboss-salsa-asound2 liboss-salsa2   (don't use liboss-salsa*, use libasound2-plugins)
+alsa            libasound2 libasound2-plugins  alsa-oss oss-compat (alsa-oss is better than oss-compat)
+esd             libesd0                 (obsolete)
+aRTs            arts libartsc0 libarts1c2a  (obsolete)
+pulse audio     libpulse0 libpulse-mainloop-glib0
+gstreamer
+phonon          libphonon4
+nas             libaudio2   audiooss    (obsolete)
+jack            libjack0
+port audio      libportaudio2
+openal          libopenal1 libalut0
+sdl             libsdl1.2debian libsdl1.2debian-alsa libsdl1.2debian-pulseaudio libsdl1.2debian-nas libsdl1.2debian-oss
+libao           libao2
+libcanberra     libcanberra0 libcanberra-gtk0 libcanberra-gtk-module
+ffmpeg
+libxine
+allegro
+=======================================
+libsamplerate0
+libnice0
+fmod
+ossplay and ossrecord in oss4-base package
+sox
+ecasound
+lame
