@@ -31,6 +31,8 @@
 #       2010-02-01
 #           * cleanup code, support desktop notification for Linux
 #             release 3.0
+#       2010-02-02
+#           * add some options, release 3.1
 #
 #  Dieken at newsmth.net
 #
@@ -54,8 +56,8 @@ use strict;
 use warnings;
 
 use Exporter 'import';
-our @EXPORT = qw(notify_start notify_alive notify_send notfy_stop);
-our @EXPORT_OK = qw(notify_start notify_alive notify_send notfy_stop);
+our @EXPORT = qw(notify_start notify_alive notify_send notify_stop);
+our @EXPORT_OK = qw(notify_start notify_alive notify_send notify_stop);
 
 my ($main, $q, $thread);
 
@@ -157,8 +159,8 @@ use strict;
 use warnings;
 
 use Exporter 'import';
-our @EXPORT = qw(notify_start notify_alive notify_send notfy_stop);
-our @EXPORT_OK = qw(notify_start notify_alive notify_send notfy_stop);
+our @EXPORT = qw(notify_start notify_alive notify_send notify_stop);
+our @EXPORT_OK = qw(notify_start notify_alive notify_send notify_stop);
 
 my ($notify, $notification);
 
@@ -180,7 +182,8 @@ sub notify_send {
 }
 
 sub notify_stop {
-    $notification->close();
+    $notification->close() if defined $notification;
+    undef $notification;
 }
 
 } # end package LinuxNotify
@@ -192,8 +195,8 @@ use strict;
 use warnings;
 
 use Exporter 'import';
-our @EXPORT = qw(notify_start notify_alive notify_send notfy_stop);
-our @EXPORT_OK = qw(notify_start notify_alive notify_send notfy_stop);
+our @EXPORT = qw(notify_start notify_alive notify_send notify_stop);
+our @EXPORT_OK = qw(notify_start notify_alive notify_send notify_stop);
 
 sub notify_start {
 }
@@ -212,20 +215,38 @@ sub notify_stop {
 
 #########################################################
 {   # begin package main
-use strict;
-use warnings;
 use Encode;
 use File::Slurp;
+use Getopt::Long;
 use LWP::Simple;
 use POSIX qw/setsid strftime/;
 #use Proc::Daemon;
+use strict;
+use warnings;
 
-if ($^O eq 'MSWin') {
+my $opt_use_gui = 1;
+my @opt_boards = ('Perl');
+my $opt_save = 1;
+my $opt_board_list = 'board.list';
+my $opt_help = 0;
+
+GetOptions(
+    "gui!"      => \$opt_use_gui,
+    "board=s"   => \@opt_boards,
+    "save!"     => \$opt_save,
+    "list=s"    => \$opt_board_list,
+    "help"      => \$opt_help,
+);
+@opt_boards = split(/[;:,\s]/,join(',',@opt_boards));
+
+if (! $opt_use_gui) {
+    DummyNotify->import();
+} elsif ($^O eq 'MSWin') {
     WindowsNotify->import();
 } elsif ($^O eq 'linux') {
     LinuxNotify->import();
 } else {
-    warn "use dummy notification implementation!\n";
+    warn "Use dummy notification implementation!\n";
     DummyNotify->import();
 }
 
@@ -245,6 +266,8 @@ if ($^O eq "MSWin32" ||
 
 my %lastPostIds;
 my $got_sig_hup = 0;
+
+usage() if $opt_help;
 
 load_board_list();
 
@@ -273,7 +296,10 @@ while (notify_alive()) {
 
         # At least in in LWP v5.827  get() returns decoded text, so $context is
         # encoded in Perl's internal encoding(UTF-8).   2010-02-10 lyb
-        my $content = get('http://www.newsmth.net/bbsdoc.php?board=' . $board);
+        my $content;
+        eval {
+            $content = get('http://www.newsmth.net/bbsdoc.php?board=' . $board);
+        };
         next unless defined $content;
 
         my @posts = parse_page($content);
@@ -303,6 +329,7 @@ while (notify_alive()) {
 
 
 END {
+    notify_stop();
     save_board_list();
 }
 
@@ -335,7 +362,9 @@ sub format_post {
                          $post->[5];    # title
 
     if ('GBK' eq $terminal_encoding) {
-        return Encode::encode("GBK", $result);
+        eval {
+            $result =  Encode::encode("GBK", $result);
+        };
     }
 
     return $result;
@@ -356,15 +385,21 @@ sub daemonize {
 
 
 sub load_board_list {
-    open (my $fh, 'board.list') || die "Can't read board list: $!\n";
-    while (<$fh>) {
-        chomp;
-        next if /^\s*#/;
-        s/^\s+//;
-        my ($board, $id) = split /\s+/;
-        $lastPostIds{$board} = ($id || 0) if defined $board;
+    if (-r $opt_board_list) {
+        open (my $fh, $opt_board_list) || die "Can't read $opt_board_list: $!\n";
+        while (<$fh>) {
+            chomp;
+            next if /^\s*#/;
+            s/^\s+//;
+            my ($board, $id) = split /\s+/;
+            $lastPostIds{$board} = ($id || 0) if defined $board;
+        }
+        close $fh;
     }
-    close $fh;
+
+    for my $board (@opt_boards) {
+        $lastPostIds{$board} = 0 if !exists $lastPostIds{$board};
+    }
 }
 
 
@@ -372,16 +407,32 @@ sub save_board_list {
     my $sig = shift;
     local $SIG{$sig} = 'IGNORE' if defined $sig;
 
-    exit 0 if keys %lastPostIds == 0;
+    exit 0 if ! $opt_save || keys %lastPostIds == 0;
 
     my @a;
     push @a, sprintf("%-32s        %s\n", "# board name", "last post id");
     while (my ($board, $id) = each %lastPostIds) {
         push @a, sprintf("%-32s        %d\n", $board, $id);
     }
-    write_file('board.list', {binmode => ':utf8', atomic => 1}, \@a);
+    write_file($opt_board_list, {binmode => ':utf8', atomic => 1}, \@a);
 
-    exit 0 if defined $sig;
+    if (defined $sig) {
+        notify_stop();
+        exit 0;
+    }
+}
+
+sub usage {
+    print <<END;
+NewSMTH-Notifier v3.1
+    --gui, --no-gui     whether to use notification. (default yes)
+    --board "XXX,YYY"   specify board list in addition to a list file
+    --save, --no-save   whether to save notifier state to board list
+                        file (default yes)
+    --list FILE         specify a board list file (default board.list)
+    --help              show this help and quit
+END
+    exit 0;
 }
 
 } # end package main
