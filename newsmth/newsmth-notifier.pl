@@ -407,14 +407,14 @@ sub save_board_list {
     my $sig = shift;
     local $SIG{$sig} = 'IGNORE' if defined $sig;
 
-    exit 0 if ! $opt_save || keys %lastPostIds == 0;
-
-    my @a;
-    push @a, sprintf("%-32s        %s\n", "# board name", "last post id");
-    while (my ($board, $id) = each %lastPostIds) {
-        push @a, sprintf("%-32s        %d\n", $board, $id);
+    if (keys %lastPostIds > 0 && $opt_save) {
+        my @a;
+        push @a, sprintf("%-32s        %s\n", "# board name", "last post id");
+        while (my ($board, $id) = each %lastPostIds) {
+            push @a, sprintf("%-32s        %d\n", $board, $id);
+        }
+        write_file($opt_board_list, {binmode => ':utf8', atomic => 1}, \@a);
     }
-    write_file($opt_board_list, {binmode => ':utf8', atomic => 1}, \@a);
 
     if (defined $sig) {
         notify_stop();
