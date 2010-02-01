@@ -44,7 +44,7 @@
 #########################################################
 ## system tray notification
 
-{ # begin package WindowsNotify
+{ # begin package WindowsNotify ------------------------
 package WindowsNotify;
 
 use threads;
@@ -148,10 +148,10 @@ sub notify_new_articles {
 
     return 1;
 }
-} # end package WindowsNotify
+} # end package WindowsNotify ------------------------------------------
 
 
-{ # begin package LinuxNotify
+{ # begin package LinuxNotify ------------------------------------------
 package LinuxNotify;
 
 use if $^O ne 'MSWin32', "Desktop::Notify";        # require to install notification-daemon
@@ -186,9 +186,9 @@ sub notify_stop {
     undef $notification;
 }
 
-} # end package LinuxNotify
+} # end package LinuxNotify -------------------------------------------
 
-{ # begin package DummyNotify
+{ # begin package DummyNotify -----------------------------------------
 package DummyNotify;
 
 use strict;
@@ -211,10 +211,21 @@ sub notify_send {
 sub notify_stop {
 }
 
-} # end package DummyNotify
+} # end package DummyNotify -------------------------------------------
 
-#########################################################
+#######################################################################
 {   # begin package main
+use Class::Struct Post => [
+                          boardId   => '$',
+                          id        => '$',
+                          topicId   => '$',
+                          author    => '$',
+                          flags     => '$',
+                          time      => '$',
+                          title     => '$',
+                          bytes     => '$',
+                          n         => '$',
+                         ];
 use Encode;
 use File::Slurp;
 use Getopt::Long;
@@ -225,127 +236,76 @@ use strict;
 use warnings;
 
 my $opt_use_gui = 1;
+my $opt_show_link = 0;
+my $opt_use_notify = 1;
 my @opt_boards = ('Perl');
 my $opt_save = 1;
 my $opt_board_list = 'board.list';
 my $opt_help = 0;
 
-GetOptions(
-    "gui!"      => \$opt_use_gui,
-    "board=s"   => \@opt_boards,
-    "save!"     => \$opt_save,
-    "list=s"    => \$opt_board_list,
-    "help"      => \$opt_help,
-);
-@opt_boards = split(/[;:,\s]/,join(',',@opt_boards));
-
-if (! $opt_use_gui) {
-    DummyNotify->import();
-} elsif ($^O eq 'MSWin') {
-    WindowsNotify->import();
-} elsif ($^O eq 'linux') {
-    LinuxNotify->import();
-} else {
-    warn "Use dummy notification implementation!\n";
-    DummyNotify->import();
-}
-
-
-$| = 1;
 my $terminal_encoding;
-if ($^O eq "MSWin32" ||
-        (exists($ENV{'LC_MESSAGES'}) && $ENV{'LC_MESSAGES'} =~ /\.GB(?:2312|K|18030)/i) ||
-        (exists($ENV{'LANG'})        && $ENV{'LANG'}        =~ /\.GB(?:2312|K|18030)/i) ||
-        (exists($ENV{'LC_CTYPE'})    && $ENV{'LC_CTYPE'}    =~ /\.GB(?:2312|K|18030)/i)) {
-    $terminal_encoding = 'GBK';
-} else {
-    $terminal_encoding = 'UTF-8';
-    binmode STDOUT, ":utf8";
-    binmode STDERR, ":utf8";
-}
-
 my %lastPostIds;
 my $got_sig_hup = 0;
 
-usage() if $opt_help;
+GetOptions(
+    "board=s"   => \@opt_boards,
+    "gui!"      => \$opt_use_gui,
+    "help"      => \$opt_help,
+    "link!"     => \$opt_show_link,
+    "list=s"    => \$opt_board_list,
+    "notify!"      => \$opt_use_notify,
+    "save!"     => \$opt_save,
+);
+usage() if $opt_help;   # must be after select_notify_mechanism() as END {} use notify_stop()
+
+@opt_boards = split(/[;:,\s]/,join(',',@opt_boards));
+
+select_notify_mechanism();
+
+initialize_terminal();
 
 load_board_list();
 
-$SIG{HUP}  = sub { ++$got_sig_hup; };
+setup_signal_handlers();
 
 # daemonize();
 
-
-$SIG{INT}  = \&save_board_list;
-$SIG{KILL} = \&save_board_list;
-$SIG{QUIT} = \&save_board_list;
-
 notify_start();
 
-while (notify_alive()) {
-    if ($got_sig_hup > 0) {
-        load_board_list();
-        --$got_sig_hup;
-    }
+poll_newsmth_loop();
 
-    print "# checking...........................\n";
-    my $message = "";
-
-    for my $board (sort(keys %lastPostIds)) {
-        my $count = 0;
-
-        # At least in in LWP v5.827  get() returns decoded text, so $context is
-        # encoded in Perl's internal encoding(UTF-8).   2010-02-10 lyb
-        my $content;
-        eval {
-            $content = get('http://www.newsmth.net/bbsdoc.php?board=' . $board);
-        };
-        next unless defined $content;
-
-        my @posts = parse_page($content);
-
-        for my $post (@posts) {
-            if (exists $lastPostIds{$board}) {
-                if ($lastPostIds{$board} < $post->[0]) {
-                    $lastPostIds{$board} = $post->[0];
-                    print $board, ': ', format_post($post), "\n";
-                    ++$count;
-                }
-            } else {
-                $lastPostIds{$board} = $post->[0];
-            }
-        }
-
-        $message .= sprintf("%16s %d\n", $board, $count) if $count > 0;
-
-        sleep rand 5;
-    }
-
-    notify_send($message);
-
-    save_board_list();
-    sleep 60 if notify_alive();
-}
-
-
-END {
-    notify_stop();
-    save_board_list();
-}
+notify_stop();
+save_board_list();
 
 ############################################################
 #
 sub parse_page {
     my $content = shift;
-    #my ($postId, $topicId, $author, $flags, $time, $title, $bytes, $n);
+    # @a: ($postId, $topicId, $author, $flags, $time, $title, $bytes, $n)
     my (@a, @result);
     my ($begin, $end) = (0, 0);
+
+    $begin = index($content, 'docWriter(');
+    my ($board_id) = substr($content, $begin) =~ /(\d+)/;
+
     while (($begin = index($content, 'c.o(', $begin)) >= 0) {
         $end = index($content, ");\n", $begin);
         last if $end <= $begin;
         @a = substr($content, $begin + 4, $end - $begin) =~
                 /(\d+),(\d+),'(.*)','(.*)',(\d+),'(.*)',(\d+),(\d+)/;
-        push @result, [@a];
+
+        my $post = new Post(boardId => $board_id,
+                           id      => $a[0],
+                           topicId => $a[1],
+                           author  => $a[2],
+                           flags   => $a[3],
+                           time    => $a[4],
+                           title   => $a[5],
+                           bytes   => $a[6],
+                           n       => $a[7],
+                           );
+
+        push @result, $post;
         $begin = $end;
     }
 
@@ -356,10 +316,10 @@ sub parse_page {
 sub format_post {
     my $post = shift;
     my $result = sprintf "[%10s] %6d (%-12s) | %s",
-                         strftime("%m-%d %H:%M", localtime($post->[4])), # time
-                         $post->[0],    # postId
-                         $post->[2],    # author
-                         $post->[5];    # title
+                         strftime("%m-%d %H:%M", localtime($post->time)),   # time
+                         $post->id,         # postId
+                         $post->author,     # author
+                         $post->title;      # title
 
     if ('GBK' eq $terminal_encoding) {
         eval {
@@ -407,11 +367,15 @@ sub save_board_list {
     my $sig = shift;
     local $SIG{$sig} = 'IGNORE' if defined $sig;
 
+    print STDERR "Got signal $sig\n" if defined $sig;
+
     if (keys %lastPostIds > 0 && $opt_save) {
         my @a;
         push @a, sprintf("%-32s        %s\n", "# board name", "last post id");
-        while (my ($board, $id) = each %lastPostIds) {
-            push @a, sprintf("%-32s        %d\n", $board, $id);
+
+        my @boards = sort keys %lastPostIds;
+        for my $board (@boards) {
+            push @a, sprintf("%-32s        %d\n", $board, $lastPostIds{$board});
         }
         write_file($opt_board_list, {binmode => ':utf8', atomic => 1}, \@a);
     }
@@ -425,14 +389,108 @@ sub save_board_list {
 sub usage {
     print <<END;
 NewSMTH-Notifier v3.1
-    --gui, --no-gui     whether to use notification. (default yes)
-    --board "XXX,YYY"   specify board list in addition to a list file
-    --save, --no-save   whether to save notifier state to board list
-                        file (default yes)
-    --list FILE         specify a board list file (default board.list)
-    --help              show this help and quit
+    --board "XXX,YYY"       specify board list in addition to a list file
+    --gui, --no-gui         whether to use GUI. (default yes)
+    --help                  show this help and quit
+    --link, --no-link       whether to show links on console (default yes)
+    --list FILE             specify a board list file (default board.list)
+    --notify, --no-notify   whether to use notification. (default yes)
+    --save, --no-save       whether to save notifier state to board list
+                            file (default yes)
 END
     exit 0;
+}
+
+sub select_notify_mechanism {
+    if (! $opt_use_notify) {
+        DummyNotify->import();
+    } elsif ($^O eq 'MSWin') {
+        WindowsNotify->import();
+    } elsif ($^O eq 'linux') {
+        LinuxNotify->import();
+    } else {
+        warn "Use dummy notification implementation!\n";
+        DummyNotify->import();
+    }
+}
+
+sub initialize_terminal {
+    $| = 1;
+    if ($^O eq "MSWin32" ||
+            (exists($ENV{'LC_MESSAGES'}) && $ENV{'LC_MESSAGES'} =~ /\.GB(?:2312|K|18030)/i) ||
+            (exists($ENV{'LANG'})        && $ENV{'LANG'}        =~ /\.GB(?:2312|K|18030)/i) ||
+            (exists($ENV{'LC_CTYPE'})    && $ENV{'LC_CTYPE'}    =~ /\.GB(?:2312|K|18030)/i)) {
+        $terminal_encoding = 'GBK';
+    } else {
+        $terminal_encoding = 'UTF-8';
+        binmode STDOUT, ":utf8";
+        binmode STDERR, ":utf8";
+    }
+}
+
+sub setup_signal_handlers {
+    $SIG{HUP}  = sub { ++$got_sig_hup; };
+    $SIG{INT}  = \&save_board_list;
+    $SIG{KILL} = \&save_board_list;
+    $SIG{QUIT} = \&save_board_list;
+}
+
+sub poll_newsmth_loop {
+    while (notify_alive()) {
+        if ($got_sig_hup > 0) {
+            load_board_list();
+            --$got_sig_hup;
+        }
+
+        print "# checking...........................\n";
+        my $message = "";
+
+        my @boards = sort keys %lastPostIds;
+        for my $board (@boards) {
+            my $count = 0;
+
+            # At least in in LWP v5.827  get() returns decoded text, so $context is
+            # encoded in Perl's internal encoding(UTF-8).   2010-02-10 lyb
+            my $content;
+            eval {
+                $content = get('http://www.newsmth.net/bbsdoc.php?board=' . $board);
+            };
+            next unless defined $content;
+
+            my @posts = parse_page($content);
+
+            for my $post (@posts) {
+                if (exists $lastPostIds{$board}) {
+                    if ($lastPostIds{$board} < $post->id) {
+                        $lastPostIds{$board} = $post->id;
+                        if ($opt_show_link) {
+                            printf "%-90s%s\n",  $board . ': ' . format_post($post),
+                                                  get_post_link($post);
+                        } else {
+                            print $board, ': ', format_post($post), "\n";
+                        }
+                        ++$count;
+                    }
+                } else {
+                    $lastPostIds{$board} = $post->id;
+                }
+            }
+
+            $message .= sprintf("%16s %d\n", $board, $count) if $count > 0;
+
+            sleep rand 5;
+        }
+
+        notify_send($message) if length($message) > 0;
+
+        save_board_list();
+        sleep 60 if notify_alive();
+    }
+}
+
+sub get_post_link {
+    my $post = shift;
+    return  "http://www.newsmth.net/bbscon.php?bid=" . $post->boardId . "&id=" . $post->id;
 }
 
 } # end package main
