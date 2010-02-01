@@ -223,7 +223,7 @@ use Class::Struct Post => [
                           flags     => '$',
                           time      => '$',
                           title     => '$',
-                          bytes     => '$',
+                          length    => '$',
                           n         => '$',
                          ];
 use Encode;
@@ -232,6 +232,8 @@ use Getopt::Long;
 use LWP::Simple;
 use POSIX qw/setsid strftime/;
 #use Proc::Daemon;
+use threads;
+use Thread::Queue;
 use strict;
 use warnings;
 
@@ -246,6 +248,9 @@ my $opt_help = 0;
 my $terminal_encoding;
 my %lastPostIds;
 my $got_sig_hup = 0;
+my $tk_thread;
+my $g_queue;
+my $g_tkappname;
 
 GetOptions(
     "board=s"   => \@opt_boards,
@@ -256,7 +261,7 @@ GetOptions(
     "notify!"      => \$opt_use_notify,
     "save!"     => \$opt_save,
 );
-usage() if $opt_help;   # must be after select_notify_mechanism() as END {} use notify_stop()
+usage() if $opt_help;
 
 @opt_boards = split(/[;:,\s]/,join(',',@opt_boards));
 
@@ -271,6 +276,16 @@ setup_signal_handlers();
 # daemonize();
 
 notify_start();
+
+if ($opt_use_gui) {
+    $g_queue = new Thread::Queue;
+    $tk_thread = start_tk_thread($g_queue);
+    $tk_thread->detach;
+
+    die "Bad greeting from Tk thread!\n" if "ready" ne $g_queue->dequeue;
+    $g_tkappname = $g_queue->dequeue;
+    print "Tk thread's appname: $g_tkappname\n";
+}
 
 poll_newsmth_loop();
 
@@ -301,7 +316,7 @@ sub parse_page {
                            flags   => $a[3],
                            time    => $a[4],
                            title   => $a[5],
-                           bytes   => $a[6],
+                           length  => $a[6],
                            n       => $a[7],
                            );
 
@@ -436,7 +451,7 @@ sub setup_signal_handlers {
 }
 
 sub poll_newsmth_loop {
-    while (notify_alive()) {
+    while (notify_alive() && tk_thread_alive()) {
         if ($got_sig_hup > 0) {
             load_board_list();
             --$got_sig_hup;
@@ -444,11 +459,10 @@ sub poll_newsmth_loop {
 
         print "# checking...........................\n";
         my $message = "";
+        my $should_hurry = 0;
 
         my @boards = sort keys %lastPostIds;
         for my $board (@boards) {
-            my $count = 0;
-
             # At least in in LWP v5.827  get() returns decoded text, so $context is
             # encoded in Perl's internal encoding(UTF-8).   2010-02-10 lyb
             my $content;
@@ -459,38 +473,123 @@ sub poll_newsmth_loop {
 
             my @posts = parse_page($content);
 
+            # Have we missed something?
+            my $missed = 0;
+            if (@posts > 0 && exists $lastPostIds{$board} && $lastPostIds{$board} > 0 &&
+                    $posts[0]->id > $lastPostIds{$board}) {
+                $missed = $posts[0]->id - $lastPostIds{$board};
+                print "** WARN **: missed $missed posts at $board\n";
+                $should_hurry = 1;
+            }
+
+            # Have we gotten something new?
+            my @new = ();
             for my $post (@posts) {
                 if (exists $lastPostIds{$board}) {
                     if ($lastPostIds{$board} < $post->id) {
                         $lastPostIds{$board} = $post->id;
+                        push @new, $post;
                         if ($opt_show_link) {
                             printf "%-90s%s\n",  $board . ': ' . format_post($post),
                                                   get_post_link($post);
                         } else {
                             print $board, ': ', format_post($post), "\n";
                         }
-                        ++$count;
                     }
                 } else {
                     $lastPostIds{$board} = $post->id;
                 }
             }
 
-            $message .= sprintf("%16s %d\n", $board, $count) if $count > 0;
+            if (@new > 0) {
+                $message .= sprintf("%16s %d", $board, scalar(@new));
+                if ($missed > 0) {
+                    $message .= " ($missed missed)\n";
+                } else {
+                    $message .= "\n";
+                }
+
+                $g_queue->enqueue($board, $missed, \@new) if $opt_use_gui;
+            }
 
             sleep rand 5;
         }
 
         notify_send($message) if length($message) > 0;
 
-        save_board_list();
-        sleep 60 if notify_alive();
+        # don't save, to avoid race condition with user edition on board list file.
+        #save_board_list();
+        sleep 60 if ! $should_hurry && notify_alive() && tk_thread_alive();
     }
 }
 
 sub get_post_link {
     my $post = shift;
     return  "http://www.newsmth.net/bbscon.php?bid=" . $post->boardId . "&id=" . $post->id;
+}
+
+sub start_tk_thread {
+    my $thread = threads->create(\&tk_thread_entry, $_[0]);
+    return $thread;
+}
+
+sub tk_thread_entry {
+    my $queue = shift;
+
+    require Tk;
+    Tk->import();
+
+    my $mw = new MainWindow();
+    my $hlist = $mw->Scrolled( qw/
+        HList
+        -header 1
+        -columns    8
+        -width      100
+        -height     30
+        -scrollbars ose
+    /)->pack(qw/-expand 1 -fill both/);
+
+    my $i = 0;
+    for my $header (qw/Board Time PostId TopicId Author Flags Title Length/) {
+        $hlist->header('create', $i++, -text => $header);
+    }
+
+    # stupid and inefficient way...
+    $hlist->repeat(5000, sub {
+            while ($queue->pending() >= 3) {
+                my ($board, $missed, $posts) = $queue->dequeue(3);
+                for my $post (@$posts) {
+                    tk_thread_addPost($hlist, $board, $post);
+                }
+            }
+        });
+
+    #$hlist->bind(<<newposts>>, sub {...});
+
+    $queue->enqueue("ready");
+    $queue->enqueue($mw->appname);
+    MainLoop();
+}
+
+
+sub tk_thread_addPost {
+    my ($hlist, $board, $post) = @_;
+
+    my $child = $hlist->addchild('');
+    my @values = ($board, strftime("%m-%d %H:%M", localtime($post->time)),
+                  $post->id, $post->topicId,
+                  $post->author, $post->flags, $post->title, $post->length);
+    for (my $i = 0; $i < @values; ++$i) {
+        $hlist->itemCreate($child, $i, -text => $values[$i]);
+    }
+}
+
+sub tk_thread_alive {
+    if (defined $tk_thread) {
+        return $tk_thread->is_running;
+    } else {
+        return 1;
+    }
 }
 
 } # end package main
