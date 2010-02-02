@@ -559,6 +559,26 @@ sub tk_thread_entry {
         -scrollbars ose
     /)->pack(qw/-expand 1 -fill both/);
 
+    $hlist->configure(
+        -command    => sub {
+            my $url = $hlist->info('data', $_[0]);
+            if (defined $url && length($url) > 0) {
+                my $pid = fork();
+                if (defined $pid && $pid == 0) {
+                    # child process
+                    if ($^O eq 'MSWin32') {
+                        exec qw(cmd /k), "\"start $url\"" or 1;
+                        exec "C:\\Windows\\explorer.exe", $url or 1;
+                    }
+                    exec "x-www-browser", $url or 1;
+                    exec "firefox", $url or 1;
+
+                    exit(0);
+                }
+            }
+        }
+    );
+
     my $button = $mw->Button(
         -text       => "Clear",
         -command    => sub {
@@ -596,10 +616,14 @@ sub tk_thread_entry {
 sub tk_thread_addPost {
     my ($hlist, $board, $post) = @_;
 
-    my $child = $hlist->addchild('');
+    my $child = $hlist->addchild('',
+        -data   => get_post_link($post),
+    );
+
     my @values = ($board, strftime("%m-%d %H:%M", localtime($post->time)),
                   $post->id, $post->topicId,
                   $post->author, $post->flags, $post->title, $post->length);
+
     for (my $i = 0; $i < @values; ++$i) {
         $hlist->itemCreate($child, $i, -text => $values[$i]);
     }
