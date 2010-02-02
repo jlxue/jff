@@ -147,6 +147,12 @@ The AXIOM family:
   FriCAS:    http://fricas.sourceforge.net/
              http://axiom-wiki.newsynthesis.org/FriCASBinaries
 
+http://plplot.sourceforge.net/
+http://www.mps.mpg.de/dislin/
+http://www.astro.caltech.edu/~tjp/pgplot/
+http://labplot.sourceforge.net/
+http://plasma-gate.weizmann.ac.il/Grace/
+
 Hoekey, AutoHotKey, Type and Run
 
 Gimp, Blender, Inkscape, Scribus, Dia, XFig
