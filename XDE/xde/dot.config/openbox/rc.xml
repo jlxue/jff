@@ -723,21 +723,21 @@
 -->
 
     <!-- poor man's startup notification -->
-    <application class="Firefox-bin">
+    <application class="Firefox-bin" name="firefox-bin" role="browser" type="normal">
       <focus>no</focus>
       <maximized>true</maximized>
       <iconic>yes</iconic>
     </application>
 
     <!-- poor man's startup notification -->
-    <application class="Icedove-bin">
+    <application class="Icedove-bin" name="icedove-bin" role="" type="normal">
       <focus>no</focus>
       <maximized>true</maximized>
       <iconic>yes</iconic>
     </application>
 
     <!-- poor man's startup notification -->
-    <application class="Pidgin">
+    <application class="Pidgin" name="Pidgin" role="buddy_list" type="normal">
       <focus>no</focus>
       <iconic>yes</iconic>
     </application>
