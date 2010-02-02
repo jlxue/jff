@@ -11,10 +11,11 @@
 #    run the command below to start the poll:
 #       perl newsmth-notifier.pl
 #
-#   Note: this script must be in GBK encoding if you add Chinese
-#   characters in it, for example use Chinese characters directly
-#   in regular expressions.
-#         (这个脚本必须是 GBK 编码)
+# Author:
+#   Dieken at newsmth.net (Liu Yubao <yubao.liu@gmail.com>)
+#
+# License:
+#   GPL v3
 #
 #  ChangeLog:
 #       2007-10-03
@@ -35,12 +36,10 @@
 #           * add some options, release 3.1
 #       2010-02-02
 #           * support Tk preview window, release 4.0
-#
-#  Dieken at newsmth.net
-#
-#  This script is released under GNU GPL v3.
-#
-#  TODO: cleanup code, port to Linux
+#       2010-02-02
+#           * avoid deleting unread posts
+#           * delete old posts automatically to spare memory
+#           * release 4.1
 #
 
 #########################################################
@@ -239,6 +238,12 @@ use Thread::Queue;
 use strict;
 use warnings;
 
+use constant {
+    GUI_POLL_INTERVAL       =>  5000,       # 5s
+    GUI_MAX_POSTS           =>  2000,
+    GUI_CLEAR_AVOID_TIME    =>  5,          # 5s
+};
+
 my $opt_use_gui = 1;
 my $opt_show_link = 0;
 my $opt_use_notify = 1;
@@ -405,11 +410,11 @@ sub save_board_list {
 
 sub usage {
     print <<END;
-NewSMTH-Notifier v4.0
+NewSMTH-Notifier v4.1
     --board "XXX,YYY"       specify board list in addition to a list file
     --gui, --no-gui         whether to use GUI. (default yes)
     --help                  show this help and quit
-    --link, --no-link       whether to show links on console (default yes)
+    --link, --no-link       whether to show links on console (default no)
     --list FILE             specify a board list file (default board.list)
     --notify, --no-notify   whether to use notification. (default yes)
     --save, --no-save       whether to save notifier state to board list
@@ -542,13 +547,14 @@ sub tk_thread_entry {
     Tk->import();
 
     my $flag_autoscroll = 1;
+    my $last_update_time = 0;
 
     my $mw = new MainWindow();
+    my $toolbar = $mw->Frame()->pack(-expand => 1, -fill => "x");
 
-    my $checkbtn = $mw->Checkbutton(
-        -text       => "Auto scroll?",
-        -variable   => \$flag_autoscroll,
-    )->pack();
+    my $label_update_time = $toolbar->Label(
+            -text => strftime("Last updated: %Y-%m-%d %H:%M:%S", localtime()),
+        )->pack(-side => "left", -anchor => "e");
 
     my $hlist = $mw->Scrolled(qw/
         HList
@@ -579,12 +585,31 @@ sub tk_thread_entry {
         }
     );
 
-    my $button = $mw->Button(
+    my $button = $toolbar->Button(
         -text       => "Clear",
         -command    => sub {
-            $hlist->delete("all");
+            # avoid deleting unread posts
+            if (time() - $last_update_time > GUI_CLEAR_AVOID_TIME) {
+                $hlist->delete("all");
+            } else {
+                my $oldtime = strftime("%H:%M:%S", localtime($last_update_time));
+                $last_update_time = 0;
+                $mw->messageBox(
+                    -icon   => "warning",
+                    -title  => "Avoid clearing unread posts!",
+                    -type   => "Ok",
+                    -message => "New posts have come since $oldtime that's in less than 5 seconds." .
+                                "You can click \"Clear\" button immediately again to clear all posts " .
+                                "if no *newer* post has come.",
+                );
+            }
         },
-    )->pack();
+    )->pack(-side => "left", -anchor => "center", -expand => 1, -fill => "x");
+
+    my $checkbtn = $toolbar->Checkbutton(
+        -text       => "Auto scroll?",
+        -variable   => \$flag_autoscroll,
+    )->pack(-side => "left", -anchor => 'w');
 
     my $i = 0;
     for my $header (qw/Board Time PostId TopicId Author Flags Title Length/) {
@@ -592,20 +617,33 @@ sub tk_thread_entry {
     }
 
     # stupid and inefficient way...
-    $hlist->repeat(5000, sub {
-            while ($queue->pending() >= 3) {
-                my ($board, $missed, $posts) = $queue->dequeue(3);
-                for my $post (@$posts) {
-                    if ($flag_autoscroll) {
-                        $hlist->see(tk_thread_addPost($hlist, $board, $post));
-                    } else {
-                        tk_thread_addPost($hlist, $board, $post);
+    $hlist->repeat(GUI_POLL_INTERVAL, sub {
+            if ($queue->pending() >= 3) {
+                $last_update_time = time();
+                $label_update_time->configure(-text =>
+                        strftime("Last updated: %Y-%m-%d %H:%M:%S", localtime($last_update_time)));
+
+                do {
+                    my ($board, $missed, $posts) = $queue->dequeue(3);
+                    for my $post (@$posts) {
+                        if ($flag_autoscroll) {
+                            $hlist->see(tk_thread_addPost($hlist, $board, $post));
+                        } else {
+                            tk_thread_addPost($hlist, $board, $post);
+                        }
+                    }
+                } while ($queue->pending() >= 3);
+
+                my @children = $hlist->info('children');
+                if (@children > GUI_MAX_POSTS) {
+                    for (my $i = 0; $i < @children - GUI_MAX_POSTS; ++$i) {
+                        $hlist->delete('entry', $children[$i]);
                     }
                 }
             }
+
         });
 
-    #$hlist->bind(<<newposts>>, sub {...});
 
     $queue->enqueue("ready");
     $queue->enqueue($mw->appname);
