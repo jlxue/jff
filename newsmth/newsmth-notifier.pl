@@ -40,6 +40,9 @@
 #           * avoid deleting unread posts
 #           * delete old posts automatically to spare memory
 #           * release 4.1
+#       2010-02-02
+#           * delete more posts when there are too many posts in GUI window
+#           * adjust GUI_MAX_POSTS to 1000
 #
 
 #########################################################
@@ -240,7 +243,7 @@ use warnings;
 
 use constant {
     GUI_POLL_INTERVAL       =>  5000,       # 5s
-    GUI_MAX_POSTS           =>  2000,
+    GUI_MAX_POSTS           =>  1000,
     GUI_CLEAR_AVOID_TIME    =>  5,          # 5s
 };
 
@@ -410,7 +413,7 @@ sub save_board_list {
 
 sub usage {
     print <<END;
-NewSMTH-Notifier v4.1
+NewSMTH-Notifier v4.2rc
     --board "XXX,YYY"       specify board list in addition to a list file
     --gui, --no-gui         whether to use GUI. (default yes)
     --help                  show this help and quit
@@ -497,10 +500,9 @@ sub poll_newsmth_loop {
                         $lastPostIds{$board} = $post->id;
                         push @new, $post;
                         if ($opt_show_link) {
-                            printf "%-90s%s\n",  $board . ': ' . format_post($post),
-                                                  get_post_link($post);
+                            printf "%-12s: %-80s%s\n", $board, format_post($post), get_post_link($post);
                         } else {
-                            print $board, ': ', format_post($post), "\n";
+                            printf "$-12s: %s\n", $board, format_post($post);
                         }
                     }
                 } else {
@@ -636,7 +638,10 @@ sub tk_thread_entry {
 
                 my @children = $hlist->info('children');
                 if (@children > GUI_MAX_POSTS) {
-                    for (my $i = 0; $i < @children - GUI_MAX_POSTS; ++$i) {
+                    my $todeleted = int(GUI_MAX_POSTS / 10);
+                    $todeleted = 1 if $todeleted == 0;
+
+                    for (my $i = 0; $i < $todeleted; ++$i) {
                         $hlist->delete('entry', $children[$i]);
                     }
                 }
