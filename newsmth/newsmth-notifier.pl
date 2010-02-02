@@ -31,8 +31,10 @@
 #       2010-02-01
 #           * cleanup code, support desktop notification for Linux
 #             release 3.0
-#       2010-02-02
+#       2010-02-01
 #           * add some options, release 3.1
+#       2010-02-02
+#           * support Tk preview window, release 4.0
 #
 #  Dieken at newsmth.net
 #
@@ -403,7 +405,7 @@ sub save_board_list {
 
 sub usage {
     print <<END;
-NewSMTH-Notifier v3.1
+NewSMTH-Notifier v4.0
     --board "XXX,YYY"       specify board list in addition to a list file
     --gui, --no-gui         whether to use GUI. (default yes)
     --help                  show this help and quit
@@ -539,15 +541,30 @@ sub tk_thread_entry {
     require Tk;
     Tk->import();
 
+    my $flag_autoscroll = 1;
+
     my $mw = new MainWindow();
-    my $hlist = $mw->Scrolled( qw/
+
+    my $checkbtn = $mw->Checkbutton(
+        -text       => "Auto scroll?",
+        -variable   => \$flag_autoscroll,
+    )->pack();
+
+    my $hlist = $mw->Scrolled(qw/
         HList
         -header 1
         -columns    8
-        -width      100
+        -width      120
         -height     30
         -scrollbars ose
     /)->pack(qw/-expand 1 -fill both/);
+
+    my $button = $mw->Button(
+        -text       => "Clear",
+        -command    => sub {
+            $hlist->delete("all");
+        },
+    )->pack();
 
     my $i = 0;
     for my $header (qw/Board Time PostId TopicId Author Flags Title Length/) {
@@ -559,7 +576,11 @@ sub tk_thread_entry {
             while ($queue->pending() >= 3) {
                 my ($board, $missed, $posts) = $queue->dequeue(3);
                 for my $post (@$posts) {
-                    tk_thread_addPost($hlist, $board, $post);
+                    if ($flag_autoscroll) {
+                        $hlist->see(tk_thread_addPost($hlist, $board, $post));
+                    } else {
+                        tk_thread_addPost($hlist, $board, $post);
+                    }
                 }
             }
         });
@@ -582,6 +603,8 @@ sub tk_thread_addPost {
     for (my $i = 0; $i < @values; ++$i) {
         $hlist->itemCreate($child, $i, -text => $values[$i]);
     }
+
+    return $child;
 }
 
 sub tk_thread_alive {
