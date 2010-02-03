@@ -1,13 +1,17 @@
 source $VIMRUNTIME/mswin.vim
 
 if has("gui_running")
-	colorscheme peachpuff
+    colorscheme peachpuff
     set cursorline
     hi CursorLine guibg=LightGreen
 else
-"	colorscheme murphy
-"	hi link String Comment
-	colorscheme darkblue
-	set cursorline
-	hi MatchParen ctermbg=Blue
+"   colorscheme murphy
+"   hi link String Comment
+    colorscheme darkblue
+    set cursorline
+    hi MatchParen ctermbg=Blue
 endif
+
+" no beep or flash
+set vb t_vb=
+

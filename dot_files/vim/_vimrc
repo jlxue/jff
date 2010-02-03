@@ -221,7 +221,7 @@ set nowrapscan
 set more
 
 " no beep or flash
-"set vb t_vb=
+set vb t_vb=
 
 set display=lastline
 
