@@ -520,9 +520,9 @@ sub poll_newsmth_loop {
                         }
 
                         if ($opt_show_link) {
-                            printf "%-12s: %-80s%s\n", $board, format_post($post), get_post_link($post);
+                            printf "%-12s %-70s%s\n", $board, format_post($post), get_post_link($post);
                         } else {
-                            printf "%-12s: %s\n", $board, format_post($post);
+                            printf "%-12s %s\n", $board, format_post($post);
                         }
                     }
                 } else {
