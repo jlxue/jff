@@ -4,7 +4,7 @@
 ##   266 m smdavidth    Mar 28. Re: 怎么把term的警告声变成null来着？(1k)
 set bell-style none
 
-## /etc/modprobe.d/pcspkr.blacklist
+## /etc/modprobe.d/pcspkr-blacklist.conf
 # blacklist pcspkr
 
 ## for console

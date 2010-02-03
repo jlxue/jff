@@ -43,6 +43,8 @@
 #       2010-02-02
 #           * delete more posts when there are too many posts in GUI window
 #           * adjust GUI_MAX_POSTS to 1000
+#       2010-02-03
+#           * add --filter-console and --title-filter options
 #
 
 #########################################################
@@ -254,6 +256,8 @@ my @opt_boards = ('Perl');
 my $opt_save = 1;
 my $opt_board_list = 'board.list';
 my $opt_help = 0;
+my $opt_title_filter;
+my $opt_filter_console = 0;
 
 my $terminal_encoding;
 my %lastPostIds;
@@ -268,8 +272,10 @@ GetOptions(
     "help"      => \$opt_help,
     "link!"     => \$opt_show_link,
     "list=s"    => \$opt_board_list,
-    "notify!"      => \$opt_use_notify,
+    "notify!"   => \$opt_use_notify,
     "save!"     => \$opt_save,
+    "filter-console!"   => \$opt_filter_console,
+    "title-filter=s"     => \$opt_title_filter,
 );
 usage() if $opt_help;
 
@@ -278,6 +284,8 @@ usage() if $opt_help;
 select_notify_mechanism();
 
 initialize_terminal();
+$opt_title_filter = Encode::decode($terminal_encoding, $opt_title_filter)
+        if defined $opt_title_filter;
 
 load_board_list();
 
@@ -422,6 +430,10 @@ NewSMTH-Notifier v4.2rc
     --notify, --no-notify   whether to use notification. (default yes)
     --save, --no-save       whether to save notifier state to board list
                             file (default yes)
+    --title-filter REGEX    set a regex to filter output by post's title
+    --filter-console, --no-filter-console
+                            whether apply title filter for console output
+                            (default no for convenience with GUI)
 END
     exit 0;
 }
@@ -498,11 +510,19 @@ sub poll_newsmth_loop {
                 if (exists $lastPostIds{$board}) {
                     if ($lastPostIds{$board} < $post->id) {
                         $lastPostIds{$board} = $post->id;
-                        push @new, $post;
+
+                        if (defined $opt_title_filter) {
+                            if ($post->title =~ /$opt_title_filter/io) {
+                                push @new, $post;
+                            } else {
+                                next if $opt_filter_console;
+                            }
+                        }
+
                         if ($opt_show_link) {
                             printf "%-12s: %-80s%s\n", $board, format_post($post), get_post_link($post);
                         } else {
-                            printf "$-12s: %s\n", $board, format_post($post);
+                            printf "%-12s: %s\n", $board, format_post($post);
                         }
                     }
                 } else {
