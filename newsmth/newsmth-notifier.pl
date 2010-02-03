@@ -53,11 +53,14 @@
 { # begin package WindowsNotify ------------------------
 package WindowsNotify;
 
+use File::Spec;
 use threads;
 use threads::shared;
 use Thread::Queue;
-use if $^O eq "MSWin32", Win32::GUI => ();
+use if $^O eq "MSWin32", Win32::GUI => qw(WM_CLOSE);
+use if $^O eq "MSWin32", "Win32::GUI::BitmapInline";
 use constant WM_NOTIFYICON => 40000;
+use constant WM_QUITSELF   => 40001;
 use strict;
 use warnings;
 
@@ -84,20 +87,29 @@ sub notify_send {
 }
 
 sub notify_stop {
+    my $win = Win32::GUI::FindWindow('', 'NewSMTH Notifier');
+    print "win=$win\n";
+    Win32::GUI::SendMessage($win, WM_QUITSELF, 0, 0);
+    #Win32::GUI::SendMessage($win, WM_CLOSE, 0, 0);
+    #Win32::GUI::PostQuitMessage($win);
+    #Win32::GUI::CloseWindow($win);
+    print "Quit it \n";
 }
 
 sub systray_thread {
 
     $main = Win32::GUI::Window->new(
-        -name => 'NewSMTH_Notifier',
+        -name => 'Main',
         -text => 'NewSMTH Notifier',
         -width => 200,
         -height => 200
     );
     $main->AddLabel(-text => "I'm NewSMTH Notifier");
     $main->Hook(WM_NOTIFYICON, \&notify_new_articles);
+    $main->Hook(WM_QUITSELF, \&quit_self);
 
     my $icon = new Win32::GUI::Icon('GUIPERL.ICO');
+    $icon = get_defaulticon() if ! defined $icon;
     my $ni = $main->AddNotifyIcon(
         -name => "NI",
         -icon => $icon,
@@ -113,14 +125,24 @@ sub systray_thread {
     $q->enqueue("ready");
 
     Win32::GUI::Dialog();
+
+    $main->Hide();
+    undef $main;
+    exit 0;
 }
 
-sub NewSMTH_Notifier_Terminate {
+sub quit_self {
+    Main_Terminate();
+    exit 0;
+}
+
+sub Main_Terminate {
+    print "Main_Terminate\n";
     $main->NI->Remove();
     return -1;
 }
 
-sub NewSMTH_Notifier_Minimize {
+sub Main_Minimize {
     $main->Disable();
     $main->Hide();
     return 1;
@@ -154,6 +176,67 @@ sub notify_new_articles {
 
     return 1;
 }
+
+# stolen from Win32::GUI demos NotifyIcon.pl
+sub get_defaulticon
+{
+    return newIcon Win32::GUI::BitmapInline( q(
+AAABAAIAICAQAAAAAADoAgAAJgAAACAgAAAAAAAAqAgAAA4DAAAoAAAAIAAAAEAAAAABAAQAAAAA
+AIACAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAgAAAgAAAAICAAIAAAACAAIAAgIAAAMDAwACAgIAA
+AAD/AAD/AAAA//8A/wAAAP8A/wD//wAA////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIgAd3AAiIAAAAAAAAAAAAgHgIcACAiAAAAAAAAAAAAI
+CIiAAAAIAAAAAAAAAAAAAAiIAAAAAAAAAAAAAAAAAIgHiAAAAAAAAAAAAAAAAACIB3cACAAAAAAA
+AAAAAAAACIB3gAAAAAgAAAAAAAAAAAAIgIiAAAAAAAAAAAAAAAAAAAAAiAiAgAAAAAAAAAAAAAAA
+AAeIiAAAAAAAAAAAAAAIgIAAiAiAAAAAAAAAAAAAAIdwAACAAAAAAAAAAAAAgAAABwAAAAAAAAAA
+AAAAAAAICHcAAAAAAAAAAAAAAAAACAB3cHAACIgAAAAAAAAIAAiId3gIAAgHAAAAAAAAAAiAB3d4
+AIAABwAAAAAAAId3d3eIiAAAAAgAAAAAh3eHd3dwAAiAAACAAAAACAh3d3d3AAAHeAAAAAAAAAAA
+iAh3dwCIAAgIeAAAAAAACIiHAHAAh3gAgHAAAAAAAAgACIAACAeIgICAAAAAAAAAAAAAAACIcAiA
+AAAAAAAAAAAAAAAAAAAIiAAAAAAAAAAAAAAAAIAACIAAAAAAAAAAAAAAAAAIgIAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////////////////wAAf/8AAH//AAB//wAAf/8A
+AH//AAB//wAAP/8AAD//AAA//4AAH/+AAB//wAAf/8AAH//gAB//4AAP/4AAD/gAAA/4AAAP8AAA
+H+AAAD/wAAA/+AAAP/iAAH//+AD///4A////Af///4f///////////8oAAAAIAAAAEAAAAABAAgA
+AAAAAIAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAgAAAAICAAIAAAACAAIAAgIAAAMDAwADA
+3MAA8MqmANTw/wCx4v8AjtT/AGvG/wBIuP8AJar/AACq/wAAktwAAHq5AABilgAASnMAADJQANTj
+/wCxx/8Ajqv/AGuP/wBIc/8AJVf/AABV/wAASdwAAD25AAAxlgAAJXMAABlQANTU/wCxsf8Ajo7/
+AGtr/wBISP8AJSX/AAAA/gAAANwAAAC5AAAAlgAAAHMAAABQAOPU/wDHsf8Aq47/AI9r/wBzSP8A
+VyX/AFUA/wBJANwAPQC5ADEAlgAlAHMAGQBQAPDU/wDisf8A1I7/AMZr/wC4SP8AqiX/AKoA/wCS
+ANwAegC5AGIAlgBKAHMAMgBQAP/U/wD/sf8A/47/AP9r/wD/SP8A/yX/AP4A/gDcANwAuQC5AJYA
+lgBzAHMAUABQAP/U8AD/seIA/47UAP9rxgD/SLgA/yWqAP8AqgDcAJIAuQB6AJYAYgBzAEoAUAAy
+AP/U4wD/sccA/46rAP9rjwD/SHMA/yVXAP8AVQDcAEkAuQA9AJYAMQBzACUAUAAZAP/U1AD/sbEA
+/46OAP9rawD/SEgA/yUlAP4AAADcAAAAuQAAAJYAAABzAAAAUAAAAP/j1AD/x7EA/6uOAP+PawD/
+c0gA/1clAP9VAADcSQAAuT0AAJYxAABzJQAAUBkAAP/w1AD/4rEA/9SOAP/GawD/uEgA/6olAP+q
+AADckgAAuXoAAJZiAABzSgAAUDIAAP//1AD//7EA//+OAP//awD//0gA//8lAP7+AADc3AAAubkA
+AJaWAABzcwAAUFAAAPD/1ADi/7EA1P+OAMb/awC4/0gAqv8lAKr/AACS3AAAerkAAGKWAABKcwAA
+MlAAAOP/1ADH/7EAq/+OAI//awBz/0gAV/8lAFX/AABJ3AAAPbkAADGWAAAlcwAAGVAAANT/1ACx
+/7EAjv+OAGv/awBI/0gAJf8lAAD+AAAA3AAAALkAAACWAAAAcwAAAFAAANT/4wCx/8cAjv+rAGv/
+jwBI/3MAJf9XAAD/VQAA3EkAALk9AACWMQAAcyUAAFAZANT/8ACx/+IAjv/UAGv/xgBI/7gAJf+q
+AAD/qgAA3JIAALl6AACWYgAAc0oAAFAyANT//wCx//8Ajv//AGv//wBI//8AJf//AAD+/gAA3NwA
+ALm5AACWlgAAc3MAAFBQAPLy8gDm5uYA2traAM7OzgDCwsIAtra2AKqqqgCenp4AkpKSAIaGhgB6
+enoAbm5uAGJiYgBWVlYASkpKAD4+PgAyMjIAJiYmABoaGgAODg4A8Pv/AKSgoACAgIAAAAD/AAD/
+AAAA//8A/wAAAP8A/wD//wAA////AOnp6enp6enp6enp6enp6enp6enp6enp6enp6enp6enr5+T/
+//////8AAAAA6+sAAAcHBwAAAOvr6///////5Ovn5P///////wAAAOsAB+sA6wcAAADrAOvr////
+///k6+fk////////AAAA6wDr6+vrAAAAAAAA6wD//////+Tr5+T///////8AAAAAAOvr6wAAAAAA
+AAAAAP//////5Ovn5P///////wAA6+sAB+vrAAAAAAAAAAAA///////k6+fk////////AADr6wAH
+BwcAAADrAAAAAAD//////+Tr5+T///////8AAADr6wAHB+sAAAAAAAAAAOv/////5Ovn5P//////
+/wAAAAAA6+sA6+vrAAAAAAAAAP/////k6+fk////////AAAAAAAAAAAAAOvrAOvrAOsA/////+Tr
+5+T/////////AAAAAAAAAAAAAAfr6+vrAAAA////5Ovn5P////////8AAAAA6+sA6wAAAOvrAOvr
+AAD////k6+fk//////////8AAAAA6wcHAAAAAADrAAAAAP///+Tr5+T//////////+sAAAAAAAAH
+AAAAAAAAAAAA////5Ovn5P///////////wAA6wDrBwcAAAAAAAAAAAD////k6+fk////////////
+AADrAAAHBwcABwAAAADr6+v//+Tr5+T/////////6wAAAOvr6wcHB+sA6wAAAOsAB///5Ovn5P//
+/wAAAAAAAOvrAAAHBwcH6wAA6wAAAAAH///k6+fk////AAAA6wcHBwcHBwfr6+vrAAAAAAAAAOv/
+/+Tr5+T//+sHBwfrBwcHBwcHAAAAAOvrAAAAAADr////5Ovn5P/rAOsHBwcHBwcHBwAAAAAABwfr
+AAAAAP/////k6+fk//8AAOvrAOsHBwcHAADr6wAAAOsA6wfr/////+Tr5+T////r6+vrBwAABwAA
+AOsHB+sAAOsABwD/////5Ovn5P///+sAAP/r6wAAAADrAAfr6+sA6wDr///////k6+fk////////
+//////8AAADr6wcAAOvrAP///////+Tr5+T/////////////////AAAAAAAA6+vr////////5Ovn
+5P//////////////////6wAAAADr6//////////k6+fn5+fn5+fn5+fn5+fn5+fn6+sA6+fn5+fn
+5+fn5wfr5wcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHB+vnZxFnZ2dnZ2dnZ2dnZ2dnZ2dn
+Z2dnZ2dn6+vr6+tn6+dnDmdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2cH6gfqB2fr5+vr6+vr6+vr6+vr
+6+vr6+vr6+vr6+vr6+vr6+vr6+sAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+) );
+}
+
 } # end package WindowsNotify ------------------------------------------
 
 
@@ -441,7 +524,7 @@ END
 sub select_notify_mechanism {
     if (! $opt_use_notify) {
         DummyNotify->import();
-    } elsif ($^O eq 'MSWin') {
+    } elsif ($^O eq 'MSWin32') {
         WindowsNotify->import();
     } elsif ($^O eq 'linux') {
         LinuxNotify->import();
@@ -517,6 +600,8 @@ sub poll_newsmth_loop {
                             } else {
                                 next if $opt_filter_console;
                             }
+                        } else {
+                            push @new, $post;
                         }
 
                         if ($opt_show_link) {
@@ -568,6 +653,9 @@ sub tk_thread_entry {
     require Tk;
     Tk->import();
 
+    use if $^O eq 'MSWin32', "Win32::Process";
+    use if $^O eq 'MSWin32', "Win32";
+
     my $flag_autoscroll = 1;
     my $last_update_time = 0;
 
@@ -590,14 +678,26 @@ sub tk_thread_entry {
     $hlist->configure(
         -command    => sub {
             my $url = $hlist->info('data', $_[0]);
-            if (defined $url && length($url) > 0) {
+            return if ! (defined $url && length($url) > 0);
+
+            if ($^O eq 'MSWin32') {
+                # XXX: fork + exec crashes under ActivePerl-5.10.1.1007-MSWin32-x86-291969
+
+                my $windir = $ENV{windir};
+                $windir = $ENV{SystemRoot} if ! defined $windir;
+                $windir = "C:\\Windows" if ! defined $windir;
+
+                my $child;
+                Win32::Process::Create($child,
+                    "$windir\\explorer.exe",
+                    "explorer \"$url\"",
+                    0,
+                    NORMAL_PRIORITY_CLASS | DETACHED_PROCESS,
+                    '.') || print STDERR Win32::FormatMessage(Win32::GetLastError());
+            } else {
                 my $pid = fork();
                 if (defined $pid && $pid == 0) {
                     # child process
-                    if ($^O eq 'MSWin32') {
-                        exec qw(cmd /k), "\"start $url\"" or 1;
-                        exec "C:\\Windows\\explorer.exe", $url or 1;
-                    }
                     exec "x-www-browser", $url or 1;
                     exec "firefox", $url or 1;
 
