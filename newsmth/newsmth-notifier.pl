@@ -45,7 +45,19 @@
 #           * adjust GUI_MAX_POSTS to 1000
 #       2010-02-03
 #           * add --filter-console and --title-filter options
+#       2010-02-04
+#           * inline missed GUIPerl.ICO
+#           * fix crash problem with fork + exec on ActiveState Perl
+#           * use correct notification implementation on Windows
+#           * fix long waiting in sleep(60) even interrupted on Windows
+#           * use sensible font for post list in GUI window
+#           * destroy tray icon on exit (XXX: not stable)
+#           * release 4.2
 #
+# TODO:
+#   * how to quit WindowsNotify's UI thread reliably and safely?
+#   * how to send message from main thread to Tk thread without polling
+#     with repeat()? Tk::send? Tk::event?
 
 #########################################################
 ## system tray notification
@@ -57,7 +69,7 @@ use File::Spec;
 use threads;
 use threads::shared;
 use Thread::Queue;
-use if $^O eq "MSWin32", Win32::GUI => qw(WM_CLOSE);
+use if $^O eq "MSWin32", Win32::GUI => qw(WM_CLOSE WM_DESTROY WM_QUIT);
 use if $^O eq "MSWin32", "Win32::GUI::BitmapInline";
 use constant WM_NOTIFYICON => 40000;
 use constant WM_QUITSELF   => 40001;
@@ -88,12 +100,11 @@ sub notify_send {
 
 sub notify_stop {
     my $win = Win32::GUI::FindWindow('', 'NewSMTH Notifier');
-    print "win=$win\n";
     Win32::GUI::SendMessage($win, WM_QUITSELF, 0, 0);
+    # All don't work....
     #Win32::GUI::SendMessage($win, WM_CLOSE, 0, 0);
     #Win32::GUI::PostQuitMessage($win);
     #Win32::GUI::CloseWindow($win);
-    print "Quit it \n";
 }
 
 sub systray_thread {
@@ -132,8 +143,26 @@ sub systray_thread {
 }
 
 sub quit_self {
-    Main_Terminate();
-    exit 0;
+    Win32::GUI::CloseWindow($main);
+    Win32::GUI::DestroyWindow($main);
+    Win32::GUI::PostQuitMessage($main);
+}
+
+sub Main_Close {
+    print "Main_Close\n";
+    #Win32::GUI::DestroyWindow($main);
+    return 1;
+}
+
+sub Main_Destroy {
+    print "Main_Destroy\n";
+    #Win32::GUI::PostQuitMessage($main);
+    return 1;
+}
+
+sub Main_Quit {
+    print "Main_Quit\n";
+    return 1;
 }
 
 sub Main_Terminate {
@@ -143,14 +172,14 @@ sub Main_Terminate {
 }
 
 sub Main_Minimize {
-    $main->Disable();
-    $main->Hide();
+    #$main->Disable();
+    #$main->Hide();
     return 1;
 }
 
 sub NI_Click {
-    $main->Enable();
-    $main->Show();
+    #$main->Enable();
+    #$main->Show();
     return 1;
 }
 
@@ -335,7 +364,7 @@ use constant {
 my $opt_use_gui = 1;
 my $opt_show_link = 0;
 my $opt_use_notify = 1;
-my @opt_boards = ('Perl');
+my @opt_boards = ();
 my $opt_save = 1;
 my $opt_board_list = 'board.list';
 my $opt_help = 0;
@@ -351,12 +380,12 @@ my $g_tkappname;
 
 GetOptions(
     "board=s"   => \@opt_boards,
-    "gui!"      => \$opt_use_gui,
-    "help"      => \$opt_help,
-    "link!"     => \$opt_show_link,
     "list=s"    => \$opt_board_list,
+    "gui!"      => \$opt_use_gui,
     "notify!"   => \$opt_use_notify,
+    "link!"     => \$opt_show_link,
     "save!"     => \$opt_save,
+    "help"      => \$opt_help,
     "filter-console!"   => \$opt_filter_console,
     "title-filter=s"     => \$opt_title_filter,
 );
@@ -371,6 +400,8 @@ $opt_title_filter = Encode::decode($terminal_encoding, $opt_title_filter)
         if defined $opt_title_filter;
 
 load_board_list();
+die "No board list specified, please specify it with --board or --list option.\n" .
+    "Run `perl $0 --help` for details.\n" if @opt_boards == 0 && keys %lastPostIds == 0;
 
 setup_signal_handlers();
 
@@ -504,19 +535,19 @@ sub save_board_list {
 
 sub usage {
     print <<END;
-NewSMTH-Notifier v4.2rc
+NewSMTH-Notifier v4.2
     --board "XXX,YYY"       specify board list in addition to a list file
-    --gui, --no-gui         whether to use GUI. (default yes)
-    --help                  show this help and quit
-    --link, --no-link       whether to show links on console (default no)
     --list FILE             specify a board list file (default board.list)
+    --gui, --no-gui         whether to use GUI. (default yes)
     --notify, --no-notify   whether to use notification. (default yes)
+    --link, --no-link       whether to show links on console (default no)
     --save, --no-save       whether to save notifier state to board list
                             file (default yes)
-    --title-filter REGEX    set a regex to filter output by post's title
+    --help                  show this help and quit
     --filter-console, --no-filter-console
                             whether apply title filter for console output
                             (default no for convenience with GUI)
+    --title-filter REGEX    set a regex to filter output by post's title
 END
     exit 0;
 }
@@ -626,14 +657,14 @@ sub poll_newsmth_loop {
                 $g_queue->enqueue($board, $missed, \@new) if $opt_use_gui;
             }
 
-            sleep rand 5;
+            interruptable_sleep(rand 5);
         }
 
         notify_send($message) if length($message) > 0;
 
         # don't save, to avoid race condition with user edition on board list file.
         #save_board_list();
-        sleep 60 if ! $should_hurry && notify_alive() && tk_thread_alive();
+        interruptable_sleep(60) if ! $should_hurry && notify_alive() && tk_thread_alive();
     }
 }
 
@@ -675,6 +706,8 @@ sub tk_thread_entry {
         -scrollbars ose
     /)->pack(qw/-expand 1 -fill both/);
 
+    $hlist->configure(-font => ["system", 9]) if $^O eq 'MSWin32';
+
     $hlist->configure(
         -command    => sub {
             my $url = $hlist->info('data', $_[0]);
@@ -682,6 +715,7 @@ sub tk_thread_entry {
 
             if ($^O eq 'MSWin32') {
                 # XXX: fork + exec crashes under ActivePerl-5.10.1.1007-MSWin32-x86-291969
+                no strict "subs";   # XXX: avoid warnings about NORMAL_PRIORITY_CLASS and DETACHED_PROCESS
 
                 my $windir = $ENV{windir};
                 $windir = $ENV{SystemRoot} if ! defined $windir;
@@ -799,6 +833,25 @@ sub tk_thread_alive {
         return $tk_thread->is_running;
     } else {
         return 1;
+    }
+}
+
+# avoid deferred signal delay on Windows
+sub interruptable_sleep {
+    if ($^O eq 'MSWin32') {
+        my $seconds = shift;
+        my $count = 2;
+
+        if ($seconds <= 2) {
+            sleep $seconds;
+        } else {
+            do {
+                sleep $count;
+                $seconds -= $count;
+            } while ($seconds > 0);
+        }
+    } else {
+        sleep $_[0];
     }
 }
 
