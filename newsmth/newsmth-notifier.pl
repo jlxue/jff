@@ -3,6 +3,8 @@
 #  newsmth-notifier.pl - poll newsmth.net for new messages
 #
 #  Usage:
+#    See `perl newsmth-notifier.pl --help`.
+#
 #    if run it for the first time, create a file named "board.list"
 #    with content like this(no leading '#' characters):
 #       Perl
@@ -10,6 +12,14 @@
 #
 #    run the command below to start the poll:
 #       perl newsmth-notifier.pl
+#
+# Requirement:
+#   Windows - install ActiveState Perl (tested with 5.10.0 and 5.10.1)
+#             run `ppm` in cmd, select View -> All packages,
+#             install Tk, Win32-GUI, File-Slurp
+#
+#   Debian/Ubuntu - aptitude install perl-tk libdesktop-notify-perl \
+#                       notification-daemon libfile-slurp-perl
 #
 # Author:
 #   Dieken at newsmth.net (Liu Yubao <yubao.liu@gmail.com>)
@@ -53,6 +63,9 @@
 #           * use sensible font for post list in GUI window
 #           * destroy tray icon on exit (XXX: not stable)
 #           * release 4.2
+#       2010-02-05
+#           * fix garbled output with ActivePerl-5.10.0.1005-MSWin32-x86-290470.msi
+#           * release 4.3
 #
 # TODO:
 #   * how to quit WindowsNotify's UI thread reliably and safely?
@@ -535,7 +548,7 @@ sub save_board_list {
 
 sub usage {
     print <<END;
-NewSMTH-Notifier v4.2
+NewSMTH-Notifier v4.3
     --board "XXX,YYY"       specify board list in addition to a list file
     --list FILE             specify a board list file (default board.list)
     --gui, --no-gui         whether to use GUI. (default yes)
@@ -604,6 +617,7 @@ sub poll_newsmth_loop {
             my $content;
             eval {
                 $content = get('http://www.newsmth.net/bbsdoc.php?board=' . $board);
+                $content = Encode::decode('GBK', $content) if ! Encode::is_utf8($content);
             };
             next unless defined $content;
 
