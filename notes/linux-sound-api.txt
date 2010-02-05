@@ -4,6 +4,7 @@ http://0pointer.de/blog/projects/guide-to-sound-apis.html
 
 http://www.opensound.com/wiki/index.php/Configuring_Applications_for_OSSv4
 http://wiki.archlinux.org/index.php/OSS
+https://help.ubuntu.com/community/OpenSound
  
 oss (v3 and v4) oss4-* liboss-salsa-asound2 liboss-salsa2   (don't use liboss-salsa*, use libasound2-plugins)
 alsa            libasound2 libasound2-plugins  alsa-oss oss-compat (alsa-oss is better than oss-compat)
@@ -30,3 +31,71 @@ ossplay and ossrecord in oss4-base package
 sox
 ecasound
 lame
+
+===============================
+The way from ALSA to OSS v4:
+(1) check http://mercurial.opensound.com/?file/tip/devlists/
+
+(2) removing PulseAudio
+# killall pulseaudio
+# aptitude remove ~ipulseaudio
+
+(3) removing ALSA packages
+# /etc/init.d/alsa-utils stop
+# aptitude remove alsa-base alsa-utils
+
+(4) blacklisting ALSA kernel modules
+# aptitude install linux-sound-base
+# dpkg-reconfigure linux-sound-base
+  选择 OSS
+# reboot
+
+(5) install OSS v4 kernel modules
+# aptitude install oss4-modules
+
+(6) configure ALSA apps to use OSS
+# aptitude install libasound2-plugins
+configure according to:
+http://www.opensound.com/wiki/index.php/Tips_And_Tricks#ALSA_Emulation
+
+(7) Gstreamer
+# aptitude install gstreamer0.10-plugins-bad
+console:
+  use script: http://www.4front-tech.com/forum/download/file.php?id=2
+gui:
+$ gnome-sound-properties
+$ gstreamer-properties
+default output: oss4sink
+default input: oss4src
+$ export PHONON_GST_AUDIOSINK=oss4sink
+
+(8) mplayer -ao oss
+~/.mplayer/config: ao=oss
+
+    libao
+~/.libao: default_driver=oss
+
+    mpd
+/etc/mpd.conf: uncomment audio_output of type "oss" section
+
+    openal
+~/.openalrc: (define devices '(native oss))
+~/.alsoftrc:
+[general]
+drivers=oss
+
+    libsdl1.2debian-oss or libsdl1.2debian-all
+set environment variable SDL_AUDIODRIVER=dsp
+
+    libwine-oss
+$ winecfg
+
+    vlc
+~/.vlc/vlcrc: aout=oss
+
+    vmware
+*.vmx: sound.autodetect: False
+
+    xine
+~/.xine/config: audio.driver:oss
+
