@@ -156,4 +156,6 @@ Windows 模拟： wine
 密钥管理： keychain
 自动 mount：
 配置管理： cfgtool ....
+备份： unison, rdiff-backup, rsnapshot, backup-manager, backup2l
+
 
