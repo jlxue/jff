@@ -10,9 +10,9 @@ Web 浏览器：iceweasel, epiphany, konqueror
 面板: gnome-panel
 密钥管理：seahorse
 自动 mount: gnome-volume-manager
-蓝牙：bluez-gnome
+蓝牙：bluez-gnome, gnome-bluetooth
 打印机: cups
-PDF 阅读器： evince, okular, apvlv
+PDF 阅读器： evince, okular, apvlv, xpdf, gv
 CHM 阅读器: chmsee, iceweasel chmreader, kchmview, xchm
 辞典：stardict, goldendict
 图片查看：eog, gthumb, gwenview, gpicview, geeqie, comix, qcomicbook

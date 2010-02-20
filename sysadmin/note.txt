@@ -49,3 +49,9 @@ Network File Servers:   NFS v4, AFS, Coda, CacheFS
 
 5. iSCSI, nbd.sf.net
 
+============================
+单点登录：ldap
+邮箱管理：imap
+群件：日历、任务计划、web mail。
+gforge? bugzilla?
+

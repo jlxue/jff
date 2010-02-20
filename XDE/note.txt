@@ -137,6 +137,7 @@ apt-listbugs
 
 X 服务端  ： xserver-xorg
 登录管理器： slim
+中文字体  ：ttf-arphic-uming ttf-arphic-ukai ttf-wqy-microhei
 窗口管理器： openbox
 面板      ： tint2
 状态检测  ： conky hddtemp
@@ -147,7 +148,7 @@ X 服务端  ： xserver-xorg
 Web 浏览器： iceweasel
 Java 支持 ： icedtea6-plugin
 Flash 支持： flashplugin-nonfree
-邮件客户端： icedove
+邮件客户端： icedove + lightning extension
 视频播放器： mplayer
 音乐播放器： mpd ario/gmpc
 办公软件  ： openoffice.org
@@ -155,7 +156,25 @@ Windows 模拟： wine
 聊天工具：   emesene/pidgin
 密钥管理： keychain
 自动 mount：
-配置管理： cfgtool ....
-备份： unison, rdiff-backup, rsnapshot, backup-manager, backup2l
+蓝牙: gnome-bluetooth
+打印机：cups
+配置管理： cfgtool/etckeeper/changetrack/filetraq/diffmon/metastore 
+PDF阅读器：apvlv evince
+CHM阅读器：chmsee/iceweasel chmreader extension
+词典：stardict/goldendict
+图片查看：feh/gpicview/geeqie/gliv
+图片编辑：mtpaint gimp inkscape
+网络管理：wicd/network-manager
+远程登录：rdesktop
+编辑器：vim-gtk
+归档管理：file-roller
+输入法：scim-pinyin
+IRC: xchat/chatzilla
+下载：transmission/amule/mldonkey-server
+光盘刻录：brasero/k3b
+抓图: scrot
+计算器：extcalc/gcalctool/galculator/qalculator/gnome-genius/speedcrunch
+备份：rsnapshot/rdiff-backup/flexbackup/faubackup/backup-manager/backup2l/backuppc/sbackup/vbackup/
+安全：shorewall aide bastille harden
 
 
