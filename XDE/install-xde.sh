@@ -60,7 +60,7 @@ i scim-pinyin
 i -R iceweasel icedtea6-plugin flashplugin-nonfree
 
 ### mail user agent
-# And: lightning
+# And: lightning or iceowl-extension
 i -R icedove
 
 ### Office
