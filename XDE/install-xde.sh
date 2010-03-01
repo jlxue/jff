@@ -84,8 +84,8 @@ i emesene
 i mplayer
 
 ### music player
-# Or gmpc
-i mpd ario
+# Or: quodlibet listen exaile
+i audacious
 
 ### printing
 i cups
