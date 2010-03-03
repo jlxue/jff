@@ -1,0 +1,49 @@
+diff --git a/Makefile b/Makefile
+index e26251c..65aae53 100644
+--- a/Makefile
++++ b/Makefile
+@@ -13,8 +13,8 @@ TEX	=	ch1.tex ch10.tex ch11.tex ch12.tex ch13.tex ch14.tex ch15.tex \
+ 
+ all:	lionc.pdf
+ 
+-pdf lionc.pdf: lionc.ps
+-	ps2pdf lionc.ps
++pdf lionc.pdf: lionc.dvi
++	dvipdfmx lionc.dvi
+ 
+ lionc.ps: lionc.dvi
+ 	dvips lionc.dvi -o lionc.ps
+@@ -24,4 +24,4 @@ lionc.dvi: ${SRC}
+ 	latex lionc.tex
+ 
+ clean:
+-	rm -f *.dvi *.ps *.pdf *.toc *.log *.aux
++	rm -f *.dvi *.ps *.pdf *.toc *.log *.aux *.out
+diff --git a/lionc.tex b/lionc.tex
+index 0e6b2a3..5553c17 100644
+--- a/lionc.tex
++++ b/lionc.tex
+@@ -1,7 +1,13 @@
+ %
+ % The Lion's Commentary, file lionc.tex, version 1.3, 18 May 1994
+ %
+-\documentstyle[twoside,fancyheadings]{article}
++\documentclass[a4paper,twoside]{article}
++\usepackage{fancyhdr}
++\usepackage[dvipdfmx]{hyperref} % Or pdftex, xetex, ps2pdf
++\hypersetup{pdfborder={0 0 0},
++            pdftitle={A COMMENTARY ON THE SIXTH EDITION UNIX OPERATING SYSTEM},
++            pdfauthor={John Lions}}
++
+ \font\twlrm = cmr10 scaled \magstep1
+ 
+ % Set the page dimensions
+@@ -38,7 +44,7 @@
+ 
+ % Set up the headings for the document
+ 
+-\setlength{\headrulewidth}{0cm}
++\renewcommand{\headrulewidth}{0cm}
+ \renewcommand{\sectionmark}[1]{\markboth{#1}{}}
+ \renewcommand{\subsectionmark}[1]{\markright{#1}}
+ \rhead[{\it UNIX 6th Edition Commentary}]{\it \leftmark}
