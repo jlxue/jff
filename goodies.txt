@@ -1,7 +1,7 @@
 * Network
 
 http://www.kegel.com/c10k.html
-������ I/O ����
+高性能 I/O 技术
 
 http://www.ibm.com/developerworks/linux/library/l-async/
 Boost application performance using asynchronous I/O
@@ -14,7 +14,7 @@ http://lucene.apache.org/hadoop
 http://www.gridgain.com/
 
 http://blog.csdn.net/guxianga/archive/2007/09/19/1791131.aspx
-���� Web 2.0 վ�㹹��������̽: Flickr, YouTube, mixi.jp, Technorati,
+大型 Web 2.0 站点构建技术初探: Flickr, YouTube, mixi.jp, Technorati,
 MySpace, LiveJournal
 
 
@@ -62,7 +62,7 @@ Top 100 Network Security Tools
 * Input Method
 
 http://openvanilla.org/oldwiki/zh/index.php?title=ChineseInformationProcessing
-���뷨����
+输入法资料
 
 http://risujin.org/cellwriter/
 Handwriting recognization
@@ -98,7 +98,7 @@ http://www.sbin.org/doc/Xlib/
 Xlib Programming Manual (O'Reilly &amp; Associates, Inc.)
 
 http://blog.csdn.net/absurd/category/336948.aspx
-Absurd's blog: X Window �о�
+Absurd's blog: X Window 研究
 
 http://www.kdecn.org
 http://www.qtcn.org (124.254.42.10)
@@ -119,8 +119,8 @@ http://www.openhandsetalliance.com/android_overview.html
 http://www.openzaurus.org
 Zaurus PDA
 
-http://www.angstrom-distribution.org/ (OpenZaurus ��Ŀ�ĺ�̣�
-iPAQ, Zaurus, Palm �� PDA
+http://www.angstrom-distribution.org/ (OpenZaurus 项目的后继）
+iPAQ, Zaurus, Palm 等 PDA
 
 http://alp.access-company.com/
 
@@ -131,7 +131,7 @@ Limo
 * Software
 
 http://www.cgsecurity.org/wiki/TestDisk
-TestDisk: �޸�����������������
+TestDisk: 修复分区表、引导扇区
 
 http://www.gnuplot.info
 http://www.octave.org
@@ -208,7 +208,7 @@ http://debaday.debian.net/
 http://lists.debian.org/completeindex.html
 
 http://alioth.debian.org
-http://(git|hg|bzr|svn|cvs|darcs|arch).debian.org��
+http://(git|hg|bzr|svn|cvs|darcs|arch).debian.org。
 
 http://lists.debian.org
 http://lists.alioth.debian.org
@@ -230,11 +230,78 @@ http://packages.qa.debian.org
 * Java
 
 EasyMock/JMock, JUnit/TestNG, HttpUnit, DbUnit, Cargo,
-Selenium: ������������� Web Ӧ�ò���
-CruiseControl, Anthill, Hudson: ��������
-STAN, Clover, CheckStyle, FindBugs: ���븲�ǡ���������
+Selenium: 控制浏览器进行 Web 应用测试
+CruiseControl, Anthill, Hudson: 持续集成
+STAN, Clover, CheckStyle, FindBugs: 代码覆盖、质量测试
 db4o, httpclient
 
 * C++
 Qt, ACE, ASIO, Boost, Crypto++, ICU, Poco, Protocol Buffers, safe_iop
+
+* Books
+ - Code Craft - The Practice of Writing Excellent Code
+   编程匠艺
+   Pete Goodliffe
+
+ - Working Effectively with Legacy Code
+   修改代码的艺术
+   Michael C.  Feathers
+
+ - Code Complete 2
+   代码大全 (第 2 版)
+   Steve McConnell
+
+ - The Pragmatic Programmer: From Journeyman to master
+   程序员修炼之道: 从小工到专家
+   Andrew Hunt, David Thomas
+
+ - Practices of an Agile Developer
+   高效程序员的 45 个习惯: 敏捷开发修炼之道
+   Venkat Subramaniam, Andy Hunt
+
+ - Programming Pearls 2ed
+   编程珠玑 (第 2 版)
+   Jon Bentley
+
+ - The Productive Programmer
+   卓有成效的程序员
+   Neal Ford
+
+ - Refactoring: Improving the Design of Existing Code
+   重构——改善既有代码的设计
+   Martin Fowler
+
+ - Refactoring to Patterns
+   重构与模式
+   Joshua Kerievsky
+
+ - Agile Software Development: Principles, Patterns, and Practices
+   敏捷软件开发: 原则、模式与实践
+   Robert C. Martin
+
+ - Beautiful Code: Leading Programmers Explain How They Think
+   代码之美
+  Andy Oram, Greg Wilson
+
+ - Beautiful Architecture: Leading Thinkers Reveal the Hidden Beauty in Software Design
+   架构之美
+   Diomidis Spinellis, Georgios Gousios
+
+ - 编程之美 -- 微软技术面试心得
+
+ - Clean Code: A Handbook of Agile Software
+   Robert C. Martin
+
+ - Coders At Work
+   Peter Seibel
+
+ - Apache 源代码全景分析
+
+ - Implementation Patterns
+   实现模式
+   Kent Beck
+ 
+ - Programming Collective Intelligence
+   集体智慧编程
+   Toby Segaran
 
