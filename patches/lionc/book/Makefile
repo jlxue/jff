@@ -13,8 +13,8 @@ TEX	=	ch1.tex ch10.tex ch11.tex ch12.tex ch13.tex ch14.tex ch15.tex \
 
 all:	lionc.pdf
 
-pdf lionc.pdf: lionc.ps
-	ps2pdf lionc.ps
+pdf lionc.pdf: lionc.dvi
+	dvipdfmx lionc.dvi
 
 lionc.ps: lionc.dvi
 	dvips lionc.dvi -o lionc.ps
@@ -24,4 +24,4 @@ lionc.dvi: ${SRC}
 	latex lionc.tex
 
 clean:
-	rm -f *.dvi *.ps *.pdf *.toc *.log *.aux
+	rm -f *.dvi *.ps *.pdf *.toc *.log *.aux *.out
