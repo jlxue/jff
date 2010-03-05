@@ -18,3 +18,5 @@ set bell-style none
 ## any beep off：
 # set nobeep=1
 
+# run alsamixer, set 'pc beep' mute
+
