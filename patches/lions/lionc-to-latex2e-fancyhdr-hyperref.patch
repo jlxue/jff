@@ -1,8 +1,35 @@
-diff --git a/Makefile b/Makefile
-index e26251c..65aae53 100644
---- a/Makefile
-+++ b/Makefile
-@@ -13,8 +13,8 @@ TEX	=	ch1.tex ch10.tex ch11.tex ch12.tex ch13.tex ch14.tex ch15.tex \
+diff -aurN book-orig/lionc.tex book/lionc.tex
+--- book-orig/lionc.tex	1994-05-19 10:40:49.000000000 +0800
++++ book/lionc.tex	2010-03-04 13:35:44.000000000 +0800
+@@ -1,7 +1,14 @@
+ %
+ % The Lion's Commentary, file lionc.tex, version 1.3, 18 May 1994
+ %
+-\documentstyle[twoside,fancyheadings]{article}
++\documentclass[a4paper,twoside]{article}
++\usepackage{fancyhdr}
++\usepackage[dvipdfmx]{hyperref} % Or pdftex, xetex, ps2pdf
++\hypersetup{pdfborder={0 0 0},
++            pdftitle={A COMMENTARY ON THE SIXTH EDITION UNIX OPERATING SYSTEM},
++            pdfauthor={John Lions},
++            bookmarksnumbered=true}
++
+ \font\twlrm = cmr10 scaled \magstep1
+ 
+ % Set the page dimensions
+@@ -38,7 +45,7 @@
+ 
+ % Set up the headings for the document
+ 
+-\setlength{\headrulewidth}{0cm}
++\renewcommand{\headrulewidth}{0cm}
+ \renewcommand{\sectionmark}[1]{\markboth{#1}{}}
+ \renewcommand{\subsectionmark}[1]{\markright{#1}}
+ \rhead[{\it UNIX 6th Edition Commentary}]{\it \leftmark}
+diff -aurN book-orig/Makefile book/Makefile
+--- book-orig/Makefile	2004-04-14 10:16:55.000000000 +0800
++++ book/Makefile	2010-03-03 15:00:54.000000000 +0800
+@@ -13,8 +13,8 @@
  
  all:	lionc.pdf
  
@@ -13,37 +40,9 @@ index e26251c..65aae53 100644
  
  lionc.ps: lionc.dvi
  	dvips lionc.dvi -o lionc.ps
-@@ -24,4 +24,4 @@ lionc.dvi: ${SRC}
+@@ -24,4 +24,4 @@
  	latex lionc.tex
  
  clean:
 -	rm -f *.dvi *.ps *.pdf *.toc *.log *.aux
 +	rm -f *.dvi *.ps *.pdf *.toc *.log *.aux *.out
-diff --git a/lionc.tex b/lionc.tex
-index 0e6b2a3..5553c17 100644
---- a/lionc.tex
-+++ b/lionc.tex
-@@ -1,7 +1,13 @@
- %
- % The Lion's Commentary, file lionc.tex, version 1.3, 18 May 1994
- %
--\documentstyle[twoside,fancyheadings]{article}
-+\documentclass[a4paper,twoside]{article}
-+\usepackage{fancyhdr}
-+\usepackage[dvipdfmx]{hyperref} % Or pdftex, xetex, ps2pdf
-+\hypersetup{pdfborder={0 0 0},
-+            pdftitle={A COMMENTARY ON THE SIXTH EDITION UNIX OPERATING SYSTEM},
-+            pdfauthor={John Lions}}
-+
- \font\twlrm = cmr10 scaled \magstep1
- 
- % Set the page dimensions
-@@ -38,7 +44,7 @@
- 
- % Set up the headings for the document
- 
--\setlength{\headrulewidth}{0cm}
-+\renewcommand{\headrulewidth}{0cm}
- \renewcommand{\sectionmark}[1]{\markboth{#1}{}}
- \renewcommand{\subsectionmark}[1]{\markright{#1}}
- \rhead[{\it UNIX 6th Edition Commentary}]{\it \leftmark}
