@@ -83,35 +83,37 @@ for p in $PACKAGES ; do
 done
 
 ######################################################################
-if [ "$NOT_USE_FAKE_ZHMETRICS" ]; then
-    [ -e "$TEXMFHOME/fonts/tfm/zhmetrics/gbksong/gbksong00.tfm" ] || (
-        cd $TEXMFHOME
-        which pltotf >/dev/null 2>&1 || {
-            [ -e ./pltotf ] || wget http://www.tug.org/svn/texlive/trunk/Master/bin/`tlmgr print-arch`/pltotf
-            chmod a+x ./pltotf
-            export PATH=$PATH:.
-        }
+# Because of zhmetrics-alias made by Xubuntu@newsmth, only one .tfm is required.
 
-        texlua "$REPOS_TEXMFHOME/zhmetrics/source/fonts/zhmetrics/zhtfm.lua"
-    )
-else
-    [ -e "$TEXMFHOME/fonts/tfm/zhmetrics/fake/gbksong00.tfm" ] || (
-        cd "$TEXMFHOME/fonts/tfm/zhmetrics/fake"
-        for f in gbksong gbkhei gbkkai gbkfs gbkli gbkyou; do
-            for ((i=0; i < 95; ++i)); do
-                ln gbksong00-tfm $f$(printf %02d $i).tfm
-                ln gbksong00-tfm ${f}sl$(printf %02d $i).tfm
-            done
-        done
-
-        for f in unisong unihei unikai unifs unili uniyou; do
-            for ((i=0; i < 256; ++i)); do
-                ln gbksong00-tfm $f$(printf %02x $i).tfm
-                ln gbksong00-tfm ${f}sl$(printf %02x $i).tfm
-            done
-        done
-    )
-fi
+#if [ "$NOT_USE_FAKE_ZHMETRICS" ]; then
+#    [ -e "$TEXMFHOME/fonts/tfm/zhmetrics/gbksong/gbksong00.tfm" ] || (
+#        cd $TEXMFHOME
+#        which pltotf >/dev/null 2>&1 || {
+#            [ -e ./pltotf ] || wget http://www.tug.org/svn/texlive/trunk/Master/bin/`tlmgr print-arch`/pltotf
+#            chmod a+x ./pltotf
+#            export PATH=$PATH:.
+#        }
+#
+#        texlua "$REPOS_TEXMFHOME/zhmetrics/source/fonts/zhmetrics/zhtfm.lua"
+#    )
+#else
+#    [ -e "$TEXMFHOME/fonts/tfm/zhmetrics/fake/gbksong00.tfm" ] || (
+#        cd "$TEXMFHOME/fonts/tfm/zhmetrics/fake"
+#        for f in gbksong gbkhei gbkkai gbkfs gbkli gbkyou; do
+#            for ((i=0; i < 95; ++i)); do
+#                ln gbksong00-tfm $f$(printf %02d $i).tfm
+#                ln gbksong00-tfm ${f}sl$(printf %02d $i).tfm
+#            done
+#        done
+#
+#        for f in unisong unihei unikai unifs unili uniyou; do
+#            for ((i=0; i < 256; ++i)); do
+#                ln gbksong00-tfm $f$(printf %02x $i).tfm
+#                ln gbksong00-tfm ${f}sl$(printf %02x $i).tfm
+#            done
+#        done
+#    )
+#fi
 
 [ -e "$TEXMFHOME/tex/latex/zhmetrics/c19hei.fd" ] || (
     cd $TEXMFHOME/tex/latex/zhmetrics/ &&
