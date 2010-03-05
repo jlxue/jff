@@ -45,25 +45,25 @@ echo "REPOS_TEXMFHOME is $REPOS_TEXMFHOME"
 PKG=xeCJK
 DESTDIR=/
 VCS=svn
-URL=http://jff.googlecode.com/svn/trunk/tex/ctex-kit/xecjk
+URL=http://ctex-kit.googlecode.com/svn/trunk/xecjk
 add_package
 
 PKG=ctex
 DESTDIR=/tex/latex/ctex
 VCS=svn
-URL=http://jff.googlecode.com/svn/trunk/tex/ctex-kit/ctex
+URL=http://ctex-kit.googlecode.com/svn/trunk/ctex
 add_package
 
 PKG=zhmetrics
 DESTDIR=/
 VCS=svn
-URL=http://jff.googlecode.com/svn/trunk/tex/ctex-kit/chinese-fonts
+URL=http://ctex-kit.googlecode.com/svn/trunk/chinese-fonts
 add_package
 
 PKG=CJKpunct
 DESTDIR=/
 VCS=svn
-URL=http://jff.googlecode.com/svn/trunk/tex/ctex-kit/CJKpunct
+URL=http://ctex-kit.googlecode.com/svn/trunk/CJKpunct
 add_package
 
 for p in $PACKAGES ; do
