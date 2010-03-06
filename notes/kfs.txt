@@ -1,0 +1,51 @@
+kosmosfs-0.4 安装步骤
+
+http://kosmosfs.sourceforge.net/
+
+1. aptitude install libssl-dev libboost-dev libfuse-dev \
+    xfslibs-dev liblog4cpp5-dev cmake
+
+2. 修改 kfs-0.4/CMakeLists.txt，设置 FUSE 路径：
+# Fill in the path to fuse library
+SET(Fuse_LIBRARY_DIR "/usr/lib")
+SET(Fuse_INCLUDE_DIR "/usr/include")
+
+去掉 find_package(JNI)
+
+3. cd kfs-0.4
+mkdir build && cd build
+cmake ..
+make
+make install
+
+4. ssh-keygen
+   cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+
+5. cd kfs-0.4/scripts
+cp ../conf/machines_local.cfg.example machines_local.cfg
+修改 machines_local.cfg
+./kfssetup.sh -r tar -w ../webui -b ../build -f machines_local.cfg -s
+
+注意：machines_local.cfg 中 chunkserver2 写成 chunkserver1 了。
+      doc/DEPLOYING.txt 中 -b 含义修改了，不再是 ../build/bin
+      单机部署需要加 -s 选项。
+
+6. 运行
+cd kfs-0.4/scripts
+./kfslaunch -f machines_local.cfg --start
+
+修改 kfsshell.py 最后，把 KfsShell 改成 kfsshell。
+
+python kfsshell.py -f machines_local.cfg -b ../build/bin
+
+7. kfs_fuse
+cd kfs-0.4/scripts
+vim kfs.prp
+写入
+metaServer.name=localhost
+metaServer.port=20000
+sudo ../build/bin/kfs_fuse /mnt
+
+太慢，不具可用性，而且不支持文件属性比如 owner、permission。
+
+
