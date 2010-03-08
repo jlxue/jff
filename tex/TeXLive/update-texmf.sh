@@ -155,7 +155,7 @@ done
 done
 
 ######################################################################
-CCT=cct-0.61803-1.tar.bz2
+CCT=cct-0.61803-2.tar.bz2
 CCT_FTP=ftp://ftp.cc.ac.cn/pub/cct/src/
 [ -e "$REPOS_TEXMFHOME/$CCT" ] || {
     wget -O "$REPOS_TEXMFHOME/$CCT" $CCT_FTP/$CCT &&
