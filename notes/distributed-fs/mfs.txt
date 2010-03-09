@@ -2,7 +2,7 @@ moosefs 安装使用
 
 http://www.moosefs.com/
 
-1. ./configure --prefix ~/usr
+1. ./configure --prefix ~/usr  (需要 libfuse-dev 软件包)
    make
    make install
 
@@ -16,11 +16,16 @@ http://www.moosefs.com/
    cp mfsmetalogger.cfg.dist mfsmetalogger.cfg，修改 MASTER_HOST。
 
    mkdir mnt/hd1
-   dd if=/dev/zero of=mfs1.img bs=100M seek=400 count=0
+   dd if=/dev/zero of=mfs1.img bs=1024M seek=40 count=0
    mkfs -t reserfs mfs1.img
    sudo mount -o loop mfs1.img mnt/hd1
 
    echo ~/usr/mnt/hd1 > mfshdd.cfg
+
+   修改 /etc/security/limits.conf，加入
+   USERNAME         soft    nofile      20000
+   USERNAME         hard    nofile      20000
+   USERNAME  为 mfs 守护进程运行时的用户身份。注销重新登录。
 
    ~/usr/sbin/mfsmaster -u start
    ~/usr/sbin/mfsmetalogger -u start
@@ -29,6 +34,8 @@ http://www.moosefs.com/
 3. mkdir ~/usr/mnt/{mfs,mfsmeta}
    sudo ~/usr/bin/mfsmount ~/usr/mnt/mfs -H MFS_MASTER_IP
    sudo ~/usr/bin/mfsmount ~/usr/mnt/mfsmeta -m -H MFS_MASTER_IP
+
+   注意 MFS_MASTER_IP 不可以是 localhost 或者本地回还地址。
 
 4. 停止
    umount ...
