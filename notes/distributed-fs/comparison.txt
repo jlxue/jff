@@ -1,0 +1,31 @@
+分布式文件系统比较：
+
+CloudStore (KosmosFS)
+    + 被 Hadoop 作为分布式文件系统后端之一
+    - 不支持文件元信息
+    - kfs_fuse 太慢，不可用
+    - 编译依赖多，文档落后，脚本简陋
+    - 开发不活跃
+
+MooseFS
+    + 支持文件元信息
+    + mfsmount 很好用
+    + 编译依赖少，文档全，默认配置很好
+    + mfshdd.cfg 加 * 的条目会被转移到其它 chunk server，以便此 chunk server 安全退出
+    + 不要求 chunk server 使用的文件系统格式以及容量一致
+    + 开发很活跃
+    - master server 存在单点故障
+    - master server 很耗内存
+
+MogileFS
+    - 不适合做通用文件系统，适合存储静态只读小文件，比如图片
+
+GlusterFS
+GFS2
+OCFS2
+PVFS2
+Lustre
+OpenAFS
+Coda
+Hadoop HDFS
+FastDFS

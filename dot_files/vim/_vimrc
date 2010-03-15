@@ -1,9 +1,12 @@
 "===================================BEGIN========================================
 
 "------------------------------------from default .vimrc of GVIM 6.4 for Win32 --
-" language en
-
+set nocompatible
 source $VIMRUNTIME/vimrc_example.vim
+if !has('unix')
+    source $VIMRUNTIME/mswin.vim
+    behave mswin
+fi
 
 set diffexpr=MyDiff()
 function MyDiff()
@@ -16,8 +19,18 @@ function MyDiff()
   if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
   let arg3 = v:fname_out
   if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
-  "silent execute '!' . $VIMRUNTIME . '/diff ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
-  silent execute '! diff ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
+  let eq = ''
+  if $VIMRUNTIME =~ ' '
+    if &sh =~ '\<cmd'
+      let cmd = '""' . $VIMRUNTIME . '\diff"'
+      let eq = '"'
+    else
+      let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
+    endif
+  else
+    let cmd = $VIMRUNTIME . '\diff'
+  endif
+  silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3 . eq
 endfunction
 
 "-------------------------------------key mappings-------------------------------
@@ -212,7 +225,7 @@ set virtualedit=block
 
 set fileformats+=mac
 set fencs=ucs-bom,utf-8,gbk
-set encoding=utf-8
+"set encoding=utf-8
 set ambiwidth=double
 
 set nowrap
