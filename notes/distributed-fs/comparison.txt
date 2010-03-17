@@ -35,7 +35,18 @@ GlusterFS (http://gluster.com/community/documentation/index.php/GlusterFS_Featur
     - 不能在线扩容(不 umount 时增加存储节点)，计划在 3.1 里实现
 
 GFS2
-    - 依赖 Red Hat Cluster Suite
+    http://sourceware.org/cluster/wiki/DRBD_Cookbook
+    http://www.smop.co.uk/blog/index.php/2008/02/11/gfs-goodgrief-wheres-the-documentation-file-system/
+    http://wiki.debian.org/kristian_jerpetjoen
+    http://longvnit.com/blog/?p=941
+    http://blog.chinaunix.net/u1/53728/showart_1073271.html (基于红帽RHEL5U2 GFS2+ISCSI+XEN+Cluster 的高可性解决方案)
+    http://www.yubo.org/blog/?p=27 (iscsi+clvm+gfs2+xen+Cluster)
+    http://linux.chinaunix.net/bbs/thread-777867-1-1.html
+
+    * 并不是 distributed file system, 而是 shared disk cluster file system，需要某种机制在机器
+            之间共享磁盘，以及加锁机制，因此需要 drbd/iscsi/clvm/gnbd 做磁盘共享，以及 dlm 做锁管理)
+    - 依赖 Red Hat Cluster Suite (Debian: aptitude install redhat-cluster-suite， 图形配置工具包
+            system-config-cluster, system-config-lvm)
 
 OCFS2
 PVFS2
