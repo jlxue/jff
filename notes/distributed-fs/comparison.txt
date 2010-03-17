@@ -34,12 +34,21 @@ GlusterFS (http://gluster.com/community/documentation/index.php/GlusterFS_Featur
             glusterfsd 需要创建不同属主的文件，所以必需 root 权限) 
     - 不能在线扩容(不 umount 时增加存储节点)，计划在 3.1 里实现
 
-
 GFS2
+    - 依赖 Red Hat Cluster Suite
+
 OCFS2
 PVFS2
 Lustre
 OpenAFS
 Coda
 Hadoop HDFS
+    * 本地写缓存，够一定大小 (64 MB) 时传给服务器
+    - 不适合通用文件系统
+
 FastDFS
+Ceph (http://ceph.newdream.net/)
+PANASAS
+pNFS
+spNFS
+OBFS
