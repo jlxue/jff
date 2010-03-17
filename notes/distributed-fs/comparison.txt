@@ -21,6 +21,12 @@ MogileFS
     - 不适合做通用文件系统，适合存储静态只读小文件，比如图片
 
 GlusterFS
+    + 无单点故障问题
+    - 对文件系统格式有要求，ext3/ext4/zfs 被正式支持，xfs/jfs 可能可以，reiserfs 不行(报告 Extended attribute not supported)
+      (http://gluster.com/community/documentation/index.php/Storage_Server_Installation_and_Configuration#Operating_System_Requirements)
+    - 
+
+
 GFS2
 OCFS2
 PVFS2
