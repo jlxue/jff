@@ -16,19 +16,23 @@ MooseFS
     + 开发很活跃
     + 可以以非 root 用户身份运行
     + 可以在线扩容
+    + 支持回收站
+    + 支持快照
     - master server 存在单点故障
     - master server 很耗内存
 
 MogileFS
     - 不适合做通用文件系统，适合存储静态只读小文件，比如图片
 
-GlusterFS
+GlusterFS (http://gluster.com/community/documentation/index.php/GlusterFS_Features)
     + 无单点故障问题
+    + 支持回收站
+    + 模块化堆叠式架构
     - 对文件系统格式有要求，ext3/ext4/zfs 被正式支持，xfs/jfs 可能可以，reiserfs 经测试可以
       (http://gluster.com/community/documentation/index.php/Storage_Server_Installation_and_Configuration#Operating_System_Requirements)
-    - 需要以 root 用户身份运行（用了 trusted xattr，mount 时加 user_xattr 选项是没用的，
-      官方说法是 glusterfsd 需要创建不同属主的文件，所以必需 root 权限) 
-    - 不能在线扩容(不 umount 时增加存储节点)
+    - 需要以 root 用户身份运行（用了 trusted xattr，mount 时加 user_xattr 选项是没用的，官方说法是
+            glusterfsd 需要创建不同属主的文件，所以必需 root 权限) 
+    - 不能在线扩容(不 umount 时增加存储节点)，计划在 3.1 里实现
 
 
 GFS2
