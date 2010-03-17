@@ -14,6 +14,8 @@ MooseFS
     + mfshdd.cfg 加 * 的条目会被转移到其它 chunk server，以便此 chunk server 安全退出
     + 不要求 chunk server 使用的文件系统格式以及容量一致
     + 开发很活跃
+    + 可以以非 root 用户身份运行
+    + 可以在线扩容
     - master server 存在单点故障
     - master server 很耗内存
 
@@ -22,9 +24,11 @@ MogileFS
 
 GlusterFS
     + 无单点故障问题
-    - 对文件系统格式有要求，ext3/ext4/zfs 被正式支持，xfs/jfs 可能可以，reiserfs 不行(报告 Extended attribute not supported)
+    - 对文件系统格式有要求，ext3/ext4/zfs 被正式支持，xfs/jfs 可能可以，reiserfs 经测试可以
       (http://gluster.com/community/documentation/index.php/Storage_Server_Installation_and_Configuration#Operating_System_Requirements)
-    - 
+    - 需要以 root 用户身份运行（用了 trusted xattr，mount 时加 user_xattr 选项是没用的，
+      官方说法是 glusterfsd 需要创建不同属主的文件，所以必需 root 权限) 
+    - 不能在线扩容(不 umount 时增加存储节点)
 
 
 GFS2
