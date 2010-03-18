@@ -33,6 +33,7 @@ GlusterFS (http://gluster.com/community/documentation/index.php/GlusterFS_Featur
     - 需要以 root 用户身份运行（用了 trusted xattr，mount 时加 user_xattr 选项是没用的，官方说法是
             glusterfsd 需要创建不同属主的文件，所以必需 root 权限) 
     - 不能在线扩容(不 umount 时增加存储节点)，计划在 3.1 里实现
+    - 分布存储以文件为单位，条带化分布存储不成熟
 
 GFS2
     http://sourceware.org/cluster/wiki/DRBD_Cookbook
@@ -55,18 +56,25 @@ OCFS2
 
 OpenAFS
     + 成熟稳定
+    + 开发活跃，支持 Unix/Linux/MacOS X/Windows
     - 性能不够好
 
 Coda
     * 从服务器复制文件到本地，文件读写是本地操作因此很高效
     * 文件关闭后发送到服务器
     + 支持离线操作，连线后再同步到服务器上
+    - 缓存基于文件，不是基于数据块，打开文件时需要等待从服务器缓存到本地完毕
     - 并发写有版本冲突问题
     - 并发读有极大的延迟，需要等某个 client 关闭文件，比如不适合 tail -f some.log
     - 研究项目，不够成熟，使用不广
 
 PVFS2
+    - 不能在线扩容
+
 Lustre
+    + 适合大规模集群
+    + 高性能
+    + 可在线扩容
 
 Hadoop HDFS
     * 本地写缓存，够一定大小 (64 MB) 时传给服务器
@@ -81,5 +89,12 @@ OBFS
 GFarm (http://datafarm.apgrid.org/software/)
 
 heartbeat, keepalived, openais, corosync, pacemaker, cman, libfence4
-ipvsadm, ldirectord, lvs, rocks, mosix, openssi
+ipvsadm, ldirectord, lvs, oscar, rocks cluster, mosix/openmosix, openssi,
+beowulf, hadoop, globus.org
+torque (http://www.clusterresources.com/products/torque-resource-manager.php)
+openpbs (http://www.mcs.anl.gov/research/projects/openpbs/)
+maui (http://www.clusterresources.com/products/maui-cluster-scheduler.php/)
+
+<<High Performance Linux Clusters>>
+
 
