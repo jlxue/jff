@@ -44,15 +44,30 @@ GFS2
     http://linux.chinaunix.net/bbs/thread-777867-1-1.html
 
     * 并不是 distributed file system, 而是 shared disk cluster file system，需要某种机制在机器
-            之间共享磁盘，以及加锁机制，因此需要 drbd/iscsi/clvm/gnbd 做磁盘共享，以及 dlm 做锁管理)
+            之间共享磁盘，以及加锁机制，因此需要 drbd/iscsi/clvm/ddraid/gnbd 做磁盘共享，以及 dlm 做锁管理)
     - 依赖 Red Hat Cluster Suite (Debian: aptitude install redhat-cluster-suite， 图形配置工具包
             system-config-cluster, system-config-lvm)
+    - 适合不超过约 30 个节点左右的小型集群，规模越大，dlm 的开销越大，默认配置 8 个节点
 
 OCFS2
+    * GFS 的 Oracle 翻版，据说性能比 GFS2 好 (Debian: aptitude install ocfs2-tools, 图形配置工具包 ocfs2console)
+    - 不支持 ACL、flock，只是为了 Oracle database 设计
+
+OpenAFS
+    + 成熟稳定
+    - 性能不够好
+
+Coda
+    * 从服务器复制文件到本地，文件读写是本地操作因此很高效
+    * 文件关闭后发送到服务器
+    + 支持离线操作，连线后再同步到服务器上
+    - 并发写有版本冲突问题
+    - 并发读有极大的延迟，需要等某个 client 关闭文件，比如不适合 tail -f some.log
+    - 研究项目，不够成熟，使用不广
+
 PVFS2
 Lustre
-OpenAFS
-Coda
+
 Hadoop HDFS
     * 本地写缓存，够一定大小 (64 MB) 时传给服务器
     - 不适合通用文件系统
@@ -63,3 +78,8 @@ PANASAS
 pNFS
 spNFS
 OBFS
+GFarm (http://datafarm.apgrid.org/software/)
+
+heartbeat, keepalived, openais, corosync, pacemaker, cman, libfence4
+ipvsadm, ldirectord, lvs, rocks, mosix, openssi
+
