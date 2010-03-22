@@ -69,24 +69,41 @@ Coda
     - 研究项目，不够成熟，使用不广
 
 PVFS2
-    - 不能在线扩容
+    http://blog.csdn.net/yfw418/archive/2007/07/06/1680930.aspx
+    * 高性能
+    - 没有锁机制，不符合 POSIX 语意，需要应用的配合，不适合做通用文件系统
+      (See pvfs2-guide chaper 5:  PVFS2 User APIs and Semantics)
+    - 静态配置，不能动态扩展
 
 Lustre
-    + 适合大规模集群
-    + 高性能
-    + 可在线扩容
+    * 适合大型集群
+    + 很高性能
+    + 支持动态扩展
+    - 需要对内核打补丁，深度依赖 Linux 内核和 ext3 文件系统
 
 Hadoop HDFS
     * 本地写缓存，够一定大小 (64 MB) 时传给服务器
     - 不适合通用文件系统
 
 FastDFS
-Ceph (http://ceph.newdream.net/)
-PANASAS
-pNFS
+    - 只能通过 API 使用，不支持 fuse
+
+NFSv4 Referrals
+    + 简单
+    - 没有负载均衡，容错
+
+NFSv4.1 pNFS
+    - 没有普及
+
 spNFS
-OBFS
+    * pNFS 在 Linux 上的一个实现
+
+Ceph (http://ceph.newdream.net/)
+    - 开发初期，不稳定
+    - 依赖 btrfs
+
 GFarm (http://datafarm.apgrid.org/software/)
+OBFS
 
 heartbeat, keepalived, openais, corosync, pacemaker, cman, libfence4
 ipvsadm, ldirectord, lvs, oscar, rocks cluster, mosix/openmosix, openssi,
@@ -96,5 +113,4 @@ openpbs (http://www.mcs.anl.gov/research/projects/openpbs/)
 maui (http://www.clusterresources.com/products/maui-cluster-scheduler.php/)
 
 <<High Performance Linux Clusters>>
-
 
