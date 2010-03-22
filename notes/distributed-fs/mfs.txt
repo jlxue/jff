@@ -10,14 +10,14 @@ http://www.moosefs.com/
    cp mfsexports.cfg.dist mfsexports.cfg
 
    cp mfschunkserver.cfg.dist  mfschunkserver.cfg，修改 MASTER_HOST 为
-   mfsmaster 进程所在机器的 IP (不能是 localhost, 127.0... 等回环地址,
+   mfsmaster 进程所在机器的 IP (不能是 localhost, 127.0... 等回环地址),
    或者修改 /etc/hosts 加入 mfsmaster 的条目。
 
    cp mfsmetalogger.cfg.dist mfsmetalogger.cfg，修改 MASTER_HOST。
 
    mkdir mnt/hd1
    dd if=/dev/zero of=mfs1.img bs=1024M seek=40 count=0
-   mkfs -t reserfs mfs1.img
+   mkfs -t reserfs -f mfs1.img
    sudo mount -o loop mfs1.img mnt/hd1
 
    echo ~/usr/mnt/hd1 > mfshdd.cfg
