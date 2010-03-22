@@ -1,5 +1,12 @@
 分布式文件系统比较：
 
+dCache
+    - 依赖 PostgreSQL
+
+xtreemfs
+    * 服务端是 Java 实现的
+    - 性能不高
+
 CloudStore (KosmosFS)
     + 被 Hadoop 作为分布式文件系统后端之一
     - 不支持文件元信息
