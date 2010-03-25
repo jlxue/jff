@@ -116,11 +116,6 @@ gqview      too many dependencies
 xpaint      too old
 gpaint      no rect selection tool
 
-rsnapshot
-rdiff-backup
-flexbackup
-faubackup
-
 jff dot_files
 
 devicekit-disks
@@ -149,7 +144,7 @@ IRC: xchat/chatzilla
 计算器：extcalc/gcalctool/galculator/qalculator/gnome-genius/speedcrunch
 备份：rsnapshot/rdiff-backup/flexbackup/faubackup/backup-manager/backup2l/backuppc/sbackup/vbackup/
 安全：shorewall
-      tripwire aide stealth fcheck samhain integrit osiris debsums tiger
+      tripwire aide stealth samhain fcheck integrit osiris debsums tiger
       bastille harden
 fail2ban denyhosts
 
