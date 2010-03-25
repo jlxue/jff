@@ -110,3 +110,14 @@ i evince
 install -r $PKGS_INSTALL_WITH_RECOMMENDS
 install -R $PKGS_INSTALL_WITHOUT_RECOMMENDS
 
+###########################################################
+grep -q LC_CTYPE /etc/default/locale && {
+    echo "*** LC_CTYPE has been set in /etc/default/locale."
+} || {
+    echo -n "Adding LC_CTYPE=\"zh_CN.UTF-8\" to /etc/default/locale..."
+    echo "LC_CTYPE=\"zh_CN.UTF-8\"" >> /etc/default/locale
+    echo "Done."
+}
+
+###########################################################
+
