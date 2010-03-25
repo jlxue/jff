@@ -148,6 +148,10 @@ IRC: xchat/chatzilla
 下载：transmission/amule/mldonkey-server
 计算器：extcalc/gcalctool/galculator/qalculator/gnome-genius/speedcrunch
 备份：rsnapshot/rdiff-backup/flexbackup/faubackup/backup-manager/backup2l/backuppc/sbackup/vbackup/
-安全：shorewall tripwire aide bastille harden
+安全：shorewall
+      tripwire aide stealth fcheck samhain integrit osiris debsums tiger
+      bastille harden
 fail2ban denyhosts
+
+utility: shush
 
