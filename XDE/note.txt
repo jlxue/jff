@@ -146,7 +146,18 @@ IRC: xchat/chatzilla
 安全：shorewall
       tripwire aide stealth samhain fcheck integrit osiris debsums tiger
       bastille harden
-fail2ban denyhosts
+      lxc, openvz, vserver, selinux, grsecurity, apparmor
+      fail2ban denyhosts
+!!! aide 用 splint 检查， commandconf.c 问题，bug 列表
+!!! /etc/cron.d/fcheck: /usr/sbin/fcheck -asxrf  => 漏了 -d 参数。
+!!! aide 模仿 fcheck cron，加入 nice ionice -c3。
+!!! aide 加入对 log 文件旧内容的检查。
+!!! strip/sstrip aide，编译时用随机字符串混淆可执行文件里的字符串，避免被辨认出来。 用这个随机字符串加密配置文件。
+
+apparmor, tomoyo, smack, selinux 的界面，模仿网络防火墙，拦截 open、exec、connect 等调用。
+搭配 lxc、openvz、vserver  等构成应用沙箱。
+需要解决如何判断输入来自硬件(ConsoleKit?)，让提示窗口置顶、捕获焦点、不可拦截、不接受其它窗口的消息等等。
+
 
 utility: shush
 

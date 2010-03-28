@@ -1,0 +1,28 @@
+发信人: Dieken (风催草低 - 明月何尝不照人), 信区: LinuxApp
+标  题: shell 脚本里锁文件的办法
+发信站: 水木社区 (Sat Mar 27 01:24:13 2010), 站内
+
+经常在 shell 脚本里要阻止其它进程，比如 msmtp 自带的
+mail queue 脚本，这个脚本的互斥做法是不正确的，下面
+介绍下发现的三个通过文件达到互斥的正确做法。
+
+1. util-linux 的 flock
+
+这个命令有两种用法：
+  flock LOCKFILE COMMAND
+  ( flock -s 200; COMMAND; ) 200>LOCKFILE
+flock 需要保持打开锁文件，对于第二种使用方式并不方便，
+而且 -s 方式指定文件句柄可能冲突。好处是不需要显式的
+解锁，进程退出后锁必然释放。
+
+2. liblockfile1 的 dotlockfile
+
+号称最灵活可靠的文件锁实现。其等待时间跟  -r 指定的
+重试次数有关，重试时间为 sum(5, 10, ..., min(5*n, 60), ...).
+锁文件不需要保持打开, 带来的问题是需要用 trap EXIT 确保进程
+退出时删除锁文件.
+
+3. procmail 的 lockfile
+
+跟 dotlockfile 类似, 但可以一次性创建多个锁文件.
+
