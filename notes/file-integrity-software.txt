@@ -2,7 +2,7 @@
 
 aide    功能够用，使用简单，比 samhein 在文件完整性检测方面稍差一点
 samhein 功能强悍，但稍嫌臃肿，支持即时监视
-tripwire 功能够用，使用简单
+tripwire 功能够用，使用稍嫌复杂，需要密码
 fcheck  使用简单，用于不怎么要求高安全性的场合，数据库是明文，便于版本管理
 debsums 依赖 /var/lib/dpkg/info/*.md5sums 的安全，可用于做软件包基本的检查
 
@@ -18,9 +18,13 @@ tripwire
     http://sourceforge.net/apps/wordpress/tripwire/
     新版本没收入 Debian，从 2009 年 8 月开始没人维护这个软件包，保持在 2001 年的版本。
     Debian 上动态链接
-    用密钥保护配置文件和文件信息数据库
-    不支持 acl, selinux context, xattr
+    用密码保护私钥，用私钥签名配置文件和文件信息数据库，防止被篡改
     支持增长型的 log 文件
+    不支持 acl, selinux context, xattr
+    公钥、私钥机制多余(必须保证 key 文件和 tripwire 可执行文件本身安全，
+        如果配置文件和文件信息数据库 *也* 保存到安全位置，那就没必要用公钥
+        机制和密码了)，配置文件比较罗嗦，不便使用
+
 
 aide
     静态链接
