@@ -1,9 +1,14 @@
 #!/bin/bash
 
-XDE_HOME="`dirname $0`"
+###########################################################
+## global variables
 
+XDE_HOME="`dirname $0`"
 PKGS_INSTALL_WITH_RECOMMENDS=
 PKGS_INSTALL_WITHOUT_RECOMMENDS=
+
+###########################################################
+## functions
 
 i () {
     if [ $1 = '-R' ]; then
@@ -26,7 +31,12 @@ install () {
     fi
 }
 
+is_installed () {
+    dpkg -s "$1" 2>/dev/null | grep "^Status: install ok installed"
+}
+
 ###########################################################
+## packages to be installed
 
 ### X server, X display manager, X window manager
 i xserver-xorg slim openbox
@@ -107,19 +117,50 @@ i gnome-bluetooth
 # Or: apvlv
 i evince
 
+### file integrity checker
+debsums_already_installed=$(is_installed debsums)
+aide_already_installed=$(is_installed aide)
+
+i aide samhain fcheck debsums
+
 ###########################################################
+## install packages
 
 install -r $PKGS_INSTALL_WITH_RECOMMENDS
 install -R $PKGS_INSTALL_WITHOUT_RECOMMENDS
 
 ###########################################################
-grep -q LC_CTYPE /etc/default/locale && {
-    echo "*** LC_CTYPE has been set in /etc/default/locale."
+## set locale for chinese input method
+
+f=/etc/default/locale
+grep -q LC_CTYPE $f && {
+    echo "*** LC_CTYPE has been set in $f."
 } || {
-    echo -n "Adding LC_CTYPE=\"zh_CN.UTF-8\" to /etc/default/locale..."
-    echo "LC_CTYPE=\"zh_CN.UTF-8\"" >> /etc/default/locale
-    echo "Done."
+    echo -n "Adding LC_CTYPE=\"zh_CN.UTF-8\" to $f..."
+    echo 'LC_CTYPE="zh_CN.UTF-8"' >> $f
+    echo 'Done.'
 }
 
 ###########################################################
+## configure debsums
+
+[ "$debsums_already_installed" ] || debsums_init
+
+f=/etc/default/debsums
+[ -f $f ] && grep -q '^CRON_CHECK="never"' $f && {
+    echo "Change $f to daily check in cron."
+    sed -i -e '/^CRON_CHECK="never".*/s//CRON_CHECK="daily"/' $f
+}
+
+###########################################################
+## configure fcheck
+
+###########################################################
+## configure samhain
+
+#!!! dpkg hook
+
+###########################################################
+## configure aide
+
 
