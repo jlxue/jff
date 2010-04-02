@@ -2,6 +2,7 @@ http://jquery.com/
 http://code.google.com/p/ie7-js/
 
 http://blueprintcss.org/
+http://bluetrip.org/
 http://developer.yahoo.com/yui/grids/
 http://960.gs/
 
