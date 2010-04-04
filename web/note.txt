@@ -4,7 +4,20 @@ http://code.google.com/p/ie7-js/
 http://blueprintcss.org/
 http://bluetrip.org/
 http://developer.yahoo.com/yui/grids/
+    * support fluid-width and fixed-width layouts
+    * support customization of the width for fixed-width layouts
+    * columns are source-order independent
 http://960.gs/
+http://devkick.com/lab/tripoli/
+http://elements.projectdesigns.org/
+http://code.google.com/p/emastic/
+http://code.google.com/p/malo/
+http://sencss.kilianvalkhof.com/
+http://simpl.romack.net/
+http://www.wymstyle.org/en/
+http://code.google.com/p/logicss/
+
+http://blogof.francescomugnai.com/2009/04/25-great-free-resources-for-making-charts/
 
 http://hi.baidu.com/jaywclove/blog/item/6183d624f408b40a4d088d34.html
 IE6 支持 PNG 透明(alpha通道)的4种方法
