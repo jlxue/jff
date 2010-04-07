@@ -14,8 +14,8 @@ Posted on December 7th, 2009 in 开发 by lifesinger
 命名规则和样式生成工具：css-generator.html
 更新说明
 
-   1. 精简了 grids.css 文件，只保留布局基础样式。需要某种具体布局时，可以用 css-generator.html
-      生成。
+   1. 精简了 grids.css 文件，只保留布局基础样式。需要某种具体布局时，可以用
+      css-generator.html 生成。
    2. 更改了命名规则，使其能见名知意。详细命名规则请阅读 css-generator.html
 
 使用说明
