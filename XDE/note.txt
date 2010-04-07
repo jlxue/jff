@@ -148,6 +148,9 @@ IRC: xchat/chatzilla
       bastille harden
       lxc, openvz, vserver, selinux, grsecurity, apparmor
       fail2ban denyhosts
+      snort, portsentry, nessus, nmap, amap
+      /etc/security
+      /etc/pam.d
 !!! aide 用 splint 检查， commandconf.c 问题，bug 列表
 !!! /etc/cron.d/fcheck: /usr/sbin/fcheck -asxrf  => 漏了 -d 参数。
 !!! aide 模仿 fcheck cron，加入 nice ionice -c3。
