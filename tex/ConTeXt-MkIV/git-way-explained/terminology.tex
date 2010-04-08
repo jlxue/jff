@@ -4,7 +4,7 @@
 \section{GIT 里的术语定义}
 
 GIT 里用 blob, tree, commit, tag 四种存储对象来描述版本控制
-所需信息，每一种存储对象都是以类型名字、内容长度、内容计算出
+所需信息，每一种存储对象都是以类型名字、内容长度以及内容计算出
 的 SHA1 摘要值命名，存放在 .git/objects/ 目录下的文件。
 
 \definedescription[term][location=top,headstyle=bold,width=broad]
@@ -14,11 +14,12 @@ GIT 里用 blob, tree, commit, tag 四种存储对象来描述版本控制
 \stopterm
 
 \startterm{tree}
-表示\in{第}{节}[basis]中的目录，不包括像 Subversion 那样的 property，
-只有文件权限位（无属组和属主信息)、对象类型(blob 还是
-tree)、SHA1 摘要值、文件或子目录名字。早期的 git 实现中
-tree 对象保存的是整个文件树的路径名清单，现在的实现中
-一个 tree 对象只保存某个目录下的一层信息;
+表示\in{第}{节}[basis]中的目录，不包括像 Subversion 那样的 property
+\footnote{GIT 有 git check-attr 和 git notes 命令，但这些信息并不是跟
+Subversion 一样记录在版本历史里，而是单独存放的}，只有文件权限位（无属组
+和属主信息)、对象类型(blob 还是tree)、SHA1 摘要值、文件或子目录名字。早
+期的 git 实现中tree 对象保存的是整个文件树的路径名清单，现在的实现中一个
+tree 对象只保存某个目录下的一层信息;
 \stopterm
 
 \startterm{commit}
@@ -29,23 +30,21 @@ tree 对象保存的是整个文件树的路径名清单，现在的实现中
 表示\in{第}{节}[basis]中静态标签。
 \stopterm
 
-值得一提的是 GIT 自称 content tracker 而非版本控制工具。
-这一思想在 blob 和 tree 记录的信息上有所体现，blob 和 tree
-只记录了绝对必要的{\bf 数据}(权限位虽然不必要但是在 UNIX 类
-系统上非常有用)，因为是 content tracker，所以 blob 和 tree
-不关心作者名字、类似 Subversion 那样的额外属性，这样两个作者
-声称数据内容一致(额外属性可以不一致)时，必然可以共用 blob
-和 tree 存储对象。这样做的好处是存储模型简单，节约空间，
-有利于分布式使用，坏处是少了 Subversion 那样方便的跟目录、
-文件关联的版本控制的属性功能。
+值得一提的是 GIT 自称 content tracker 而非版本控制工具。这一思想在 blob
+和 tree 记录的信息上有所体现，blob 和 tree只记录了绝对必要的{\em 数据}(
+权限位虽然不必要但是在 UNIX 类系统上非常有用)，因为是 content tracker，
+所以 blob 和 tree不关心作者名字、类似 Subversion 那样的额外属性，这样两
+个作者声称数据内容一致(额外属性可以不一致)时，必然可以共用 blob和 tree
+存储对象。这样做的好处是存储模型简单，节约空间，有利于分布式使用，坏处是
+少了 Subversion 那样方便的跟目录、文件关联的纳入版本控制的属性功能。
 
 content tracker 这个名字还体现在对 file 和 blob 的区分对待
 上：file 指 blob + file name。git 所关心的是文件内容的流向，
 并不显式记录复制、移动这些信息，这些信息是运行时根据文件
 内容流向动态分析出来的。这样做的好处是减轻了使用者的负担，
-据个人所见，很多 Subversion 用户在应该用 copy 时却用 add，
-导致版本库迅速膨胀，而且 svn log 里看不出来复制、移动信息。
-这样做的坏处自然是动态分析需要时间，单次变更集(change set)
+据个人所见，很多 Subversion 用户在应该用 svn copy 时却用 svn add，
+导致版本库迅速膨胀，用 svn log 也看不出来复制、移动信息。
+GIT 这样做的坏处自然是动态分析需要时间，单次变更集(change set)
 太大时效果不行，这就寄希望于更好的探测算法了──起码我们将来
 可以很容易补救。
 
@@ -82,9 +81,36 @@ GIT 之父 Linus Torvalds 惊天地泣鬼神前无古人后无来者先天下
 其实语义跟通常的版本控制系统还是有差别的，这往往让人迷惑。
 
 
-在 GIT 中还有两种引用(reference, 简称 ref)类型：head 和 tag，
-head 就是第一节中的动态标签，tag 也表示第一节中的静态标签，
-只是其存储方式比 tag 对象经济许多，被称为轻量级 tag。
+在 GIT 中比较容易混淆的一个术语是引用(reference, 简称 ref)类型，
+从字面上理解，引用就是对上面四种对象的标记，这是 GIT 对动态标签、
+静态标签等特性的实现机制，虽然是实现机制，但对使用有些晦涩的影响。
+
+GIT 中的引用的主要用途:
+\startterm{head}
+head 就是动态标签，分支头，记录一个分支的最新版本。保存在 .git/refs/heads/
+目录下，可以用全名 refs/heads/xxx 也可以用简名xxx。
+
+这种 ref 被 git branch、git checkout -b、git update-ref 创建、修改。
+\stopterm
+
+\startterm{tag}
+tag 就是静态标签，但从 GIT {\em 实现}里分两种，一种实现为普通的 tag object，保存
+在 .git/objects 下，另外在 .git/refs/tags/ 下额外保存一个 tag ref，内容是 tag 对
+象的 SHA1 摘要值。 这种 tag 用 git tag -a、git tag -u 或者 git tag -s 命令创建
+(注意如果没提供 -a/-u/-s 但提供了 -m 则隐含了 -a)，这种 tag 可以包含日志、签名、
+时间、创建者信息。
+
+另一种是用\type{git tag TAGNAME COMMIT-ISH} 创建的（没有 -m/-a/-u/-s)，这时没
+有创建 tag object，只是在 .git/refs/tags/ 下创建了 tag ref。这种 tag 被
+称为轻量级 tag，只有一个名字跟一个 SHA1 值，用于命名对象以备忘。
+
+两种 tag 实现方式都可以用 git tag 命令查看、修改。 另外 git update-ref 也能创建、
+修改 reference，也就是 .git/refs/ 下的文件。
+\stopterm
+
+除了上面两种主要用途外，ref 还被用于保存 note (被 git notes 命令使用) 以
+及 remote tracking branch(被 git remote、git fetch、git push、git pull
+等使用)。
 
 引用存放在 .git/refs/heads 和 .git/refs/tags 下(引用可以
 被打包集中存放在 .git/info/refs 或 .git/packed-refs 文件
@@ -93,14 +119,15 @@ head 就是第一节中的动态标签，tag 也表示第一节中的静态标�
 [ XXX: 术语跟 CVS、Subversion 很不一样，可怜我等呆瓜脑袋］
 
 
-更混乱的是还有一个 symbolic ref，保存在 .git/ 目录下的符号
-链接或者内容为 refs: refs/.... 的普通文件，比如 .git/HEAD
-内容一开始是 refs: refs/heads/master，表示当前 head 是
-master。
+更混乱的是还有一个 symbolic ref，用 git symbolic-ref 命令维护，
+保存在 .git/ 目录下的符号链接或者内容为 refs: refs/.... 的普通文件，
+比如 .git/HEAD 内容一开始是 refs: refs/heads/master，表示{\em 当前}
+head 是master。
 
 需要注意的是在命令行引用分支时，如果 symbolic ref 跟
 ref 重名，那么引用后者时要用 refs/heads/xxx 或者 heads/xxx
-这样的名字。
+这样的名字，关于这点在 git help rev-parse 的 SPECIFYING REVISIONS
+一节有说明。
 
 [ XXX: 够混淆]
 

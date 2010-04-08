@@ -3,11 +3,11 @@
 
 \section{版本库}
 
-版本库就是 .git 目录，用于保存{\bf 全局}版本演化图的
-{\bf 子集}和标签。git clone A B，然后 A 库和 B 库内
+版本库就是 .git 目录，用于保存{\em 全局}版本演化图的
+{\em 子图}和标签。git clone A B，然后 A 库和 B 库内
 各自修改提交了，从全局看，A 的修改者和 B 的修改者
 都是在扩展一个全局的版本图，只是两个库各自只包含了
-这个全局版本图的子集：
+这个全局版本图的子图：
 
 \startitemize[n,packed,broad]
 \item 起始情况
@@ -66,8 +66,8 @@ push 和 fetch 命令实现的(pull = fetch + merge)。
   这跟集中式的版本管理工具比如 Subversion 全局主分支是
   很不一样的;
 
-\item origin/master 是 git clone 自动建立的分支，用于跟踪
-  clone 来源的分支情况，存放在 .git/refs/remotes/origin/
+\item origin/master 是 git clone 自动建立的分支(术语叫 remote tracking
+   branch)，用于跟踪 clone 来源的分支情况，存放在 .git/refs/remotes/origin/
   下，用 git fetch 或者 git remote update 更新, 在
   .git/config 中 origin 定义了对方库地址;
 
@@ -76,22 +76,29 @@ push 和 fetch 命令实现的(pull = fetch + merge)。
   建立这样的分支)，在 .git/config 里定义了 master 分支的
   跟踪关系;
 
-\item GIT 的文档里称 origin/master 这样的为 remote branch，这个
-  叫法相当易混淆，从上面的图看来，分支首先分为远端库里的分支
-  和本地库里的分支，之间可以重名; 其次，每一个库里的分支又
-  分为 remote branch, tracking branch, normal branch。
-  remote branch 完全是用来同步对方库里的分支的，因此绝对
-  不要往 remote branch 上提交;
-  tracking branch 在无参数的 git pull 时会在同步完 remote
-  branch 后，将 remote branch 往 tracking branch 上合并，
-  在多人开发时这往往会冲突，因此也不建议往 tracking branch
-  上提交。
+\item GIT 的文档里称 origin/master 这样的为 remote tracking branch，
+  (原来叫 remote branch，这个叫法相当易混淆)，从上面
+  的图看来，分支首先分为远端库里的分支和本地库里的分支，之间可以重名;
+  其次，每一个库里的分支又分为 remote tracking branch, normal branch。
+  normal branch 可以在用 git checkout -b 或者 git branch 创建时指定
+  --track 选项以 track {\em remote tracking branch}，我们且称呼这种
+  normal branch 为 local tracking branch(在 .git/config 里有记录)。
 
-  [ XXX: tracking branch 太无厘头了, 实际上 remote branch
-   改叫 tracking branch 才合适，而原来的 tracking branch 以及
-   pull 命令不应该存在]
+  remote tracking branch 完全是用来同步对方库里的分支的，因此绝对
+  不要往 remote tracking branch 上提交(实际上用 git 高层命令也提交不了）;
+  无参数的 git pull 会在调用 git fetch 同步完 remote tracking branch 后，
+  再调用 git merge 将 remote tracking branch 往 local tracking branch 上合并，
+  前提是这个 local tracking branch 是当前分支。
 
-\item git branch -a 显示的 remote branch 列表并没有 remotes 前缀，
+  在多人开发时往往会发生冲突，git pull 的自动调用 git merge 行为很容易让新手
+  措手不及，因此建议多用 git fetch 加上 git merge 或者 git rebase，少用 git pull。
+  当然如果很清楚 git pull 的行为，那么 git pull 和 git pull --rebase 还是很方便的，
+  发生冲突也没什么，用 git reset --hard 或者 git rebase --abort 撤销 merge 和 rebase，
+  或者用 git mergetool 解决冲突，切记可以用 git log -g xxx 看到 xxx 分支头曾经
+  指向哪些版本，这样即使出乱子了也很容易恢复回去。
+
+
+\item git branch -a 显示的 remote tracking branch 列表并没有 remotes 前缀，
   而在 git 里分支只是用 .git/refs/heads 下某个文件记录的，因此
   可以建立一个 origin/master 分支，这样会导致 git branch -a
   的输出很迷惑人，可以用 remotes/origin/master 来显式指代
@@ -103,11 +110,12 @@ push 和 fetch 命令实现的(pull = fetch + merge)。
 \stopitemize
 
 理解 GIT 里的 branch(准确说是 branch head) 只是各人在全局版本图上的动态
-标签，以及 GIT repository 只是保存了这个全局版本图的子集，对于理解分布式
+标签，以及 GIT repository 只是保存了这个全局版本图的子图，对于理解分布式
 版本控制中的分支关系是非常重要的，千万不要把 GIT 里的 branch 理解成像
-Subversion 里那样一个线性的版本序列。GIT 里所称呼的 remote branch，不过
-是私有的一个标记，用来跟踪其它代码库里的某个 head，remote branch 需要
-不时的用 git fetch 同步才能和对应的 head 指向{\bf 全局}版本图中的同一个版本。
+Subversion 里那样一个线性的版本序列。GIT 里所称呼的 remote tracking branch，不过
+是私有的一个标记，用来跟踪其它代码库里的某个 head，remote tracking branch 需要
+不时的用 git fetch/git pull/git remote update 同步才能和对应的 head 指向{\em 全局}
+版本图中的同一个版本。
 
 \stopcomponent
 

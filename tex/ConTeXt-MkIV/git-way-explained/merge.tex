@@ -16,8 +16,8 @@ Fast forward 不知道怎么翻译才比较合适，头一次在 GIT 里见到
 }
 
 考虑\in{图}[fig:fastforward] 中的分支情况，master 分支
-在 test 分支分出去之后没有任何提交，也就是说 master 分支{\bf 真包含于}
-test 分支，这时在 master 分支{\bf 上}合并 test 分支，GIT 并不会创建一个
+在 test 分支分出去之后没有任何提交，也就是说 master 分支{\em 真包含于}
+test 分支，这时在 master 分支{\em 上}合并 test 分支，GIT 并不会创建一个
 新的 commit 对象以表达两个分支的合并，而是直接把 master 这个 head 修改成
 跟 test 这个 head 一致，这种特殊的合并就称为 fast forward，合并后的
 结果如\in{图}[fig:fastforward2]：
@@ -47,7 +47,7 @@ Subversion 允许分支存放在多个服务器上，但仍然按照 Subversion 
 并策略，那么除非我们显式的删除分支，分支的数目是只增不减的，这会给合并带
 来灾难性的困难。
 
-其次，fast forward 实际上{\bf 从全局看}是抹除了在 Subversion 这种版本控制
+其次，fast forward 实际上{\em 从全局看}是抹除了在 Subversion 这种版本控制
 工具里的“私有分支”。用过 Subversion 的人应该很习惯于建立一个私有分支，然后
 在上面修改，并不时的从其它分支上合并修改到私有分支，在这个私有分支上的每
 次提交都是分支拥有者的。而在 GIT 里，如果你不在自己的私有分支上提交，那么

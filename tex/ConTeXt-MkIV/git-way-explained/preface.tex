@@ -29,15 +29,16 @@ GIT 包装工具的做法被 GIT 吸收，可以说 GIT 正在成为一个怪物
 如果你要纳入版本控制的文件树规模不大\footnote{大于 500 MB 你就要慎重考虑
 了，Subversion 没有文件复制自动探测，用户如果粗心的用 svn add 来替代 svn
 copy，那么会导致版本库迅速膨胀，而且 Subversion 的工作拷贝实现原理比较低
-效，类似操作比起 GIT 慢得多，著名的开源项目 FreeBSD 从 CVS 转向 Subversion，
-我是觉得很可惜的。}，如果你不关心分布式开发，那么对于版本控制工具，我向
-你推荐Subversion， 集中式版本控制工具的佼佼者，有着非常友好的命令行和图
-形使用界面，否则，如果你不是必须使用 GIT，那么我推荐Mercurial，目前分布
-式版本控制工具里唯一可以跟 GIT 抗衡的选手\footnote{虽然我欣赏 Canonical
-的Ubuntu Linux 发行版，但是对它家的 Bazaar 并没有多大好感，从几次使用印
-象来看这东西效率太太太低了，表面友好的使用界面掩盖不住其繁复的设计。}，
-Sun的OpenJDK、OpenSolaris 这样的大规模项目都是使用Mercurial 管理的。这两
-者都已经被用在大量开源项目里，而且可移植性非常好。
+效，类似操作比起 GIT 慢得多，著名的开源项目 FreeBSD 从 CVS 转向
+Subversion，我是觉得很可惜的。}，如果你不关心分布式开发，那么对于版本控
+制工具，我向你推荐Subversion， 集中式版本控制工具的佼佼者，有着非常友好
+的命令行和图形使用界面\footnote{\from[TortoiseSVN]}，否则，如果你不是必
+须使用 GIT，那么我推荐Mercurial，目前分布式版本控制工具里唯一可以跟 GIT
+抗衡的选手\footnote{虽然我欣赏 Canonical的Ubuntu Linux 发行版，但是对它
+家的 Bazaar 并没有多大好感，从几次使用印象来看这东西效率太太太低了，表面
+友好的使用界面掩盖不住其繁复的设计。}，Sun的OpenJDK、OpenSolaris 这样的
+大规模项目都是使用Mercurial 管理的。Subversion和Mercurial都已经被用在大量
+开源项目里，跨平台移植性非常好。
 
 啰嗦了这么多，该说感谢致辞了，首先要感谢 NewSMTH BBS 的 donated 和 garfileo。
 大概是一年前，donated 非常耐心的给我介绍了 \ConTeXt，但那时能方便使用新
