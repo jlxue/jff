@@ -1,0 +1,27 @@
+http://blog.amhill.net/2010/01/27/linux-ftw-using-virtualbox-with-an-existing-windows-partition/
+
+1. 启动进 Windows，我的电脑 -> 属性 -> 硬件 -> 创建新的硬件配置，
+   可以用来禁用一些在 virtualbox 下用不了的驱动
+2. 启动进 Linux
+   $ /usr/bin/sudo aptitude install mbr
+   $ /sbin/install-mbr --force ~/.VirtualBox/fake.mbr
+
+   $ /usr/bin/sudo VBoxManage internalcommands listpartitions -rawdisk /dev/sda
+     找到 Type 列为 0x07 的分区，这是 windows 的分区 (用 fdisk -l 也能看
+出来)
+
+   $ /usr/bin/sudo VBoxManage internalcommands createrawvmdk \
+    -filename ~/.VirtualBox/raw-winxp.vmdk \
+    -rawdisk /dev/sda -partitions 1,5 \
+    -mbr ~/.VirtualBox/fake.mbr -relative -register
+
+    -partitions 后面是逗号分隔的分区列表，在上一步能看到。
+
+   $ /usr/bin/sudo chown YOU.YOUR_GROUP  ~/.VirtualBox/raw-winxp*.vmdk
+   $ /usr/bin/sudo adduser YOU disk
+
+   注销，重新登录 X window。
+
+3. 启动 VirtualBox，创建虚拟机，选择已有的磁盘镜像 raw-winxp.vmdk，配置
+   虚拟机属性，把 enable IO APIC 选择上(开了性能很低，但是不开无法正常启动)。
+
