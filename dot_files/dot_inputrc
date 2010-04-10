@@ -1,3 +1,5 @@
+$include /etc/inputrc
+
 "\C-n": menu-complete
 
 ## http://www.newsmth.net/bbscon.php?bid=392&id=337800
