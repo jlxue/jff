@@ -1,11 +1,23 @@
 #!/bin/bash
+#
+# Run `perldoc ./jump.pl` for document.
+#
+# Author:
+#   Liu Yubao <yubao.liu at gmail.com>
+#
+# License:
+#   GPL v3
+#
+# ChangeLog:
+#   2010-04-15  Liu Yubao
+#       * initial release, v0.1
 
-__JUMP_PL=jump.pl
 
 j () {
     declare -a candidates
     declare -i i=0
     local from
+    local __JUMP_PL=jump.pl
 
     [ "$1" = "-" -o -d "$1" ] && {
         from=$PWD
@@ -50,6 +62,4 @@ j () {
         }
     done
 }
-
-unset __JUMP_PL
 

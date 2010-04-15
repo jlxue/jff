@@ -1,4 +1,17 @@
 #!/usr/bin/perl -w
+#
+# Run `perldoc ./jump.pl` for document.
+#
+# Author:
+#   Liu Yubao <yubao.liu at gmail.com>
+#
+# License:
+#   GPL v3
+#
+# ChangeLog:
+#   2010-04-15  Liu Yubao
+#       * initial release, v0.1
+
 use strict;
 use warnings;
 
@@ -6,7 +19,8 @@ use Cwd;
 use Fcntl qw/:DEFAULT :flock/;
 use File::Spec;
 use Getopt::Long;
-use Smart::Comments '###';
+use Pod::Usage;
+#use Smart::Comments '###';
 use Storable qw/store_fd fd_retrieve lock_retrieve/;
 use Term::ANSIColor;
 
@@ -25,6 +39,9 @@ use constant    {
 
 ######################################################################
 ## global variables
+my $g_opt_help = 0;
+my $g_opt_man = 0;
+my $g_opt_version = 0;
 my $g_history_file = File::Spec->catfile($ENV{'HOME'}, HISTORY_FILE);
 my $g_history;              # hash of working directories to HistoryItems
 my @g_history_changed;      # changed entries to $g_history
@@ -39,9 +56,19 @@ my %g_action_handler = (
 
 ######################################################################
 ## parse options
-GetOptions("--from=s"    => \$g_opt_from_work_dir,
-           "--action=s"  => \$g_opt_action,
+GetOptions("from=s"    => \$g_opt_from_work_dir,
+           "action=s"  => \$g_opt_action,
+           "help|?"    => \$g_opt_help,
+           "man"       => \$g_opt_man,
+           "version"   => \$g_opt_version,
           );
+pod2usage(1) if $g_opt_help;
+pod2usage(-exitstatus => 0, -verbose => 2) if $g_opt_man;
+if ($g_opt_version) {
+    print "$0 v0.1, by Liu Yubao <yubao.liu at gmail.com>\n";
+    exit 0;
+}
+
 if (defined $g_opt_from_work_dir) {
     $g_opt_from_work_dir = File::Spec->rel2abs(File::Spec->canonpath($g_opt_from_work_dir));
 } else {
@@ -161,12 +188,12 @@ sub choice_directory {
         }
         close $pipe;
 
-        print "Which directory? ";
+        print "Which directory? [0 to quit, 1 ~ ", scalar(@candidates), " to select, or view again] ";
         $choice = <STDIN>;
         chomp $choice;
         $choice =~ s/^\s+//;
 
-        return undef if $choice =~ /^q/i;
+        return undef if $choice eq '0';
     } while ($choice <= 0 || $choice > @candidates);
 
     return $candidates[$choice - 1];
@@ -211,4 +238,96 @@ sub safe_store_history {
 
     return $ret;
 }
+
+__END__
+
+=head1 NAME
+
+jump.pl - auxiliary script to quickly jump among directores in Unix/Linux shell
+
+=head1 SYNOPSIS
+
+jump.pl [options] [new_working_directory]
+
+ Options:
+    --action, -a    specify an action: add, search(default), prune, dump
+    --help, -h, -?  brief help message
+    --man, -m       full documentation
+    --version, -v   version information
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<--action>
+
+Specified which action to take, default action is search.
+
+=over 8
+
+=item B<--action add [ -f old_PWD ] PWD>
+
+Add a history entry, jump from old_PWD to PWD directory.
+
+=item B<--action search [pattern]>
+
+Search a history entry with pattern in Perl regexp grammar.
+
+=item B<--action prune>
+
+Prune history entries which corresponding directores don't exist any more.
+
+=item B<--action dump>
+
+Only for debug purpose, dump the jump history.
+
+=back
+
+=item B<--help>
+
+Print a brief help message and exits.
+
+=item B<--man>
+
+Prints the manual page and exits.
+
+=item B<--version>
+
+Prints version information and exits.
+
+=back
+
+=head1 DESCRIPTION
+
+B<jump.pl> stores its history entires in $HOME/.jump_history with Perl's
+Storable module.
+
+It's better use this script with its companion shell script "jump.sh".
+
+Installation:
+
+   export PATH=$PATH:$HOME/bin
+   mv jump.pl $HOME/bin/
+   . jump.pl
+
+Usage:
+
+   j /home
+   j /boot
+   j            # select in all history entries
+   j me         # select in history entries filter by a pattern
+
+=head1 LICENSE
+
+This script is licensed under GPL v3.
+
+=head1 AUTHOR
+
+Liu Yubao <yubao.liu at gmail.com>
+
+=head1 SEE ALSO
+
+autojump <http://wiki.github.com/joelthelion/autojump/>
+
+=cut
 
