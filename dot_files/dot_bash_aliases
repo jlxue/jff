@@ -47,3 +47,6 @@ u () {
     fi
 }
 
+# for j() function
+. $HOME/bin/jump.sh
+
