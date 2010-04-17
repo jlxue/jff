@@ -377,6 +377,7 @@ Extras.Sync.Menu = Core.extend(Echo.Render.ComponentSync, {
     /** @see Echo.Render.ComponentSync#renderUpdate */
     renderDispose: function(update) {
         this.deactivate();
+        this.element = null;
     },
     
     /** @see Echo.Render.ComponentSync#renderFocus */
@@ -1001,7 +1002,7 @@ Extras.Sync.ContextMenu = Core.extend(Extras.Sync.Menu, {
     
     /** @see Echo.Render.ComponentSync#renderUpdate */
     renderUpdate: function(update) {
-        if (update.isUpdatedPropertySetIn({ stateModel: true, model: true })) {
+        if (update.isUpdatedPropertySetIn({ modal: true, stateModel: true, model: true })) {
             // partial update
             var removedChildren = update.getRemovedChildren();
             if (removedChildren) {
@@ -1478,47 +1479,57 @@ Extras.Sync.MenuBarPane = Core.extend(Extras.Sync.Menu, {
         var menuBarTr = document.createElement("tr");
         menuBarTbody.appendChild(menuBarTr);
         
-        if (this.menuModel != null) {
+        if (this.menuModel == null || this.menuModel.items.length === 0) {
+            menuBarTr.appendChild(this._createMenuBarItem("\u00a0", null));
+        } else {
             var items = this.menuModel.items;
             for (var i = 0; i < items.length; ++i) {
                 var item = items[i];
                 if (item instanceof Extras.OptionModel || item instanceof Extras.MenuModel) {
-                    var menuBarItemTd = document.createElement("td");
-                    this.itemElements[item.id] = menuBarItemTd;
-                    menuBarItemTd.style.padding = "0px";
-                    menuBarItemTd.style.cursor = "pointer";
+                    var menuBarItemTd = this._createMenuBarItem(item.text, item.icon);
                     menuBarTr.appendChild(menuBarItemTd);
-                    var menuBarItemDiv = document.createElement("div");
-                    menuBarItemDiv.style.whiteSpace = "nowrap";
-                    Echo.Sync.Insets.render(Extras.Sync.MenuBarPane.DEFAULTS.itemInsets, menuBarItemDiv, "padding");
-                    menuBarItemTd.appendChild(menuBarItemDiv);
-                    if (item.icon) {
-                        // FIXME no load listeners being set on images for auto-resizing yet.
-                        var img = document.createElement("img");
-                        img.style.verticalAlign = "middle";
-                        img.src = item.icon;
-                        menuBarItemDiv.appendChild(img);
-                        if (item.text) {
-                            // FIXME Does not handle RTL.
-                            img.style.paddingRight = "1ex";
-                        }
-                    }
-                    if (item.text) {
-                        var textSpan = document.createElement("span");
-                        textSpan.style.verticalAlign = "middle";
-                        textSpan.appendChild(document.createTextNode(item.text));
-                        menuBarItemDiv.appendChild(textSpan);
-                    }
+                    this.itemElements[item.id] = menuBarItemTd;
                 }
             }
+
+            Core.Web.Event.add(menuBarDiv, "click", Core.method(this, this._processClick), false);
+            Core.Web.Event.add(menuBarDiv, "mouseover", Core.method(this, this._processItemEnter), false);
+            Core.Web.Event.add(menuBarDiv, "mouseout", Core.method(this, this._processItemExit), false);
         }
         
-        Core.Web.Event.add(menuBarDiv, "click", Core.method(this, this._processClick), false);
-        Core.Web.Event.add(menuBarDiv, "mouseover", Core.method(this, this._processItemEnter), false);
-        Core.Web.Event.add(menuBarDiv, "mouseout", Core.method(this, this._processItemExit), false);
         Core.Web.Event.Selection.disable(menuBarDiv);
-    
+        
         return menuBarDiv;
+    },
+    
+    _createMenuBarItem: function(text, icon) {
+        var menuBarItemTd = document.createElement("td");
+        menuBarItemTd.style.padding = "0px";
+        menuBarItemTd.style.cursor = "pointer";
+        
+        var menuBarItemDiv = document.createElement("div");
+        menuBarItemDiv.style.whiteSpace = "nowrap";
+        Echo.Sync.Insets.render(Extras.Sync.MenuBarPane.DEFAULTS.itemInsets, menuBarItemDiv, "padding");
+        
+        menuBarItemTd.appendChild(menuBarItemDiv);
+        if (icon) {
+            // FIXME no load listeners being set on images for auto-resizing yet.
+            var img = document.createElement("img");
+            img.style.verticalAlign = "middle";
+            img.src = icon;
+            menuBarItemDiv.appendChild(img);
+            if (text) {
+                // FIXME Does not handle RTL.
+                img.style.paddingRight = "1ex";
+            }
+        }
+        if (text) {
+            var textSpan = document.createElement("span");
+            textSpan.style.verticalAlign = "middle";
+            textSpan.appendChild(document.createTextNode(text));
+            menuBarItemDiv.appendChild(textSpan);
+        }
+        return menuBarItemTd;
     },
     
     /**

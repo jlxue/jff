@@ -583,21 +583,14 @@ Echo.Component = Core.extend({
         focusable: false,
 
         /**
-         * Returns the child component at the specified index after sorting the
-         * children in the order which they should be focused. The default
-         * implementation simply returns the same value as getComponent().
-         * Implementations should override this method when the natural order to
-         * focus child components is different than their normal ordering (e.g.,
-         * when the component at index 1 is positioned above the component at
-         * index 0).
+         * Returns the order in which child components should be focused.
+         * The natural order in which child components should be focused should be returned, without necessarily investigating
+         * whether those children are focusable.  A value of null may be returned if the components should be focused in the
+         * sequential order.
          * 
-         * @param {Number} index the index of the child (in focus order)
-         * @return the child component
-         * @type Echo.Component
+         * @return Array an array of child indices
          */
-        getFocusComponent: function(index) {
-            return this.children[index];
-        },
+        getFocusOrder: null,
         
         /**
          *  Flag indicating whether component is rendered as a pane (pane components consume available height).
@@ -1436,7 +1429,7 @@ Echo.FocusManager = Core.extend({
         
         while (true) {
             // The candidate next component to be focused.
-            var nextComponent = null, componentIndex;
+            var nextComponent = null;
 
             if ((reverse && component == originComponent) || (lastComponent && lastComponent.parent == component)) {
                 // Searching in reverse on origin component (OR) Previously moved up: do not move down.
@@ -1445,7 +1438,13 @@ Echo.FocusManager = Core.extend({
                 if (componentCount > 0) {
                     // Attempt to move down.
                     // Next component is first child (searching forward) or last child (searching reverse).
-                    nextComponent = component.getComponent(reverse ? componentCount - 1 : 0);
+                    var focusOrder = this._getFocusOrder(component);
+                    if (focusOrder) {
+                        nextComponent = component.getComponent(focusOrder[reverse ? componentCount - 1 : 0]);
+                    } else {
+                        nextComponent = component.getComponent(reverse ? componentCount - 1 : 0);
+                    }
+                    
                     if (visitedComponents[nextComponent.renderId]) {
                         // Already visited children, cancel the move.
                         nextComponent = null;
@@ -1456,18 +1455,7 @@ Echo.FocusManager = Core.extend({
             if (nextComponent == null) {
                 // Attempt to move to next/previous sibling.
                 if (component.parent) {
-                    // Get previous sibling.
-                    if (reverse) {
-                        componentIndex = component.parent.indexOf(component);
-                        if (componentIndex > 0) {
-                            nextComponent = component.parent.getComponent(componentIndex - 1);
-                        }
-                    } else {
-                        componentIndex = component.parent.indexOf(component);
-                        if (componentIndex < component.parent.getComponentCount() - 1) {
-                            nextComponent = component.parent.getComponent(componentIndex + 1);
-                        }
-                    }
+                    nextComponent = this._getNextCandidate(component, reverse);
                 }
             }
 
@@ -1567,6 +1555,78 @@ Echo.FocusManager = Core.extend({
             return -1;
         }
         return parent.indexOf(descendant);
+    },
+    
+    /**
+     * Returns and validates the component's natural focus order, if provided.
+     * Null is returned in the event the component's natural focus order is invalid, i.e., one or more component
+     * indices are repeated.
+     * 
+     * @param {Echo.Component} component the component
+     * @return the focus order, an array of component indices
+     * @type Array
+     */
+    _getFocusOrder: function(component) {
+        var focusOrder = component.getFocusOrder ? component.getFocusOrder() : null;
+        if (!focusOrder) {
+            return null;
+        }
+        
+        var testOrder = focusOrder.slice().sort();
+        for (var i = 1; i < testOrder.length; ++i) {
+            if (testOrder[i - 1] >= testOrder[i]) {
+                // Invalid focus order.
+                Core.Debug.consoleWrite("Invalid focus order for component " + component + ": " + focusOrder);
+                return null;
+            }
+        }
+
+        return focusOrder;
+    },
+    
+    /**
+     * Returns the next sibling candidate focus component adjacent the specified component.
+     * Uses the focus order provided by <code>Echo.Component.getFocusOrder()</code> if provided.
+     * 
+     * @param {Echo.Component} component the current focused/analyzed component
+     * @param {Boolean} reverse flag indicating whether next component (false) or previous copmonent (true)
+     *        should be returned
+     * @return the next focus candidate
+     * @type Echo.Component
+     */
+    _getNextCandidate: function(component, reverse) {
+        if (!component.parent) {
+            return null;
+        }
+        
+        var focusOrder = this._getFocusOrder(component.parent);
+        var componentIndex, orderIndex;
+        
+        if (reverse) {
+            componentIndex = component.parent.indexOf(component);
+            if (focusOrder) {
+                orderIndex = Core.Arrays.indexOf(focusOrder, componentIndex);
+                if (orderIndex > 0) {
+                    return component.parent.children[focusOrder[orderIndex - 1]];
+                }
+            } else {
+                if (componentIndex > 0) {
+                    return component.parent.getComponent(componentIndex - 1);
+                }
+            }
+        } else {
+            componentIndex = component.parent.indexOf(component);
+            if (focusOrder) {
+                orderIndex = Core.Arrays.indexOf(focusOrder, componentIndex);
+                if (orderIndex < focusOrder.length - 1) {
+                    return component.parent.children[focusOrder[orderIndex + 1]];
+                }
+            } else {
+                if (componentIndex < component.parent.getComponentCount() - 1) {
+                    return component.parent.getComponent(componentIndex + 1);
+                }
+            }
+        }
     }
 });
 
@@ -2996,7 +3056,8 @@ Echo.ContentPane = Core.extend(Echo.Component, {
  * @sp {#Border} border the border displayed around the grid, and between cells
  * @sp {#Extent} columnWidth an indexed property whose indices represent the
  *     width of each column of the grid
- * @sp {#Extent} height the overall height of the grid
+ * @sp {#Extent} height the overall height of the grid (may not be specified
+ *     as a percentage value)
  * @sp {#Insets} insets the default inset margin displayed in each cell
  * @sp {Number} orientation a value indicating whether the grid will be laid out
  *     horizontally and then vertically or vice-versa, one of the following
@@ -3007,7 +3068,7 @@ Echo.ContentPane = Core.extend(Echo.Component, {
  *     <li><code>ORIENTATION_VERTICAL</code> lay children out vertically,
  *     then horizontally</li>
  *     </ul>
- * @sp {#Extent} rowWidth an indexed property whose indices represent the height
+ * @sp {#Extent} rowHeight an indexed property whose indices represent the height
  *     of each row of the grid
  * @sp {Number} size the number of cells to render before wrapping to the next
  *     column/row (default 2)
@@ -3165,7 +3226,7 @@ Echo.Row = Core.extend(Echo.Component, {
  * @ldp {#Alignment} alignment the alignment of the child component within its
  *      subpane
  * @ldp {#Color} background the background of the child component's subpane
- * @ldp {#FillImage} backrgoundImage the background image of the child
+ * @ldp {#FillImage} backgroundImage the background image of the child
  *      component's subpane
  * @ldp {#Insets} insets the insets margin of the child component's subpane
  * @ldp {#Extent} maximumSize the maximum size of the child component's subpane
@@ -3270,12 +3331,32 @@ Echo.SplitPane = Core.extend(Echo.Component, {
     componentType: "SplitPane",
 
     /** @see Echo.Component#pane */
-    pane: true
+    pane: true,
+    
+    /** @see Echo.Component#getFocusOrder */
+    getFocusOrder: function() {
+        if (this.children.length < 2) {
+            return null;
+        }
+        
+        switch (this.render("orientation")) {
+        case Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP:
+        case Echo.SplitPane.ORIENTATION_HORIZONTAL_TRAILING_LEADING:
+            return [1, 0];
+        case Echo.SplitPane.ORIENTATION_HORIZONTAL_LEFT_RIGHT:
+            return this.getRenderLayoutDirection().isLeftToRight() ? null : [1, 0]; 
+        case Echo.SplitPane.ORIENTATION_HORIZONTAL_RIGHT_LEFT:
+            return this.getRenderLayoutDirection().isLeftToRight() ? [1, 0] : null; 
+        default:
+            return null;
+        }
+    }
 });
 
 /**
  * Abstract base class for text-entry components.
  * 
+ * @cp {String} text the text value
  * @sp {String} actionCommand the action command fired when the enter key is
  *     pressed within the text component
  * @sp {#Alignment} alignment an alignment setting describing the alignment of
@@ -3288,6 +3369,7 @@ Echo.SplitPane = Core.extend(Echo.Component, {
  * @sp {#Border} disabledBorder the disabled border
  * @sp {#Font} disabledFont the disabled font
  * @sp {#Color} disabledForeground the disabled foreground color
+ * @sp {Boolean} editable flag indicating whether field is editable (true) or read-only (false); default value is true
  * @sp {#Extent} height the height of the component
  * @sp {#Extent} horizontalScroll the horizontal scrollbar position
  * @sp {#Insets} insets the inset margin between the border and the text content
@@ -3404,6 +3486,8 @@ Echo.PasswordField = Core.extend(Echo.TextField, {
  *     content area
  * @sp {#FillImageBorder} border the border frame containing the WindowPane
  * @sp {Boolean} closable flag indicating whether the window is closable
+ * @sp {Number} closeAnimationTime the duration of the close animation, in 
+ *     milliseconds (default/zero value will result in no animation)
  * @sp {#ImageReference} closeIcon the close button icon
  * @sp {#Insets} closeIconInsets the inset margin around the close button icon
  * @sp {#ImageReference} closeRolloverIcon the close button rollover icon
@@ -3432,7 +3516,11 @@ Echo.PasswordField = Core.extend(Echo.TextField, {
  * @sp {#ImageReference} minimizeRolloverIcon the minimize button rollover icon
  * @sp {#Extent} minimumHeight the minimum height of the window
  * @sp {#Extent} minimumWidth the minimum width of the window
+ * @sp {Boolean} modal flag indicating whether the window is modal (and will thus
+ *     block input to components not contained within it)
  * @sp {Boolean} movable flag indicating whether the window is movable
+ * @sp {Number} openAnimationTime the duration of the open animation, in 
+ *     milliseconds (default/zero value will result in no animation)
  * @sp {#Extent} positionX the horizontal (x) position of the window
  * @sp {#Extent} positionY the vertical (y) position of the window
  * @sp {Boolean} resizable flag indicating whether the window is resizable

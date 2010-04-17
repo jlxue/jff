@@ -51,6 +51,7 @@ Core.Web = {
     
         if (Core.Web.Env.ENGINE_MSHTML) {
             Core.Web.DOM.addEventListener(document, "selectstart", Core.Web._selectStartListener, false);
+            Core.Web.DOM.addEventListener(document, "dragstart", Core.Web._selectStartListener, false);
         }
         
         Core.Web.initialized = true;
@@ -79,7 +80,7 @@ Core.Web.DOM = {
      * Temporary storage for the element about to be focused (for clients that require 'delayed' focusing).
      */
     _focusPendingElement: null,
-    
+
     /**
      * Runnable to invoke focus implementation (lazily created).
      * @type Core.Web.Scheduler.Runnable
@@ -150,38 +151,58 @@ Core.Web.DOM = {
      * The focus operation may be placed in the scheduler if the browser requires the focus
      * operation to be performed outside of current JavaScript context (i.e., in the case
      * where the element to be focused was just rendered in this context).
+     * Passing a null element argument will cancel any scheduler runnable attempting to 
+     * set the focus.
      * 
      * @param {Element} element the DOM element to focus
      */
     focusElement: function(element) {
-        if (Core.Web.Env.QUIRK_DELAYED_FOCUS_REQUIRED) {
-            if (!this._focusRunnable) {
-                this._focusRunnable = new Core.Web.Scheduler.MethodRunnable(this._focusElementImpl);
-            }
-            Core.Web.DOM._focusPendingElement = element;
-            Core.Web.Scheduler.add(this._focusRunnable);
-        } else {
-            this._focusElementImpl(element);
+        if (!this._focusRunnable) {
+            this._focusRunnable = new (Core.extend(Core.Web.Scheduler.Runnable, {
+                
+                repeat: true,
+                
+                attempt: 0,
+                
+                timeInterval: 25,
+            
+                run: function() {
+                    element = Core.Web.DOM._focusPendingElement;
+                    Core.Debug.consoleWrite("Focus:" + element + "/" + element.id + "/" + Core.Web.DOM.isDisplayed(element));
+                    
+                    var done = false;
+                    if (Core.Web.DOM.isDisplayed(element)) {
+                        done = true;
+                        try {
+                            element.focus();
+                        } catch (ex) {
+                            // Silently digest IE focus exceptions.
+                        }
+                    }
+                    
+                    done |= this.attempt > 25;
+                    
+                    ++this.attempt;
+                    
+                    if (done) {
+                        Core.Web.DOM._focusPendingElement = null;
+                        Core.Web.Scheduler.remove(this);
+                    }
+                }
+            }))();
         }
-    },
-    
-    /**
-     * Focus element implementation.
-     * 
-     * @param {Element} element the DOM element to focus
-     */
-    _focusElementImpl: function(element) {
-        if (!element) {
-            element = Core.Web.DOM._focusPendingElement;
+
+        if (!(element && element.focus && Core.Web.DOM.isAncestorOf(document.body, element))) {
+            // Cancel and return.
             Core.Web.DOM._focusPendingElement = null;
+            Core.Web.Scheduler.remove(this._focusRunnable);
+            return;
         }
-        if (element && element.focus) {
-            try {
-                element.focus();
-            } catch (ex) {
-                // Silently digest IE focus exceptions.
-            }
-        }
+        
+        this._focusPendingElement = element;
+        
+        this._focusRunnable.attempt = 0;
+        Core.Web.Scheduler.add(this._focusRunnable);
     },
     
     /**
@@ -283,11 +304,46 @@ Core.Web.DOM = {
      */
     isAncestorOf: function(ancestorNode, descendantNode) {
         var testNode = descendantNode;
-        while (testNode !== null) {
+        while (testNode != null) {
             if (testNode == ancestorNode) {
                 return true;
             }
             testNode = testNode.parentNode;
+        }
+        return false;
+    },
+    
+    /**
+     * Determines if the given node is theoretically dispalyed within the document.
+     * The following conditions are verified:
+     * <ul>
+     *  <li><code>node</code> must be a descendant of <code>document.body</code></li>
+     *  <li><code>node</code>'s element ancestry must not contain a element whose CSS <code>visibility</code> state is 
+     *    <code>hidden</code></li>
+     *  <li><code>node</code>'s element ancestry must not contain a element whose CSS <code>display</code> state is 
+     *    <code>none</code></li>
+     * </ul>
+     * 
+     * @param {Node} node to analyze
+     * @return true if the node is displayed 
+     */
+    isDisplayed: function(node) {
+        while (node != null) {
+            if (node.nodeType == 1) {
+                if (node.style) {
+                    if (node.style.visibility == "hidden") {
+                        return false;
+                    }
+                    if (node.style.display == "none") {
+                        return false;
+                    }
+                }
+            }
+            
+            if (node == document.body) {
+                return true;
+            }
+            node = node.parentNode;
         }
         return false;
     },
@@ -828,14 +884,14 @@ Core.Web.Env = {
             this.MEASURE_OFFSET_EXCLUDES_BORDER = true;
             this.QUIRK_IE_BLANK_SCREEN = true;
             this.QUIRK_IE_HAS_LAYOUT = true;
+            this.NOT_SUPPORTED_CSS_OPACITY = true;
+            this.PROPRIETARY_IE_OPACITY_FILTER_REQUIRED = true;
             
             if (this.BROWSER_VERSION_MAJOR < 8) {
                 // Internet Explorer 6 and 7 Flags.
                 this.QUIRK_TABLE_CELL_WIDTH_EXCLUDES_PADDING = true;
                 this.NOT_SUPPORTED_RELATIVE_COLUMN_WIDTHS = true;
                 this.QUIRK_CSS_BORDER_COLLAPSE_INSIDE = true;
-                this.NOT_SUPPORTED_CSS_OPACITY = true;
-                this.PROPRIETARY_IE_OPACITY_FILTER_REQUIRED = true;
                 this.QUIRK_IE_TABLE_PERCENT_WIDTH_SCROLLBAR_ERROR = true;
                 this.QUIRK_IE_SELECT_PERCENT_WIDTH = true;
                 
@@ -1525,6 +1581,11 @@ Core.Web.HttpConnection = Core.extend({
 Core.Web.Image = {
     
     /**
+     * Expiration time, after which an image monitor will give up.
+     */
+    _EXPIRE_TIME: 5000,
+    
+    /**
      * Work object for monitorImageLoading() method.
      */
     _Monitor: Core.extend({
@@ -1533,16 +1594,22 @@ Core.Web.Image = {
         _processImageLoadRef: null,
         
         /** Currently enqueued runnable. */
-        _queuedRunnable: null,
+        _runnable: null,
         
         /** Listener to notify of successful image loadings. */
         _listener: null,
         
-        /** Minimum Listener callback interval. */
-        _interval: null,
+        /** Images with remaining load listeners. */
+        _images: null,
         
         /** The number of images to be loaded. */
         _count: 0,
+        
+        /** Expiration time.  When system time is greater than this value, monitor will give up. */
+        _expiration: null,
+        
+        /** Flag indicating whether one or more images have been loaded since last update. */ 
+        _imagesLoadedSinceUpdate: false,
         
         /**
          * Creates a new image monitor.
@@ -1553,15 +1620,25 @@ Core.Web.Image = {
          */
         $construct: function(element, listener, interval) {
             this._listener = listener;
-            this._interval = interval || 250;
             this._processImageLoadRef = Core.method(this, this._processImageLoad);
-            var imgs = element.getElementsByTagName("img");
-            this._count = imgs.length;
-            for (var i = 0; i < this._count; ++i) {
-                if (!imgs[i].complete && (Core.Web.Env.QUIRK_UNLOADED_IMAGE_HAS_SIZE || 
-                        (!imgs[i].height && !imgs[i].style.height))) {
-                    Core.Web.DOM.addEventListener(imgs[i], "load", this._processImageLoadRef, false);
+            
+            this._runnable = new Core.Web.Scheduler.MethodRunnable(Core.method(this, this._updateProgress), interval || 250, true);
+            
+            // Find all images beneath element, register load listeners on all which are not yet loaded.
+            var nodeList = element.getElementsByTagName("img");
+            this._images = [];
+            for (var i = 0; i < nodeList.length; ++i) {
+                if (!nodeList[i].complete && (Core.Web.Env.QUIRK_UNLOADED_IMAGE_HAS_SIZE || 
+                        (!nodeList[i].height && !nodeList[i].style.height))) {
+                    this._images.push(nodeList[i]);
+                    Core.Web.Event.add(nodeList[i], "load", this._processImageLoadRef, false);
                 }
+            }
+            
+            this._count = this._images.length;
+            if (this._count > 0) {
+                this._expiration = new Date().getTime() + Core.Web.Image._EXPIRE_TIME;
+                Core.Web.Scheduler.add(this._runnable);
             }
         },
         
@@ -1572,19 +1649,71 @@ Core.Web.Image = {
          */
         _processImageLoad: function(e) {
             e = e ? e : window.event;
-            Core.Web.DOM.removeEventListener(Core.Web.DOM.getEventTarget(e), "load", this._processImageLoadRef, false);
+            var image = Core.Web.DOM.getEventTarget(e);
+            
+            this._imagesLoadedSinceUpdate = true;
+            
+            // Remove listener.
+            Core.Web.Event.remove(image, "load", this._processImageLoadRef, false);
+            
+            // Remove image from list of images to be loaded.
+            Core.Arrays.remove(this._images, image);
+            
+            // Decrement remaining image count.
             --this._count;
             
-            if (this._queuedRunnable && this._count === 0) {
-                Core.Web.Scheduler.remove(this._queuedRunnable);
-                this._queuedRunnable = null;
+            // If runnable is enqueued and no more images now remain to be loaded,
+            // remove the enqueued runnable, perform immediate notification.
+            if (this._count === 0) {
+                this._stop();
+                this._notify();
+            }
+        },
+        
+        /**
+         * Notifies the listener of images having been loaded or expiration of the monitor. 
+         */
+        _notify: function() {
+            Core.Web.Scheduler.run(Core.method(this, function() {
+                this._listener({
+                    source: this,
+                    type: "imageLoad",
+                    expired: this._expired,
+                    complete: this._expired || this._count === 0
+                });
+            }));
+        },
+        
+        /**
+         * Stops monitoring.
+         */
+        _stop: function() {
+            // Remove runnable.
+            Core.Web.Scheduler.remove(this._runnable);
+            this._runnable = null;
+            
+            // Disconnect listeners from images.
+            for (var i = 0; i < this._images.length; ++i) {
+                Core.Web.Event.remove(this._images[i], "load", this._processImageLoadRef, false);
+            }
+        },
+        
+        /**
+         * Scheduled method invoked at intervals to monitor progress.
+         */
+        _updateProgress: function() {
+            // Stop if beyond expiration time.
+            if (new Date().getTime() > this._expiration) {
+                this._expired = true;
+                this._stop();
+                this._notify();
+                return;
             }
             
-            if (!this._queuedRunnable) {
-                this._queuedRunnable = Core.Web.Scheduler.run(Core.method(this, function() {
-                    this._queuedRunnable = null;
-                    this._listener();
-                }), this._count === 0 ? 0 : this._interval);
+            // Perform notification if new images have loaded.
+            if (this._imagesLoadedSinceUpdate) {
+                this._imagesLoadedSinceUpdate = false;
+                this._notify();
             }
         }
     }),
@@ -1599,9 +1728,11 @@ Core.Web.Image = {
      * @param {Function} l the method to invoke when images are loaded.
      * @param {Number} interval the maximum time interval at which the listener should be invoked (default value is 50ms, 
      *        the listener will be invoked immediately once all images have loaded)
+     * @return true if images are waiting to be loaded
      */
     monitor: function(element, l, interval) {
         var monitor = new Core.Web.Image._Monitor(element, l, interval);
+        return monitor._count > 0;
     }
 };
 

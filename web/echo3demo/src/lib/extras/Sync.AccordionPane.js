@@ -7,6 +7,12 @@ Extras.Sync.AccordionPane = Core.extend(Echo.Render.ComponentSync, {
     $static: {
     
         /**
+         * Supported partial update properties. 
+         * @type Array
+         */
+        _supportedPartialProperties: { "activeTabId": true, "activeTabIndex": true },
+
+        /**
          * Default component property settings, used when supported component object does not provide settings. 
          */
         _DEFAULTS: {
@@ -149,6 +155,16 @@ Extras.Sync.AccordionPane = Core.extend(Echo.Render.ComponentSync, {
     },
     
     /**
+     * Capturing Mouseover/out listener to prevent rollover effects from firing on children during transitions.
+     * Returns false if transition present.
+     * 
+     * @param e the rollover event
+     */
+    _processRollover: function(e) {
+        return !this.rotation;
+    },
+    
+    /**
      * Immediately redraws tabs in the appropriate positions, exposing the content of the 
      * selected tab.  Any active animated rotation is aborted.
      * 
@@ -212,6 +228,10 @@ Extras.Sync.AccordionPane = Core.extend(Echo.Render.ComponentSync, {
         this.div.style.cssText = "position:absolute;width:100%;height:100%;";
         Echo.Sync.renderComponentDefaults(this.component, this.div);
         
+        var rolloverMethod = Core.method(this, this._processRollover);
+        Core.Web.Event.add(this.div, "mouseover", rolloverMethod, true);
+        Core.Web.Event.add(this.div, "mouseout", rolloverMethod, true);
+        
         var componentCount = this.component.getComponentCount();
         for (var i = 0; i < componentCount; ++i) {
             var child = this.component.getComponent(i);
@@ -247,6 +267,7 @@ Extras.Sync.AccordionPane = Core.extend(Echo.Render.ComponentSync, {
     
     /** @see Echo.Render.ComponentSync#renderDispose */
     renderDispose: function(update) {
+        Core.Web.Event.removeAll(this.div);
         this.component.removeListener("tabSelect", this._tabSelectListenerRef);
 
         if (this.rotation) {
@@ -268,8 +289,8 @@ Extras.Sync.AccordionPane = Core.extend(Echo.Render.ComponentSync, {
             // Add/remove/layout data change: full render.
             fullRender = true;
         } else {
-            var propertyNames = update.getUpdatedPropertyNames();
-            if (propertyNames.length == 1 && propertyNames[0] == "activeTabId") {
+            if (update.isUpdatedPropertySetIn(Extras.Sync.AccordionPane._supportedPartialProperties) &&
+                   update.getUpdatedProperty("activeTabId")) {
                 this._selectTab(update.getUpdatedProperty("activeTabId").newValue);
                 fullRender = false;
             } else {

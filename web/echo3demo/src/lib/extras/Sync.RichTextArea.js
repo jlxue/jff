@@ -200,9 +200,9 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
          * 
          * @param e the event
          */
-        processNewTable: function(e) {
+        processInsertTable: function(e) {
             var tableDialog = new Extras.Sync.RichTextArea.TableDialog(this.component);
-            tableDialog.addListener("tableInsert", Core.method(this, function(e) {
+            tableDialog.addListener("insertTable", Core.method(this, function(e) {
                 this.newTable(e.data.columns, e.data.rows);
                 this.focusDocument();
             }));
@@ -665,7 +665,7 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
             }
             if (features.table) {
                 row.add(this._createToolbarButton("Table", this.icons.table, this.msg["Menu.NewTable"], 
-                        this.processNewTable));
+                        this.processInsertTable));
             }
             controlsRow.add(row);
         }
@@ -885,7 +885,7 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
                 this.processSetBackground();
                 break;
             case "tableNew":
-                this.processNewTable();
+                this.processInsertTable();
                 break;
             case "inserthyperlink":
                 this.processInsertHyperlink();
@@ -965,7 +965,9 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
     /** @see Echo.Render.ComponentSync#renderUpdate */
     renderUpdate: function(update) {
         if (update.isUpdatedPropertySetIn({text: true })) {
-            this._richTextInput.set("text", this.component.get("text"));
+            if (this._richTextInput) {
+                this._richTextInput.set("text", this.component.get("text"));
+            }
             update.renderContext.displayRequired = [];
             return;
         }
@@ -1022,7 +1024,6 @@ Extras.Sync.RichTextArea.AbstractDialog = Core.extend(Echo.WindowPane, {
         // Build control.
         Echo.WindowPane.call(this, {
             styleName: rta.render("windowPaneStyleName"),
-            iconInsets: "6px 10px",
             contentWidth: "25em",
             modal: true,
             resizable: false,
@@ -1504,7 +1505,7 @@ Extras.Sync.RichTextArea.TableDialog = Core.extend(Extras.Sync.RichTextArea.Abst
             return;
         }
         this.parent.remove(this);
-        this.fireEvent({type: "tableInsert", source: this, data: data});
+        this.fireEvent({type: "insertTable", source: this, data: data});
     },
     
     _processSelectorUpdate: function(e) {

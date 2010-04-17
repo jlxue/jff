@@ -285,13 +285,13 @@ Extras.Sync.CalendarSelect = Core.extend(Echo.Render.ComponentSync, {
                 if (cellIndex < this.firstCellPosition) {
                     date = this.month === 0 ? { month: 11, year: this.year - 1 } :
                             { month: this.month - 1, year: this.year };
-                    date.day = this.daysInPreviousMonth - this.firstDayOfMonth + cellIndex + 1;
-                } else if (cellIndex >= (this.firstDayOfMonth + this.daysInMonth)) {
+                    date.day = this.daysInPreviousMonth - this.firstCellPosition + cellIndex + 1;
+                } else if (cellIndex >= (this.firstCellPosition + this.daysInMonth)) {
                     date = this.month === 11 ? { month: 0, year: this.year + 1 } :
                             { month: this.month + 1, year: this.year };
-                    date.day = cellIndex - this.firstDayOfMonth - this.daysInMonth + 1;
+                    date.day = cellIndex - this.firstCellPosition - this.daysInMonth + 1;
                 } else {
-                    date = { month: this.month, year: this.year, day: cellIndex - this.firstDayOfMonth + 1 };
+                    date = { month: this.month, year: this.year, day: cellIndex - this.firstCellPosition + 1 };
                 }
                 return date;
             },
@@ -814,7 +814,7 @@ Extras.Sync.CalendarSelect = Core.extend(Echo.Render.ComponentSync, {
             dayOfWeekNameAbbreviationLength = parseInt(this.component.render("dayOfWeekNameAbbreviationLength", 2), 10),
             date = this.component.get("date");
 
-        this._firstDayOfWeek = parseInt(this._msg["FirstDayOfWeek"], 10) || 0;
+        this._firstDayOfWeek = parseInt(this.component.render("firstDayOfWeek", this._msg["FirstDayOfWeek"]), 10) || 0;
 
         if (!date) {
             date = new Date();
@@ -834,7 +834,7 @@ Extras.Sync.CalendarSelect = Core.extend(Echo.Render.ComponentSync, {
 
         this._div = document.createElement("div");
         this._div.id = this.component.renderId;
-        this._div.style.cssText = "width:" + (this._cellWidth * this._xSize) + "px;";
+        this._div.style.cssText = "text-align:left;width:" + (this._cellWidth * this._xSize) + "px;";
         
         Echo.Sync.LayoutDirection.render(this.component.getLayoutDirection(), this._div);
         Echo.Sync.Font.render(this._font, this._div);
@@ -934,6 +934,8 @@ Extras.Sync.CalendarSelect = Core.extend(Echo.Render.ComponentSync, {
         this._div = null;
         this._monthSelect = null;
         this._yearField = null;
+        this._yearDecSpan = null;
+        this._yearIncSpan = null;
         this._dayContainerDiv = null;
         this._scrollContainer = null;
         this._calendarDiv = null;
@@ -1062,6 +1064,8 @@ Extras.Sync.CalendarSelect = Core.extend(Echo.Render.ComponentSync, {
         this._updateMonthYearSelection();
         
         this._storeValue();
+        
+        this.component.doAction();
     },
     
     /**

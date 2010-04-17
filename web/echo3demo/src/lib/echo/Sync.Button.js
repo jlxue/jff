@@ -120,61 +120,46 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
                 this.iconImg = this.renderButtonIcon(this.div, icon);
             }
         },
-    
+
         /**
          * Enables/disables pressed appearance of button.
          * 
-         * @param {Boolean} pressedState the new pressed state.
+         * @param {Boolean} rollover the new pressed state
+         * @param {Boolean} pressed the new pressed state
          */
-        setPressedState: function(pressedState) {
-            var foreground = Echo.Sync.getEffectProperty(this.component, "foreground", "pressedForeground", pressedState);
-            var background = Echo.Sync.getEffectProperty(this.component, "background", "pressedBackground", pressedState);
+        setHighlightState: function(rollover, pressed) {
+            var focused = this.component && this.component.application && 
+                    this.component.application.getFocusedComponent() == this.component;
+            
+            // Determine effect property name.  Priorities are 1: pressed, 2: rollover: 3: focused.
+            var ep = pressed ? "pressed" : (rollover ? "rollover" : "focused");
+            var state = focused || pressed || rollover;
+
+            var foreground = Echo.Sync.getEffectProperty(this.component, "foreground", ep + "Foreground", state);
+            var background = Echo.Sync.getEffectProperty(this.component, "background", ep + "Background", state);
             var backgroundImage = Echo.Sync.getEffectProperty(
-                    this.component, "backgroundImage", "pressedBackgroundImage", pressedState);
-            var font = Echo.Sync.getEffectProperty(this.component, "font", "pressedFont", pressedState);
-            var border = Echo.Sync.getEffectProperty(this.component, "border", "pressedBorder", pressedState);
+                    this.component, "backgroundImage", ep + "BackgroundImage", state);
+            var font = Echo.Sync.getEffectProperty(this.component, "font", ep + "Font", state);
+            var border = Echo.Sync.getEffectProperty(this.component, "border", ep + "Border", state);
             
             Echo.Sync.Color.renderClear(foreground, this.div, "color");
             Echo.Sync.Color.renderClear(background, this.div, "backgroundColor");
             Echo.Sync.FillImage.renderClear(backgroundImage, this.div, "backgroundColor");
+            
+            if (state) {
+                Echo.Sync.Insets.render(this.getInsetsForBorder(this.component.render(ep + "Border")), this.div, "padding");
+            } else {
+                Echo.Sync.Insets.render(this.component.render("insets"), this.div, "padding");
+            }
             Echo.Sync.Border.renderClear(border, this.div);
+
             if (this._textElement) {
                 Echo.Sync.Font.renderClear(font, this._textElement);
             }
             
             if (this.iconImg) {
                 var iconUrl = Echo.Sync.ImageReference.getUrl(
-                        Echo.Sync.getEffectProperty(this.component, "icon", "pressedIcon", pressedState));
-                if (iconUrl != this.iconImg.src) {
-                    this.iconImg.src = iconUrl;
-                }
-            }
-        },
-        
-        /**
-         * Enables/disables rollover appearance of button.
-         * 
-         * @param {Boolean} rolloverState the new rollover state.
-         */
-        setRolloverState: function(rolloverState) {
-            var foreground = Echo.Sync.getEffectProperty(this.component, "foreground", "rolloverForeground", rolloverState);
-            var background = Echo.Sync.getEffectProperty(this.component, "background", "rolloverBackground", rolloverState);
-            var backgroundImage = Echo.Sync.getEffectProperty(
-                    this.component, "backgroundImage", "rolloverBackgroundImage", rolloverState);
-            var font = Echo.Sync.getEffectProperty(this.component, "font", "rolloverFont", rolloverState);
-            var border = Echo.Sync.getEffectProperty(this.component, "border", "rolloverBorder", rolloverState);
-            
-            Echo.Sync.Color.renderClear(foreground, this.div, "color");
-            Echo.Sync.Color.renderClear(background, this.div, "backgroundColor");
-            Echo.Sync.FillImage.renderClear(backgroundImage, this.div, "backgroundColor");
-            Echo.Sync.Border.renderClear(border, this.div);
-            if (this._textElement) {
-                Echo.Sync.Font.renderClear(font, this._textElement);
-            }
-        
-            if (this.iconImg) {
-                var iconUrl = Echo.Sync.ImageReference.getUrl(
-                        Echo.Sync.getEffectProperty(this.component, "icon", "rolloverIcon", rolloverState));
+                        Echo.Sync.getEffectProperty(this.component, "icon", ep + "Icon", state));
                 if (iconUrl != this.iconImg.src) {
                     this.iconImg.src = iconUrl;
                 }
@@ -233,9 +218,39 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
         return Echo.Render.ComponentSync.FOCUS_PERMIT_ARROW_ALL;
     },
     
+    /**
+     * Returns an adjusted insets value to apply to the button such that the specified border+returned insets will occupy the
+     * same space as the button's default state border+insets.
+     * <p>
+     * For example. consider a button with a border size of 5px, and a default inset of 3px.  
+     * The total border/inset space would be 8px.  If this method is passed a border with
+     * a size of 2px, it will return an inset with a size of 6px to compensate and ensure the border+inset size will be unchanged.
+     * This calculation is performed individually for each side of the border/insets. 
+     * 
+     * @param #Border border the effect border for which insets should be calculated.
+     * @return the adjusted insets
+     * @type #Insets
+     */
+    getInsetsForBorder: function(border) {
+        var defaultBorder = this.component.render("border");
+        if (!border) {
+            // Return default insets if provided border is null.
+            return this.component.render("insets");
+        }
+        
+        var insetsPx = Echo.Sync.Insets.toPixels(this.component.render("insets"));
+        for (var x in insetsPx) {
+            insetsPx[x] += Echo.Sync.Border.getPixelSize(defaultBorder, x) - Echo.Sync.Border.getPixelSize(border, x);
+            if (insetsPx[x] < 0) {
+                insetsPx[x] = 0;
+            }
+        }
+        return insetsPx.top + " " + insetsPx.right + " " + insetsPx.bottom + " "  + insetsPx.left;
+    },
+        
     /** Processes a focus blur event. */
     _processBlur: function(e) {
-        this._renderFocusStyle(false);
+        this.setHighlightState(false, false);
     },
     
     /** Processes a mouse click event. */
@@ -253,6 +268,7 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
             return true;
         }
         this.client.application.setFocusedComponent(this.component);
+        this.setHighlightState(false, false);
     },
     
     /**
@@ -280,7 +296,7 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
             return true;
         }
         Core.Web.DOM.preventEventDefault(e);
-        this.setPressedState(true);
+        this.setHighlightState(false, true);
     },
     
     /** Processes a mouse button release event on the button, displaying the button's normal appearance. */
@@ -288,7 +304,7 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
         if (!this.client) {
             return true;
         }
-        this.setPressedState(false);
+        this.setHighlightState(false, false);
     },
     
     /** Processes a mouse roll over event, displaying the button's rollover appearance. */
@@ -297,7 +313,7 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
             return true;
         }
         this.client.application.addListener("focus", this._processRolloverExitRef);
-        this.setRolloverState(true);
+        this.setHighlightState(true, false);
         return true;
     },
     
@@ -309,7 +325,7 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
         if (this._processRolloverExitRef) {
             this.client.application.removeListener("focus", this._processRolloverExitRef);
         }
-        this.setRolloverState(false);
+        this.setHighlightState(false, false);
         return true;
     },
     
@@ -427,8 +443,8 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
             return;
         }
 
-        this._renderFocusStyle(true);
         Core.Web.DOM.focusElement(this.div);
+        this._focused = true;
     },
     
     /** @see Echo.Render.ComponentSync#renderUpdate */
@@ -439,51 +455,5 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
         containerElement.removeChild(element);
         this.renderAdd(update, containerElement);
         return false; // Child elements not supported: safe to return false.
-    },
-    
-    /**
-     * Enables/disables focused appearance of button.
-     * 
-     * @param {Boolean} focusState the new focus state.
-     */
-    _renderFocusStyle: function(focusState) {
-        if (this._focused == focusState) {
-            return;
-        }
-        this._focused = focusState;
-        var background;
-        
-        if (!this.component.render("focusedEnabled")) {
-            // Render default focus aesthetic.
-            background = this.component.render("background");
-            if (background != null) {
-                var newBackground = focusState ? Echo.Sync.Color.adjust(background, 0x20, 0x20, 0x20) : background;
-                Echo.Sync.Color.render(newBackground, this.div, "backgroundColor");
-            }
-            return;
-        } else {
-            var foreground = Echo.Sync.getEffectProperty(this.component, "foreground", "focusedForeground", focusState);
-            background = Echo.Sync.getEffectProperty(this.component, "background", "focusedBackground", focusState);
-            var backgroundImage = Echo.Sync.getEffectProperty(
-                    this.component, "backgroundImage", "focusedBackgroundImage", focusState);
-            var font = Echo.Sync.getEffectProperty(this.component, "font", "focusedFont", focusState);
-            var border = Echo.Sync.getEffectProperty(this.component, "border", "focusedBorder", focusState);
-            
-            Echo.Sync.Color.renderClear(foreground, this.div, "color");
-            Echo.Sync.Color.renderClear(background, this.div, "backgroundColor");
-            Echo.Sync.FillImage.renderClear(backgroundImage, this.div, "backgroundColor");
-            Echo.Sync.Border.renderClear(border, this.div);
-            if (this._textElement) {
-                Echo.Sync.Font.renderClear(font, this._textElement);
-            }
-        
-            if (this.iconImg) {
-                var iconUrl = Echo.Sync.ImageReference.getUrl(
-                        Echo.Sync.getEffectProperty(this.component, "icon", "focusedIcon", focusState));
-                if (iconUrl != this.iconImg.src) {
-                    this.iconImg.src = iconUrl;
-                }
-            }
-        }
     }
 });

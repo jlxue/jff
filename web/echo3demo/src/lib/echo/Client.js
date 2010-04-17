@@ -44,12 +44,26 @@ Echo.Client = Core.extend({
             for (var i = 0; i < Echo.Client._activeClients.length; ++i) {
                 Echo.Client._activeClients[i]._windowResizeListener(e);
             }
-        }
+        },
+        
+        /**
+         * A client-generated unique persistent identifier for the window, stored in window.name.
+         * @type String
+         */
+        windowId: null
     },
     
     $load: function() {
         // Register resize listener on containing window one time.
         Core.Web.DOM.addEventListener(window, "resize", this._globalWindowResizeListener, false);
+        
+        var re = /EchoWindowId=([0-9a-f]*\.[0-9a-f]*);/i;
+        var match = re.exec(window.name || "");
+        this.windowId = match && match[1];
+        if (!this.windowId) {
+            this.windowId = new Date().getTime().toString(16) + "." + parseInt(Math.random() * 0x100000000, 10).toString(16);
+            window.name = (window.name || "") + ";EchoWindowId=" + this.windowId + ";";
+        }
     },
     
     /**
@@ -104,7 +118,8 @@ Echo.Client = Core.extend({
     _inputRescriptionMap: null,
     
     /**
-     * The renderId of the compoennt which was focused during the last received <code>keyDown</code> event.
+     * The renderId of the component which was focused during the last received <code>keyDown</code> event.
+     * @String
      */
     _keyFocusedComponentId: null,
     
@@ -155,6 +170,11 @@ Echo.Client = Core.extend({
      * @type Core.Web.Scheduler.Runnable
      */
     _waitIndicatorRunnable: null,
+    
+    /**
+     * Flag indicating whether a client failure has occurred (indicating there a fail error has also been displayed).
+     */
+    _failed: false,
 
     /**
      * Creates a new Client instance.  Derived classes must invoke.
@@ -394,6 +414,16 @@ Echo.Client = Core.extend({
             Core.Web.DOM.addEventListener(actionDiv, "keypress", listener, false);
             Core.Web.DOM.focusElement(actionDiv);
         }
+        
+        var closeDiv = document.createElement("div");
+        closeDiv.style.cssText = "position:absolute;top:2px;right:8px;color:#ffffff;font-weight:bold;cursor:pointer;";
+        closeDiv.appendChild(document.createTextNode("x"));
+        Core.Web.DOM.addEventListener(closeDiv, "click", Core.method(this, function() {
+            blackoutDiv.parentNode.removeChild(blackoutDiv);
+            div.parentNode.removeChild(div);
+        }), false);
+        
+        div.appendChild(closeDiv);
     },
     
     /**
@@ -423,6 +453,11 @@ Echo.Client = Core.extend({
      * @param {String} detail the error details 
      */
     fail: function(detail) {
+        if (this._failed) {
+            // Do nothing if failure has already been processed.
+            return;
+        }
+        this._failed = true;
         var element = this.domainElement;
         try {
             // Attempt to dispose.
@@ -564,7 +599,7 @@ Echo.Client = Core.extend({
         
         return true;
     },
-    
+
     /**
      * Processes updates to the component hierarchy.
      * Invokes <code>Echo.Render.processUpdates()</code>.

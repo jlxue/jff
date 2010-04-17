@@ -282,6 +282,11 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
     _layoutRequired: false,
     
     /**
+     * Flag indicating whether header images have been completely loaded.
+     */
+    _headerImageLoadingComplete: false,
+    
+    /**
      * Flag indicating whether a full header re-render operation is required.  Flag is set by renderUpdate() method in response
      * to child layout data changes to avoid full render.
      * @type Boolean
@@ -375,14 +380,18 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
             this._tabs[i]._renderDisplay();
         }
         
-        // Add image monitor to re-execute renderLayout as images are loaded.
-        var imageListener = Core.method(this, function() {
-            if (this.component) { // Verify component still registered.
-                this._layoutRequired = true;
-                this._renderLayout();
-            }
-        });
-        Core.Web.Image.monitor(this._headerContainerDiv, imageListener);
+        if (!this._headerImageLoadingComplete) {
+            this._headerImageLoadingComplete = true;
+            // Add image monitor to re-execute renderLayout as images are loaded.
+            var imageListener = Core.method(this, function() {
+                if (this.component) { // Verify component still registered.
+                    this._layoutRequired = true;
+                    this._renderLayout();
+                }
+            });
+            imageListener.id = "TabPane:" + this.component.renderId;
+            Core.Web.Image.monitor(this._headerContainerDiv, imageListener);
+        }
     },
     
     /**
@@ -632,6 +641,8 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
     
     /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
+        this._headerImageLoadingComplete = false;
+
         this.component.addListener("tabSelect", this._tabSelectListenerRef);
         
         // Store rendering properties.
@@ -864,6 +875,8 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
             tab,
             i;
         
+        this._headerImageLoadingComplete = false;
+        
         if (update.hasUpdatedLayoutDataChildren()) {
             this._headerUpdateRequired = true;
         }
@@ -1019,7 +1032,9 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
         } else {
             if (this._rolloverTabId == tabId) {
                 this._rolloverTabId = null;
-                rolloverTab.setRollover(false, false);
+                if (rolloverTab) {
+                    rolloverTab.setRollover(false, false);
+                }
             } else {
                 // Tab state is already non-rollover, do nothing.
             }

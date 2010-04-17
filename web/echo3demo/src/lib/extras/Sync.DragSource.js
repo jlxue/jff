@@ -48,13 +48,24 @@ Extras.Sync.DragSource = Core.extend(Echo.Render.ComponentSync, {
     },
     
     /**
-     * Start a drag operation.
+     * Prepare for a drag operation, register move/up listeners.
      * 
-     * @param the e relevant mouse down event which started the drag operation
+     * @param e the relevant mouse down event which started the drag operation
      */
-    _dragStart: function(e) {
+    _dragPreStart: function(e) {
         this._dragStop();
-        
+
+        Core.Web.Event.add(document.body, "mousemove", this._processMouseMoveRef, true);
+        Core.Web.Event.add(document.body, "mouseup", this._processMouseUpRef, true);
+    },
+    
+    /**
+     * Mouse has moved since drag operation was prepared, draw overlay DIV, create clone of
+     * dragged item.
+     * 
+     * @param e the relevant mouse move event
+     */
+    _dragMoveStart: function(e) {
         this._overlayDiv = document.createElement("div");
         this._overlayDiv.style.cssText = "position:absolute;z-index:30000;width:100%;height:100%;cursor:pointer;";
         Echo.Sync.FillImage.render(this.client.getResourceUrl("Echo", "resource/Transparent.gif"), this._overlayDiv);
@@ -65,11 +76,6 @@ Extras.Sync.DragSource = Core.extend(Echo.Render.ComponentSync, {
         this._overlayDiv.appendChild(this._dragDiv);
 
         document.body.appendChild(this._overlayDiv);
-
-        Core.Web.Event.add(document.body, "mousemove", this._processMouseMoveRef, true);
-        Core.Web.Event.add(document.body, "mouseup", this._processMouseUpRef, true);
-        
-        this._dragUpdate(e);
     },
     
     /**
@@ -159,9 +165,18 @@ Extras.Sync.DragSource = Core.extend(Echo.Render.ComponentSync, {
      * @type Element
      */
     _findElement: function(searchElement, x, y) {
-        if (searchElement.style.display == "none" || searchElement.style.visibility == "hidden" || 
-                (searchElement.nodeName && searchElement.nodeName.toLowerCase() == "colgroup")) {
-            // Ignore non-displayed elements, hidden elements, and COLGROUP elements.
+        if (searchElement.style.display == "none") {
+            // Not displayed.
+            return null;
+        }
+
+        if (searchElement.style.visibility == "hidden") {
+            // Not visible.
+            return null;
+        }
+        
+        if (searchElement.nodeName && searchElement.nodeName.toLowerCase() == "colgroup") {
+            // Ignore colgroups.
             return null;
         }
 
@@ -220,21 +235,18 @@ Extras.Sync.DragSource = Core.extend(Echo.Render.ComponentSync, {
      * @return the highest candidate element
      * @type Element
      */
-    _findHighestCandidate: function(searchElement, candidates) {
+    _findHighestCandidate: function(parentElement, candidates) {
         var candidatePaths = [];
-        var candidateIndex;
-        for (candidateIndex = 0; candidateIndex < candidates.length; ++candidateIndex) {
-            candidatePaths[candidateIndex] = [];
-            var element = candidates[candidateIndex];
-            if (element.style.zIndex) {
-                candidatePaths[candidateIndex].unshift(element.style.zIndex);
-            }
-            while (element != searchElement) {
-                element = element.parentNode;
+        var iCandidate;
+        for (iCandidate = 0; iCandidate < candidates.length; ++iCandidate) {
+            candidatePaths[iCandidate] = [];
+            var element = candidates[iCandidate];
+            do {
                 if (element.style.zIndex) {
-                    candidatePaths[candidateIndex].unshift(element.style.zIndex);
+                    candidatePaths[iCandidate].unshift(element.style.zIndex);
                 }
-            }
+                element = element.parentNode;
+            } while (element != parentElement);
         }
         
         var elementIndex = 0;
@@ -243,17 +255,18 @@ Extras.Sync.DragSource = Core.extend(Echo.Render.ComponentSync, {
             elementsFoundOnIteration = false;
             var highestZIndex = 0;
             var highestCandidateIndices = [];
-            for (candidateIndex = 0; candidateIndex < candidatePaths.length; ++candidateIndex) {
-                if (elementIndex < candidatePaths[candidateIndex].length) {
-                    var zIndex = candidatePaths[candidateIndex][elementIndex];
+            for (iCandidate = 0; iCandidate < candidatePaths.length; ++iCandidate) {
+                if (elementIndex < candidatePaths[iCandidate].length) {
+                    var zIndex = candidatePaths[iCandidate][elementIndex];
                     if (zIndex && zIndex > 0 && zIndex >= highestZIndex) {
                         if (zIndex == highestZIndex) {
                             // Value is equal to previous highest found, add to list of highest.
-                            highestCandidateIndices.push(candidateIndex);
+                            highestCandidateIndices.push(iCandidate);
                         } else {
                             // Value is greater than highest found, clear list of highest and add.
                             highestCandidateIndices = [];
-                            highestCandidateIndices.push(candidateIndex);
+                            highestCandidateIndices.push(iCandidate);
+                            highestZIndex = zIndex;
                         }
                     }
                     elementsFoundOnIteration = true;
@@ -271,6 +284,7 @@ Extras.Sync.DragSource = Core.extend(Echo.Render.ComponentSync, {
                 }
                 candidates = remainingCandidates;
             }
+            ++elementIndex;
         } while (elementsFoundOnIteration);
         
         return candidates[candidates.length - 1];
@@ -312,7 +326,7 @@ Extras.Sync.DragSource = Core.extend(Echo.Render.ComponentSync, {
             return;
         }
         
-        this._dragStart(e);
+        this._dragPreStart(e);
     },
     
     /**
@@ -321,6 +335,10 @@ Extras.Sync.DragSource = Core.extend(Echo.Render.ComponentSync, {
      * @param e the event
      */
     _processMouseMove: function(e) {
+        Core.Web.DOM.preventEventDefault(e);
+        if (!this._dragDiv) {
+            this._dragMoveStart();
+        }
         this._dragUpdate(e);
     },
     
@@ -330,8 +348,14 @@ Extras.Sync.DragSource = Core.extend(Echo.Render.ComponentSync, {
      * @param e the event
      */
     _processMouseUp: function(e) {
+        var inProgress = !!this._dragDiv;
+        if (inProgress) {
+            Core.Web.DOM.preventEventDefault(e);
+        }
         this._dragStop();
-        this._dragDrop(e);
+        if (inProgress) {
+            this._dragDrop(e);
+        }
     },
     
     /** @see Echo.Render.ComponentSync#renderAdd */
