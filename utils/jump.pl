@@ -133,7 +133,7 @@ sub action_search {
     my $choice;
 
     if (defined $pattern) {
-        @candidates = grep /$pattern/, keys %$g_history;
+        @candidates = grep /$pattern/i, keys %$g_history;
     } else {
         @candidates = keys %$g_history;
     }
