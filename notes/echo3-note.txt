@@ -1,0 +1,51 @@
+Echo 3 JS framework
+
+http://echo.nextapp.com/site/corejs/doc/devguide/core
+
+1. 记得用 var 声明局部变量，否则是全局变量。
+
+2. Echo3 使用 shared prototype 方案实现类继承。
+
+3. 不以 $ 开头的属性，如果是对象，则必须在 $construct 里赋值，
+   在声明时赋值 null ，否则这个值会被所有实例共享。
+   (声明可以用于检查 final 的属性是否被子类覆盖了）
+
+4. 调用父类的 $construct:
+    BaseClass.call(this, ...);
+
+5. 允许子类覆盖的属性放在 $virtual: {...} 里。不在 $virtual 里
+   的属性是不允许子类覆盖的，也即属性默认是 final 的。
+
+6. 调用父类被覆盖的方法：
+   BaseClass.prototype.someMethod.call(this, ...);
+   (没有被覆盖的方法用 this.someMethod(...) 即可）
+
+7. 合作式的 private 属性：
+ 1) 以 _ 开头命名，以 this._xxx 引用(因为不加 this  可能引用到父类的
+    属性)。 这条只是惯例，不是语法必需的。
+ 2) 不要把这种属性放入 $virtual 中，一定要用 _xxxx: initial-value
+    (任意非 object 类型，见第 3 条）声明此属性，这样就可以不让子类
+    覆盖此私有属性，从而父类里引用私有属性的方法不会错误的引用子类
+    的同名私有属性。
+
+8. 抽象属性用 $abstract: {...} 定义，属性的值是无关紧要的，但是对于
+   抽象方法，设置一个带参数(如果有参数)的空函数有利于代码维护。
+
+9. 用 $include: [...] 引入 mixin，mixin 的属性 *不会* 覆盖类的同名属性，
+   后加入的 mixin 会覆盖先加入的 mixin 的同名属性。
+
+10. 用 $static: {...} 定义类静态属性，在静态方法里可以用 this 指代类
+    本身，也即 this.staticValue 等价与 MyClass.staticValue.
+    在非静态方法里则必需用 MyClass.staticValue，因为此时 this 是对象
+    本身而非类本身。
+
+11. 用 $load: function() {...} 定义类静态构造函数，在静态构造函数里，
+    由于类本身还没有被赋值，所以必需用 this.staticValue 而不能用
+    MyClass.staticValue。
+
+12. 注册事件监听函数时，如果要注册一个对象的方法，需要用
+    Core.method(obj, obj.method) 封装一下，注意 Core.method() 没调用一次
+    返回一个新的闭包，所以删除事件监听函数时，要用预先保存的 Core.method()
+    的返回值作为 listener 参数，以在用 == 判断 listener 时判定相等。
+
+
