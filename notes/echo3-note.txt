@@ -48,4 +48,59 @@ http://echo.nextapp.com/site/corejs/doc/devguide/core
     返回一个新的闭包，所以删除事件监听函数时，要用预先保存的 Core.method()
     的返回值作为 listener 参数，以在用 == 判断 listener 时判定相等。
 
+==================
+JS 的类以及继承实现问题：
+(1)
+SomeClass = function() {
+}
+SomeClass.a = 1;
+
+问题：这里 a 是类静态变量，因为 new SomeClass() 创建的实例没有属性 a。
+
+(2)
+BaseClass = function() {
+}
+BaseClass.stuff = new Array();
+
+DerivedClass = function() {
+}
+DerivedClass.prototype = BaseClass;
+BaseClass 的所有子类的实例都共享这个属性，从而互相干扰，比如子类里
+this.stuff.push("xxx")，对于类的非静态成员，这不是期望的结果。
+
+(3)
+BaseClass = function() {
+    this.stuff = new Array();
+}
+
+DerivedClass = function() {
+}
+DerivedClass.prototype = new BaseClass();
+跟 (2) 一样，只是问题范围小了，是 DerivedClass 的所有实例互相干扰。
+
+(4) 对 3 的解决办法
+BaseClass = function() {
+    this.stuff = new Array();
+}
+
+DerivedClass = function() {
+    BaseClass.call(this, ....);
+}
+DerivedClass.prototype = new BaseClass();
+
+基类的一个构造函数用于两个用途，可维护性不好。原型的成员变量被覆盖了，实
+际上子类的原型不需要基类实例的状态(也即成员变量）。
+
+(5) shared prototype 的做法：
+BaseClass = function() {
+    this.stuff = new Array();
+}
+var def = function() {};
+def.prototype = BaseClass.prototype;
+
+DerivedClass = function() {
+    BaseClass.call(this, ....)
+}
+DerivedClass.prototype = new def();
+达到了 4 的效果，又不需要在 DerivedClass.prototype 里浪费一个基类实例的状态。
 
