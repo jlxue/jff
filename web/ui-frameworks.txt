@@ -1,24 +1,24 @@
 Echo 3
 http://echo.nextapp.com/site/
 
-Qooxdoo
-http://www.qooxdoo.org/
-
-MochaUI
-http://mochaui.com/
-
 YUI
 http://developer.yahoo.com/yui/
 
-ExtJS
-http://www.extjs.com/
+Qooxdoo
+http://www.qooxdoo.org/
 
 dijit
 http://www.dojotoolkit.org/
 
-bindows
+ExtJS (商业许可)
+http://www.extjs.com/
+
+bindows (商业许可)
 http://www.bindows.net/
 
-Cappuccino
+Cappuccino (模仿 Object-C 语法，在 JS 之上构造了 Object-J 语言）
 http://cappuccino.org/
+
+MochaUI (基于 Mootools，Mootools 对于自定义类、全局符号、内置函数污染很严重)
+http://mochaui.com/
 

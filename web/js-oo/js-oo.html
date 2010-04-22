@@ -6,6 +6,8 @@
         jquery、prototype、mootools、YUI的继承的实现
         http://www.uedmagazine.com/ued/index.php?entry=entry091109-052418
 
+        http://mankz.com/code/GlobalCheck.htm
+
         jQuery.extend() 不算类继承。
 
         实现复杂度： mootools > prototype > Dojo > YUI 3 > Echo 3 > YUI 2
@@ -52,6 +54,13 @@
                             initialize b
                             a constructor initialize b
 
+                // By withinsea@newsmth (Mo Chen <withinsea@gmail.com>)
+                jQuery OO   1                   1               1                   2
+                            prototype
+                            prototype
+                            b
+                            a b
+
         -->
         <script type="text/javascript">
             result = "Should be:\thello, hello, undefined, VERSION, true\n\n";
@@ -77,7 +86,7 @@
 
             BaseClass.prototype.b = "hello";
             result += "jQuery: \t" + b.b + ", " + d.b + ", " + b.a + ", " + d.a + ", " + (d instanceof BaseClass);
-            // output: hello, undefined, undefined, 1.4.2
+            // output: hello, undefined, undefined, 1.4.2, false
         </script>
 
         <script type="text/javascript" src="mootools-1.2.4-core-nc.js"></script>
@@ -101,7 +110,7 @@
             BaseClass.implement({ b : "hello"});
 
             result += "\nMootools: \t" + b.b + ", " + d.b + ", " + b.a + ", " + d.a + ", " + (d instanceof BaseClass);
-            // output: hello, hello, undefined, 1.2.4
+            // output: hello, hello, undefined, 1.2.4, true
         </script>
 
         <script type="text/javascript" src="yahoo-dom-event.js"></script>
@@ -123,7 +132,7 @@
 
             BaseClass.prototype.b = "hello";
             result += "\nYUI 2.8.0r4: \t" + b.b + ", " + d.b + ", " + b.a + ", " + d.a + ", " + (d instanceof BaseClass);
-            // output: hello, hello, undefined, 2.8.0r4
+            // output: hello, hello, undefined, 2.8.0r4, true
         </script>
 
         <script type="text/javascript" src="yui-min.js"></script>
@@ -145,7 +154,7 @@
 
                 BaseClass.prototype.b = "hello";
                 result += "\nYUI 3.1.0: \t" + b.b + ", " + d.b + ", " + b.a + ", " + d.a + ", " + (d instanceof BaseClass);
-                // output: hello, hello, undefined, 3.1.0
+                // output: hello, hello, undefined, 3.1.0, true
             });
         </script>
 
@@ -170,7 +179,7 @@
 
             BaseClass.prototype.b = "hello";
             result += "\nDojo: \t\t" + b.b + ", " + d.b + ", " + b.a + ", " + d.a + ", " + (d instanceof BaseClass);
-            // output: hello, hello, undefined, 1.4.2
+            // output: hello, hello, undefined, 1.4.2, true
         </script>
 
         <script type="text/javascript" src="Core.js"></script>
@@ -186,7 +195,7 @@
 
             BaseClass.prototype.b = "hello";
             result += "\nEcho 3 Core.js: " + b.b + ", " + d.b + ", " + b.a + ", " + d.a + ", " + (d instanceof BaseClass);
-            // output: hello, hello, undefined, 3.0 beta8
+            // output: hello, hello, undefined, 3.0 beta8, ture
         </script>
 
         <script type="text/javascript" src="prototype-1.7-rc1.js"></script>
@@ -206,7 +215,28 @@
 
             BaseClass.prototype.b = "hello";
             result += "\nPrototype: \t" + b.b + ", " + d.b + ", " + b.a + ", " + d.a + ", " + (d instanceof BaseClass);
-            // output: hello, hello, undefined, 1.7-rc1
+            // output: hello, hello, undefined, 1.7-rc1, ture
+        </script>
+
+        <script type="text/javascript" src="jquery.oo.js"></script>
+        <script type="text/javascript">
+            var JO = window.jQuery || window.oo;
+
+            BaseClass = JO.claz(function() {}, {});
+            // 也是使用 shared prototype 技巧，新增属性放入子类的prototype
+            DerivedClass = JO.extendClaz(BaseClass,
+                    function() {
+                        BaseClass.call(this);
+                    },
+                    {a : "2010-04-22"});
+
+            var b = new BaseClass();
+            var d = new DerivedClass();
+            // Or JO.neo(DerivedClass), JO.neo(DerivedClass.prototype)
+
+            BaseClass.prototype.b = "hello";
+            result += "\njQuery OO: \t" + b.b + ", " + d.b + ", " + b.a + ", " + d.a + ", " + (d instanceof BaseClass);
+            // output: hello, hello, undefined, 2010-04-22, true
         </script>
 
     </head>

@@ -1,0 +1,49 @@
+<script type="text/javascript" src="jquery.oo.js"></script>
+<script type="text/javascript">
+    var BaseClaz = oo.claz(function (name) {
+        this.name = name;
+    }, {
+        name: 'unknown',
+        msg: function () {
+            return 'hello, ' + this.name;
+        },
+        hello: function () {
+            alert(this.msg());
+        }
+    });
+
+    var basePrototype = BaseClaz.prototype;
+
+    var base1 = new BaseClaz('world');
+    var base2 = oo.neo(BaseClaz, 'world')
+    var base3 = oo.neo(basePrototype, { name: 'world' });
+
+    base1.hello();
+    base2.hello();
+    base3.hello();
+
+    var DerivedClaz1 = oo.extendClaz(BaseClaz);
+    var DerivedClaz2 = oo.extendClaz(BaseClaz, function (name) {
+        BaseClaz.call(this, 'the ' + name);
+    });
+    var DerivedClaz3 = oo.extendClaz(base3, function (name) {
+        this.name = '"' + name + '"';
+    }, {
+        msg: function () {
+            return 'hi, ' + this.name;
+        }
+    });
+
+    var derived1 = new DerivedClaz1('WORLD');
+    var derived2 = new DerivedClaz2('WORLD');
+    var derived3 = new DerivedClaz3('WORLD');
+
+    derived1.hello();
+    derived2.hello();
+    derived3.hello();
+
+    basePrototype.hello = function () {
+        alert(this.msg() + ' !!!!!!');
+    };
+    derived3.hello();
+</script>
