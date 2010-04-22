@@ -88,8 +88,8 @@ DerivedClass = function() {
 }
 DerivedClass.prototype = new BaseClass();
 
-基类的一个构造函数用于两个用途，可维护性不好。原型的成员变量被覆盖了，实
-际上子类的原型不需要基类实例的状态(也即成员变量）。
+基类的一个构造函数用于两个用途，可维护性不好。原型的成员变量被子类实例覆盖了，
+实际上子类的原型不需要基类实例的状态(也即成员变量的取值）。
 
 (5) shared prototype 的做法：
 BaseClass = function() {
@@ -103,4 +103,8 @@ DerivedClass = function() {
 }
 DerivedClass.prototype = new def();
 达到了 4 的效果，又不需要在 DerivedClass.prototype 里浪费一个基类实例的状态。
+
+后注：var obj= new BaseClass(); 在 obj 里保存的是状态(成员变量的取值)，而
+BaseClass.prototype 里保存的是 obj 的结构（有哪些成员变量）和行为（有哪些成
+员方法），基于类的继承只需要继承结构和行为，不需要继承状态。
 
