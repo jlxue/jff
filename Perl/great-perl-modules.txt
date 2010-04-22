@@ -45,12 +45,13 @@ DBIx::Class
 Rose::DB::Object
 DBIx::Simple
 
+Starman (High-performance preforking PSGI web server)
 Continuity
 Apache::PageKit
 Maypole
 Catalyst
 Mason
-Mojo
+Mojo (http://mojolicious.org/)
 Web::Simple
 Dancer
 CGI::Application
