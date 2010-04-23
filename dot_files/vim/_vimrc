@@ -136,8 +136,12 @@ let g:tex_flavor = "latex"        " plaintex, context, latex
 
 " for taglist plugin
 let Tlist_Show_Menu = 1
-"let Tlist_Ctags_Cmd = $VIMRUNTIME . '/ctags'
+let Tlist_Ctags_Cmd = 'ctags --fields=+ainS --extra=+fq --c-kinds=+px --c++-kinds=+px'
 let Tlist_File_Fold_Auto_Close = 1
+let Tlist_Show_One_File = 1
+let Tlist_WinWidth = 40
+let tlist_html_settings = 'html;a:anchor;f:javascript function;m:javascript method;p:javascript property;c:javascript class'
+let tlist_javascript_settings = 'javascript;f:function;m:method;p:property;c:class'
 
 
 " for mru.vim
