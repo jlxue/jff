@@ -1,7 +1,7 @@
-<project name="Echo3Demo" default="build" basedir=".">
+<project name="MyApp" default="build" basedir=".">
 
-    <taskdef 
-            name="yui-compressor" 
+    <taskdef
+            name="yui-compressor"
             classname="net.noha.tools.ant.yuicompressor.tasks.YuiCompressorTask">
         <classpath>
             <pathelement location="build-lib/yui-compressor-ant-task-0.3.jar"/>
@@ -15,14 +15,14 @@
         <delete dir="out"/>
         <delete dir="release"/>
     </target>
-    
+
     <target name="jslint">
         <java fork="true" jar="resource/JSLint/rhino.jar">
             <arg value="resource/JSLint/jslint.js"/>
             <arg value="src/app/"/>
         </java>
     </target>
-    
+
     <target name="init">
         <mkdir dir="tmp"/>
         <!-- Copy non-JS files, path structure. -->
@@ -31,7 +31,7 @@
                 <exclude name="**/*.js"/>
             </fileset>
         </copy>
-        
+
         <!-- Copy non-JS files, path structure. -->
         <copy todir="out/src/">
             <fileset dir="src/">
@@ -40,21 +40,21 @@
             </fileset>
         </copy>
     </target>
-    
+
     <target name="compress.modules">
         <mkdir dir="out"/>
-        <yui-compressor 
-                warn="false" 
+        <yui-compressor
+                warn="false"
                 munge="true"
                 linebreakposition="1000"
-                preserveallsemicolons="false" 
+                preserveallsemicolons="false"
                 jssuffix=".js"
-                fromdir="src/" 
+                fromdir="src/"
                 todir="out/">
           <include name="**/*.js"/>
         </yui-compressor>
     </target>
-    
+
     <target name="compress.boot">
         <concat destfile="tmp/AppCompressed.js" fixlastline="true">
             <filelist dir="src/lib/corejs/">
@@ -89,34 +89,33 @@
                 <file name="Util.js"/>
                 <file name="Default.StyleSheet.js"/>
                 <file name="Messages.js"/>
-                <file name="WelcomeScreen.js"/>
             </filelist>
         </concat>
-        
-        <yui-compressor 
-                warn="false" 
+
+        <yui-compressor
+                warn="false"
                 munge="true"
                 linebreakposition="1000"
-                preserveallsemicolons="false" 
+                preserveallsemicolons="false"
                 jssuffix=".js"
-                fromdir="tmp/" 
+                fromdir="tmp/"
                 todir="out/">
           <include name="AppCompressed.js"/>
         </yui-compressor>
     </target>
     <target name="build" depends="clean,init,compress.modules,compress.boot">
-    
+
     </target>
-    
+
     <target name="release" depends="clean,jslint,build">
         <mkdir dir="release"/>
-        <copy todir="release/e3d">
+        <copy todir="release/MyApp">
             <fileset dir="out/"/>
         </copy>
-        <tar tarfile="tmp/e3d.tar" basedir="release" longfile="gnu"/>
-        <delete dir="release/e3d"/>
-        <gzip src="tmp/e3d.tar" zipfile="release/e3d.tgz"/>
-        <delete file="release/e3d.tar"/>
+        <tar tarfile="tmp/MyApp.tar" basedir="release" longfile="gnu"/>
+        <delete dir="release/MyApp"/>
+        <gzip src="tmp/MyApp.tar" zipfile="release/MyApp.tgz"/>
+        <delete file="release/MyApp.tar"/>
     </target>
-    
+
 </project>

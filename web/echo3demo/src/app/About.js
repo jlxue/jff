@@ -1,15 +1,15 @@
 /**
  * Help/About Dialog.  Displays general application information, credits, and copyrights.
  */
-DemoApp.AboutDialog = Core.extend(Echo.WindowPane, {
+MyApp.AboutDialog = Core.extend(Echo.WindowPane, {
 
     _msg: null,
-    
+
     $construct: function() {
-        this._msg = DemoApp.getMessages();
-        
+        this._msg = MyApp.getMessages();
+
         Echo.WindowPane.call(this, {
-            styleName: DemoApp.pref.windowStyleName,
+            styleName: MyApp.pref.windowStyleName,
             width: "40em",
             height: "30em",
             title: this._msg["About.WindowTitle"],
@@ -46,10 +46,10 @@ DemoApp.AboutDialog = Core.extend(Echo.WindowPane, {
                                         new Echo.Label({
                                             text: this._msg["About.General1"]
                                         }),
-                                        new DemoApp.HtmlLabel({
+                                        new MyApp.HtmlLabel({
                                             html: this._msg["About.General2"]
                                         }),
-                                        new DemoApp.HtmlLabel({
+                                        new MyApp.HtmlLabel({
                                             html: this._msg["About.General3"]
                                         })
                                     ]
@@ -62,10 +62,10 @@ DemoApp.AboutDialog = Core.extend(Echo.WindowPane, {
                                     insets: "15px 25px",
                                     cellSpacing: 10,
                                     children: [
-                                        new DemoApp.HtmlLabel({
+                                        new MyApp.HtmlLabel({
                                             html: this._msg["About.Artwork1"]
                                         }),
-                                        new DemoApp.HtmlLabel({
+                                        new MyApp.HtmlLabel({
                                             html: this._msg["About.Artwork2"]
                                         })
                                     ]

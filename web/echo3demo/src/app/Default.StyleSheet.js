@@ -1,4 +1,4 @@
-DemoApp.StyleSheet = new Echo.StyleSheet({
+MyApp.StyleSheet = new Echo.StyleSheet({
     "ControlPane": {
         "Row": {
             layoutData: {

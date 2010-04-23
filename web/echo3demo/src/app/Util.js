@@ -1,7 +1,7 @@
 /**
  * Color selection button widget.  Colored button launches a color select window when clicked.
  */
-DemoApp.ColorSelectButton = Core.extend(Echo.Button, {
+MyApp.ColorSelectButton = Core.extend(Echo.Button, {
 
     _msg: null,
     _color: null,
@@ -9,7 +9,7 @@ DemoApp.ColorSelectButton = Core.extend(Echo.Button, {
     _colorSelect: null,
 
     $construct: function(color) {
-        this._msg = DemoApp.getMessages();
+        this._msg = MyApp.getMessages();
         this.color = color ? color : "#000000";
         Echo.Button.call(this, {
             width: 50,
@@ -21,7 +21,7 @@ DemoApp.ColorSelectButton = Core.extend(Echo.Button, {
             }
         });
     },
-    
+
     _apply: function(e) {
         this.color = this._colorSelect.get("color");
         this.set("border", "1px outset " + this.color);
@@ -30,21 +30,21 @@ DemoApp.ColorSelectButton = Core.extend(Echo.Button, {
         this._window = null;
         this._colorSelect = null;
     },
-    
+
     _close: function(e) {
         this._window.parent.remove(this._window);
         this._window = null;
         this._colorSelect = null;
     },
-    
+
     _processAction: function() {
         var contentPane = this;
         while (!(contentPane instanceof Echo.ContentPane)) {
             contentPane = contentPane.parent;
         }
-        
+
         this._window = new Echo.WindowPane({
-            styleName: DemoApp.pref.windowStyleName,
+            styleName: MyApp.pref.windowStyleName,
             title: "Select Color",
             width: 220,
             modal: true,
@@ -90,7 +90,7 @@ DemoApp.ColorSelectButton = Core.extend(Echo.Button, {
                 })
             ]
         });
-        
+
         contentPane.add(this._window);
     }
 });
@@ -98,17 +98,17 @@ DemoApp.ColorSelectButton = Core.extend(Echo.Button, {
 /**
  * Label component which renders arbitrary HTML.
  */
-DemoApp.HtmlLabel = Core.extend(Echo.Component, {
-    componentType: "DemoApp.HtmlLabel"
+MyApp.HtmlLabel = Core.extend(Echo.Component, {
+    componentType: "MyApp.HtmlLabel"
 });
 
 /**
  * Synchronization peer for HtmlLabel component.
  */
-DemoApp.HtmlLabelSync = Core.extend(Echo.Render.ComponentSync, {
+MyApp.HtmlLabelSync = Core.extend(Echo.Render.ComponentSync, {
 
     $load: function() {
-        Echo.Render.registerPeer("DemoApp.HtmlLabel", this);
+        Echo.Render.registerPeer("MyApp.HtmlLabel", this);
     },
 
     renderAdd: function(update, parentElement) {
@@ -122,7 +122,7 @@ DemoApp.HtmlLabelSync = Core.extend(Echo.Render.ComponentSync, {
     renderDispose: function(update) {
         this._spanElement = null;
     },
-    
+
     renderUpdate: function(update) {
         var element = this._spanElement;
         var containerElement = element.parentNode;
@@ -136,7 +136,7 @@ DemoApp.HtmlLabelSync = Core.extend(Echo.Render.ComponentSync, {
 /**
  * Utility methods.
  */
-DemoApp.Util = {
+MyApp.Util = {
 
     _LEADING_SPACES: /^(\s*)/,
     _TRAILING_SPACES: /(\s*)$/,
