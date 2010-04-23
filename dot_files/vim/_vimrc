@@ -140,8 +140,8 @@ let Tlist_Ctags_Cmd = 'ctags --fields=+ainS --extra=+fq --c-kinds=+px --c++-kind
 let Tlist_File_Fold_Auto_Close = 1
 let Tlist_Show_One_File = 1
 let Tlist_WinWidth = 40
-let tlist_html_settings = 'html;a:anchor;f:javascript function;m:javascript method;p:javascript property;c:javascript class'
-let tlist_javascript_settings = 'javascript;f:function;m:method;p:property;c:class'
+let tlist_html_settings = 'html;a:anchor;f:js function;m:js method;p:js property;c:js class;v:global variable'
+let tlist_javascript_settings = 'javascript;f:function;m:method;p:property;c:class;v:global'
 
 
 " for mru.vim
