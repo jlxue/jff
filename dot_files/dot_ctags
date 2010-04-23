@@ -1,0 +1,5 @@
+--regex-JavaScript=/^\s*(\w+)\s*:\s*function.*/\1/m/
+--fields=+ainS
+--extra=+fq
+--c-kinds=+px
+--c++-kinds=+px

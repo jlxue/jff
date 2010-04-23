@@ -10,6 +10,12 @@ http://www.qooxdoo.org/
 dijit
 http://www.dojotoolkit.org/
 
+SproutCore
+http://www.sproutcore.com/
+
+GWT
+http://code.google.com/webtoolkit/
+
 ExtJS (商业许可)
 http://www.extjs.com/
 
