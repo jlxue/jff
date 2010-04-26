@@ -1,4 +1,4 @@
-MyApp.Messages = new Core.ResourceBundle({
+MyApp.Messages.set("zh", {
 
     "Generic.Ok":                                           "Ok",
     "Generic.Cancel":                                       "Cancel",

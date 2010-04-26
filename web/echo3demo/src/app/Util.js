@@ -7,15 +7,23 @@ MyApp.ColorSelectButton = Core.extend(Echo.Button, {
     _color: null,
     _window: null,
     _colorSelect: null,
+    _windowStyleName: null,
 
-    $construct: function(color) {
-        this._msg = MyApp.getMessages();
-        this.color = color ? color : "#000000";
+    /**
+     * Constructor function.
+     * @param {Core.ResourceBundle} messages Messages for some locale.
+     * @param {String} windowStyleName Style name to use for this dialog.
+     * @param {string} color The color for this button.
+     */
+    $construct: function(messages, windowStyleName, color) {
+        this._msg = messages;
+        this._windowStyleName = windowStyleName;
+        this._color = color ? color : "#000000";
         Echo.Button.call(this, {
             width: 50,
             height: 20,
-            border: "1px outset " + this.color,
-            background: this.color,
+            border: "1px outset " + this._color,
+            background: this._color,
             events: {
                 action: Core.method(this, this._processAction)
             }
@@ -23,9 +31,9 @@ MyApp.ColorSelectButton = Core.extend(Echo.Button, {
     },
 
     _apply: function(e) {
-        this.color = this._colorSelect.get("color");
-        this.set("border", "1px outset " + this.color);
-        this.set("background", this.color);
+        this._color = this._colorSelect.get("color");
+        this.set("border", "1px outset " + this._color);
+        this.set("background", this._color);
         this._window.parent.remove(this._window);
         this._window = null;
         this._colorSelect = null;
@@ -44,7 +52,7 @@ MyApp.ColorSelectButton = Core.extend(Echo.Button, {
         }
 
         this._window = new Echo.WindowPane({
-            styleName: MyApp.pref.windowStyleName,
+            styleName: this._windowStyleName,
             title: "Select Color",
             width: 220,
             modal: true,
@@ -81,7 +89,7 @@ MyApp.ColorSelectButton = Core.extend(Echo.Button, {
                             layoutData: {
                                 insets: "5px 10px"
                             },
-                            color: this.color,
+                            color: this._color,
                             hueWidth: 16,
                             saturationHeight: 128,
                             valueWidth: 128

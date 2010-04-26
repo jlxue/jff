@@ -10,12 +10,17 @@ MyApp = Core.extend(Echo.Application, {
             if (Echo.DebugConsole) {
                 Echo.DebugConsole.install();
             }
+
             var app = new MyApp();
             var client = new Echo.FreeClient(app, document.getElementById("rootArea"));
+
+            app.setStyleSheet(MyApp.StyleSheet);
             client.addResourcePath("Echo", "lib/echo/");
             client.addResourcePath("Extras", "lib/extras/");
-            app.setStyleSheet(MyApp.StyleSheet);
+
             client.init();
+
+            Core.Debug.consoleWrite("MyApp is started successfully!");
         },
 
         /** Required JavaScript module URLs for "About" dialog. */
@@ -29,40 +34,17 @@ MyApp = Core.extend(Echo.Application, {
          * Set of available locale modules.
          */
         LOCALE_MODULES: {
-            "en": true,
             "zh": true,
         },
+    },
 
-        /**
-         * Globally configured locale.
-         * @type String
-         */
-        locale: null,
-
-        /**
-         * Retrieves resource map for current (globally configured) locale from resource bundle.
-         */
-        getMessages: function() {
-            return MyApp.Messages.get(MyApp.locale);
-        },
-
-        /**
-         * User preference information.
-         */
-        pref: {
-
-            /**
-             * Flag indicating whether animated transition effects are enabled.
-             * @type Boolean
-             */
-            transitionsEnabled: true,
-
-            /**
-             * Default WindowPane style name.
-             * @type String
-             */
-            windowStyleName: "Default",
-        },
+    /** @see Echo.Application#init */
+    init: function() {
+        this._msg = this.getMessages();
+        var label = new Echo.Label({
+            text: this._msg["About.WindowTitle"],
+        });
+        this.rootComponent.add(label);
     },
 
     /**
@@ -70,13 +52,29 @@ MyApp = Core.extend(Echo.Application, {
      */
     _msg: null,
 
-    /** @see Echo.Application#init */
-    init: function() {
-        this._msg = MyApp.getMessages();
-        var label = new Echo.Label({
-            text: this._msg["About.WindowTitle"],
-        });
-        this.rootComponent.add(label);
+    /**
+     * Retrieves resource map for current (globally configured) locale from resource bundle.
+     */
+    getMessages: function() {
+        return MyApp.Messages.get(this.getLocale());
+    },
+
+    /**
+     * User preference information.
+     */
+    pref: {
+
+        /**
+         * Flag indicating whether animated transition effects are enabled.
+         * @type Boolean
+         */
+        transitionsEnabled: true,
+
+        /**
+         * Default WindowPane style name.
+         * @type String
+         */
+        windowStyleName: "Default",
     },
 });
 

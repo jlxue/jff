@@ -5,11 +5,16 @@ MyApp.AboutDialog = Core.extend(Echo.WindowPane, {
 
     _msg: null,
 
-    $construct: function() {
-        this._msg = MyApp.getMessages();
+    /**
+     * Constructor function.
+     * @param {Core.ResourceBundle} messages Messages for some locale.
+     * @param {String} windowStyleName Style name to use for this dialog.
+     */
+    $construct: function(messages, windowStyleName) {
+        this._msg = messages;
 
         Echo.WindowPane.call(this, {
-            styleName: MyApp.pref.windowStyleName,
+            styleName: windowStyleName,
             width: "40em",
             height: "30em",
             title: this._msg["About.WindowTitle"],
