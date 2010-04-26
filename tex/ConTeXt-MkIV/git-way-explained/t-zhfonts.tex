@@ -1,0 +1,68 @@
+%D \module
+%D   [     file=t-zhfonts,
+%D      version=2010.01.06,
+%D        title=\CONTEXT\ User Module,
+%D     subtitle=zhfonts,
+%D       author=Li Yanrui,
+%D         date=\currentdate,
+%D    copyright=Li Yanrui,
+%D        email=liyanrui.m2@gmail.com,
+%D      license=Public Domain]
+
+\writestatus{loading}{ConTeXt User Module / zhfonts}
+\unprotect
+\startmodule[zhfonts]
+
+\setupmodule[size=,style=]
+
+% 标点
+\startluacode
+fonts.protrusions.vectors['myvector'] = {  
+   [0xFF0c] = { 0, 0.60 },  -- ，
+   [0x3002] = { 0, 0.60 },  -- 。
+   [0x201C] = { 0.50, 0 },  -- “
+   [0x201D] = { 0, 0.50 },  -- ”
+   [0xFF1F] = { 0, 0.60 },  -- ？
+   [0x300A] = { 0.60, 0 },  -- 《
+   [0x300B] = { 0, 0.60 },  -- 》
+   [0xFF08] = { 0.50, 0 },  -- （
+   [0xFF09] = { 0, 0.50 },  -- ）
+   [0x3001] = { 0, 0.50 },  -- 、
+}
+fonts.protrusions.classes['mypure'] = {
+   vector = 'myvector', factor = 1
+}
+\stopluacode
+\definefontfeature[zh][mode=node,protrusion=mypure]
+\setupalign[hz,hanging]
+
+\startluacode
+dofile (kpse.find_file ("zhfonts", "lua"))
+\stopluacode
+
+\def\setupzhfonts{\dodoubleempty\dosetupzhfonts}
+\def\dosetupzhfonts[#1][#2]{%
+    \ctxlua{zhfonts.refresh_font_model ('zh', '#1', '#2')}
+}
+
+\def\setuplatinfonts{\dodoubleempty\dosetuplatinfonts}
+\def\dosetuplatinfonts[#1][#2]{%
+    \ctxlua{zhfonts.refresh_font_model ('latin', '#1', '#2')}
+}
+
+\def\usezhfonts[#1]{%
+    \ctxlua{zhfonts.use ('#1')}
+}
+
+\doifnot{\currentmoduleparameter{style}}{dim}{%
+    \doifsomethingelse{\currentmoduleparameter{size}}
+        {\usezhfonts[\currentmoduleparameter{style},\currentmoduleparameter{size}]}%
+        {\usezhfonts[\currentmoduleparameter{style},11pt]}%
+}
+
+
+
+\stopmodule
+\protect
+\endinput
+

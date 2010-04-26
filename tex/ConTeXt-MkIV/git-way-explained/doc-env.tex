@@ -3,9 +3,32 @@
 \usemodule[bib]
 
 %% --------------------------- 中文字体
-\usetypescriptfile[zhfonts]
-\usetypescript[myfont]
-\setupbodyfont[myfont,rm,12pt]
+% old way:
+    %\usetypescriptfile[zhfonts]
+    %\usetypescript[myfont]
+    %\setupbodyfont[myfont,rm,12pt]
+
+% new way:
+\usemodule[zhfonts][style=dim]      % 'style=dim' means 'style= do it myself'
+
+% you can set 'sans' and 'mono' respectively 
+% and their 'regular', 'bold', 'italic', 'bolditalic'
+\setupzhfonts[serif][regular=AdobeSongStd-Light,bold=AdobeHeitiStd-Regular,
+                     italic=AdobeKaitiStd-Regular,bolditalic=AdobeHeitiStd-Regular,
+                     slanted=AdobeKaitiStd-Regular,boldslanted=AdobeHeitiStd-Regular]
+
+\setupzhfonts[sans][regular=AdobeKaitiStd-Regular,bold=AdobeHeitiStd-Regular,
+                     italic=AdobeKaitiStd-Regular,bolditalic=AdobeHeitiStd-Regular,
+                     slanted=AdobeKaitiStd-Regular,boldslanted=AdobeHeitiStd-Regular]
+
+\setupzhfonts[mono][regular=AdobeFangsongStd-Regular,bold=AdobeHeitiStd-Regular,
+                     italic=AdobeFangsongStd-Regular,bolditalic=AdobeHeitiStd-Regular,
+                     slanted=AdobeFangsongStd-Regular,boldslanted=AdobeHeitiStd-Regular]
+
+%\setuplatinfonts[serif][regular=texgyrepagella]
+
+\usezhfonts[rm,11pt]
+
 
 %% --------------------------- 交互设置
 \setupcolors[state=start]
