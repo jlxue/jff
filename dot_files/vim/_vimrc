@@ -232,6 +232,25 @@ set fencs=ucs-bom,utf-8,gbk,latin1
 "set encoding=utf-8
 set ambiwidth=double
 
+" see http://guoyoooping.blog.163.com/blog/static/135705183201003172555951/
+"     http://guoyoooping.blog.163.com/blog/static/13570518320101291442176/
+"
+" required: ghostscript, cmap-adobe-gb1
+if has("unix")
+    set printencoding=utf-8
+    set printmbcharset=ISO10646
+    " see /var/lib/defoma/gs.d/dirs/fonts/cidfmap
+    set printmbfont=r:UMingCN,i:UKaiCN,c:yes
+    "set printmbfont=r:UMingCN,b:ZenHei,i:UKaiCN,c:yes
+
+    set printexpr=MyPrintFile(v:fname_in,\ v:cmdarg)
+    function MyPrintFile(fname, args)
+        return system('ps2pdf ' . a:fname . ' - | lpr' .
+            \   (&printdevice == '' ? '' : ' -P' . &printdevice) . ' ' . a:args) .
+            \   delete(a:fname) + v:shell_error
+    endfunc
+endif
+
 set nowrap
 set nowrapscan
 
