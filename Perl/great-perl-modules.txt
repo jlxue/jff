@@ -5,97 +5,191 @@ http://perl.net.au/wiki/Recommended_Perl_Modules
 http://wiki.perlchina.org/index.php/%E6%A8%A1%E5%9D%97%E6%8E%A8%E4%BB%8B
 http://search.cpan.org/~perigrin/Task-Kensho-0.18/lib/Task/Kensho.pm
 
-===================================================
-App::Ack
-Devel::Cover
-Dist::Zilla
-Getopt::Long::Descriptive
-HTML::TreeBuilder
-HTML::Template
-HTML::Template::Compiled
-HTML::Template::Pro
-local::lib
-Log::Log4perl
-PAR::Packer
-Params::Validate
-Perl::Critic
-Perl::Tidy
-Smart::Comments
-pmtools (http://search.cpan.org/~mlfisher/pmtools-1.10/)
-    (pmpath, pmvers, pmdirs, plxload, pmload, pminst, pmls, pmcat,
-     pmfunc, podgrep, podcat, podtoc, podpath)
-===================================================
+#######################################################################
+
+模板系统
+=======
+    Text::Template
+    HTML::Mason
+    HTML::Template::Pro
+    HTML::Template::Compiled
+    Template::Toolkit
+
+
+web app framework
+================
+    PSGI & Plack (http://plackperl.org/)
+
+    Catalyst
+    Gantry (http://code.google.com/p/gantry/)
+
+    Mojo (http://mojolicious.org/)
+    Dancer
+
+    Jifty (http://jifty.org/)
+    Continuity
+
+    CGI::Application
+    CGI::Application::Structured
+    Titanium
+
+    solstice (http://solstice.eplt.washington.edu/)
+        http://perl.apache.org/products/app-server.html
+        http://www.perlfoundation.org/perl5/index.cgi?web_frameworks
+
+
+Server
+======
+    Starman (High-performance preforking PSGI web server, UNIX only!)
+    PerlBal
+    Net::Server
+    HTTP::Daemon
+    HTTP::Server::Simple
+    POE::Component::Server::HTTP
+    POE::Component::Server::SimpleHTTP
+    POE::Loop::EV
+    POE::Loop::Event
+    POE::XS::Queue::Array
+
+
+数据库访问
+=========
+    DBI
+    Class::DBI          (*)
+    DBIx::Class         (***)
+    Rose::DB::Object    (**)
+    DBIx::Simple
+
+
+面向对象
+=======
+    Moose
+    Class::Struct
+    Class::Accessor
+    Class::Std
+    Class::MethodMaker
+
+
+语法解析
+========
+    Parse::RecDescent   (不推荐，太慢)
+    Parse::Yapp
+    Parse::Eyapp
+    perl-byacc
+    http://home.earthlink.net/~slkpg/
+    http://packages.debian.org/re2c     thread safer lexer generator
+    http://packages.debian.org/lemon    thread safer parser generator
+
+HTML clean
+=========
+    HTML::Defang
+    HTML::Declaw
+    HTML::Scrubber
+    HTML::StripScripts
+    HTML::Restrict
+
+
+XML 处理
+=======
+    XML::LibXML (不推荐用 XML::Parser, XML::XPath, XML::DOM, 推荐用 XML::LibXML)
+    XML::Rules
+    XML::Simple
+    XML::Twig
+
+
+进程管理
+=======
+    Parallel::Prefork
+    Parallel::ForkManager
+    Proc::ProcessTable
+
+
+模块编写
+========
+    Dist::Zilla     *****
+    Module::Starter + Module::Release   ****
+    ExtUtils::ModuleMaker   较长时间没有维护
+    基础模块：ExtUtils::MakeMaker / Module::Install / Module::Build
+                老旧                依赖 Make       只依赖 Perl，更好
+
+开发调试
+========
+    local::lib
+    PAR::Packer
+
+    Devel::Cover
+    Devel::DProf
+    Devel::DumpSizes
+    Devel::Hide
+    Devel::LineTrace
+    Devel::MemUsed
+    Devel::NYTProf
+    Devel::Size
+    Devel::Size::Report
+    Devel::SmallProf
+    Devel::Trace
+
+    Test::*
+    Test::Builder
+    Test::Builder::Tester
+    Test::Class
+    Test::Data::Array
+    Test::Deep
+    Test::Differences
+    Test::Exception
+    Test::File
+    Test::File::Contents
+    Test::FITesque
+    Test::Harness
+    Test::Kwalitee
+    Test::Memory::Cycle
+    Test::MockModule
+    Test::More
+    Test::NoWarnings
+    Test::NoXS
+    Test::Number::Delta
+    Test::Output
+    Test::Pod
+    Test::Pod::Coverage
+    Test::Simple
+    Test::Spelling
+    Test::Taint
+    Test::Trap
+    Test::Warn
+    Test::Without::Module
+    Test::WWW::Declare
+    Test::WWW::Mechanize
+
+    Perl::Critic
+    Perl::Tidy
+    Smart::Comments
+    pmtools (http://search.cpan.org/~mlfisher/pmtools-1.10/)
+        (pmpath, pmvers, pmdirs, plxload, pmload, pminst, pmls, pmcat,
+         pmfunc, podgrep, podcat, podtoc, podpath)
+
+
+#######################################################################
 
 
 Task::Kensho    推荐模块
 
 AnyEvent
+Coro
 
-Parse::RecDescent   (不推荐，太慢)
-Parse::Yapp
-Parse::Eyapp
-perl-byacc
-http://home.earthlink.net/~slkpg/
-http://packages.debian.org/re2c     thread safer lexer generator
-http://packages.debian.org/lemon    thread safer parser generator
-
-DBI
-Class::DBI
-DBIx::Class
-Rose::DB::Object
-DBIx::Simple
-
-Starman (High-performance preforking PSGI web server)
-Continuity
-Apache::PageKit
-Maypole
-Catalyst
-Mason
-Mojo (http://mojolicious.org/)
-Web::Simple
-Dancer
-CGI::Application
-CGI::Application::Structured
-CGI::Prototype
-Gantry
-Jifty
-Solstice
-http://perl.apache.org/products/app-server.html
-
-PSGI, Plack
-
-Net::Server
-HTTP::Daemon
-HTTP::Server::Simple
-POE::Component::Server::HTTP
-POE::Component::Server::SimpleHTTP
-POE::Loop::EV
-POE::Loop::Event
-POE::XS::Queue::Array
-
-Dist::Zilla     *****
-Module::Starter + Module::Release   ****
-ExtUtils::ModuleMaker   较长时间没有维护
-基础模块：ExtUtils::MakeMaker / Module::Install / Module::Build
-            老旧                依赖 Make       只依赖 Perl，更好
-
-Moose
-Class::Struct
-Class::Accessor
-Class::Std
-Class::MethodMaker
 ========================================================
 Apache::DProf
 App::Ack
 App::Config
+App::cpanminus
 BerkeleyDB (比 DB_File 的接口更全面)
+B::Hooks::EndOfScope
 Bundle::Test
 CGI
 CGI::Minimal
 CGI::Simple
 Clone
-Config::General
 Config::Any
+Config::General
 Config::MVP
 cpan2dist
 Cwd
@@ -108,20 +202,8 @@ Date::Parse
 DateTime
 DBD::RAM
 DBD::SQLite
-Devel::Cover
-Devel::DProf
-Devel::Hide
-Devel::NYTProf
-Devel::SmallProf
-Devel::Size
-Devel::Size::Report
-Devel::DumpSizes
-Devel::MemUsed
-Devel::Trace
-Devel::LineTrace
 Encode
 ExtUtils::Installed
-ExtUtils::MakeMaker
 File::Basename
 File::Copy
 File::Find
@@ -134,28 +216,27 @@ Filter::Simple
 Filter::Util::Call
 FindBin
 GetOpt::Long
+Getopt::Long::Descriptive
 GetOpt::Std
+Hash::MoreUtils
+Hash::Util
 Hook::Scope
 HOP::Lexer
 HTML::Seamstress
 HTML::Selector::XPath
 HTML::TreeBuilder
 HTML::TreeBuilder::XPath
-HTML::Template
-HTML::Template::Pro
-Template-Toolkit
 Imager
+Inline
 IO::AtomicFile
 IO::CaptureOutput
 IPC::Run3
-Scalar::Util
-Scalar::MoreUtils
+JSON::XS
+libgd-securityimage-perl (generate CAPTCHA)
+List::AllUtils
 List::MoreUtils
 List::Util
 List::Utils
-List::AllUtils
-Hash::Util
-Hash::MoreUtils
 Log::Log4perl
 LWP::*
 Mail::Mailer
@@ -166,67 +247,31 @@ mocked
 Net::*
 Object::Destroyer***
 ops
-PAR::Packer
 Params::Validate
-Parse::RecDescent
 Path::Class
-Perl::Critic
-Perl::Tidy
-perlcritic
 POE
-Coro
 POSIX
 ptkdb
 Regex::Assemble
 Regex::Common
 Safe
+Scalar::MoreUtils
+Scalar::Util
 Scope::Guard
-B::Hooks::EndOfScope
 Smart::Comments
 SQL::Interp
 Storable
 Sub::ScopeFinalizer
 Switch
 Sys::Mmap
-Template
 Template::Extract
 Term::*
-Test::*
-Test::Builder
-Test::Builder::Tester
-Test::Class
-Test::Data::Array
-Test::Deep
-Test::Differences
-Test::Exception
-Test::File
-Test::File::Contents
-Test::FITesque
-Test::Harness
-Test::Kwalitee
-Test::Memory::Cycle
-Test::MockModule
-Test::More
-Test::NoWarnings
-Test::NoXS
-Test::Number::Delta
-Test::Output
-Test::Pod
-Test::Pod::Coverage
-Test::Simple
-Test::Spelling
-Test::Taint
-Test::Trap
-Test::Warn
-Test::Without::Module
-Test::WWW::Declare
-Test::WWW::Mechanize
 Text::Autoformat
-Text::CSV::Simple
+Text::CharWidth  (see vim:mbyte.c)
 Text::CSV_PP
+Text::CSV::Simple
 Text::CSV_XS
 Text::WrapI18N
-Text::CharWidth  (see vim:mbyte.c)
 Tie::File
 Time::HiRes
 Tk
@@ -236,17 +281,3 @@ Web::Scraper
 Win32::AdminMisc
 Win32::FileOp
 WWW::Mechanize
-XML::LibXML (不推荐用 XML::Parser, XML::XPath, XML::DOM, 推荐用 XML::LibXML)
-XML::Rules
-XML::Simple
-XML::Twig
-
-Inline
-
-libgd-securityimage-perl (generate CAPTCHA)
-
-JSON::XS
-Parallel::Prefork
-Parallel::ForkManager
-Proc::ProcessTable
-
