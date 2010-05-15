@@ -19,19 +19,19 @@ http://search.cpan.org/~perigrin/Task-Kensho-0.18/lib/Task/Kensho.pm
 web app framework
 ================
     PSGI & Plack (http://plackperl.org/)
+    HTTP::Engine (old)
 
-    Catalyst
-    Gantry (http://code.google.com/p/gantry/)
+    Catalyst    (成熟，太重量级)
+    Jifty (http://jifty.org/)   (比较重量级)
+    Continuity  (基于 continuation)
+    Gantry (http://code.google.com/p/gantry/)   (文档太少）
 
     Mojo (http://mojolicious.org/)
     Dancer
 
-    Jifty (http://jifty.org/)
-    Continuity
-
-    CGI::Application
+    CGI::Application        (*****)
+    Titanium                (*****) 基于 CGI::Application
     CGI::Application::Structured
-    Titanium
 
     solstice (http://solstice.eplt.washington.edu/)
         http://perl.apache.org/products/app-server.html
@@ -64,6 +64,8 @@ Server
 面向对象
 =======
     Moose
+    MooseX
+    Mouse
     Class::Struct
     Class::Accessor
     Class::Std
@@ -79,6 +81,7 @@ Server
     http://home.earthlink.net/~slkpg/
     http://packages.debian.org/re2c     thread safer lexer generator
     http://packages.debian.org/lemon    thread safer parser generator
+
 
 HTML clean
 =========
