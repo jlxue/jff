@@ -1,7 +1,7 @@
 
 =head1 NAME
 
-MyTrac - The great new MyTrac web application!
+MyTrac - a project management system like bulletin board system
 
 =head1 SYNOPSIS
 
@@ -11,7 +11,8 @@ MyTrac - The great new MyTrac web application!
 
 =head1 ABSTRACT
 
-A brief summary of what MyTrac does.
+MyTrac is a project management system like bulletin board system,
+it aims to simplicity and extensiblity.
 
 =cut
 

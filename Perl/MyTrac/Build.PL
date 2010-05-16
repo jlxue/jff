@@ -5,7 +5,7 @@ use Module::Build;
 my $builder = Module::Build->new(
     dist_name           => 'MyTrac',
     module_name         => 'MyTrac',
-    dist_abstract       => 'Abstract goes here.',
+    dist_abstract       => 'A project management system like bulletin board system',
     dist_author         => 'Liu Yubao <Yubao.Liu@gmail.com>',
     license             => 'perl',
     dist_version        => '0.01',
@@ -29,6 +29,9 @@ my $builder = Module::Build->new(
     requires => {
         'Titanium'                      => 0,
         'HTML::Template'                => 0,
+        'Moose'                         => 0,
+        'MooseX::Storage'               => 0,
+        'MooseX::Storage::Format::JSONpm'   => 0,
     },
     add_to_cleanup      => [ 'MyTrac-*' ],
     create_makefile_pl  => 'traditional',
