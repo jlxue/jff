@@ -1,12 +1,16 @@
 package MyTrac::Item;
-use Moose;
-use MooseX::Storage;
+use Any::Moose;
+use Any::Moose 'X::Storage';
 use namespace::autoclean;
 
 our $VERSION = '0.01';
 
-with Storage(format => [JSONpm => {json_opts => {canonical => 1, pretty => 1}}],
-             io => 'File');
+if (any_moose eq 'Moose') {
+    with Storage(format => [JSONpm => {json_opts => {canonical => 1, pretty => 1}}],
+                 io => 'File');
+} else {
+    with 'MouseX::Storage';
+}
 
 has 'id'        => (is => 'rw', isa => 'Str');  # item id
 has 'pid'       => (is => 'rw', isa => 'Str');  # parent id
@@ -17,6 +21,6 @@ has 'subject'   => (is => 'rw', isa => 'Str');
 has 'ctime'     => (is => 'rw', isa => 'Int');
 has 'mtime'     => (is => 'rw', isa => 'Int');
 
-no Moose;
+no Any::Moose;
 __PACKAGE__->meta->make_immutable();
 1;

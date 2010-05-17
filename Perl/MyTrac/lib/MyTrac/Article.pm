@@ -1,11 +1,11 @@
 package MyTrac::Article;
-use Moose;
+use Any::Moose;
 use namespace::autoclean;
 
 our $VERSION = '0.01';
 
 extends 'MyTrac::Item';
 
-no Moose;
+no Any::Moose;
 __PACKAGE__->meta->make_immutable();
 1;
