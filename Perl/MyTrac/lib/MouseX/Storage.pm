@@ -1,56 +1,21 @@
 package MouseX::Storage;
-use JSON;
-use Mouse::Role;
-use constant JSON_OPTS => {canonical => 1, pretty => 1};
+use Mouse;
 use namespace::autoclean;
 
 our $VERSION = '0.01';
 
-sub pack {
-    my ($self) = @_;
-    my $h = {};
+sub import {
+    my $pkg = caller();
 
-    $h->{__CLASS__} = $self->meta->name . "-" . $VERSION;
-    my @attributes = $self->meta->get_all_attributes;
+    return if $pkg eq 'main';
 
-    for my $attr (@attributes) {
-        if ($attr->has_value($self)) {
-            $h->{$attr->name} = $attr->get_value($self);
-        }
-    }
+    ($pkg->can('meta')) || confess "This package can only be used in Moose based classes";
 
-    return $h;
+    $pkg->meta->add_method('Storage' => sub {
+            return ('MouseX::Storage::Basic');
+        });
 }
 
-sub unpack {
-    my ($class, $h) = @_;
-
-    if (exists $h->{__CLASS__}) {
-        #confess 'Bad class or version!' if $h->{__CLASS__} ne
-        #        $class . "-" . ${${class}::VERSION};
-        delete $h->{__CLASS__};
-    }
-
-    $class->new($h);
-}
-
-sub freeze {
-    my ($self, @args) = @_;
-
-    to_json($self->pack(@args), JSON_OPTS);
-}
-
-sub thaw {
-    my ($class, $json, @args) = @_;
-
-    $class->unpack(from_json($json, JSON_OPTS), @args);
-}
-
-sub load {
-}
-
-sub store {
-}
-
-no Mouse::Role;
+no Mouse;
+__PACKAGE__->meta->make_immutable();
 1;

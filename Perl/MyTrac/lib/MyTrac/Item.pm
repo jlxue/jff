@@ -5,12 +5,8 @@ use namespace::autoclean;
 
 our $VERSION = '0.01';
 
-if (any_moose eq 'Moose') {
-    with Storage(format => [JSONpm => {json_opts => {canonical => 1, pretty => 1}}],
-                 io => 'File');
-} else {
-    with 'MouseX::Storage';
-}
+with Storage(format => [JSONpm => {json_opts => {canonical => 1, pretty => 1}}],
+             io => 'File');
 
 has 'id'        => (is => 'rw', isa => 'Str');  # item id
 has 'pid'       => (is => 'rw', isa => 'Str');  # parent id
