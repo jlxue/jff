@@ -3,6 +3,7 @@ use Any::Moose;
 use Digest::SHA1 qw/sha1_hex/;
 use File::Spec;
 use File::Temp;
+use Guard;      # or Scope::Guard?
 use JSON 2.0 qw//;
 use namespace::autoclean;
 #use Smart::Comments;
@@ -86,6 +87,10 @@ sub commit {
 }
 
 sub rollback {
+    my ($self) = @_;
+}
+
+sub transact {
     my ($self) = @_;
 }
 
