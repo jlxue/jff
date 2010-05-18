@@ -1,10 +1,27 @@
 package MyTrac::Database;
 use Any::Moose;
+use Digest::SHA1 qw/sha1_hex/;
+use File::Spec;
+use File::Temp;
+use JSON 2.0 qw//;
 use namespace::autoclean;
+#use Smart::Comments;
 
 our $VERSION = '0.01';
 
-has db_path     => (is => 'ro', isa => 'Str');
+has path        => (is => 'ro', isa => 'Str');
+has json        => (is => 'rw', isa => 'Ref');
+
+sub BUILD {
+    my ($self, $args) = @_;
+
+    $self->json(JSON->new->utf8->canonical->pretty->relaxed);
+
+    if (! -e File::Spec->catdir($self->path, '.git')) {
+        confess "Can't initialize database!" if
+                0 != system('git', 'init', '-q', $self->path);
+    }
+}
 
 sub pack {
     my ($self, $obj) = @_;
@@ -45,9 +62,36 @@ sub unpack {
     $class->new($h);
 }
 
+sub to_json {
+    my ($self, $perl) = @_;
+
+    $self->json->encode($perl);
+}
+
+sub from_json {
+    my ($self, $json) = @_;
+
+    $self->json->decode($json);
+}
+
+sub begin_work {
+}
+
+sub commit {
+}
+
+sub rollback {
+}
+
 sub insert {
     my ($self, $obj) = @_;
 
+    my $h = $self->pack($obj);
+    delete $h->{qw/id revision/};
+
+    my $json = $self->to_json($h);
+
+    $obj->id(sha1_hex($json));
 }
 
 sub update {
