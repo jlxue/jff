@@ -12,15 +12,25 @@ has filename=> (is => 'ro', isa => 'Str', required => 1);
 sub BUILD {
     my ($self, $args) = @_;
 
-    flock($self->fh, $self->mode | LOCK_NB) or die "Can't lock " .  $self->filename .
-            "(" . ($self->mode == LOCK_EX ? "LOCK_EX" : "LOCK_SH") . "): $!\n";
+    flock($self->fh, $self->mode) or die "Can't lock " .  $self->filename .
+            "(" . $self->_lock_mode . "): $!\n";
 }
 
-sub DESTROY {
+# require Mouse >= 0.51:
+#   http://cpansearch.perl.org/src/GFUJI/Mouse-0.59/Changes
+#       0.51 Mon Mar 15 15:25:58 2010
+#       * Mouse::Object::DESTROY could cause SEGVs
+sub DEMOLISH {
     my ($self) = @_;
 
     flock($self->fh, LOCK_UN) or die "Can't unlock " . $self->filename .
-            "(" . ($self->mode == LOCK_EX ? "LOCK_EX" : "LOCK_SH") . "): $!\n";
+            "(" . $self->_lock_mode . "): $!\n";
+}
+
+sub _lock_mode {
+    my ($self) = @_;
+
+    ($self->mode & LOCK_EX) == LOCK_EX ? "LOCK_EX" : "LOCK_SH";
 }
 
 no Any::Moose;

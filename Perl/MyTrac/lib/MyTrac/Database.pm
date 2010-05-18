@@ -11,6 +11,7 @@ our $VERSION = '0.01';
 
 has path        => (is => 'ro', isa => 'Str');
 has json        => (is => 'rw', isa => 'Ref');
+has locks       => (is => 'rw', isa => 'ArrayRef[MyTrac::FileLock]');
 
 sub BUILD {
     my ($self, $args) = @_;
@@ -75,12 +76,17 @@ sub from_json {
 }
 
 sub begin_work {
+    my ($self) = @_;
+
+    confess "Transaction already in use!" if defined $self->locks;
 }
 
 sub commit {
+    my ($self) = @_;
 }
 
 sub rollback {
+    my ($self) = @_;
 }
 
 sub insert {
