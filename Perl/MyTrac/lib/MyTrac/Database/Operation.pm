@@ -7,6 +7,7 @@ our $VERSION = '0.01';
 has 'id'        => (is => 'ro', isa => 'Str');
 has 'data'      => (is => 'ro', isa => 'Str');
 has 'filename'  => (is => 'rw', isa => 'Str');
+has 'fh'        => (is => 'rw', isa => 'FileHandle');
 
 sub BUILD {
 }
