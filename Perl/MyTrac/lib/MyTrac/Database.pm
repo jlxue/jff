@@ -1,6 +1,7 @@
 package MyTrac::Database;
 use Any::Moose;
 use Digest::SHA1 qw/sha1_hex/;
+use Fcntl qw/:flock/;
 use File::Spec;
 use File::Temp;
 use Guard;      # or Scope::Guard?
@@ -12,7 +13,7 @@ our $VERSION = '0.01';
 
 has path        => (is => 'ro', isa => 'Str');
 has json        => (is => 'rw', isa => 'Ref');
-has locks       => (is => 'rw', isa => 'ArrayRef[MyTrac::FileLock]');
+has locks       => (is => 'rw', isa => 'ArrayRef[FileLock]');
 
 sub BUILD {
     my ($self, $args) = @_;
@@ -21,7 +22,7 @@ sub BUILD {
 
     if (! -e File::Spec->catdir($self->path, '.git')) {
         confess "Can't initialize database!" if
-                0 != system('git', 'init', '-q', $self->path);
+                0 != system(qw/git init -q/, $self->path);
     }
 }
 
@@ -76,22 +77,42 @@ sub from_json {
     $self->json->decode($json);
 }
 
-sub begin_work {
-    my ($self) = @_;
-
-    confess "Transaction already in use!" if defined $self->locks;
-}
-
-sub commit {
-    my ($self) = @_;
-}
-
-sub rollback {
-    my ($self) = @_;
-}
-
 sub transact {
-    my ($self) = @_;
+    my ($self, $func, @args) = @_;
+    my $successful = 0;
+
+    confess "Transaction can't be nested!" if defined $self->locks;
+
+    scope_guard {
+        my @dirty_files = ();
+
+        for my $lock ($self->locks) {
+            push @dirty_files, $lock->filename if ($lock->mode & LOCK_EX) == LOCK_EX;
+        }
+
+        if (@dirty_files > 0) {
+            if ($successful) {      # commit
+                if (system(qw/git commit --author/, 'admin', '--', @dirty_files) != 0) {
+                    warn "Failed to commit @dirty_files: $?, $!\n";
+                    $successful = 0;
+                }
+            }
+
+            if (! $successful) {    # rollback
+                # REQUIRE: `git checkout -- FILE` doesn't change inode of FILE.
+                if (system(qw/git checkout HEAD --/, @dirty_files) != 0) {
+                    warn "Failed to reset @dirty_files: $?, $!\n";
+                }
+            }
+        }
+
+        # unlock and close files
+        $self->locks(undef);    # locks and file handles will be closed automatically
+    };
+
+    $func->(@args);
+
+    $successful = 1;
 }
 
 sub insert {

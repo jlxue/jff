@@ -23,11 +23,8 @@ sub BUILD {
 sub DEMOLISH {
     my ($self) = @_;
 
-    #flock($self->fh, LOCK_UN) or warn "Can't unlock " . $self->filename .
-    #        "(" . $self->_lock_mode . "): $!\n";
-
-    close $self->fh or warn "Can't close " . $self->filename .
-            "(" . $self->_lock_mode . "): $!\n";;
+    flock($self->fh, LOCK_UN) or warn "Can't unlock " . $self->filename .
+            "(" . $self->_lock_mode . "): $!\n";
 }
 
 sub _lock_mode {
