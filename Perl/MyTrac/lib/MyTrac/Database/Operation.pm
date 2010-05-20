@@ -8,13 +8,15 @@ use namespace::autoclean;
 our $VERSION = '0.01';
 
 has 'id'        => (is => 'ro', isa => 'Str', required => 1);
-has 'data'      => (is => 'ro', isa => 'Str', required => 1);
+has 'db'        => (is => 'ro', isa => 'MyTrac::Database', required => 1);
 has 'lock_mode' => (is => 'ro', isa => 'Int', default => LOCK_SH);
 has 'filename'  => (is => 'rw', isa => 'Str');
 has 'fh'        => (is => 'rw', isa => 'FileHandle');
 has 'successful'=> (is => 'rw', isa => 'Bool', default => 0);
 
 sub BUILD {
+    my ($self) = @_;
+
     $self->filename(File::Spec->catfile(substr($self->id, 0, 2), substr($self, 2)));
 }
 
@@ -38,6 +40,8 @@ sub commit {
 #       0.51 Mon Mar 15 15:25:58 2010
 #       * Mouse::Object::DESTROY could cause SEGVs
 sub DEMOLISH {
+    my ($self) = @_;
+
     if (! $self->successful) {
         eval {
             $self->rollback;
