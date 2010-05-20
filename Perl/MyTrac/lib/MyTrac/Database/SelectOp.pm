@@ -2,11 +2,12 @@ package MyTrac::Database::SelectOp;
 use Any::Moose;
 use Carp;
 use Fcntl qw/:DEFAULT :flock/;
-use File::Spec;
 use namespace::autoclean;
 
 our $VERSION = '0.01';
 
+# return data by this reference to a scalar
+has 'data'      => (is => 'rw', isa => 'ScalarRef', required => 1);
 has 'revision'  => (is => 'ro', isa => 'Str');
 
 sub prepare {
@@ -14,7 +15,7 @@ sub prepare {
 
     return if defined $self->revision;
 
-    sysopen my $fh, File::Spec->catfile($self->db->work_tree, $self->filename), O_RDONLY;
+    sysopen my $fh, $self->db->git_path($self->filename), O_RDONLY;
     confess "Can't open " . $self->filename . " to read: $!" if !defined $fh;
 
     $self->fh($fh);
@@ -41,6 +42,7 @@ sub execute {
     confess "Invalid data!" if length($data) == 0;
 
     utf8::upgrade($data);
+
     return $data;
 }
 

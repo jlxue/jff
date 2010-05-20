@@ -15,6 +15,7 @@ has 'git_dir'   => (is => 'ro', isa => 'Str', required => 1);
 has 'work_tree' => (is => 'ro', isa => 'Str', required => 1);
 has 'json'      => (is => 'rw', isa => 'Ref');
 has 'operations'=> (is => 'rw', isa => 'ArrayRef[MyTrac::Database::Operation]');
+has 'async'     => (is => 'rw', isa => 'Bool', default => 1);
 
 sub BUILD {
     my ($self, $args) = @_;
@@ -82,10 +83,38 @@ sub from_json {
     $self->json->decode($json);
 }
 
-sub transact {
-    my ($self, $func, @args) = @_;
+sub sync_transact {
+    my ($self, $author, $message, $func, @args) = @_;
 
     confess "Transaction can't be nested!" if defined $self->operations;
+    $self->operations([]);
+    $self->async(0);
+
+    scope_guard {
+        # Destructors of database operations will do cleanup.
+        $self->operations(undef);
+    };
+
+    my $result = $func->(@args);
+
+    return $result if ! defined $self->operations;
+
+    my $operations = $self->operations;
+
+    # they are successful
+    for my $op (@$operations) {
+        $op->commit();
+    }
+
+    return $result;
+}
+
+sub async_transact {
+    my ($self, $author, $message, $func, @args) = @_;
+
+    confess "Transaction can't be nested!" if defined $self->operations;
+    $self->operations([]);
+    $self->async(1);
 
     scope_guard {
         # Destructors of database operations will do cleanup.
@@ -119,6 +148,8 @@ sub transact {
 sub insert {
     my ($self, $obj) = @_;
 
+    confess "Transaction not started!" if !defined $self->operations;
+
     my $h = $self->pack($obj);
     delete $h->{qw/id revision/};
 
@@ -129,14 +160,20 @@ sub insert {
 
 sub update {
     my ($self, $obj) = @_;
+
+    confess "Transaction not started!" if !defined $self->operations;
 }
 
 sub delete {
     my ($self, $id) = @_;
+
+    confess "Transaction not started!" if !defined $self->operations;
 }
 
 sub select {
     my ($self, $rules) = @_;
+
+    confess "Transaction not started!" if !defined $self->operations;
 }
 
 sub git_cmd {
@@ -144,6 +181,12 @@ sub git_cmd {
 
     return ('git', '--git-dir=' . $self->git_dir,
             '--work_tree=' . $self->work_tree, @args);
+}
+
+sub git_path {
+    my ($self, $filename) = @_;
+
+    return File::Spec->catfile($self->work_tree, $filename);
 }
 
 no Any::Moose;

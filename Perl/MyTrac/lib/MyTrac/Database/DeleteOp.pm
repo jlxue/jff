@@ -9,7 +9,7 @@ our $VERSION = '0.01';
 sub prepare {
     my ($self) = @_;
 
-    sysopen my $fh, File::Spec->catfile($self->db->work_tree, $self->filename), O_WRONLY;
+    sysopen my $fh, $self->db->git_path($self->filename), O_WRONLY;
     confess "Can't open " . $self->filename . " to write: $!" if !defined $fh;
 
     $self->fh($fh);
