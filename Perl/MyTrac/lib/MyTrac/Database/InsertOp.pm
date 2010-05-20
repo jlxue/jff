@@ -12,9 +12,15 @@ has 'added'     => (is => 'rw', isa => 'Bool', default => 0);
 
 sub prepare {
     my ($self) = @_;
+    my $file = $self->db->git_path($self->filename);
 
-    sysopen my $fh, $self->db->git_path($self->filename), O_WRONLY | O_CREAT | O_EXCL;
-    confess "Can't create " . $self->filename . " to write: $!" if !defined $fh;
+    sysopen my $fh, $file, O_WRONLY | O_CREAT | O_EXCL;
+    if (! defined $fh) {
+        my $old_error = $!;
+
+        # may the file is a empty file produced by DeleteOp
+        sysopen($fh, $file, O_WRONLY) or confess "Can't open " . $self->filename . " to write: $!";
+    }
 
     $self->fh($fh);
     flock($fh, LOCK_EX | LOCK_NB) or confess "Can't lock EX on " .  $self->filename . ": $!";

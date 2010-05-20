@@ -53,6 +53,7 @@ sub DEMOLISH {
                 Carp::cluck("Can't unlock(" . $self->_lock_mode . ") " .  $self->filename);
 
         close($self->fh) or Carp::cluck("Can't close " .  $self->filename);
+        $self->fh(undef);
     }
 }
 
