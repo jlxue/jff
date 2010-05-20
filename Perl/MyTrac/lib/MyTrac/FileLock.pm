@@ -5,9 +5,9 @@ use namespace::autoclean;
 
 our $VERSION = '0.01';
 
-has fh      => (is => 'ro', isa => 'FileHandle', required => 1);
-has mode    => (is => 'ro', isa => 'Int', required => 1);
-has filename=> (is => 'ro', isa => 'Str', required => 1);
+has 'fh'        => (is => 'ro', isa => 'FileHandle', required => 1);
+has 'mode'      => (is => 'ro', isa => 'Int', required => 1);
+has 'filename'  => (is => 'ro', isa => 'Str', required => 1);
 
 sub BUILD {
     my ($self, $args) = @_;

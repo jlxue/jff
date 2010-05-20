@@ -11,18 +11,23 @@ use namespace::autoclean;
 
 our $VERSION = '0.01';
 
-has path        => (is => 'ro', isa => 'Str');
-has json        => (is => 'rw', isa => 'Ref');
-has locks       => (is => 'rw', isa => 'ArrayRef[FileLock]');
+has 'git_dir'   => (is => 'ro', isa => 'Str', required => 1);
+has 'work_tree' => (is => 'ro', isa => 'Str', required => 1);
+has 'json'      => (is => 'rw', isa => 'Ref');
+has 'operations'=> (is => 'rw', isa => 'ArrayRef[MyTrac::Database::Operation]');
 
 sub BUILD {
     my ($self, $args) = @_;
 
     $self->json(JSON->new->utf8->canonical->pretty->relaxed);
 
-    if (! -e File::Spec->catdir($self->path, '.git')) {
+    if (! -e File::Spec->catdir($self->git_dir)) {
+        my @dirs = File::Spec->splitdir($self->git_dir);
+        pop @dirs;
+        my $repos = File::Spec->catdir(@dirs);
+
         confess "Can't initialize database!" if
-                0 != system(qw/git init -q/, $self->path);
+                0 != system(qw/git init -q/, $repos);
     }
 }
 
@@ -79,40 +84,36 @@ sub from_json {
 
 sub transact {
     my ($self, $func, @args) = @_;
-    my $successful = 0;
 
-    confess "Transaction can't be nested!" if defined $self->locks;
+    confess "Transaction can't be nested!" if defined $self->operations;
 
     scope_guard {
-        my @dirty_files = ();
-
-        for my $lock ($self->locks) {
-            push @dirty_files, $lock->filename if ($lock->mode & LOCK_EX) == LOCK_EX;
-        }
-
-        if (@dirty_files > 0) {
-            if ($successful) {      # commit
-                if (system(qw/git commit --author/, 'admin', '--', @dirty_files) != 0) {
-                    warn "Failed to commit @dirty_files: $?, $!\n";
-                    $successful = 0;
-                }
-            }
-
-            if (! $successful) {    # rollback
-                # REQUIRE: `git checkout -- FILE` doesn't change inode of FILE.
-                if (system(qw/git checkout HEAD --/, @dirty_files) != 0) {
-                    warn "Failed to reset @dirty_files: $?, $!\n";
-                }
-            }
-        }
-
-        # unlock and close files
-        $self->locks(undef);    # locks and file handles will be closed automatically
+        # Destructors of database operations will do cleanup.
+        $self->operations(undef);
     };
 
-    $func->(@args);
+    my $result = $func->(@args);
 
-    $successful = 1;
+    return $result if ! defined $self->operations;
+
+    my $operations = $self->operations;
+
+    # acquire all required resources for this transaction.
+    for my $op (@$operations) {
+        $op->prepare();
+    }
+
+    # do jobs
+    for my $op (@$operations) {
+        $op->execute();
+    }
+
+    # they are successful
+    for my $op (@$operations) {
+        $op->commit();
+    }
+
+    return $result;
 }
 
 sub insert {
@@ -136,6 +137,13 @@ sub delete {
 
 sub select {
     my ($self, $rules) = @_;
+}
+
+sub git_cmd {
+    my ($self, @args) = @_;
+
+    return ('git', '--git-dir=' . $self->git_dir,
+            '--work_tree=' . $self->work_tree, @args);
 }
 
 no Any::Moose;
