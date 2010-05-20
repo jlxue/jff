@@ -33,7 +33,7 @@ sub execute {
 sub rollback {
     my ($self) = @_;
 
-    my @cmd = $self->db->git_cmd(qw/checkout --/, $self->filename);
+    my @cmd = $self->db->git_cmd(qw/checkout HEAD --/, $self->filename);
     system(@cmd) or confess "Can't reset " . $self->filename;
 }
 

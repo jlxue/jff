@@ -6,8 +6,6 @@ use namespace::autoclean;
 
 our $VERSION = '0.01';
 
-# return data by this reference to a scalar
-has 'data'      => (is => 'rw', isa => 'ScalarRef', required => 1);
 has 'revision'  => (is => 'ro', isa => 'Str');
 
 sub prepare {

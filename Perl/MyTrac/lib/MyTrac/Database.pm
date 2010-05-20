@@ -171,7 +171,7 @@ sub delete {
 }
 
 sub select {
-    my ($self, $rules) = @_;
+    my ($self, $id) = @_;
 
     confess "Transaction not started!" if !defined $self->operations;
 }

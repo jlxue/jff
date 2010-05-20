@@ -6,6 +6,9 @@ use namespace::autoclean;
 
 our $VERSION = '0.01';
 
+# Is this file has been deleted by others?
+has 'deleted'       => (is => 'rw', isa => 'Bool', default => 0);
+
 sub prepare {
     my ($self) = @_;
 
@@ -14,6 +17,11 @@ sub prepare {
 
     $self->fh($fh);
     flock($fh, LOCK_EX | LOCK_NB) or confess "Can't lock EX on " .  $self->filename . ": $!";
+
+    if (0 == (stat($fh))[7]) {
+        $self->deleted(1);
+        confess "Has been deleted: " . $self->filename
+    }
 }
 
 sub execute {
@@ -25,8 +33,10 @@ sub execute {
 sub rollback {
     my ($self) = @_;
 
-    my @cmd = $self->db->git_cmd(qw/checkout --/, $self->filename);
-    system(@cmd) or confess "Can't reset " . $self->filename;
+    if (! $self->deleted) {
+        my @cmd = $self->db->git_cmd(qw/checkout HEAD --/, $self->filename);
+        system(@cmd) or confess "Can't reset " . $self->filename;
+    }
 }
 
 no Any::Moose;

@@ -7,6 +7,8 @@ use namespace::autoclean;
 our $VERSION = '0.01';
 
 has 'data'      => (is => 'ro', isa => 'Str', required => 1);
+# has this data been added by others?
+has 'added'     => (is => 'rw', isa => 'Bool', default => 0);
 
 sub prepare {
     my ($self) = @_;
@@ -17,7 +19,10 @@ sub prepare {
     $self->fh($fh);
     flock($fh, LOCK_EX | LOCK_NB) or confess "Can't lock EX on " .  $self->filename . ": $!";
 
-    confess "Other process has written " . $self->filename if 0 != (stat($fh))[7];
+    if (0 != (stat($fh))[7]) {
+        $self->added(1);
+        confess "Other process has written " . $self->filename
+    }
 }
 
 sub execute {
@@ -32,8 +37,10 @@ sub execute {
 sub rollback {
     my ($self) = @_;
 
-    unlink $self->db->git_path($self->filename) or
-            confess "Can't unlink " . $self->filename . ":$!";
+    if (! $self->added) {
+        unlink $self->db->git_path($self->filename) or
+                confess "Can't unlink " . $self->filename . ":$!";
+    }
 }
 
 no Any::Moose;
