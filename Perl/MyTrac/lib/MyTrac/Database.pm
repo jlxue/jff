@@ -87,12 +87,17 @@ sub from_json {
     $self->json->decode($json);
 }
 
-sub sync_transact {
-    my ($self, $author, $message, $func, @args) = @_;
+sub transact($\%&@) {
+    my ($self, $options, $func, @args) = @_;
 
     confess "Transaction can't be nested!" if defined $self->operations;
     $self->operations([]);
-    $self->async(0);
+
+    if (exists $options->{async} && $options->{async}) {
+        $self->async(1);
+    } else {
+        $self->async(0);
+    }
 
     scope_guard {
         # Destructors of database operations will do cleanup.
@@ -105,40 +110,21 @@ sub sync_transact {
 
     my $operations = $self->operations;
 
-    # they are successful
-    for my $op (@$operations) {
-        $op->commit();
+    if ($self->async) {
+        # acquire all required resources for this transaction.
+        for my $op (@$operations) {
+            $op->prepare();
+        }
+
+        # do jobs
+        for my $op (@$operations) {
+            $op->execute();
+        }
     }
 
-    return $result;
-}
-
-sub async_transact {
-    my ($self, $author, $message, $func, @args) = @_;
-
-    confess "Transaction can't be nested!" if defined $self->operations;
-    $self->operations([]);
-    $self->async(1);
-
-    scope_guard {
-        # Destructors of database operations will do cleanup.
-        $self->operations(undef);
-    };
-
-    my $result = $func->(@args);
-
-    return $result if ! defined $self->operations;
-
-    my $operations = $self->operations;
-
-    # acquire all required resources for this transaction.
+    # commit this transaction
     for my $op (@$operations) {
-        $op->prepare();
-    }
 
-    # do jobs
-    for my $op (@$operations) {
-        $op->execute();
     }
 
     # they are successful
