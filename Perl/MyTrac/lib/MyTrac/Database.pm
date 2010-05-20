@@ -6,6 +6,10 @@ use File::Spec;
 use File::Temp;
 use Guard;      # or Scope::Guard?
 use JSON 2.0 qw//;
+use MyTrac::Database::DeleteOp;
+use MyTrac::Database::InsertOp;
+use MyTrac::Database::SelectOp;
+use MyTrac::Database::UpdateOp;
 use namespace::autoclean;
 #use Smart::Comments;
 
@@ -156,24 +160,81 @@ sub insert {
     my $json = $self->to_json($h);
 
     $obj->id(sha1_hex($json));
+
+    my $op = new MyTrac::Database::InsertOp({
+            db => $self,
+            id => $obj->id,
+            data => $json,
+        });
+
+    push @{$self->operations}, $op;
+
+    if (! $self->async) {
+        $op->prepare;
+        $op->execute;
+    }
 }
 
 sub update {
     my ($self, $obj) = @_;
 
     confess "Transaction not started!" if !defined $self->operations;
+
+    my $h = $self->pack($obj);
+    delete $h->{revision};
+
+    my $json = $self->to_json($h);
+
+    my $op = new MyTrac::Database::UpdateOp({
+            db => $self,
+            id => $obj->id,
+            data => $json,
+        });
+
+    push @{$self->operations}, $op;
+
+    if (! $self->async) {
+        $op->prepare;
+        $op->execute;
+    }
 }
 
 sub delete {
     my ($self, $id) = @_;
 
     confess "Transaction not started!" if !defined $self->operations;
+
+    my $op = new MyTrac::Database::DeleteOp({
+            db => $self,
+            id => $id,
+        });
+
+    push @{$self->operations}, $op;
+
+    if (! $self->async) {
+        $op->prepare;
+        $op->execute;
+    }
 }
 
 sub select {
-    my ($self, $id) = @_;
+    my ($self, $id, $revision) = @_;
 
     confess "Transaction not started!" if !defined $self->operations;
+
+    my %args = { db => $self, id => $id };
+    $args{revision} = $revision if defined $revision;
+
+    my $op = new MyTrac::Database::SelectOp(\%args);
+
+    $op->prepare;
+    my $json = $op->execute;
+    $op->commit;
+
+    my $obj = $self->unpack($self->from_json($json));
+    $obj->revision($revision) if defined $revision;
+
+    return $obj;
 }
 
 sub git_cmd {
