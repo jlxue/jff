@@ -18,7 +18,7 @@ our $VERSION = '0.01';
 has 'git_dir'   => (is => 'ro', isa => 'Str', required => 1);
 has 'work_tree' => (is => 'ro', isa => 'Str', required => 1);
 has 'json'      => (is => 'rw', isa => 'Ref');
-has 'operations'=> (is => 'rw', isa => 'ArrayRef[MyTrac::Database::Operation]');
+has 'operations'=> (is => 'rw', isa => 'Undef | ArrayRef[MyTrac::Database::Operation]');
 has 'async'     => (is => 'rw', isa => 'Bool', default => 1);
 
 sub BUILD {
@@ -99,12 +99,15 @@ sub transact($\%&@) {
     my $lock_fh;
 
     confess "Transaction can't be nested!" if defined $self->operations;
+    confess "\"author\" not specified!" if ! exists $options->{author};
+    confess "\"shortlog\" or \"log\" not specified!" if ! exists $options->{shortlog} && ! exists $options->{log};
+
     $self->operations([]);
 
-    if (exists $options->{async} && $options->{async}) {
-        $self->async(1);
-    } else {
+    if (exists $options->{sync} && $options->{sync}) {
         $self->async(0);
+    } else {
+        $self->async(1);
     }
 
     scope_guard {
@@ -132,6 +135,7 @@ sub transact($\%&@) {
         }
     }
 
+    # lock git database
     sysopen $lock_fh, $self->git_lockfile_path, O_WRONLY;
     confess "Can't open lock file for transaction: $!" if !defined $lock_fh;
     flock($lock_fh, LOCK_EX) or confess "Can't lock for transaction: $!";
@@ -274,7 +278,7 @@ sub git_cmd {
     my ($self, @args) = @_;
 
     return ('git', '--git-dir=' . $self->git_dir,
-            '--work_tree=' . $self->work_tree, @args);
+            '--work-tree=' . $self->work_tree, @args);
 }
 
 sub git_path {

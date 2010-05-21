@@ -2,9 +2,12 @@ package MyTrac::Database::SelectOp;
 use Any::Moose;
 use Carp;
 use Fcntl qw/:DEFAULT :flock/;
+use MyTrac::Database::Operation;
 use namespace::autoclean;
 
 our $VERSION = '0.01';
+
+extends 'MyTrac::Database::Operation';
 
 has 'revision'  => (is => 'ro', isa => 'Str');
 

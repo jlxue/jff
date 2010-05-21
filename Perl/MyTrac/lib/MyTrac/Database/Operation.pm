@@ -11,7 +11,7 @@ has 'id'        => (is => 'ro', isa => 'Str', required => 1);
 has 'db'        => (is => 'ro', isa => 'MyTrac::Database', required => 1);
 has 'lock_mode' => (is => 'ro', isa => 'Int', default => LOCK_SH);
 has 'filename'  => (is => 'rw', isa => 'Str');
-has 'fh'        => (is => 'rw', isa => 'FileHandle');
+has 'fh'        => (is => 'rw', isa => 'GlobRef');
 has 'locked'    => (is => 'rw', isa => 'Bool', default => 0);
 has 'successful'=> (is => 'rw', isa => 'Bool', default => 0);
 
@@ -19,10 +19,10 @@ sub BUILD {
     my ($self) = @_;
 
     my $dir = substr($self->id, 0, 2);
-    $self->filename(File::Spec->catfile($dir, substr($self, 2)));
+    $self->filename(File::Spec->catfile($dir, substr($self->id, 2)));
 
     $dir = $self->db->git_path($dir);
-    if (! -e $dir && ! mkdir($dir, 022) && ! $!{EEXIST}) {
+    if (! -e $dir && ! mkdir($dir, 0755) && ! $!{EEXIST}) {
         confess "Can't create directory " . $dir . ":$!\n";
     }
 }
@@ -52,7 +52,11 @@ sub DEMOLISH {
     if (! $self->successful) {
         eval {
             $self->rollback if $self->locked;
-        }
+        };
+
+        my $dir = substr($self->id, 0, 2);
+        $dir = $self->db->git_path($dir);
+        rmdir $dir;
     }
 
     if (defined($self->fh)) {

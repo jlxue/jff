@@ -2,9 +2,12 @@ package MyTrac::Database::UpdateOp;
 use Any::Moose;
 use Carp;
 use Fcntl qw/:DEFAULT :flock :seek/;
+use MyTrac::Database::Operation;
 use namespace::autoclean;
 
 our $VERSION = '0.01';
+
+extends 'MyTrac::Database::Operation';
 
 has 'data'      => (is => 'ro', isa => 'Str', required => 1);
 

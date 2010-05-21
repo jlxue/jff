@@ -2,9 +2,12 @@ package MyTrac::Database::DeleteOp;
 use Any::Moose;
 use Carp;
 use Fcntl qw/:DEFAULT :flock/;
+use MyTrac::Database::Operation;
 use namespace::autoclean;
 
 our $VERSION = '0.01';
+
+extends 'MyTrac::Database::Operation';
 
 # Is this file has been deleted by others?
 has 'deleted'       => (is => 'rw', isa => 'Bool', default => 0);
