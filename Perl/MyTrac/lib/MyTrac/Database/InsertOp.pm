@@ -43,7 +43,7 @@ sub rollback {
     my ($self) = @_;
 
     if (! $self->added) {
-        system($self->db->git_cmd(qw/rm --cached --/, $self->filename)) or
+        system($self->db->git_cmd(qw/rm -f -q --cached --/, $self->filename)) or
             Carp::cluck "Can't git-rm --cached " . $self->filename .  ":$!";
         unlink $self->db->git_path($self->filename) or
                 confess "Can't unlink " . $self->filename . ":$!";

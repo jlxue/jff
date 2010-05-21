@@ -9,9 +9,6 @@ our $VERSION = '0.01';
 
 extends 'MyTrac::Database::Operation';
 
-# Is this file has been deleted by others?
-has 'deleted'       => (is => 'rw', isa => 'Bool', default => 0);
-
 sub prepare {
     my ($self) = @_;
 
@@ -21,26 +18,17 @@ sub prepare {
     $self->fh($fh);
     flock($fh, LOCK_EX | LOCK_NB) or confess "Can't lock EX on " .  $self->filename . ": $!";
     $self->locked(1);
-
-    if (0 == (stat($fh))[7]) {
-        $self->deleted(1);
-        confess "Has been deleted: " . $self->filename
-    }
 }
 
-sub execute {
-    my ($self) = @_;
-
-    truncate $self->fh, 0 or confess "Can't truncate " . $self->filename .  ": $!";
-}
+#sub execute {
+    # nothing to do for file in work tree, we'll delete it when transaction is successful.
+#}
 
 sub rollback {
     my ($self) = @_;
 
-    if (! $self->deleted) {
-        my @cmd = $self->db->git_cmd(qw/checkout HEAD --/, $self->filename);
-        system(@cmd) or confess "Can't reset " . $self->filename;
-    }
+    my @cmd = $self->db->git_cmd(qw/reset -q --/, $self->filename);
+    system(@cmd) or confess "Can't reset " . $self->filename;
 }
 
 sub DEMOLISH {
