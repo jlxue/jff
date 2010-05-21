@@ -20,6 +20,11 @@ sub BUILD {
 
     my $dir = substr($self->id, 0, 2);
     $self->filename(File::Spec->catfile($dir, substr($self, 2)));
+
+    $dir = $self->db->git_path($dir);
+    if (! -e $dir && ! mkdir($dir, 022) && ! $!{EEXIST}) {
+        confess "Can't create directory " . $dir . ":$!\n";
+    }
 }
 
 sub prepare {

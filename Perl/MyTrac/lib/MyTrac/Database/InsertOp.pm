@@ -14,7 +14,7 @@ sub prepare {
     my ($self) = @_;
     my $file = $self->db->git_path($self->filename);
 
-    sysopen my $fh, $file, O_WRONLY | O_CREAT | O_EXCL;
+    sysopen my $fh, $file, O_WRONLY | O_CREAT | O_EXCL, 022;
     if (! defined $fh) {
         my $old_error = $!;
 
