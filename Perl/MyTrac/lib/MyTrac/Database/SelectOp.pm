@@ -16,8 +16,8 @@ sub prepare {
 
     return if defined $self->revision;
 
-    sysopen my $fh, $self->db->git_path($self->filename), O_RDONLY;
-    confess "Can't open " . $self->filename . " to read: $!" if !defined $fh;
+    sysopen my $fh, $self->db->git_path($self->filename), O_RDONLY or
+            confess "Can't open " . $self->filename . " to read: $!";
 
     $self->fh($fh);
     flock($fh, LOCK_SH | LOCK_NB) or confess "Can't lock SH on " .  $self->filename . ": $!";

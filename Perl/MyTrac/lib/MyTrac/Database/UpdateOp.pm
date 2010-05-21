@@ -14,8 +14,8 @@ has 'data'      => (is => 'ro', isa => 'Str', required => 1);
 sub prepare {
     my ($self) = @_;
 
-    sysopen my $fh, $self->db->git_path($self->filename), O_WRONLY;
-    confess "Can't open " . $self->filename . " to write: $!" if !defined $fh;
+    sysopen my $fh, $self->db->git_path($self->filename), O_WRONLY or
+            confess "Can't open " . $self->filename . " to write: $!";
 
     $self->fh($fh);
     flock($fh, LOCK_EX | LOCK_NB) or confess "Can't lock EX on " .  $self->filename . ": $!";

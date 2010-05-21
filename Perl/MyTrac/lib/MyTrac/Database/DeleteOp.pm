@@ -15,8 +15,8 @@ has 'deleted'       => (is => 'rw', isa => 'Bool', default => 0);
 sub prepare {
     my ($self) = @_;
 
-    sysopen my $fh, $self->db->git_path($self->filename), O_WRONLY;
-    confess "Can't open " . $self->filename . " to write: $!" if !defined $fh;
+    sysopen my $fh, $self->db->git_path($self->filename), O_WRONLY or
+            confess "Can't open " . $self->filename . " to write: $!";
 
     $self->fh($fh);
     flock($fh, LOCK_EX | LOCK_NB) or confess "Can't lock EX on " .  $self->filename . ": $!";
@@ -40,6 +40,15 @@ sub rollback {
     if (! $self->deleted) {
         my @cmd = $self->db->git_cmd(qw/checkout HEAD --/, $self->filename);
         system(@cmd) or confess "Can't reset " . $self->filename;
+    }
+}
+
+sub DEMOLISH {
+    my ($self) = @_;
+
+    if ($self->successful) {
+        unlink($self->db->git_path($self->filename)) or
+                Carp::cluck "Can't remove " . $self->filename . ":$!";
     }
 }
 

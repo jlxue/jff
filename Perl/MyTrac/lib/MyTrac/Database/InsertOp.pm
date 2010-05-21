@@ -16,12 +16,13 @@ has 'added'     => (is => 'rw', isa => 'Bool', default => 0);
 sub prepare {
     my ($self) = @_;
     my $file = $self->db->git_path($self->filename);
+    my $fh;
 
-    sysopen my $fh, $file, O_WRONLY | O_CREAT | O_EXCL, 0644;
-    if (! defined $fh) {
+    if (! sysopen $fh, $file, O_WRONLY | O_CREAT | O_EXCL, 0644) {
         my $old_error = $!;
 
         # may the file is a empty file produced by DeleteOp
+        undef $fh;
         sysopen($fh, $file, O_WRONLY) or confess "Can't open " . $self->filename . " to write: $!";
     }
 

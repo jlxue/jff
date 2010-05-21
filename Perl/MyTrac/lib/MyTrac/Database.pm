@@ -37,8 +37,8 @@ sub BUILD {
 
     my $lockfile = $self->git_lockfile_path;
     if (! -e $lockfile) {
-        sysopen my $fh, $lockfile, O_WRONLY | O_CREAT, 0644;
-        confess "Can't create lock file $lockfile: $!" if ! defined $fh;
+        sysopen my $fh, $lockfile, O_WRONLY | O_CREAT, 0644 or
+                confess "Can't create lock file $lockfile: $!";
         close $fh;
     }
 }
@@ -136,8 +136,8 @@ sub transact($\%&@) {
     }
 
     # lock git database
-    sysopen $lock_fh, $self->git_lockfile_path, O_WRONLY;
-    confess "Can't open lock file for transaction: $!" if !defined $lock_fh;
+    sysopen $lock_fh, $self->git_lockfile_path, O_WRONLY or
+            confess "Can't open lock file for transaction: $!";
     flock($lock_fh, LOCK_EX) or confess "Can't lock for transaction: $!";
 
     # commit this transaction
@@ -165,14 +165,12 @@ sub transact($\%&@) {
                 0 != system($self->git_cmd(qw/rm -f --cached --/, @delete_files));
     }
 
-    push @files, @delete_files;
     my @commit_options = ();
     push @commit_options, '--author=' . $options->{author} if exists $options->{author};
     push @commit_options, '-m', $options->{shortlog} if exists $options->{shortlog};
     push @commit_options, '-m', $options->{log} if exists $options->{log};
-    push @commit_options, '--';
     confess "Failed to git-commit files: @files" if
-            0 != system($self->git_cmd(qw/commit -q/, @commit_options, @files));
+            0 != system($self->git_cmd(qw/commit -q/, @commit_options));
 
     # they are successful
     for my $op (@$operations) {
