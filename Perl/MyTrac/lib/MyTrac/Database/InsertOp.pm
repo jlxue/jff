@@ -16,15 +16,9 @@ has 'added'     => (is => 'rw', isa => 'Bool', default => 0);
 sub prepare {
     my ($self) = @_;
     my $file = $self->db->git_path($self->filename);
-    my $fh;
 
-    if (! sysopen $fh, $file, O_WRONLY | O_CREAT | O_EXCL, 0644) {
-        my $old_error = $!;
-
-        # may the file is a empty file produced by DeleteOp
-        undef $fh;
-        sysopen($fh, $file, O_WRONLY) or confess "Can't open " . $self->filename . " to write: $!";
-    }
+    sysopen my $fh, $file, O_WRONLY | O_CREAT | O_EXCL, 0644 or
+            confess "Can't create " . $self->filename . " to write: $!";
 
     $self->fh($fh);
     flock($fh, LOCK_EX | LOCK_NB) or confess "Can't lock EX on " .  $self->filename . ": $!";
@@ -32,7 +26,7 @@ sub prepare {
 
     if (0 != (stat($fh))[7]) {
         $self->added(1);
-        confess "Other process has written " . $self->filename
+        confess "Other process has written " . $self->filename;
     }
 }
 
@@ -49,6 +43,8 @@ sub rollback {
     my ($self) = @_;
 
     if (! $self->added) {
+        system($self->db->git_cmd(qw/rm --cached --/, $self->filename)) or
+            Carp::cluck "Can't git-rm --cached " . $self->filename .  ":$!";
         unlink $self->db->git_path($self->filename) or
                 confess "Can't unlink " . $self->filename . ":$!";
     }
