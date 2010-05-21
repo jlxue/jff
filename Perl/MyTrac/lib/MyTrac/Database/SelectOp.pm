@@ -18,6 +18,7 @@ sub prepare {
 
     $self->fh($fh);
     flock($fh, LOCK_SH | LOCK_NB) or confess "Can't lock SH on " .  $self->filename . ": $!";
+    $self->locked(1);
 }
 
 sub execute {

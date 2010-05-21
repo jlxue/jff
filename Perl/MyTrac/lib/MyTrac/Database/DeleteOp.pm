@@ -17,6 +17,7 @@ sub prepare {
 
     $self->fh($fh);
     flock($fh, LOCK_EX | LOCK_NB) or confess "Can't lock EX on " .  $self->filename . ": $!";
+    $self->locked(1);
 
     if (0 == (stat($fh))[7]) {
         $self->deleted(1);

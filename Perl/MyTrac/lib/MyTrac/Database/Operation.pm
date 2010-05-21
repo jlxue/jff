@@ -12,12 +12,14 @@ has 'db'        => (is => 'ro', isa => 'MyTrac::Database', required => 1);
 has 'lock_mode' => (is => 'ro', isa => 'Int', default => LOCK_SH);
 has 'filename'  => (is => 'rw', isa => 'Str');
 has 'fh'        => (is => 'rw', isa => 'FileHandle');
+has 'locked'    => (is => 'rw', isa => 'Bool', default => 0);
 has 'successful'=> (is => 'rw', isa => 'Bool', default => 0);
 
 sub BUILD {
     my ($self) = @_;
 
-    $self->filename(File::Spec->catfile(substr($self->id, 0, 2), substr($self, 2)));
+    my $dir = substr($self->id, 0, 2);
+    $self->filename(File::Spec->catfile($dir, substr($self, 2)));
 }
 
 sub prepare {
@@ -44,13 +46,16 @@ sub DEMOLISH {
 
     if (! $self->successful) {
         eval {
-            $self->rollback;
+            $self->rollback if $self->locked;
         }
     }
 
     if (defined($self->fh)) {
-        flock($self->fh, LOCK_UN) or
-                Carp::cluck("Can't unlock(" . $self->_lock_mode . ") " .  $self->filename);
+        if ($self->locked) {
+            flock($self->fh, LOCK_UN) or
+                    Carp::cluck("Can't unlock(" . $self->_lock_mode . ") " .  $self->filename);
+            $self->locked(0);
+        }
 
         close($self->fh) or Carp::cluck("Can't close " .  $self->filename);
         $self->fh(undef);
