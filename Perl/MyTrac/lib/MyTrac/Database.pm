@@ -183,6 +183,8 @@ sub insert {
 
     confess "Transaction not started!" if !defined $self->operations;
 
+    $obj->timestamp(time());
+
     my $h = $self->pack($obj);
     delete $h->{qw/id revision/};
 
@@ -208,6 +210,8 @@ sub update {
     my ($self, $obj) = @_;
 
     confess "Transaction not started!" if !defined $self->operations;
+
+    $obj->timestamp(time());
 
     my $h = $self->pack($obj);
     delete $h->{revision};
