@@ -292,3 +292,88 @@ sub git_lockfile_path {
 no Any::Moose;
 __PACKAGE__->meta->make_immutable();
 1;
+
+__END__
+
+=pod
+
+=encoding utf8
+
+=head1 The design of the document database using GIT as backend
+
+文件根据内容计算出 sha1 摘要，以此作为文件名。
+读写 git 工作目录中的文件应该允许最大的并行性，不要做全局锁。
+改写 .git/ 内容时可以做一个全局锁(.git/mytrac.lck)。
+
+=head2 transact()
+
+允许多个数据库操作在一个事务环境下执行，部分失败回导致操作被撤销。
+事务不允许嵌套。
+
+事务的执行分成同步和异步两种方式，同步指请求一个操作马上改写 git
+工作目录里的文件，最后统一提交； 异步指请求一个非 select 的操作时
+只是记录操作，等最后统一执行并提交。
+
+由于事务中要对所有涉及的文件加锁，所以异步方式可以最大程度避免
+某个锁获取失败后有些操作进行了一半。
+
+    transact({...options...}, \&subroutine, @args)
+
+options 有如下值：
+  author => 'XXX <YYY>'，作为 git commit 的 --author 参数。
+  shortlog => '...', 作为 git commit 的 -m 参数。
+  log => '...', 作为 git commit 的 -m 参数。
+  sync => 1, 事务以同步方式执行。
+
+  transact() 依赖 Guard 或者 Scope::Guard 模块，确保在 transact()
+  退出前执行一段代码， 这段代码会取消对所有 Operation 实例的引用，
+  导致触发它们的析构函数。
+
+
+=head2 Database::Operation
+
+=head3 prepare()
+
+打开文件、获取锁。
+
+=head3 execute()
+
+改写工作目录中的文件，注意不释放锁。
+
+=head3 rollback()
+
+撤销操作。
+
+=head3 commit()
+
+标记操作成功。
+
+=head3 DEMOLISH()
+
+根据是否调用过 commit() 决定是否撤销操作，注意在这里才释放锁。
+
+
+=head2 Database::InsertOp
+
+互斥方式创建文件，如果失败，打开文件加互斥锁，成功后确保文件大小是零，
+以免在打开和加锁过程中文件被改写。
+
+长度为零的文件是删除留下的空文件。
+
+=head2 Database::DeleteOp
+
+打开文件加互斥锁，截断为零。 不能在事务成功前直接删除文件，因为此事务
+失败时还需恢复此文件。
+
+在事务成功后可以删除此文件。
+
+=head2 Database::UpdateOp
+
+打开文件加互斥锁，改写文件。
+
+=head2 Database::SelectOp
+
+打开文件加共享锁，读取文件。
+
+=cut
+
