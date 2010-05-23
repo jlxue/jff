@@ -158,7 +158,7 @@ sub transact($\%&@) {
     my @files = (@insert_files, @update_files);
     if (@files > 0) {
         confess "Failed to git-add files: @files" if
-                0 != system($self->git_cmd(qw/add --ignore-errors/, @files));
+                0 != system($self->git_cmd(qw/add --ignore-errors --/, @files));
     }
     if (@delete_files > 0) {
         confess "Failed to git-rm files: @delete_files" if
