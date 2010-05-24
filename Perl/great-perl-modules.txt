@@ -72,6 +72,13 @@ Server
     Class::MethodMaker
 
 
+对象数据库
+==========
+    KiokuDB
+    DBM::Deep
+    MLDBM
+
+
 语法解析
 ========
     Parse::RecDescent   (不推荐，太慢)
@@ -284,3 +291,4 @@ Web::Scraper
 Win32::AdminMisc
 Win32::FileOp
 WWW::Mechanize
+Directory::Transactional
