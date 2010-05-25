@@ -85,6 +85,11 @@ Server
     Exception::Class
     Try::Tiny
 
+    Guard
+    Scope::Guard
+    B::Hooks::EndOfScope
+    Hook::Scope
+    Sub::ScopeFinalizer
 
 语法解析
 ========
@@ -112,6 +117,17 @@ XML 处理
     XML::Rules
     XML::Simple
     XML::Twig
+
+
+HTML 信息提取
+=============
+    Web::Scaper
+    Template::Extract
+    HTML::Seamstress
+    HTML::Selector::XPath
+    HTML::TreeBuilder
+    HTML::TreeBuilder::XPath
+    WWW::Mechanize
 
 
 进程管理
@@ -199,7 +215,6 @@ App::Ack
 App::Config
 App::cpanminus
 BerkeleyDB (比 DB_File 的接口更全面)
-B::Hooks::EndOfScope
 Bundle::Test
 CGI
 CGI::Minimal
@@ -237,12 +252,7 @@ Getopt::Long::Descriptive
 GetOpt::Std
 Hash::MoreUtils
 Hash::Util
-Hook::Scope
 HOP::Lexer
-HTML::Seamstress
-HTML::Selector::XPath
-HTML::TreeBuilder
-HTML::TreeBuilder::XPath
 Imager
 Inline
 IO::AtomicFile
@@ -274,14 +284,11 @@ Regex::Common
 Safe
 Scalar::MoreUtils
 Scalar::Util
-Scope::Guard
 Smart::Comments
 SQL::Interp
 Storable
-Sub::ScopeFinalizer
 Switch
 Sys::Mmap
-Template::Extract
 Term::*
 Text::Autoformat
 Text::CharWidth  (see vim:mbyte.c)
@@ -294,8 +301,6 @@ Time::HiRes
 Tk
 typesafety
 uniread
-Web::Scraper
 Win32::AdminMisc
 Win32::FileOp
-WWW::Mechanize
 Directory::Transactional
