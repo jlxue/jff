@@ -55,7 +55,7 @@ sub throw {
     $params{errno} = $errno if defined $errno;
     $params{show_trace} = 1;
 
-    MyTrac::Database::Exception->throw(%params);
+    MyTrac::Database::OperateException->throw(%params);
 }
 
 # require Mouse >= 0.51:

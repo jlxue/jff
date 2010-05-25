@@ -10,6 +10,7 @@ use MyTrac::Database::DeleteOp;
 use MyTrac::Database::InsertOp;
 use MyTrac::Database::SelectOp;
 use MyTrac::Database::UpdateOp;
+use MyTrac::Exceptions;
 use namespace::autoclean;
 #use Smart::Comments;
 
@@ -137,8 +138,8 @@ sub transact($\%&@) {
 
     # lock git database
     sysopen $lock_fh, $self->git_lockfile_path, O_WRONLY or
-            confess "Can't open lock file for transaction: $!";
-    flock($lock_fh, LOCK_EX) or confess "Can't lock for transaction: $!";
+            MyTrac::Database::Exception->throw("Can't open lock file for transaction: $!");
+    flock($lock_fh, LOCK_EX) or MyTrac::Database::Exception->throw("Can't lock for transaction: $!");
 
     # commit this transaction
     my @insert_files = ();
@@ -157,11 +158,11 @@ sub transact($\%&@) {
     }
     my @files = (@insert_files, @update_files);
     if (@files > 0) {
-        confess "Failed to git-add files: @files" if
+        MyTrac::Database::Exception->throw("Failed to git-add files: @files") if
                 0 != system($self->git_cmd(qw/add --ignore-errors --/, @files));
     }
     if (@delete_files > 0) {
-        confess "Failed to git-rm files: @delete_files" if
+        MyTrac::Database::Exception->throw("Failed to git-rm files: @delete_files") if
                 0 != system($self->git_cmd(qw/rm -f -q --cached --/, @delete_files));
     }
 
@@ -169,7 +170,7 @@ sub transact($\%&@) {
     push @commit_options, '--author=' . $options->{author} if exists $options->{author};
     push @commit_options, '-m', $options->{shortlog} if exists $options->{shortlog};
     push @commit_options, '-m', $options->{log} if exists $options->{log};
-    confess "Failed to git-commit files: @files" if
+    MyTrac::Database::Exception->throw("Failed to git-commit files: @files") if
             0 != system($self->git_cmd(qw/commit -q/, @commit_options));
 
     # they are successful
