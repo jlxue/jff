@@ -18,25 +18,25 @@ sub prepare {
     my $file = $self->db->git_path($self->filename);
 
     sysopen my $fh, $file, O_WRONLY | O_CREAT | O_EXCL, 0644 or
-            confess "Can't create " . $self->filename . " to write: $!";
+            $self->throw("Can't create " . $self->filename . " to write", $!);
 
     $self->fh($fh);
-    flock($fh, LOCK_EX | LOCK_NB) or confess "Can't lock EX on " .  $self->filename . ": $!";
+    flock($fh, LOCK_EX | LOCK_NB) or $self->throw("Can't lock EX on " .  $self->filename, $!);
     $self->locked(1);
 
     if (0 != (stat($fh))[7]) {
         $self->added(1);
-        confess "Other process has written " . $self->filename;
+        $self->throw("Other process has written " . $self->filename);
     }
 }
 
 sub execute {
     my ($self) = @_;
     my $data = $self->data;
-    utf8::downgrade($data) or confess "Not utf-8 encoding!";
+    utf8::downgrade($data) or $self->throw("Not utf-8 encoding!");
 
     syswrite($self->fh, $data) == length($data) or
-            confess "Failed to write " . $self->filename . ":$!";
+            $self->throw("Failed to write " . $self->filename, $!);
 }
 
 sub rollback {
@@ -46,7 +46,7 @@ sub rollback {
         system($self->db->git_cmd(qw/rm -f -q --cached --/, $self->filename)) or
             Carp::cluck "Can't git-rm --cached " . $self->filename .  ":$!";
         unlink $self->db->git_path($self->filename) or
-                confess "Can't unlink " . $self->filename . ":$!";
+                Carp::cluck "Can't unlink " . $self->filename . ":$!";
     }
 }
 

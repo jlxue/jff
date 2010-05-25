@@ -13,10 +13,10 @@ sub prepare {
     my ($self) = @_;
 
     sysopen my $fh, $self->db->git_path($self->filename), O_WRONLY or
-            confess "Can't open " . $self->filename . " to write: $!";
+            $self->throw("Can't open " . $self->filename . " to write", $!);
 
     $self->fh($fh);
-    flock($fh, LOCK_EX | LOCK_NB) or confess "Can't lock EX on " .  $self->filename . ": $!";
+    flock($fh, LOCK_EX | LOCK_NB) or $self->throw("Can't lock EX on " .  $self->filename, $!);
     $self->locked(1);
 }
 
@@ -28,7 +28,7 @@ sub rollback {
     my ($self) = @_;
 
     my @cmd = $self->db->git_cmd(qw/reset -q --/, $self->filename);
-    system(@cmd) or confess "Can't reset " . $self->filename;
+    system(@cmd) or $self->throw("Can't reset " . $self->filename);
 }
 
 sub DEMOLISH {

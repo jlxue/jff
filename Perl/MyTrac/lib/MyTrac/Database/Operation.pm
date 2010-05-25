@@ -3,6 +3,7 @@ use Any::Moose;
 use Carp;
 use Fcntl qw/:flock/;
 use File::Spec;
+use MyTrac::Exceptions;
 use namespace::autoclean;
 
 our $VERSION = '0.01';
@@ -23,7 +24,7 @@ sub BUILD {
 
     $dir = $self->db->git_path($dir);
     if (! -e $dir && ! mkdir($dir, 0755) && ! $!{EEXIST}) {
-        confess "Can't create directory " . $dir . ":$!\n";
+        $self->throw("Can't create directory " . $dir, $!);
     }
 }
 
@@ -40,6 +41,21 @@ sub commit {
     my ($self) = @_;
 
     $self->successful(1);
+}
+
+sub throw {
+    my ($self, $msg, $errno) = @_;
+
+    my %params = (id => $self->id, message => $msg);
+    my $operation = $self->meta->name;
+    $operation =~ s/^.*Database:://;
+    $operation =~ s/Op$//;
+
+    $params{operation} = lc $operation;
+    $params{errno} = $errno if defined $errno;
+    $params{show_trace} = 1;
+
+    MyTrac::Database::Exception->throw(%params);
 }
 
 # require Mouse >= 0.51:

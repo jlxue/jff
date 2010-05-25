@@ -17,10 +17,10 @@ sub prepare {
     return if defined $self->revision;
 
     sysopen my $fh, $self->db->git_path($self->filename), O_RDONLY or
-            confess "Can't open " . $self->filename . " to read: $!";
+            $self->throw("Can't open " . $self->filename . " to read",  $!);
 
     $self->fh($fh);
-    flock($fh, LOCK_SH | LOCK_NB) or confess "Can't lock SH on " .  $self->filename . ": $!";
+    flock($fh, LOCK_SH | LOCK_NB) or $self->throw("Can't lock SH on " .  $self->filename, $!);
     $self->locked(1);
 }
 
@@ -31,7 +31,7 @@ sub execute {
     if (defined $self->revision) {
         my $file = $self->revision . ':' . $self->filename;
         my @cmd = $self->db->git_cmd('cat-file', 'blob', $file);
-        open my $fh, join(' ', @cmd) . ' |' or confess "Can't git-cat-file $file: $!";
+        open my $fh, join(' ', @cmd) . ' |' or $self->throw("Can't git-cat-file $file", $!);
         local $/;
         $data = <$fh>;
         close $fh;
@@ -41,7 +41,7 @@ sub execute {
         $data = <$fh>;
     }
 
-    confess "Invalid data!" if length($data) == 0;
+    $self->throw("Empty data!") if length($data) == 0;
 
     utf8::upgrade($data);
 

@@ -15,30 +15,30 @@ sub prepare {
     my ($self) = @_;
 
     sysopen my $fh, $self->db->git_path($self->filename), O_WRONLY or
-            confess "Can't open " . $self->filename . " to write: $!";
+            $self->throw("Can't open " . $self->filename . " to write", $!);
 
     $self->fh($fh);
-    flock($fh, LOCK_EX | LOCK_NB) or confess "Can't lock EX on " .  $self->filename . ": $!";
+    flock($fh, LOCK_EX | LOCK_NB) or $self->throw("Can't lock EX on " .  $self->filename, $!);
     $self->locked(1);
 }
 
 sub execute {
     my ($self) = @_;
     my $data = $self->data;
-    utf8::downgrade($data) or confess "Not utf-8 encoding!";
+    utf8::downgrade($data) or $self->throw("Not utf-8 encoding!");
 
-    truncate $self->fh, 0 or confess "Can't truncate " . $self->filename .  ": $!";
-    seek $self->fh, 0, SEEK_SET or confess "Can't seek " .  $self->filename . ": $!";
+    truncate $self->fh, 0 or $self->throw("Can't truncate " . $self->filename, $!);
+    seek $self->fh, 0, SEEK_SET or $self->throw("Can't seek " .  $self->filename, $!);
 
     syswrite($self->fh, $data) == length($data) or
-            confess "Failed to write " . $self->filename . ":$!";
+            $self->throw("Failed to write " . $self->filename, $!);
 }
 
 sub rollback {
     my ($self) = @_;
 
     my @cmd = $self->db->git_cmd(qw/checkout HEAD --/, $self->filename);
-    system(@cmd) or confess "Can't reset " . $self->filename;
+    system(@cmd) or $self->throw("Can't reset " . $self->filename);
 }
 
 no Any::Moose;

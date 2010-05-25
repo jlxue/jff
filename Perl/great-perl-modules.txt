@@ -79,6 +79,13 @@ Server
     MLDBM
 
 
+异常处理
+========
+    autodie
+    Exception::Class
+    Try::Tiny
+
+
 语法解析
 ========
     Parse::RecDescent   (不推荐，太慢)
