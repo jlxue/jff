@@ -304,9 +304,3 @@ uniread
 Win32::AdminMisc
 Win32::FileOp
 Directory::Transactional
-
-Sub::Exporter
-Sub::Import
-Data::Alias
-aliased
-
