@@ -11,6 +11,7 @@ has 'revision'  => (is => 'rw', isa => 'Str');
 # use id instead of name, because name can be changed!
 has 'authorId'  => (is => 'rw', isa => 'Str');
 has 'timestamp' => (is => 'rw', isa => 'Int');
+has 'tags'      => (is => 'rw', isa => 'ArrayRef[Str]');
 
 no Any::Moose;
 __PACKAGE__->meta->make_immutable();
