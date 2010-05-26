@@ -66,9 +66,11 @@ sub DEMOLISH {
     my ($self) = @_;
 
     if (! $self->successful) {
+        local $@;   # DON'T clear global $@ by this "eval"
         eval {
             $self->rollback if $self->locked;
         };
+        Carp::cluck $@ if $@;
 
         my $dir = substr($self->id, 0, 2);
         $dir = $self->db->git_path($dir);
