@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Welcome to MyTrac</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<link rel="stylesheet" href="css/bluetrip/screen.css" type="text/css" media="screen, projection" />
+<link rel="stylesheet" href="css/bluetrip/print.css" type="text/css" media="print" />
+<!--[if lt IE 8]>
+  <link rel="stylesheet" href="css/bluetrip/ie.css" type="text/css" media="screen, projection" />
+<![endif]-->
+
+<link rel="stylesheet" href="css/bluetrip/style.css" type="text/css" media="print" />
+<link rel="stylesheet" href="js/blackbirdjs/blackbird.css" type="text/css" media="screen, projection" />
+<script type="text/javascript" src="js/blackbirdjs/blackbird.js"></script>
+
+<!--[if lt IE 9]><script src="js/IE9.js"></script><![endif]-->
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/ckeditor/ckeditor.js"></script>
+<script type="text/javascript" src="js/ckeditor/adapters/jquery.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $("#content").ckeditor();
+});
+</script>
+</head>
+
+<body>
+  <div class="container">
+    <h1>
+      Post new article
+    </h1>
+
+    <div id="alerts">
+      <noscript>
+        <p>
+        <strong>CKEditor requires JavaScript to run</strong>. In a browser with no JavaScript
+        support, like yours, you should still see the contents (HTML data) and you should
+        be able to edit it normally, without a rich editor interface.
+        </p>
+      </noscript>
+    </div>
+
+    <form action="mytrac" method="post">
+      <p>
+      <label for="title" class="span-1 suffix-1">Title:</label>
+      <input type="text" name="title" id="title" class="span-12"/>
+      </p>
+
+      <p>
+      <textarea name="content" id="content" cols="80" rows="20"></textarea>
+      </p>
+
+      <p>
+      <label for="tags" class="span-1 suffix-1">Tags:</label>
+      <input type="text" name="tags" id="tags" class="span-12"/>
+      (Separate multiple tags by comma)
+      </p>
+
+      <input type="submit" value="Submit" />
+    </form>
+
+  </div>
+</body>
+</html>
