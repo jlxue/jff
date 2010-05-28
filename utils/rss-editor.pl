@@ -90,7 +90,12 @@ our $VERSION = '0.2';
 my $rss = XML::RSS::LibXML->new (version => '2.0',
     encode_output => 1, encode_cb => \&encode_rss);
 
-my $mw = new MainWindow();
+Tk::CmdLine::LoadResources();
+Tk::CmdLine::SetArguments();
+
+my $mw = new MainWindow(-width => 800, -height => 600);
+$mw->packPropagate(0);  # avoid main window resize because of child widgets
+
 #my $filedialog = $mw->FileDialog();
 my $file = '';                  # rss 文件路径
 my %rss_widgets = ();           # type => Tk::TextUndo, type 取值 channel, image, textinput, item-NNN
@@ -99,8 +104,6 @@ my @item_widgets = ();          # LabFrame 数组，保存每个 item 所在的�
 
 my $scrolled = $mw->Scrolled(
     qw/Frame
-    -width          800
-    -height         600
     -scrollbars     osoe
     /)->pack(qw/-expand 1 -fill both/);
 
@@ -108,9 +111,9 @@ add_widget($scrolled, 'channel', CHANNEL_ATTRS);
 add_widget($scrolled, 'image', IMAGE_ATTRS);
 add_widget($scrolled, 'textinput', TEXTINPUT_ATTRS);
 
-$mw->Label(-textvariable => \$file)->pack;
+$mw->Label(-textvariable => \$file)->pack();
 
-my $toolbar = $mw->Frame()->pack;
+my $toolbar = $mw->Frame()->pack();
 $toolbar->Button(-text => 'Load', -command => \&load)->pack(-side => 'left');
 $toolbar->Button(-text => 'Save', -command => \&save)->pack(-side => 'left');
 $toolbar->Button(-text => 'Save as...', -command => \&saveas)->pack(-side => 'left');
@@ -140,12 +143,12 @@ sub add_widget {
 
     my $labframe = $scrolled->LabFrame(
         -label      => $type,
-    )->pack();
+    )->pack(-fill => 'x');
 
     if ($type =~ /^item/) {
         push @item_widgets, $labframe;
 
-        my $w = $labframe->Frame()->pack();
+        my $w = $labframe->Frame()->pack(-fill => 'x');
         $w->Button(
             -text => 'Up',
             -command => sub {
@@ -171,7 +174,7 @@ sub add_widget {
     for my $attr (@attrs) {
         my $name = "$type $attr";
 
-        my $frame = $labframe->Frame()->pack();
+        my $frame = $labframe->Frame()->pack(-fill => 'x');
 
         $frame->Label(
             -text       => $name,
@@ -181,10 +184,9 @@ sub add_widget {
 
         $rss_widgets{$name} = $frame->Scrolled(
             'TextUndo',
-            -width      => 75,
             -height     => 3,
             -scrollbars => 'osoe'
-        )->pack();
+        )->pack(-side => 'left', -fill => 'x');
 
         $rss_widgets{$name}->configure(-font => ["NSimSun", -16]) if $^O eq 'MSWin32';
 
