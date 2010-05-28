@@ -28,9 +28,11 @@
 use DateTime;
 use DateTime::Format::Mail;
 use Encode;
+use File::Basename;
 use File::Spec;
 use POSIX;
 use Tk;
+#use Tk::FileDialog;
 use Tk::FontDialog;
 use XML::RSS;
 use strict;
@@ -89,6 +91,7 @@ my $rss = XML::RSS->new (version => '2.0',
     encode_output => 1, encode_cb => \&encode_rss);
 
 my $mw = new MainWindow();
+#my $filedialog = $mw->FileDialog();
 my $file = '';                  # rss 文件路径
 my %rss_widgets = ();           # type => Tk::TextUndo, type 取值 channel, image, textinput, item-NNN
                                 # save/load rss 时根据 type 更新 $rss 或者 Tk::TextUndo
@@ -210,9 +213,22 @@ sub add_widget {
 }
 
 sub load {
+    my ($dirname, $basename);
+    ($dirname, $basename) = (dirname $file, basename $file) if length($file) > 0;
+
+    my @options = ();
+    push @options, -initialdir => $dirname, -initialfile => $basename if defined $basename;
     my $f = $mw->getOpenFile(
+        @options,
         #-filetypes => ['RSS Files', ['.xml', '.rss', '.rdf']],
     );
+
+    #$filedialog->configure(-Create => 0);
+    #if (defined $basename) {
+    #    $filedialog->configure(-File => $basename);
+    #    $filedialog->configure(-Path => $dirname);
+    #}
+    #my $f = $filedialog->Show();
 
     return if ! defined $f;
     $file = $f;
@@ -229,10 +245,23 @@ sub save {
 }
 
 sub saveas {
+    my ($dirname, $basename);
+    ($dirname, $basename) = (dirname $file, basename $file) if length($file) > 0;
+
+    my @options = ();
+    push @options, -initialdir => $dirname, -initialfile => $basename if defined $basename;
     my $f = $mw->getSaveFile(
+        @options,
         #-defaultextension => '.xml',
         #-filetypes => ['RSS Files', ['.xml', '.rss', '.rdf']],
     );
+
+    #$filedialog->configure(-Create => 1);
+    #if (defined $basename) {
+    #    $filedialog->configure(-File => $basename);
+    #    $filedialog->configure(-Path => $dirname);
+    #}
+    #my $f = $filedialog->Show();
 
     return if ! defined $f;
     $file = $f;
