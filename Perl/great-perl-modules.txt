@@ -7,6 +7,15 @@ http://search.cpan.org/~perigrin/Task-Kensho-0.18/lib/Task/Kensho.pm
 
 #######################################################################
 
+POD 文档 GUI 查看器
+==================
+    http://att.newsmth.net/att.php?p.226.36512.505.gz (Gtk2::Ex::PodViewer::Parser)
+    Pod::WebServer
+    Pod::Browser
+    Pod::Server
+    Pod::POM::Web
+    Tk::Browser
+
 模板系统
 =======
     Text::Template

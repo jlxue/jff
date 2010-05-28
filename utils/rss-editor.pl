@@ -15,19 +15,23 @@
 #   2010-05-28    Liu Yubao
 #       * initial version, v0.1
 #       * support up/down button
+#       * fix bad font on MS Windows
+#       * fix garbled pubDate on MS Windows
 #       * release v0.2
 #
 # TODO:
-#   * garbled pubDate on MS Windows
-#   * chinese input bar flash on MS Windows
-#   * Bad font on MS Windows
 #   * auto scroll to last TextUndo widget
 #   * auto expand to fill whole main window,
+#   * chinese input bar flash on MS Windows
 #   * keep input method when switch to another TextUndo widget,
 
+use DateTime;
+use DateTime::Format::Mail;
+use Encode;
 use File::Spec;
 use POSIX;
 use Tk;
+use Tk::FontDialog;
 use XML::RSS;
 use strict;
 use warnings;
@@ -110,6 +114,16 @@ $toolbar->Button(-text => 'Save as...', -command => \&saveas)->pack(-side => 'le
 $toolbar->Button(-text => 'New item', -command => sub {
         my $w = add_widget($scrolled, 'item-' . next_item_id(), ITEM_ATTRS);
     })->pack(-side => 'left');
+$toolbar->Button(-text => 'Select font...', -command => sub {
+        my $font = $mw->FontDialog(
+            -sampletext => decode_utf8("The Quick Brown Fox Jumps Over The Lazy Dog\n中华人民共和国万岁！"),
+        )->Show;
+        if (defined $font) {
+            my $fontname = $mw->GetDescriptiveFontName($font);
+            print "Select font: ", ($^O eq 'MSWin32' ? encode('GBK', $fontname) : $fontname), "\n";
+            $mw->RefontTree(-font => $font);
+        }
+    })->pack(-side => 'left');
 
 if (@ARGV > 0 && -f $ARGV[0]) {
     $file = File::Spec->rel2abs($ARGV[0]);
@@ -158,7 +172,7 @@ sub add_widget {
 
         $frame->Label(
             -text       => $name,
-            -width      => 30,
+            -width      => 20,
             -anchor     => 'w',
         )->pack(-side => 'left');
 
@@ -169,8 +183,10 @@ sub add_widget {
             -scrollbars => 'osoe'
         )->pack();
 
+        $rss_widgets{$name}->configure(-font => ["NSimSun", -16]) if $^O eq 'MSWin32';
+
         if ($attr eq 'pubDate' or $attr eq 'lastBuildDate') {
-            $rss_widgets{$name}->Contents(POSIX::strftime("%a, %d %b %Y %T %z", gmtime));
+            $rss_widgets{$name}->Contents(current_datetime());
         } elsif ($attr eq 'language') {
             $rss_widgets{$name}->Contents('zh-cn');
         } elsif ($attr eq 'generator') {
@@ -293,7 +309,7 @@ sub save_rss_element {
     }
 
     if ($type eq 'channel') {
-        $h{lastBuildDate} = POSIX::strftime("%a, %d %b %Y %T %z", gmtime);
+        $h{lastBuildDate} = current_datetime();
     }
 
     if ($type =~ /^item/) {
@@ -354,5 +370,9 @@ sub find_item_widget {
     for (my $i = 0; $i < @item_widgets; ++$i) {
         return $i if $w == $item_widgets[$i];
     }
+}
+
+sub current_datetime {
+    DateTime::Format::Mail->format_datetime(DateTime->now);
 }
 
