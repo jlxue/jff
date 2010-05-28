@@ -1,4 +1,20 @@
 #!/usr/bin/perl
+#
+# Purpose: a simple RSS editor written with Perl/Tk
+#
+# Usage:
+#   perl rss-editor.pl [some.rss]
+#
+# Author:
+#   Liu Yubao <yubao.liu@gmail.com>
+#
+# License:
+#   GPL v3
+#
+# ChangeLog:
+#   2010-05-28    Liu Yubao
+#       * initial version, v0.1
+
 use File::Spec;
 use POSIX;
 use Tk;
@@ -59,9 +75,10 @@ my $rss = XML::RSS->new (version => '2.0',
     encode_output => 1, encode_cb => \&encode_rss);
 
 my $mw = new MainWindow();
-my $file = '';
-my %rss_widgets = ();
-my @item_widgets = ();
+my $file = '';                  # rss 文件路径
+my %rss_widgets = ();           # type => Tk::TextUndo, type 取值 channel, image, textinput, item-NNN
+                                # save/load rss 时根据 type 更新 $rss 或者 Tk::TextUndo
+my @item_widgets = ();          # LabFrame 数组，保存每个 item 所在的控件，每个 LabFrame 的 label 是 item-NNN
 
 my $scrolled = $mw->Scrolled(
     qw/Frame
@@ -198,9 +215,9 @@ sub saveas {
 sub loadrss {
     $rss->parsefile($file);
 
-    print "#" . 70;
+    print "\n", "#" x 70, "\n";
     print $rss->as_string;
-    print "#" . 70;
+    print "\n", "#" x 70, "\n";
 
     load_rss_element('channel', CHANNEL_ATTRS);
     load_rss_element('image', IMAGE_ATTRS);
@@ -212,7 +229,7 @@ sub loadrss {
     @item_widgets = ();
 
     my @items = @{$rss->{items}};
-    my $i = 0;
+    my $i = 1;
     for my $item (@items) {
         add_widget($scrolled, "item-$i", ITEM_ATTRS);
         load_rss_element("item-$i", ITEM_ATTRS);
@@ -240,6 +257,16 @@ sub load_rss_element {
 }
 
 sub saverss {
+    save_rss_element('channel', CHANNEL_ATTRS);
+    save_rss_element('image', IMAGE_ATTRS);
+    save_rss_element('textinput', TEXTINPUT_ATTRS);
+
+    $rss->{'items'} = [];
+    for my $w (@item_widgets) {
+        my $type = $w->cget('-label');
+        save_rss_element($type, ITEM_ATTRS);
+    }
+
     $rss->save($file);
 }
 
@@ -257,7 +284,11 @@ sub save_rss_element {
         $h{lastBuildDate} = POSIX::strftime("%a, %d %b %Y %T %z", gmtime);
     }
 
-    $rss->$type(%h);
+    if ($type =~ /^item/) {
+        $rss->add_item(%h);
+    } else {
+        $rss->$type(%h);
+    }
 }
 
 sub encode_rss {
@@ -268,11 +299,11 @@ sub encode_rss {
 }
 
 sub next_item_id {
-    my @keys = keys %rss_widgets;
-    my $id = -1;
+    my $id = 0;
 
-    for my $key (@keys) {
-        if ($key =~ /^item-(\d+)/) {
+    for my $w (@item_widgets) {
+        my $type = $w->cget('-label');
+        if ($type =~ /^item-(\d+)/) {
             $id = $1 if $id < $1;
         }
     }
