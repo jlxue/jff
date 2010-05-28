@@ -34,7 +34,7 @@ use POSIX;
 use Tk;
 #use Tk::FileDialog;
 use Tk::FontDialog;
-use XML::RSS;
+use XML::RSS::LibXML;   #use XML::RSS;
 use strict;
 use warnings;
 
@@ -87,7 +87,7 @@ use constant ITEM_ATTRS      => qw(
 
 our $VERSION = '0.2';
 
-my $rss = XML::RSS->new (version => '2.0',
+my $rss = XML::RSS::LibXML->new (version => '2.0',
     encode_output => 1, encode_cb => \&encode_rss);
 
 my $mw = new MainWindow();
@@ -300,7 +300,7 @@ sub load_rss_element {
     for my $attr (@attrs) {
         my $value;
         if ($type =~ /^item-(\d+)/) {
-            my $item = $rss->{items}->[$1];
+            my $item = $rss->{items}->[$1 - 1];
             next if ! defined $item;
             $value = $item->{$attr};
         } else {
