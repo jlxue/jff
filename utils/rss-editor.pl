@@ -17,6 +17,7 @@
 #       * support up/down button
 #       * fix bad font on MS Windows
 #       * fix garbled pubDate on MS Windows
+#       * change to XML::RSS::LibXML
 #       * release v0.2
 #
 # TODO:
