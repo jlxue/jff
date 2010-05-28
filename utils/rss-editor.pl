@@ -14,6 +14,16 @@
 # ChangeLog:
 #   2010-05-28    Liu Yubao
 #       * initial version, v0.1
+#       * support up/down button
+#       * release v0.2
+#
+# TODO:
+#   * garbled pubDate on MS Windows
+#   * chinese input bar flash on MS Windows
+#   * Bad font on MS Windows
+#   * auto scroll to last TextUndo widget
+#   * auto expand to fill whole main window,
+#   * keep input method when switch to another TextUndo widget,
 
 use File::Spec;
 use POSIX;
@@ -69,7 +79,7 @@ use constant ITEM_ATTRS      => qw(
     #enclosure
 
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 my $rss = XML::RSS->new (version => '2.0',
     encode_output => 1, encode_cb => \&encode_rss);
@@ -98,7 +108,7 @@ $toolbar->Button(-text => 'Load', -command => \&load)->pack(-side => 'left');
 $toolbar->Button(-text => 'Save', -command => \&save)->pack(-side => 'left');
 $toolbar->Button(-text => 'Save as...', -command => \&saveas)->pack(-side => 'left');
 $toolbar->Button(-text => 'New item', -command => sub {
-        add_widget($scrolled, 'item-' . next_item_id(), ITEM_ATTRS);
+        my $w = add_widget($scrolled, 'item-' . next_item_id(), ITEM_ATTRS);
     })->pack(-side => 'left');
 
 if (@ARGV > 0 && -f $ARGV[0]) {
@@ -179,6 +189,8 @@ sub add_widget {
             $rss_widgets{$name}->Contents('author@example.com');
         }
     }
+
+    return $labframe;
 }
 
 sub load {
@@ -294,7 +306,8 @@ sub save_rss_element {
 sub encode_rss {
     my ($obj, $text) = @_;
     $text =~ s/^\s+|\s+$//g;
-    chomp $text;
+    while (chomp $text) {
+    }
     return '<![CDATA[' . $text . ']]>';
 }
 
@@ -317,9 +330,14 @@ sub move_item_widget {
     my $i = find_item_widget($w);
     if ($direction < 0) {   # up
         return if $i == 0;
+        $w->pack(-before => $item_widgets[$i + $direction]);
     } else {                # down
         return if $i == $#item_widgets;
+        $w->pack(-after => $item_widgets[$i + $direction]);
     }
+
+    $item_widgets[$i] = $item_widgets[$i + $direction];
+    $item_widgets[$i + $direction] = $w;
 }
 
 sub delete_item_widget {
