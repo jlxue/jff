@@ -61,6 +61,7 @@ my $rss = XML::RSS->new (version => '2.0',
 my $mw = new MainWindow();
 my $file = '';
 my %rss_widgets = ();
+my @item_widgets = ();
 
 my $scrolled = $mw->Scrolled(
     qw/Frame
@@ -80,7 +81,7 @@ $toolbar->Button(-text => 'Load', -command => \&load)->pack(-side => 'left');
 $toolbar->Button(-text => 'Save', -command => \&save)->pack(-side => 'left');
 $toolbar->Button(-text => 'Save as...', -command => \&saveas)->pack(-side => 'left');
 $toolbar->Button(-text => 'New item', -command => sub {
-        add_widget($scrolled, 'item', ITEM_ATTRS);
+        add_widget($scrolled, 'item-' . next_item_id(), ITEM_ATTRS);
     })->pack(-side => 'left');
 
 if (@ARGV > 0 && -f $ARGV[0]) {
@@ -93,14 +94,40 @@ MainLoop;
 sub add_widget {
     my ($scrolled, $type, @attrs) = @_;
 
-    $scrolled = $scrolled->LabFrame(
+    my $labframe = $scrolled->LabFrame(
         -label      => $type,
     )->pack();
+
+    if ($type =~ /^item/) {
+        push @item_widgets, $labframe;
+
+        my $w = $labframe->Frame()->pack();
+        $w->Button(
+            -text => 'Up',
+            -command => sub {
+                move_item_widget($labframe, -1);
+            },
+        )->pack(-side => 'left');
+
+        $w->Button(
+            -text => 'Down',
+            -command => sub {
+                move_item_widget($labframe, 1);
+            },
+        )->pack(-side => 'left');
+
+        $w->Button(
+            -text => 'Delete',
+            -command => sub {
+                delete_item_widget($labframe);
+            },
+        )->pack(-side => 'left');
+    }
 
     for my $attr (@attrs) {
         my $name = "$type $attr";
 
-        my $frame = $scrolled->Frame()->pack();
+        my $frame = $labframe->Frame()->pack();
 
         $frame->Label(
             -text       => $name,
@@ -179,6 +206,11 @@ sub loadrss {
     load_rss_element('image', IMAGE_ATTRS);
     load_rss_element('textinput', TEXTINPUT_ATTRS);
 
+    for (@item_widgets) {
+        $_->destroy();
+    }
+    @item_widgets = ();
+
     my @items = @{$rss->{items}};
     my $i = 0;
     for my $item (@items) {
@@ -233,5 +265,45 @@ sub encode_rss {
     $text =~ s/^\s+|\s+$//g;
     chomp $text;
     return '<![CDATA[' . $text . ']]>';
+}
+
+sub next_item_id {
+    my @keys = keys %rss_widgets;
+    my $id = -1;
+
+    for my $key (@keys) {
+        if ($key =~ /^item-(\d+)/) {
+            $id = $1 if $id < $1;
+        }
+    }
+
+    return $id + 1;
+}
+
+sub move_item_widget {
+    my ($w, $direction) = @_;
+
+    my $i = find_item_widget($w);
+    if ($direction < 0) {   # up
+        return if $i == 0;
+    } else {                # down
+        return if $i == $#item_widgets;
+    }
+}
+
+sub delete_item_widget {
+    my ($w) = @_;
+
+    $w->destroy;
+    my $i = find_item_widget($w);
+    splice @item_widgets, $i, 1;
+}
+
+sub find_item_widget {
+    my ($w) = @_;
+
+    for (my $i = 0; $i < @item_widgets; ++$i) {
+        return $i if $w == $item_widgets[$i];
+    }
 }
 
