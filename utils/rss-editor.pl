@@ -12,13 +12,16 @@
 #   GPL v3
 #
 # ChangeLog:
-#   2010-05-28    Liu Yubao
+#   2010-05-28      Liu Yubao
 #       * initial version, v0.1
 #       * support up/down button
 #       * fix bad font on MS Windows
 #       * fix garbled pubDate on MS Windows
 #       * change to XML::RSS::LibXML
 #       * release v0.2
+#   2010-05-29      Liu Yubao
+#       * change back to XML::RSS because XML::RSS::LibXML doesn't support "encode_cb" options
+#       * release v0.2.1
 #
 # TODO:
 #   * auto scroll to last TextUndo widget
@@ -35,7 +38,7 @@ use POSIX;
 use Tk;
 #use Tk::FileDialog;
 use Tk::FontDialog;
-use XML::RSS::LibXML;   #use XML::RSS;
+use XML::RSS;
 use strict;
 use warnings;
 
@@ -86,9 +89,9 @@ use constant ITEM_ATTRS      => qw(
     #enclosure
 
 
-our $VERSION = '0.2';
+our $VERSION = '0.2.1';
 
-my $rss = XML::RSS::LibXML->new (version => '2.0',
+my $rss = XML::RSS->new (version => '2.0',
     encode_output => 1, encode_cb => \&encode_rss);
 
 Tk::CmdLine::LoadResources();
