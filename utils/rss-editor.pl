@@ -163,7 +163,7 @@ sub add_widget {
     if ($type =~ /^item/) {
         push @item_widgets, $labframe;
 
-        my $w = $labframe->Frame()->pack(-fill => 'x');
+        my $w = $labframe->Frame()->pack();
         $w->Button(
             -text => 'Up',
             -command => sub {
