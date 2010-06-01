@@ -19,9 +19,11 @@
 #       * fix garbled pubDate on MS Windows
 #       * change to XML::RSS::LibXML
 #       * release v0.2
+#
 #   2010-05-29      Liu Yubao
 #       * change back to XML::RSS because XML::RSS::LibXML doesn't support "encode_cb" options
 #       * import Tk::FontDialog on demand
+#       * fix undefined height problem in Cygwin
 #       * release v0.2.1
 #
 # TODO:
@@ -97,8 +99,7 @@ my $rss = XML::RSS->new (version => '2.0',
 Tk::CmdLine::LoadResources();
 Tk::CmdLine::SetArguments();
 
-my $mw = new MainWindow(-width => 800, -height => 600);
-$mw->packPropagate(0);  # avoid main window resize because of child widgets
+my $mw = new MainWindow();
 
 #my $filedialog = $mw->FileDialog();
 my $fontdialog;
@@ -109,6 +110,8 @@ my @item_widgets = ();          # LabFrame 数组，保存每个 item 所在的�
 
 my $scrolled = $mw->Scrolled(
     qw/Frame
+    -width          800
+    -height         600
     -scrollbars     osoe
     /)->pack(qw/-expand 1 -fill both/);
 
