@@ -21,6 +21,7 @@
 #       * release v0.2
 #   2010-05-29      Liu Yubao
 #       * change back to XML::RSS because XML::RSS::LibXML doesn't support "encode_cb" options
+#       * import Tk::FontDialog on demand
 #       * release v0.2.1
 #
 # TODO:
@@ -37,7 +38,6 @@ use File::Spec;
 use POSIX;
 use Tk;
 #use Tk::FileDialog;
-use Tk::FontDialog;
 use XML::RSS;
 use strict;
 use warnings;
@@ -101,6 +101,7 @@ my $mw = new MainWindow(-width => 800, -height => 600);
 $mw->packPropagate(0);  # avoid main window resize because of child widgets
 
 #my $filedialog = $mw->FileDialog();
+my $fontdialog;
 my $file = '';                  # rss 文件路径
 my %rss_widgets = ();           # type => Tk::TextUndo, type 取值 channel, image, textinput, item-NNN
                                 # save/load rss 时根据 type 更新 $rss 或者 Tk::TextUndo
@@ -125,9 +126,16 @@ $toolbar->Button(-text => 'New item', -command => sub {
         my $w = add_widget($scrolled, 'item-' . next_item_id(), ITEM_ATTRS);
     })->pack(-side => 'left');
 $toolbar->Button(-text => 'Select font...', -command => sub {
-        my $font = $mw->FontDialog(
-            -sampletext => decode_utf8("The Quick Brown Fox Jumps Over The Lazy Dog\n中华人民共和国万岁！"),
-        )->Show;
+        if (! defined $fontdialog) {
+            require Tk::FontDialog;
+            Tk::FontDialog->import;
+
+            $fontdialog = $mw->FontDialog(
+                -sampletext => decode_utf8("The Quick Brown Fox Jumps Over The Lazy Dog\n中华人民共和国万岁！"),
+            );
+        }
+
+        my $font = $fontdialog->Show;
         if (defined $font) {
             my $fontname = $mw->GetDescriptiveFontName($font);
             print "Select font: ", ($^O eq 'MSWin32' ? encode('GBK', $fontname) : $fontname), "\n";
