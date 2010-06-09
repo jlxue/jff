@@ -89,8 +89,8 @@ i brasero
 i file-roller
 
 ### instant messaging
-# Or: pidgin
-i emesene
+# Or: emesene
+i pidgin pidgin-encryption
 
 ### movie player
 i mplayer
