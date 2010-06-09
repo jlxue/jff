@@ -9,12 +9,15 @@ http://search.cpan.org/~perigrin/Task-Kensho-0.18/lib/Task/Kensho.pm
 
 POD 文档 GUI 查看器
 ==================
-    http://att.newsmth.net/att.php?p.226.36512.505.gz (Gtk2::Ex::PodViewer::Parser)
-    Pod::WebServer
-    Pod::Browser
-    Pod::Server
-    Pod::POM::Web
-    Tk::Browser
+    podbrowser.pl (http://www.newsmth.net/bbscon.php?bid=226&id=36512)
+        比 Gtk2::Ex::PodViewer::Parser 自带的 podviewer 好用。
+    Pod::Browser        pod_browser_server.pl，美观方便的界面，使用了 ExtJS
+    Pod::POM::Web       帧结构，容易使用，可以看源码，安装 PPI::HTML 和 Search::Indexer
+                        后支持源码语法高亮以及全文搜索。
+
+    Pod::Server         pod_server, 启动快，有帧结构，比较漂亮，但还不够方便
+    Pod::WebServer      podwebserver, 很一般，启动时索引建立时间太长
+    Tk::Browser         mkbrowser, 启动慢，可以看源码，但不方便
 
 模板系统
 =======
