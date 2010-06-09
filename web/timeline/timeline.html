@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Timeline</title>
+<link type="text/css" href="css/ui-lightness/jquery-ui-1.8.1.custom.css" rel="stylesheet" />
+<style type="text/css">
+    #timeline td {
+        text-align: center;
+    }
+
+    #timeline input {
+        margin: 10px;
+        text-align: center;
+    }
+
+    #timeline input.error-time-format {
+        border: 1px solid red;
+        background: red;
+    }
+
+    #timeline img {
+        width:  200px;
+        height: 200px;
+        margin: 10px;
+        border: 1px solid black;
+    }
+
+    #timeline .ui-selected {
+        background: #F39814;
+        color: white;
+    }
+</style>
+
+<script type="text/javascript" src="js/jquery-1.4.2.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.2.custom.js"></script>
+<script type="text/javascript" src="timeline.js"></script>
+</head>
+<body>
+
+<p>
+<button id="btn_add">增加场景</button>
+<button id="btn_remove">删除场景</button>
+<button id="btn_select">选择场景</button>
+<button id="btn_edit">编辑场景</button>
+<button id="btn_preview">预览场景</button>
+<button id="btn_done">完成</button>
+</p>
+
+<form>
+<table id="timeline-container">
+<tr id="timeline">
+</tr>
+</table>
+</form>
+
+<p>
+操作说明：
+<ul>
+    <li>左键横向拖动某个项目，改变其位置；</li>
+    <li>左键单击，选择当前项，取消其它选择；</li>
+    <li>Ctrl + 左键单击，切换当前项的选择状态；</li>
+    <li>Shift + 左键单击，选择上次单击的项，以及当前项之间的所有项；</li>
+    <li>Ctrl + Shift + 左键单击，取消选择上次单击的项，以及当前项之间的所有项；</li>
+</ul>
+</p>
+
+</body>
+</html>
+
