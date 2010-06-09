@@ -225,6 +225,7 @@ Coro
 Apache::DProf
 App::Ack
 App::Config
+App::CPAN::Fresh
 App::cpanminus
 BerkeleyDB (比 DB_File 的接口更全面)
 Bundle::Test
@@ -236,6 +237,7 @@ Config::Any
 Config::General
 Config::MVP
 cpan2dist
+CPAN::Mini
 Cwd
 Data::Dumper
 Data::FormValidator
@@ -246,6 +248,7 @@ Date::Parse
 DateTime
 DBD::RAM
 DBD::SQLite
+Directory::Transactional
 Encode
 ExtUtils::Installed
 File::Basename
@@ -315,4 +318,3 @@ typesafety
 uniread
 Win32::AdminMisc
 Win32::FileOp
-Directory::Transactional
