@@ -1,6 +1,6 @@
 # $Id: Makefile,v 1.4 2005/10/05 10:07:40 jodrell Exp $
 NAME=podbrowser
-PREFIX=/usr/local
+PREFIX?=/usr/local
 BINDIR=$(PREFIX)/bin
 DATADIR=$(PREFIX)/share
 ICONDIR=$(DATADIR)/icons/hicolor/48x48/apps
