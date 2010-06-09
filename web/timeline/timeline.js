@@ -13,6 +13,19 @@
             }, onSelect);
 
 
+        $(document).keydown(function(event) {
+            if (event.which == 16) {    // shift key
+                $("#timeline .last-clicked-item").addClass("last-clicked");
+            }
+        });
+
+        $(document).keyup(function(event) {
+            if (event.which == 16) {    // shift key
+                $("#timeline .last-clicked-item").removeClass("last-clicked");
+            }
+        });
+
+
         $("#timeline td input").live("change", function() {
             var td = $(this).parent("td")[0];
 
@@ -43,7 +56,6 @@
             if (tds.length > 0) {
                 tds.remove();
                 update_timeline(0);
-                $("#timeline").removeData("last-clicked-td");
             } else {
                 alert("请先选择场景！");
             }
@@ -122,7 +134,11 @@
 
     function onSelect(event) {
         var td = $(this);
-        var last_clicked_td = $(event.data.parent).data("last-clicked-td");
+        var last_clicked = $(event.data.parent).find(".last-clicked-item");
+        if (last_clicked.length > 0)
+            last_clicked_td = last_clicked[0];
+        else
+            last_clicked_td = null;
 
 
         if (event.ctrlKey) {
@@ -138,6 +154,9 @@
                 } else {
                     td.removeClass(event.data.selectedClass);
                 }
+
+                $(event.data.parent).find(".last-clicked-item").removeClass("last-clicked");
+
             } else {
                 // ctrl key pressed, not shift key, toggle current item
                 td.toggleClass(event.data.selectedClass);
@@ -155,6 +174,8 @@
                 td.addClass(event.data.selectedClass);
             }
 
+            $(event.data.parent).find(".last-clicked-item").removeClass("last-clicked");
+
         } else {
             // no ctrl or shift key pressed, select current item, unselect others
             $(event.data.children).removeClass(event.data.selectedClass);
@@ -162,7 +183,8 @@
         }
 
 
-        $(event.data.parent).data("last-clicked-td", this);
+        last_clicked.removeClass("last-clicked-item");
+        td.addClass("last-clicked-item");
     }
 
 
