@@ -10,6 +10,8 @@
                 parent: "#timeline",
                 children: "#timeline td",
                 selectedClass: "ui-selected",
+                lastClickedClass: "last-clicked",
+                lastClickedMark: "last-clicked-item",
             }, onSelect);
 
 
@@ -134,7 +136,7 @@
 
     function onSelect(event) {
         var td = $(this);
-        var last_clicked = $(event.data.parent).find(".last-clicked-item");
+        var last_clicked = $(event.data.parent).find("." + event.data.lastClickedMark);
         if (last_clicked.length > 0)
             last_clicked_td = last_clicked[0];
         else
@@ -155,7 +157,7 @@
                     td.removeClass(event.data.selectedClass);
                 }
 
-                $(event.data.parent).find(".last-clicked-item").removeClass("last-clicked");
+                $(event.data.parent).find(".last-clicked-item").removeClass(event.data.lastClickedClass);
 
             } else {
                 // ctrl key pressed, not shift key, toggle current item
@@ -174,7 +176,7 @@
                 td.addClass(event.data.selectedClass);
             }
 
-            $(event.data.parent).find(".last-clicked-item").removeClass("last-clicked");
+            $(event.data.parent).find(".last-clicked-item").removeClass(event.data.lastClickedClass);
 
         } else {
             // no ctrl or shift key pressed, select current item, unselect others
@@ -183,8 +185,8 @@
         }
 
 
-        last_clicked.removeClass("last-clicked-item");
-        td.addClass("last-clicked-item");
+        last_clicked.removeClass(event.data.lastClickedMark);
+        td.addClass(event.data.lastClickedMark);
     }
 
 
