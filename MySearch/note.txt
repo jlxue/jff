@@ -1,0 +1,21 @@
+HtmlUnit
+    http://htmlunit.sourceforge.net/
+    Java 做了 DOM 和 JS 引擎实现，不依赖 web browser。
+
+Cobra
+    http://lobobrowser.org/cobra.jsp
+    与 HtmlUnit 类似。
+
+WebDriver, Selenium
+    http://code.google.com/p/selenium/
+    http://www.seleniumhq.org
+
+Jaxer
+    http://jaxer.org/
+
+Sahi
+    http://sahi.co.in/w/
+    做了一个 HTTP 代理服务器，给经过的网页插入一段 script
+    代码，这个代码可以获取 DOM 树状态并交互，并且可以与
+    代理服务器交互。
+
