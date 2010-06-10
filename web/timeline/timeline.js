@@ -82,6 +82,7 @@
         var inputs = $("#timeline input");
         var spans = $("#timeline span");
         var time = 0;
+        var str;
 
         if (begin < 0 || begin >= spans.length)
             return;
@@ -91,7 +92,19 @@
         }
 
         while (begin < spans.length) {
-            spans[begin].textContent = formatTime(time);
+            str = formatTime(time);
+
+            if (spans[begin].textContent != str) {
+                spans[begin].textContent = str;
+
+                var span = $(spans[begin]);
+                var bg = span.css("backgroundColor");
+
+                span.stop(true, true);
+                span.animate({backgroundColor: "green"}, "slow", "swing", function(){
+                    $(this).css("backgroundColor", bg);
+                });
+            }
 
             time += parseTime(inputs[begin].value);
 
