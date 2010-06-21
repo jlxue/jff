@@ -12,6 +12,8 @@ WebDriver, Selenium
 
 Jaxer
     http://jaxer.org/
+    基于 Mozilla Gecko 引擎，作了一个类似 FastCGI 的 apache 模块,
+    响应对 JavaScript 的执行请求。
 
 Sahi
     http://sahi.co.in/w/
