@@ -21,6 +21,9 @@ function main() {
     if (dialog.length == 0) {
         var dialog_html = ##DIALOG_HTML##;
         dialog = $(dialog_html).appendTo('body').draggable();
+        dialog.find("#btn_mark").click(function(e) {
+            alert("ok");
+        });
     } else {
         dialog.toggle();
     }
