@@ -22,7 +22,19 @@ function main() {
         var dialog_html = ##DIALOG_HTML##;
         dialog = $(dialog_html).appendTo('body').draggable();
         dialog.find("#btn_mark").click(function(e) {
-            alert("ok");
+            dialog.data("scrollTop", $(window).scrollTop());
+            dialog.data("scrollLeft", $(window).scrollLeft());
+        });
+
+        dialog.find("#btn_scroll").click(function(e) {
+            var top = dialog.data("scrollTop");
+            var left = dialog.data("scrollLeft");
+
+            if (typeof(top) != "undefined" && typeof(left) != "undefined") {
+                window.scrollTo(left, top);
+            } else {
+                alert("No position remembered!");
+            }
         });
     } else {
         dialog.toggle();
