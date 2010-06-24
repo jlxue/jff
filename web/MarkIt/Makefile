@@ -29,14 +29,12 @@ $(BUILD_DIR)/markit.loader.url.js: $(BUILD_DIR)/markit.loader.min.js
 $(BUILD_DIR)/markit.loader.min.js: $(BUILD_DIR)/markit.loader.js
 	$(call compress_js, $@, $^)
 
-$(BUILD_DIR)/markit.loader.js: markit.loader.js
+$(BUILD_DIR)/markit.loader.js: markit.loader.js $(BUILD_DIR)/markit.min.js
 ifeq ($(INFER_MARKIT_URL),true)
-	perl -pe '' $^ > $@
+	perl -pe '' $< > $@
 else
-	perl -pe 'my $$url="$(MARKIT_URL)"; s/##MARKIT_URL##/$$url/g;' $^ > $@
+	perl -pe 'my $$url="$(MARKIT_URL)"; s/##MARKIT_URL##/$$url/g;' $< > $@
 endif
-
-$(BUILD_DIR)/markit.loader.js: $(BUILD_DIR)/markit.min.js
 
 
 ################ markit index.html #####################################
