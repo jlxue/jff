@@ -2,13 +2,16 @@
 
 
 var JQUERY_URL = '##JQUERY_URL##';
-var JQUERY_UI_URL = '##JQUERY_URL##';
+var JQUERY_UI_URL = '##JQUERY_UI_URL##';
 
 function load_script(url, onload) {
     var s = document.createElement('script');
     s.setAttribute('src', url);
     document.getElementsByTagName('body')[0].appendChild(s);
-    s.onload = onload;
+    s.onload = function() {
+        this.parentNode.removeChild(this);
+        onload();
+    }
 }
 
 function main() {
@@ -41,9 +44,9 @@ function main() {
 if (typeof(jQuery) == 'undefined') {
     load_script(JQUERY_URL,
         function() {
-            this.parentNode.removeChild(this);
             jQuery.noConflict();
             jQuery.getScript(JQUERY_UI_URL, main);
+            //load_script(JQUERY_UI_URL, main);
         });
 } else if (! (jQuery.ui && jQuery.ui.version)) {
     jQuery.getScript(JQUERY_UI_URL, main);

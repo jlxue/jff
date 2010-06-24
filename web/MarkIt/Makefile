@@ -2,11 +2,18 @@
 
 BUILD_DIR	:= build
 CWD_URL		:= $(shell perl -e 'use URI::file; print URI::file->cwd')
+
+ifeq ($(DEBUG),true)
+MARKIT_URL	?= $(CWD_URL)build/markit.merged.js
+JQUERY_URL	?= $(CWD_URL)js/jquery-1.4.2.js
+JQUERY_UI_URL	?= $(CWD_URL)js/jquery-ui-1.8.2.custom.js
+else
 MARKIT_URL	?= $(CWD_URL)build/markit.min.js
 INFER_MARKIT_URL	?= true
 
 JQUERY_URL	?= $(CWD_URL)js/jquery-1.4.2.min.js
 JQUERY_UI_URL	?= $(CWD_URL)js/jquery-ui-1.8.2.custom.min.js
+endif
 
 
 define compress_js
