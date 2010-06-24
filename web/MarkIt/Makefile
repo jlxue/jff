@@ -5,14 +5,18 @@ CWD_URL		:= $(shell perl -e 'use URI::file; print URI::file->cwd')
 
 ifeq ($(DEBUG),true)
 MARKIT_URL	?= $(CWD_URL)build/markit.merged.js
-JQUERY_URL	?= $(CWD_URL)js/jquery-1.4.2.js
-JQUERY_UI_URL	?= $(CWD_URL)js/jquery-ui-1.8.2.custom.js
+#JQUERY_URL	?= $(CWD_URL)js/jquery-1.4.2.js
+#JQUERY_UI_URL	?= $(CWD_URL)js/jquery-ui-1.8.2.custom.js
+JQUERY_URL	?= http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js
+JQUERY_UI_URL	?= http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.js
 else
 MARKIT_URL	?= $(CWD_URL)build/markit.min.js
 INFER_MARKIT_URL	?= true
 
-JQUERY_URL	?= $(CWD_URL)js/jquery-1.4.2.min.js
-JQUERY_UI_URL	?= $(CWD_URL)js/jquery-ui-1.8.2.custom.min.js
+#JQUERY_URL	?= $(CWD_URL)js/jquery-1.4.2.min.js
+#JQUERY_UI_URL	?= $(CWD_URL)js/jquery-ui-1.8.2.custom.min.js
+JQUERY_URL	?= http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js
+JQUERY_UI_URL	?= http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js
 endif
 
 
