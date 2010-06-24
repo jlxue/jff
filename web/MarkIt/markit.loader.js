@@ -1,12 +1,13 @@
 (function() {
     var dialog = document.getElementById('markit-dialog');
     if (dialog) {
+        // markit.js must load jQuery and jQuery UI first, then create dialog
         jQuery(dialog).toggle();
         return;
     }
 
     var scripts = document.getElementsByTagName('script');
-    var url='##MARKIT_URL##';
+    var url = '##MARKIT_URL##';
 
     for (var i = 0; i < scripts.length; ++i) {
         if (url == scripts[i].getAttribute('src')) {
