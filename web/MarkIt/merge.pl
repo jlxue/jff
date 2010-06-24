@@ -8,7 +8,7 @@ my @a = <F>;
 chomp @a;
 close F;
 
-my $a = "'" . join("' +\n'", @a) . "'";
+my $a = join("' +\n'", @a);
 while (<>) {
     s/##DIALOG_HTML##/$a/;
     print

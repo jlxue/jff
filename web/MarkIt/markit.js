@@ -1,16 +1,14 @@
 (function() {
 
 
+var JQUERY_URL = '##JQUERY_URL##';
+var JQUERY_UI_URL = '##JQUERY_URL##';
+
 function load_script(url, onload) {
     var s = document.createElement('script');
     s.setAttribute('src', url);
     document.getElementsByTagName('body')[0].appendChild(s);
     s.onload = onload;
-}
-
-function load_jquery_ui(onload) {
-    load_script('http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js',
-        onload);
 }
 
 function main() {
@@ -19,7 +17,7 @@ function main() {
     var dialog = $('#markit-dialog');
 
     if (dialog.length == 0) {
-        var dialog_html = ##DIALOG_HTML##;
+        var dialog_html = '##DIALOG_HTML##';
         dialog = $(dialog_html).appendTo('body').draggable();
         dialog.data("scrollTop", 0);
         dialog.data("scrollLeft", 0);
@@ -41,10 +39,14 @@ function main() {
 }
 
 if (typeof(jQuery) == 'undefined') {
-    load_script('http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js',
-        function() { jQuery.noConflict(); load_jquery_ui(main); });
+    load_script(JQUERY_URL,
+        function() {
+            this.parentNode.removeChild(this);
+            jQuery.noConflict();
+            jQuery.getScript(JQUERY_UI_URL, main);
+        });
 } else if (! (jQuery.ui && jQuery.ui.version)) {
-    load_jquery_ui(main);
+    jQuery.getScript(JQUERY_UI_URL, main);
 } else {
     main();
 }
