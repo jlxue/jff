@@ -21,6 +21,9 @@ function main() {
     if (dialog.length == 0) {
         var dialog_html = ##DIALOG_HTML##;
         dialog = $(dialog_html).appendTo('body').draggable();
+        dialog.data("scrollTop", 0);
+        dialog.data("scrollLeft", 0);
+
         dialog.find("#btn_mark").click(function(e) {
             dialog.data("scrollTop", $(window).scrollTop());
             dialog.data("scrollLeft", $(window).scrollLeft());
@@ -30,11 +33,7 @@ function main() {
             var top = dialog.data("scrollTop");
             var left = dialog.data("scrollLeft");
 
-            if (typeof(top) != "undefined" && typeof(left) != "undefined") {
-                window.scrollTo(left, top);
-            } else {
-                alert("No position remembered!");
-            }
+            window.scrollTo(left, top);
         });
     } else {
         dialog.toggle();
