@@ -3,13 +3,53 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Mark It!</title>
-</head>
-
-<body>
-<a id="loader-url" href="##LOADER_URL##">Mark It! (v0.1)</a>
+<script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
 <script type="text/javascript">
-    var a = document.getElementById("loader-url");
+$(function() {
+    var a = document.getElementById("loader-url-local");
+    var a2 = document.getElementById("loader-url");
     var href = a.getAttribute("href");
+    var root = location.href.substring(0, location.href.lastIndexOf("/")) + "/";
+
+    $("input[type=text]").attr("size", "80");
+
+    $("#markit_url").val("jff.googlecode.com/files/markit.min.js");
+    $("#jquery_url").val("ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js");
+    $("#jquery_ui_url").val("ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.js");
+    $("#ckeditor_url").val("ckeditor.com/apps/ckeditor/3.3.1/ckeditor.js");
+
+    $("#btn_update").click(function() {
+        var debug = false;
+
+        if (debug) {
+            a.setAttribute("href", href.replace(
+                    /##MARKIT_ROOT##/g, root).replace(
+                    /##MARKIT_URL##/g, "markit.js").replace(
+                    /##JQUERY_URL##/g, "js/jquery-1.4.2.js").replace(
+                    /##JQUERY_UI_URL##/g, "js/jquery-ui-1.8.2.custom.js").replace(
+                    /##CKEDITOR_URL##/g, "ckeditor/ckeditor_source.js"));
+        } else {
+            a.setAttribute("href", href.replace(
+                    /##MARKIT_ROOT##/g, root).replace(
+                    /##MARKIT_URL##/g, "markit.min.js").replace(
+                    /##JQUERY_URL##/g, "js/jquery-1.4.2.min.js").replace(
+                    /##JQUERY_UI_URL##/g, "js/jquery-ui-1.8.2.custom.min.js").replace(
+                    /##CKEDITOR_URL##/g, "ckeditor/ckeditor.js"));
+        }
+
+        a2.setAttribute("href", href.replace(
+                /##MARKIT_ROOT##/g, "http://").replace(
+                /##MARKIT_URL##/g, $("#markit_url").val()).replace(
+                /##JQUERY_URL##/g, $("#jquery_url").val()).replace(
+                /##JQUERY_UI_URL##/g, $("#jquery_ui_url").val()).replace(
+                /##CKEDITOR_URL##/g, $("#ckeditor_url").val()));
+
+        alert("Mark It! (local): " + a.getAttribute("href").length + "\n" +
+                a.getAttribute("href") + "\n\n" +
+                "Mark It! : " + a2.getAttribute("href").length + "\n" +
+                a2.getAttribute("href"));
+
+    });
 
     if (href.indexOf('##MARKIT_URL##') != -1) {
         var url = location.href;
@@ -18,7 +58,49 @@
         href = href.replace(/##MARKIT_URL##/g, url);
         a.setAttribute("href", href);
     }
+});
 </script>
+</head>
+
+<body>
+<form>
+    <p>
+    <label for="debug">Use debug version javascript files?</label>
+    <input type="checkbox" id="debug"/><br/>
+    </p>
+
+    <p>
+    <label for="markit_url">URL for MarkIt javascript file:</label><br/>
+    <input type="text" id="markit_url"/><br/>
+    </p>
+
+    <p>
+    <label for="jquery_url">URL for jQuery javascript file:</label><br/>
+    <input type="text" id="jquery_url"/><br/>
+    </p>
+
+    <p>
+    <label for="jquery_ui_url">URL for jQuery UI javascript file:</label><br/>
+    <input type="text" id="jquery_ui_url"/><br/>
+    </p>
+
+    <p>
+    <label for="ckeditor_url">URL for CKEditor javascript file:</label><br/>
+    <input type="text" id="ckeditor_url"/><br/>
+    </p>
+
+    </p>
+    <button id="btn_update">Update links</button>
+    </p>
+
+    <p>
+    <a id="loader-url-local" href="##LOADER_URL##">Mark It! (local)</a><br/>
+    </p>
+
+    <p>
+    <a id="loader-url" href="##LOADER_URL##">Mark It!</a><br/>
+    </p>
+</form>
 </body>
 </html>
 

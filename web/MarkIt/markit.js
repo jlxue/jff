@@ -1,8 +1,11 @@
 (function() {
 
 
-var JQUERY_URL = '##JQUERY_URL##';
-var JQUERY_UI_URL = '##JQUERY_UI_URL##';
+var markit_script = document.getElementById('markit-script');
+
+var JQUERY_URL = markit_script.getAttribute('j');
+var JQUERY_UI_URL = markit_script.getAttribute('u');
+var CKEDITOR_URL = markit_script.getAttribute('c');
 
 function load_script(url, onload) {
     var s = document.createElement('script');
@@ -18,7 +21,8 @@ function load_script(url, onload) {
 function main() {
     var $ = jQuery;
 
-    $('#markit-script').remove();
+    $(markit_script).remove();
+    markit_script = null;
 
     var dialog = $('#markit-dialog');
 
