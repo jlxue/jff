@@ -6,19 +6,28 @@
         return;
     }
 
-    var scripts = document.getElementsByTagName('script');
+    var id = 'markit-script';
+    var msg = 'Loading MarkIt dialog, please try again later.';
     var url = '##MARKIT_URL##';
 
-    for (var i = 0; i < scripts.length; ++i) {
-        if (url == scripts[i].getAttribute('src')) {
-            alert('Loading MarkIt dialog, please try again later.');
-            return;
+    if (document.getElementById(id)) {
+        alert(msg);
+        return;
+    } else {
+        var scripts = document.getElementsByTagName('script');
+
+        for (var i = 0; i < scripts.length; ++i) {
+            if (url == scripts[i].getAttribute('src')) {
+                alert(msg);
+                return;
+            }
         }
     }
 
     var s = document.createElement('script');
     s.setAttribute('src', url);
     s.setAttribute('charset', 'UTF-8');
+    s.setAttribute('id', id);
     document.getElementsByTagName('body')[0].appendChild(s);
 })()
 

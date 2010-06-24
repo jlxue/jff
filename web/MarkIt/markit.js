@@ -18,6 +18,8 @@ function load_script(url, onload) {
 function main() {
     var $ = jQuery;
 
+    $('#markit-script').remove();
+
     var dialog = $('#markit-dialog');
 
     if (dialog.length == 0) {
