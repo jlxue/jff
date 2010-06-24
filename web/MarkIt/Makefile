@@ -5,11 +5,13 @@ CWD_URL		:= $(shell perl -e 'use URI::file; print URI::file->cwd')
 MARKIT_URL	?= $(CWD_URL)build/markit.min.js
 
 define compress_js
-$(shell java -jar google-closure-compiler/compiler.jar $(addprefix --js , $(2)) --js_output_file $(1))
+$(shell java -jar google-closure-compiler/compiler.jar \
+	$(addprefix --js , $(2)) --js_output_file $(1))
 endef
 
 define js_to_url
-$(shell perl -e 'my @a=<>; chomp @a; my $$a=join("", @a); $$a =~ s/;$$//; $$a =~ s/"/%22/g; print "javascript:void(", $$a, ")"' $(2) > $(1))
+$(shell perl -e 'my @a=<>; chomp @a; my $$a=join("", @a); $$a =~ s/;$$//; \
+	$$a =~ s/"/%22/g; print "javascript:void(", $$a, ")"' $(2) > $(1))
 endef
 
 all: prepare $(addprefix $(BUILD_DIR)/, markit.loader.url.js index.html)
