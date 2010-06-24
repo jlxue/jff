@@ -49,5 +49,5 @@ $(BUILD_DIR)/markit.merged.js: markit.html markit.js
 	perl merge.pl $^ > $@
 
 clean:
-	rm -rf build
+	perl -e 'use File::Path; File::Path::remove_tree("build", { verbose => 1 })'
 
