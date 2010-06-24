@@ -2,3 +2,6 @@ http://lifesinger.org/blog/2009/03/how-to-pass-params-to-javascript-file/
 
 http://noscript.net/abe/
 
+debug checkbox
+closure: markit.loader.js
+index.html href not changed??
