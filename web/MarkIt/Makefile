@@ -2,14 +2,14 @@
 
 BUILD_DIR	:= build
 CWD_URL		:= $(shell perl -e 'use URI::file; print URI::file->cwd')
-MARKIT_URL	?= $(CWD_URL)markit.min.js
+MARKIT_URL	?= $(CWD_URL)build/markit.min.js
 
 define compress_js
 $(shell java -jar google-closure-compiler/compiler.jar $(addprefix --js , $(2)) --js_output_file $(1))
 endef
 
 define js_to_url
-$(shell perl -e 'use URI::Escape; my @a=<>; chomp @a; my $$a=join("", @a); $$a =~ s/;$$//; print uri_escape("javascript:void(" . $$a . ")")' $(2) > $(1))
+$(shell perl -e 'use URI::Escape; my @a=<>; chomp @a; my $$a=join("", @a); $$a =~ s/;$$//; $$a =~ s/"/%22/g; print "javascript:", uri_escape("void(" . $$a . ")")' $(2) > $(1))
 endef
 
 all: prepare $(addprefix $(BUILD_DIR)/, markit.loader.url.js index.html)
@@ -33,13 +33,7 @@ $(BUILD_DIR)/markit.loader.js: markit.loader.js
 $(BUILD_DIR)/index.html: $(BUILD_DIR)/markit.loader.url.js index.html
 	perl replace.pl "##LOADER_URL##" $^ > $@
 
-markit.url.html: markit.url.js
-	perl -pe 'BEGIN {print q(<a href=")}; s/"/%22/g; END {print q(">Mark It!</a>)}' $^ > $@
-
-markit.url.js: markit.min.js
-	perl -e 'my @a=<>; chomp @a; my $$a=join("", @a); $$a =~ s/;$$//; print "javascript:void(", $$a, ")"' $^ > $@
-
-markit.min.js: markit.merged.js
+$(BUILD_DIR)/markit.min.js: $(BUILD_DIR)/markit.merged.js
 	java -jar google-closure-compiler/compiler.jar $(addprefix --js , $^) --js_output_file $@
 
 markit.merged.js: markit.html markit.js
