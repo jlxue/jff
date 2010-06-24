@@ -9,7 +9,7 @@ $(shell java -jar google-closure-compiler/compiler.jar $(addprefix --js , $(2)) 
 endef
 
 define js_to_url
-$(shell perl -e 'use URI::Escape; my @a=<>; chomp @a; my $$a=join("", @a); $$a =~ s/;$$//; $$a =~ s/"/%22/g; print "javascript:", uri_escape("void(" . $$a . ")")' $(2) > $(1))
+$(shell perl -e 'my @a=<>; chomp @a; my $$a=join("", @a); $$a =~ s/;$$//; $$a =~ s/"/%22/g; print "javascript:void(", $$a, ")"' $(2) > $(1))
 endef
 
 all: prepare $(addprefix $(BUILD_DIR)/, markit.loader.url.js index.html)
