@@ -7,7 +7,7 @@
         var url = location.href;
 
         url = url.substring(0, url.lastIndexOf("/")) + "/markit.min.js";
-        href = href.replace(/\#\#MARKIT\_URL\#\#/g, url);
+        href = href.replace(/##MARKIT_URL##/g, url);
         a.setAttribute("href", href);
     }
 </script>
