@@ -45,11 +45,10 @@ if (typeof(jQuery) == 'undefined') {
     load_script(JQUERY_URL,
         function() {
             jQuery.noConflict();
-            jQuery.getScript(JQUERY_UI_URL, main);
-            //load_script(JQUERY_UI_URL, main);
+            load_script(JQUERY_UI_URL, main);
         });
 } else if (! (jQuery.ui && jQuery.ui.version)) {
-    jQuery.getScript(JQUERY_UI_URL, main);
+    load_script(JQUERY_UI_URL, main);
 } else {
     main();
 }
