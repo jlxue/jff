@@ -1,2 +1,15 @@
-<a href="##LOADER_URL##">Mark It!</a>
+<a id="loader-url" href="##LOADER_URL##">Mark It!</a>
+<script type="text/javascript">
+    var a = document.getElementById("loader-url");
+    var href = a.getAttribute("href");
+
+    if (href.indexOf('##MARKIT_URL##') != -1) {
+        var url = location.href;
+
+        url = url.substring(0, url.lastIndexOf("/")) + "/markit.min.js";
+        href = href.replace(/\#\#MARKIT\_URL\#\#/g, url);
+        alert(href);
+        a.setAttribute("href", href);
+    }
+</script>
 
