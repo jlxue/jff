@@ -18,6 +18,7 @@
 
     var s = document.createElement('script');
     s.setAttribute('src', url);
+    s.setAttribute('charset', 'UTF-8');
     document.getElementsByTagName('body')[0].appendChild(s);
 })()
 

@@ -7,6 +7,7 @@ var JQUERY_UI_URL = '##JQUERY_UI_URL##';
 function load_script(url, onload) {
     var s = document.createElement('script');
     s.setAttribute('src', url);
+    s.setAttribute('charset', 'UTF-8');
     document.getElementsByTagName('body')[0].appendChild(s);
     s.onload = function() {
         this.parentNode.removeChild(this);
