@@ -50,14 +50,6 @@ $(function() {
                 a2.getAttribute("href"));
 
     });
-
-    if (href.indexOf('##MARKIT_URL##') != -1) {
-        var url = location.href;
-
-        url = url.substring(0, url.lastIndexOf("/")) + "/markit.min.js";
-        href = href.replace(/##MARKIT_URL##/g, url);
-        a.setAttribute("href", href);
-    }
 });
 </script>
 </head>

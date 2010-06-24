@@ -8,10 +8,11 @@
 
     var id = 'markit-script';
     var msg = 'Loading MarkIt dialog, please try again later.';
-    var markit_url      = '##MARKIT_ROOT####MARKIT_URL##';
-    var jquery_url      = '##MARKIT_ROOT####JQUERY_URL##';
-    var jquery_ui_url   = '##MARKIT_ROOT####JQUERY_UI_URL##';
-    var ckeditor_url    = '##MARKIT_ROOT####CKEDITOR_URL##';
+    var markit_root     = '##MARKIT_ROOT##';
+    var markit_url      = markit_root + '##MARKIT_URL##';
+    var jquery_url      = markit_root + '##JQUERY_URL##';
+    var jquery_ui_url   = markit_root + '##JQUERY_UI_URL##';
+    var ckeditor_url    = markit_root + '##CKEDITOR_URL##';
 
     if (document.getElementById(id)) {
         alert(msg);
