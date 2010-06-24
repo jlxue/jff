@@ -1,4 +1,4 @@
-void((function() {
+(function() {
 
 
 function load_script(url, onload) {
@@ -16,7 +16,7 @@ function load_jquery_ui(onload) {
 function main() {
     var $ = jQuery;
 
-    var dialog = $('#bookmark-dialog');
+    var dialog = $('#markit-dialog');
 
     if (dialog.length == 0) {
         var dialog_html = ##DIALOG_HTML##;
@@ -51,5 +51,5 @@ if (typeof(jQuery) == 'undefined') {
 }
 
 
-})())
+})()
 

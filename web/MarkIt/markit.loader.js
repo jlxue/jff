@@ -1,16 +1,16 @@
 (function() {
+    var dialog = document.getElementById('markit-dialog');
+    if (dialog) {
+        jQuery(dialog).toggle();
+        return;
+    }
+
     var scripts = document.getElementsByTagName('script');
     var url='##MARKIT_URL##';
 
     for (var i = 0; i < scripts.length; ++i) {
-        var src = scripts[i].getAttribute('src');
-        if (src === url) {
-            var dialog = document.getElementById('markit-dialog');
-            if (dialog) {
-                $(dialog).toggle();
-            } else {
-                alert('Loading MarkIt dialog, please try again later.');
-            }
+        if (url == scripts[i].getAttribute('src')) {
+            alert('Loading MarkIt dialog, please try again later.');
             return;
         }
     }
