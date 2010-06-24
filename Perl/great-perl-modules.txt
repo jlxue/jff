@@ -161,6 +161,7 @@ HTML 信息提取
 ========
     local::lib
     PAR::Packer
+    shipwright-generate (CPAN Shipwright)
 
     Devel::Cover
     Devel::DProf
