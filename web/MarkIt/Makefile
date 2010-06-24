@@ -1,19 +1,22 @@
 .PHONY: all
 
-all: bookmark.url.html
+CWD_URL		:= $(shell perl -e 'use URI::file; print URI::file->cwd')
+MARKIT_URL	?= $(CWD_URL)/markit.min.js
 
-bookmark.url.html: bookmark.url.js
+all: markit.url.html
+
+markit.url.html: markit.url.js
 	perl -pe 'BEGIN {print q(<a href=")}; s/"/%22/g; END {print q(">Mark It!</a>)}' $^ > $@
 
-bookmark.url.js: bookmark.min.js
+markit.url.js: markit.min.js
 	perl -e 'my @a=<>; chomp @a; my $$a=join("", @a); $$a =~ s/;$$//; print "javascript:void(", $$a, ")"' $^ > $@
 
-bookmark.min.js: bookmark.merged.js
+markit.min.js: markit.merged.js
 	java -jar google-closure-compiler/compiler.jar $(addprefix --js , $^) --js_output_file $@
 
-bookmark.merged.js: bookmark.html bookmark.js
+markit.merged.js: markit.html markit.js
 	perl merge.pl $^ > $@
 
 clean:
-	rm -rf bookmark.min.js bookmark.merged.js bookmark.url.js bookmark.url.html
+	rm -rf markit.min.js markit.merged.js markit.url.js markit.url.html
 
