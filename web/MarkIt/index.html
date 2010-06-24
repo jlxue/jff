@@ -8,7 +8,7 @@
 $(function() {
     var a = document.getElementById("loader-url-local");
     var a2 = document.getElementById("loader-url");
-    var href = a.getAttribute("href");
+    var href = a.href;
     var root = location.href.substring(0, location.href.lastIndexOf("/")) + "/";
 
     $("input[type=text]").attr("size", "80");
@@ -22,32 +22,32 @@ $(function() {
         var debug = false;
 
         if (debug) {
-            a.setAttribute("href", href.replace(
+            a.href = href.replace(
                     /##MARKIT_ROOT##/g, root).replace(
                     /##MARKIT_URL##/g, "markit.js").replace(
                     /##JQUERY_URL##/g, "js/jquery-1.4.2.js").replace(
                     /##JQUERY_UI_URL##/g, "js/jquery-ui-1.8.2.custom.js").replace(
-                    /##CKEDITOR_URL##/g, "ckeditor/ckeditor_source.js"));
+                    /##CKEDITOR_URL##/g, "ckeditor/ckeditor_source.js");
         } else {
-            a.setAttribute("href", href.replace(
+            a.href = href.replace(
                     /##MARKIT_ROOT##/g, root).replace(
                     /##MARKIT_URL##/g, "markit.min.js").replace(
                     /##JQUERY_URL##/g, "js/jquery-1.4.2.min.js").replace(
                     /##JQUERY_UI_URL##/g, "js/jquery-ui-1.8.2.custom.min.js").replace(
-                    /##CKEDITOR_URL##/g, "ckeditor/ckeditor.js"));
+                    /##CKEDITOR_URL##/g, "ckeditor/ckeditor.js");
         }
 
-        a2.setAttribute("href", href.replace(
+        a2.href = href.replace(
                 /##MARKIT_ROOT##/g, "http://").replace(
                 /##MARKIT_URL##/g, $("#markit_url").val()).replace(
                 /##JQUERY_URL##/g, $("#jquery_url").val()).replace(
                 /##JQUERY_UI_URL##/g, $("#jquery_ui_url").val()).replace(
-                /##CKEDITOR_URL##/g, $("#ckeditor_url").val()));
+                /##CKEDITOR_URL##/g, $("#ckeditor_url").val());
 
-        alert("Mark It! (local): " + a.getAttribute("href").length + "\n" +
-                a.getAttribute("href") + "\n\n" +
-                "Mark It! : " + a2.getAttribute("href").length + "\n" +
-                a2.getAttribute("href"));
+        alert("Mark It! (local): " + a.href.length + "\n" +
+                a.href + "\n\n" +
+                "Mark It! : " + a2.href.length + "\n" +
+                a2.href);
 
     });
 });
