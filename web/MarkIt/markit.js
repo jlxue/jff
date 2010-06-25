@@ -12,6 +12,10 @@ function load_script(url, onload) {
     s.setAttribute('src', url);
     s.setAttribute('charset', 'UTF-8');
     document.getElementsByTagName('body')[0].appendChild(s);
+    s.ontimeout = s.onerror = function() {
+        this.parentNode.removeChild(this);
+        alert("Can't load " + url);
+    }
     s.onload = function() {
         this.parentNode.removeChild(this);
         onload();
