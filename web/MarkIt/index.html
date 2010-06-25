@@ -3,6 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Mark It!</title>
+<link rel="stylesheet" type="text/css" href="css/ui-lightness/jquery-ui-1.8.2.custom.css"/>
 <script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
 <script type="text/javascript">
 $(function() {
@@ -13,10 +14,10 @@ $(function() {
 
     $("input[type=text]").attr("size", "80");
 
-    $("#markit_url").val("jff.googlecode.com/files/markit.min.js");
-    $("#jquery_url").val("ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js");
-    $("#jquery_ui_url").val("ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.js");
-    $("#ckeditor_url").val("ckeditor.com/apps/ckeditor/3.3.1/ckeditor.js");
+    $("#markit_url").val("http://jff.googlecode.com/files/markit.min.js");
+    $("#jquery_url").val("http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js");
+    $("#jquery_ui_url").val("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.js");
+    $("#ckeditor_url").val("http://ckeditor.com/apps/ckeditor/3.3.1/ckeditor.js");
 
     $("#btn_update").click(function() {
         update_links();
@@ -48,13 +49,31 @@ $(function() {
                     /##CKEDITOR_URL##/g, "ckeditor/ckeditor.js");
         }
 
-        a2.href = href.replace(
-                /##MARKIT_ROOT##/g, "http://").replace(
-                /##MARKIT_URL##/g, $("#markit_url").val()).replace(
-                /##JQUERY_URL##/g, $("#jquery_url").val()).replace(
-                /##JQUERY_UI_URL##/g, $("#jquery_ui_url").val()).replace(
-                /##CKEDITOR_URL##/g, $("#ckeditor_url").val());
+        var prefix = '';
+        var markit_url      = $("#markit_url").val();
+        var jquery_url      = $("#jquery_url").val();
+        var jquery_ui_url   = $("#jquery_ui_url").val();
+        var ckeditor_url    = $("#ckeditor_url").val();
 
+        var minlen = Math.min(markit_url.length, jquery_url.length,
+                jquery_ui_url.length, ckeditor_url.length);
+
+        var i = 0;
+        for (i = 0; i < minlen; ++i) {
+            if (markit_url[i] != jquery_url[i] || jquery_url[i] != jquery_ui_url[i] ||
+                    jquery_ui_url[i] != ckeditor_url[i]) {
+                break;
+            }
+        }
+
+        prefix = markit_url.substring(0, i);
+
+        a2.href = href.replace(
+                /##MARKIT_ROOT##/g, prefix).replace(
+                /##MARKIT_URL##/g, markit_url.substring(i)).replace(
+                /##JQUERY_URL##/g, jquery_url.substring(i)).replace(
+                /##JQUERY_UI_URL##/g, jquery_ui_url.substring(i)).replace(
+                /##CKEDITOR_URL##/g, ckeditor_url.substring(i));
     }
 });
 </script>
