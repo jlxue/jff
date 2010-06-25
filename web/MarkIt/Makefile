@@ -2,6 +2,7 @@
 
 BUILD_DIR	:= build
 USE_YUI_COMPRESSOR	?= true
+# ungzipped 时 YUI 产生的 js 体积小，gzipped 时 Google Closure 产生的 js 体积小。
 
 
 ifeq ($(USE_YUI_COMPRESSOR),true)
@@ -18,7 +19,7 @@ endif
 
 define js_to_url
 $(shell perl -e 'my @a=<>; chomp @a; my $$a=join("", @a); $$a =~ s/;$$//; \
-	$$a =~ s/"/%22/g; print "javascript:void(", $$a, ")"' $(2) > $(1))
+	$$a =~ s/\x27/%27/g; print "javascript:void(", $$a, ")"' $(2) > $(1))
 endef
 
 all: prepare $(addprefix $(BUILD_DIR)/, index.html ckeditor css js)
@@ -33,7 +34,7 @@ $(BUILD_DIR)/markit.loader.url.js: $(BUILD_DIR)/markit.loader.min.js
 	$(call js_to_url, $@, $^)
 
 $(BUILD_DIR)/markit.loader.min.js: $(BUILD_DIR)/markit.loader.js
-	$(call compress_js, $@, $^)
+	$(call compress_js, $@, $^, --compilation_level SIMPLE_OPTIMIZATIONS)	# don't inline
 
 $(BUILD_DIR)/markit.loader.js: markit.loader.js $(BUILD_DIR)/markit.min.js
 	perl -pe '' $< > $@

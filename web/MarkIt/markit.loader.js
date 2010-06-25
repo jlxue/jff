@@ -1,5 +1,22 @@
 (function() {
-    var dialog = document.getElementById('markit-dialog');
+    function elem(id) {
+        return document.getElementById(id);
+    }
+
+    function tags(name) {
+        return document.getElementsByTagName(name);
+    }
+
+    function attr(node, name, value) {
+        if (value) {
+            node.setAttribute(name, value)
+            return node;
+        } else {
+            return node.getAttribute(name);
+        }
+    }
+
+    var dialog = elem('markit-dialog');
     if (dialog) {
         // markit.js must load jQuery and jQuery UI first, then create dialog
         jQuery(dialog).toggle();
@@ -14,14 +31,14 @@
     var jquery_ui_url   = markit_root + '##JQUERY_UI_URL##';
     var ckeditor_url    = markit_root + '##CKEDITOR_URL##';
 
-    if (document.getElementById(id)) {
+    if (elem(id)) {
         alert(msg);
         return;
     } else {
-        var scripts = document.getElementsByTagName('script');
+        var scripts = tags('script');
 
         for (var i = 0; i < scripts.length; ++i) {
-            if (markit_url == scripts[i].getAttribute('src')) {
+            if (markit_url == attr(scripts[i], 'src')) {
                 alert(msg);
                 return;
             }
@@ -29,16 +46,18 @@
     }
 
     var s = document.createElement('script');
-    s.setAttribute('src', markit_url);
-    s.setAttribute('j', jquery_url);
-    s.setAttribute('u', jquery_ui_url);
-    s.setAttribute('c', ckeditor_url);
-    s.setAttribute('charset', 'UTF-8');
-    s.setAttribute('id', id);
+    attr(attr(attr(attr(attr(attr(s,
+                'src', markit_url),
+                'j', jquery_url),
+                'u', jquery_ui_url),
+                'c', ckeditor_url),
+                'charset', 'UTF-8'),
+                'id', id);
     s.ontimeout = s.onerror = function() {
-        this.parentNode.removeChild(this);
-        alert("Can't load " + markit_url);
+        s.parentNode.removeChild(s);
+        alert('Can\'t load ' + markit_url);
     }
-    document.getElementsByTagName('body')[0].appendChild(s);
+
+    tags('body')[0].appendChild(s);
 })()
 
