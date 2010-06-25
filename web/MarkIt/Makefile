@@ -1,13 +1,20 @@
 .PHONY: all prepare
 
 BUILD_DIR	:= build
+USE_YUI_COMPRESSOR	?= true
 
 
+ifeq ($(USE_YUI_COMPRESSOR),true)
+define compress_js
+$(shell java -jar yuicompressor-2.4.2.jar --charset UTF-8 --type js $(2) -o $(1))
+endef
+else
 define compress_js
 $(shell java -jar google-closure-compiler/compiler.jar \
-	--create_source_map $(1).map \
+	--create_source_map $(1).map --charset UTF-8 \
 	$(3) $(addprefix --js , $(2)) --js_output_file $(1))
 endef
+endif
 
 define js_to_url
 $(shell perl -e 'my @a=<>; chomp @a; my $$a=join("", @a); $$a =~ s/;$$//; \
