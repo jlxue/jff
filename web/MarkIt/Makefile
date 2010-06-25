@@ -26,7 +26,7 @@ $(BUILD_DIR)/markit.loader.url.js: $(BUILD_DIR)/markit.loader.min.js
 	$(call js_to_url, $@, $^)
 
 $(BUILD_DIR)/markit.loader.min.js: $(BUILD_DIR)/markit.loader.js
-	$(call compress_js, $@, $^, --compilation_level ADVANCED_OPTIMIZATIONS)
+	$(call compress_js, $@, $^)
 
 $(BUILD_DIR)/markit.loader.js: markit.loader.js $(BUILD_DIR)/markit.min.js
 	perl -pe '' $< > $@
