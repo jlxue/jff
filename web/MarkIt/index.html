@@ -22,10 +22,14 @@ $(function() {
     $("#btn_update").click(function() {
         update_links();
 
-        alert("Mark It! (local): " + a.href.length + "\n" +
-                a.href + "\n\n" +
-                "Mark It! : " + a2.href.length + "\n" +
-                a2.href);
+        if ($("#debug").attr("checked")) {
+            alert("Mark It! (local): " + a.href.length + "\n" +
+                    a.href + "\n\n" +
+                    "Mark It! : " + a2.href.length + "\n" +
+                    a2.href);
+        } else {
+            alert("Update links successfully!");
+        }
 
         return false;   // avoid submit the form!
     });
@@ -74,35 +78,64 @@ $(function() {
                 /##JQUERY_URL##/g, jquery_url.substring(i)).replace(
                 /##JQUERY_UI_URL##/g, jquery_ui_url.substring(i)).replace(
                 /##CKEDITOR_URL##/g, ckeditor_url.substring(i));
+
+        $("a[id^=loader-url]").fadeOut(1000, function() {
+            $(this).fadeIn(1000);
+        });
     }
 });
 </script>
 </head>
 
 <body>
+<noscript>
+    <p>此页面需要 JavaScript 支持！</p>
+</noscript>
+
+<h1>MarkIt 安装程序</h1>
+
+<p>
+使用说明：
+<ul>
+    <li>把 "Mark It! (local)" 和 "Mark It!" 两个链接拖到浏览器的书签栏(Bookmarks Toolbar)，点击此书签之一，会在当前窗口显示或隐藏 MarkIt 对话框；</li>
+
+    <li>"Mark It! (local)" 版本是使用本地的 JavaScript 脚本，有的浏览器出于安全考虑不让运行, 这个版本加载快，不需要联网；</li>
+
+    <li>"Mark It!" 版本是使用远程的 JavaScript 脚本，这个版本加载慢，需要联网；</li>
+
+    <li>修改 JavaScript 脚本的 URL 后，点击 "Update links" 按钮更新页面下部的链接，重新做书签；</li>
+
+    <li>"Mark It! (local)" 依赖此页面所在目录的文件，因此做好书签后不要移动或删除该目录以及其中的文件；</li>
+
+    <li>如果点击 "Mark It! (local)" 书签出不来 MarkIt 对话框(被浏览器出于安全原因限制了)，请刷新页面，再使用 "Mark It!" 书签。</li>
+
+</ul>
+</p>
+
+<hr/>
 <form>
     <p>
-    <label for="debug">Use debug version javascript files for local?</label>
+    <label for="debug">Use debug version JavaScript files for local?</label>
     <input type="checkbox" id="debug"/><br/>
     </p>
 
     <p>
-    <label for="markit_url">URL for MarkIt javascript file:</label><br/>
+    <label for="markit_url">URL for MarkIt JavaScript file:</label><br/>
     <input type="text" id="markit_url"/><br/>
     </p>
 
     <p>
-    <label for="jquery_url">URL for jQuery javascript file:</label><br/>
+    <label for="jquery_url">URL for jQuery JavaScript file:</label><br/>
     <input type="text" id="jquery_url"/><br/>
     </p>
 
     <p>
-    <label for="jquery_ui_url">URL for jQuery UI javascript file:</label><br/>
+    <label for="jquery_ui_url">URL for jQuery UI JavaScript file:</label><br/>
     <input type="text" id="jquery_ui_url"/><br/>
     </p>
 
     <p>
-    <label for="ckeditor_url">URL for CKEditor javascript file:</label><br/>
+    <label for="ckeditor_url">URL for CKEditor JavaScript file:</label><br/>
     <input type="text" id="ckeditor_url"/><br/>
     </p>
 
@@ -118,6 +151,10 @@ $(function() {
     <a id="loader-url" href='##LOADER_URL##'>Mark It!</a><br/>
     </p>
 </form>
+
+<hr/>
+<p> 作者：Liu Yubao (yubao dot liu at gmail dot com), 2010-06-25</p>
+
 </body>
 </html>
 

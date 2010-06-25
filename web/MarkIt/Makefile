@@ -1,5 +1,6 @@
-.PHONY: all prepare
+.PHONY: all prepare release
 
+VERSION		:= 1.0
 BUILD_DIR	:= build
 USE_YUI_COMPRESSOR	?= true
 # ungzipped 时 YUI 产生的 js 体积小，gzipped 时 Google Closure 产生的 js 体积小。
@@ -34,7 +35,7 @@ $(BUILD_DIR)/markit.loader.url.js: $(BUILD_DIR)/markit.loader.min.js
 	$(call js_to_url, $@, $^)
 
 $(BUILD_DIR)/markit.loader.min.js: $(BUILD_DIR)/markit.loader.js
-	$(call compress_js, $@, $^, --compilation_level SIMPLE_OPTIMIZATIONS)	# don't inline
+	$(call compress_js, $@, $^)
 
 $(BUILD_DIR)/markit.loader.js: markit.loader.js $(BUILD_DIR)/markit.min.js
 	perl -pe '' $< > $@
@@ -58,6 +59,13 @@ $(addprefix $(BUILD_DIR)/, ckeditor css js): ckeditor css js
 	mkdir -p $(BUILD_DIR)
 	cp -r $^ $(BUILD_DIR)
 
+
+################ release     ###########################################
+release: $(BUILD_DIR)/MarkIt-$(VERSION).tar.gz
+
+$(BUILD_DIR)/MarkIt-$(VERSION).tar.gz: all
+	tar czf $@ -C $(BUILD_DIR) --transform 's#^#MarkIt-$(VERSION)/#' \
+		index.html markit.min.js  ckeditor css js
 
 ################ clean       ###########################################
 clean:
