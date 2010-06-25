@@ -5,7 +5,8 @@ BUILD_DIR	:= build
 
 define compress_js
 $(shell java -jar google-closure-compiler/compiler.jar \
-	$(addprefix --js , $(2)) --js_output_file $(1))
+	--create_source_map $(1).map \
+	$(3) $(addprefix --js , $(2)) --js_output_file $(1))
 endef
 
 define js_to_url
@@ -25,7 +26,7 @@ $(BUILD_DIR)/markit.loader.url.js: $(BUILD_DIR)/markit.loader.min.js
 	$(call js_to_url, $@, $^)
 
 $(BUILD_DIR)/markit.loader.min.js: $(BUILD_DIR)/markit.loader.js
-	$(call compress_js, $@, $^)
+	$(call compress_js, $@, $^, --compilation_level ADVANCED_OPTIMIZATIONS)
 
 $(BUILD_DIR)/markit.loader.js: markit.loader.js $(BUILD_DIR)/markit.min.js
 	perl -pe '' $< > $@
@@ -38,7 +39,7 @@ $(BUILD_DIR)/index.html: $(BUILD_DIR)/markit.loader.url.js index.html
 
 ################ markit js #############################################
 $(BUILD_DIR)/markit.min.js: $(BUILD_DIR)/markit.js
-	java -jar google-closure-compiler/compiler.jar $(addprefix --js , $^) --js_output_file $@
+	$(call compress_js, $@, $^)
 
 $(BUILD_DIR)/markit.js: markit.html markit.js
 	perl merge.pl $^ > $@
