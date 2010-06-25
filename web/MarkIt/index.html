@@ -19,6 +19,19 @@ $(function() {
     $("#ckeditor_url").val("ckeditor.com/apps/ckeditor/3.3.1/ckeditor.js");
 
     $("#btn_update").click(function() {
+        update_links();
+
+        alert("Mark It! (local): " + a.href.length + "\n" +
+                a.href + "\n\n" +
+                "Mark It! : " + a2.href.length + "\n" +
+                a2.href);
+
+        return false;   // avoid submit the form!
+    });
+
+    update_links();
+
+    function update_links() {
         var debug = false;
 
         if (debug) {
@@ -44,13 +57,7 @@ $(function() {
                 /##JQUERY_UI_URL##/g, $("#jquery_ui_url").val()).replace(
                 /##CKEDITOR_URL##/g, $("#ckeditor_url").val());
 
-        alert("Mark It! (local): " + a.href.length + "\n" +
-                a.href + "\n\n" +
-                "Mark It! : " + a2.href.length + "\n" +
-                a2.href);
-
-        return false;   // avoid submit the form!
-    });
+    }
 });
 </script>
 </head>
