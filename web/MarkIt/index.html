@@ -32,9 +32,7 @@ $(function() {
     update_links();
 
     function update_links() {
-        var debug = false;
-
-        if (debug) {
+        if ($("#debug").attr("checked")) {
             a.href = href.replace(
                     /##MARKIT_ROOT##/g, root).replace(
                     /##MARKIT_URL##/g, "markit.js").replace(
@@ -65,7 +63,7 @@ $(function() {
 <body>
 <form>
     <p>
-    <label for="debug">Use debug version javascript files?</label>
+    <label for="debug">Use debug version javascript files for local?</label>
     <input type="checkbox" id="debug"/><br/>
     </p>
 
