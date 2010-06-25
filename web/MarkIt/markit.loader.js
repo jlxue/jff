@@ -37,7 +37,6 @@
     s.setAttribute('id', id);
     s.ontimeout = s.onerror = function() {
         this.parentNode.removeChild(this);
-        alert(arguments.length);
         alert("Can't load " + markit_url);
     }
     document.getElementsByTagName('body')[0].appendChild(s);
