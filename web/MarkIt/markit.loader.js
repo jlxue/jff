@@ -99,10 +99,10 @@
                 xhr.overrideMimeType('text/javascript; charset=UTF-8');
             }
 
-            if (! markit_url_is_local) {
+            //if (! markit_url_is_local) {
                 // must be after open().
                 //xhr.setRequestHeader('User-Agent', 'Wget');
-            }
+            //}
 
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == 4) {
@@ -111,18 +111,23 @@
 
                     if (i == 200 || i == 0) {
                         script = xhr.responseText;
-                        //alert('got script: ' + script);
 
-                        // YUI compressor refuses to optimize scripts containing eval(),
-                        // so we do a trick in Makefile, where EVAL is replaced with eval.
-                        EVAL(replace(replace(replace(replace(script,
-                                    /#j#/g, jquery_url),
-                                    /#u#/g, jquery_ui_url),
-                                    /#c#/g, ckeditor_url),
-                                    /#k#/g, markit_key));
-                    } else {
-                        load_markit_js_by_script_tag();
+                        // XHR can't cross domains.
+                        if (script.length > 0) {
+                            //alert('got script: ' + script);
+
+                            // YUI compressor refuses to optimize scripts containing eval(),
+                            // so we do a trick in Makefile, where EVAL is replaced with eval.
+                            EVAL(replace(replace(replace(replace(script,
+                                        /#j#/g, jquery_url),
+                                        /#u#/g, jquery_ui_url),
+                                        /#c#/g, ckeditor_url),
+                                        /#k#/g, markit_key));
+                            return;
+                        }
                     }
+
+                    load_markit_js_by_script_tag();
                 }
             }
 
