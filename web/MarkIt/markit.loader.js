@@ -91,7 +91,10 @@
                     if (xhr.status == 200 || xhr.status == 0 /* file:// */) {
                         script = xhr.responseText;
                         //alert('got script: ' + script);
-                        eval(script.replace(
+
+                        // YUI compressor refuses to optimize scripts containing eval(),
+                        // so we do a trick in Makefile, where EVAL is replaced with eval.
+                        EVAL(script.replace(
                                     /#j#/g, jquery_url).replace(
                                     /#u#/g, jquery_ui_url).replace(
                                     /#c#/g, ckeditor_url).replace(

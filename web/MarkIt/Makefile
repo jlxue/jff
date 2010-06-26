@@ -36,6 +36,7 @@ $(BUILD_DIR)/markit.loader.url.js: $(BUILD_DIR)/markit.loader.min.js
 
 $(BUILD_DIR)/markit.loader.min.js: $(BUILD_DIR)/markit.loader.js
 	$(call compress_js, $@, $^)
+	perl -i -pe 's/\bEVAL\b/eval/g' $@
 
 $(BUILD_DIR)/markit.loader.js: markit.loader.js $(BUILD_DIR)/markit.min.js
 	perl -pe '' $< > $@
