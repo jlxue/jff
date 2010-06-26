@@ -90,6 +90,11 @@
                 xhr = new ActiveXObject('Microsoft.XMLHTTP');   // IE 5.5+
             }
 
+            if (xhr.overrideMimeType) {
+                // avoid Firefox treating it as text/xml to report a syntax error
+                xhr.overrideMimeType('text/javascript');
+            }
+
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == 4) {
                     xhr.onreadystatechange = function() {};
