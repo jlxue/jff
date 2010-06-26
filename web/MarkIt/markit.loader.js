@@ -94,12 +94,14 @@
             xhr.open('GET', markit_url, true);
 
             if (xhr.overrideMimeType) {
-                // avoid Firefox treating it as text/xml to report a syntax error
+                // avoid Firefox treating it as text/xml to report a syntax error.
+                // must be before send().
                 xhr.overrideMimeType('text/javascript; charset=UTF-8');
             }
 
             if (! markit_url_is_local) {
-                xhr.setRequestHeader('User-Agent', 'Wget');
+                // must be after open().
+                //xhr.setRequestHeader('User-Agent', 'Wget');
             }
 
             xhr.onreadystatechange = function() {
@@ -127,6 +129,7 @@
             xhr.send(null);
             return;
         } catch (e) {
+            alert(e);
         }
     }
 
