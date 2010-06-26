@@ -73,6 +73,20 @@ function main() {
             }
         });
 
+        dialog.find("#btn_favor").click(function(e) {
+            var title, url;
+            title = $("title").text();
+            url = location.href;
+
+            if ($.browser.msie) {
+                window.external.addFavorite(url, title);
+            } else if ($.browser.mozilla) {
+                window.sidebar.addPanel(title, url, "");
+            } else {
+                alert("This browser isn't supported!");
+            }
+        });
+
         // must be after markit-dialog is created!
         if (markit_script) {
             $(markit_script).remove();
