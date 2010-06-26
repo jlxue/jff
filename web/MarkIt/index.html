@@ -26,6 +26,7 @@ $(function() {
     $("#jquery_url").val("http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js");
     $("#jquery_ui_url").val("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.js");
     $("#ckeditor_url").val("http://ckeditor.com/apps/ckeditor/3.3.1/ckeditor.js");
+    $("#markit_key").val("my.secret.markit.key");
 
     $("#btn_update").click(function() {
         update_links();
@@ -87,6 +88,9 @@ $(function() {
                 /##JQUERY_UI_URL##/g, jquery_ui_url.substring(i)).replace(
                 /##CKEDITOR_URL##/g, ckeditor_url.substring(i));
 
+        a.href = a.href.replace(/##MARKIT_KEY##/, $("#markit_key").val());
+        a2.href = a2.href.replace(/##MARKIT_KEY##/, $("#markit_key").val());
+
         $("a[id^=loader-url]").fadeOut(1000, function() {
             $(this).fadeIn(1000);
         });
@@ -147,6 +151,11 @@ $(function() {
     <p>
     <label for="ckeditor_url">URL for CKEditor JavaScript file:</label><br/>
     <input type="text" id="ckeditor_url"/><br/>
+    </p>
+
+    <p>
+    <label for="markit_key">A secret string used as storage key:</label><br/>
+    <input type="text" id="markit_key"/><br/>
     </p>
 
     </p>
