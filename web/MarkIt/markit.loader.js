@@ -1,4 +1,5 @@
 (function() {
+
     function elem(id) {
         return g_document.getElementById(id);
     }
@@ -90,9 +91,15 @@
                 xhr = new ActiveXObject('Microsoft.XMLHTTP');   // IE 5.5+
             }
 
+            xhr.open('GET', markit_url, true);
+
             if (xhr.overrideMimeType) {
                 // avoid Firefox treating it as text/xml to report a syntax error
-                xhr.overrideMimeType('text/javascript');
+                xhr.overrideMimeType('text/javascript; charset=UTF-8');
+            }
+
+            if (! markit_url_is_local) {
+                xhr.setRequestHeader('User-Agent', 'Wget');
             }
 
             xhr.onreadystatechange = function() {
@@ -100,7 +107,7 @@
                     xhr.onreadystatechange = function() {};
                     i = xhr.status;
 
-                    if (i == 200 || i == 0 /* file:// */) {
+                    if (i == 200 || i == 0) {
                         script = xhr.responseText;
                         //alert('got script: ' + script);
 
@@ -117,7 +124,6 @@
                 }
             }
 
-            xhr.open('GET', markit_url, true);
             xhr.send(null);
             return;
         } catch (e) {
