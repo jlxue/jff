@@ -39,6 +39,7 @@
     }
 
     var g_document = document,      /* help YUI compressor */
+        g_window = window,
         dialog = elem('markit-dialog'),
         id = 'markit-script',
         msg = 'Loading MarkIt dialog!',
@@ -83,7 +84,7 @@
             //
             // XMLHttpRequest in IE7 can't request local files, so we
             // we use the ActiveXObject when it is available.
-            if (XMLHttpRequest && (! markit_url_is_local || ! ActiveXObject)) {
+            if (g_window.XMLHttpRequest && (! markit_url_is_local || ! g_window.ActiveXObject)) {
                 xhr = new XMLHttpRequest();     // Firefox, Opera, Safari
             } else {
                 xhr = new ActiveXObject('Microsoft.XMLHTTP');   // IE 5.5+
