@@ -1,11 +1,31 @@
 (function() {
 
 
-var markit_script = document.getElementById('markit-script');
+// avoid evaluate this script twice in same window.
+if (document.getElementById('markit-dialog')) {
+    return;
+}
 
-var JQUERY_URL = markit_script.getAttribute('j');
-var JQUERY_UI_URL = markit_script.getAttribute('u');
-var CKEDITOR_URL = markit_script.getAttribute('c');
+var markit_script, JQUERY_URL, JQUERY_UI_URL, CKEDITOR_URL, MARKIT_KEY,
+    load_by_script_tag;
+
+markit_script = document.getElementById('markit-script');
+
+if (markit_script) {    // by <script src=...>
+    load_by_script_tag = true;
+
+    JQUERY_URL = markit_script.getAttribute('j');
+    JQUERY_UI_URL = markit_script.getAttribute('u');
+    CKEDITOR_URL = markit_script.getAttribute('c');
+    MARKIT_KEY = markit_script.getAttribute('k');
+} else {                // by XMLHttpRequest
+    load_by_script_tag = false;
+
+    JQUERY_URL = '#j#';
+    JQUERY_UI_URL = '#u#';
+    CKEDITOR_URL = '#c#';
+    MARKIT_KEY = '#k#';
+}
 
 function load_script(url, onload) {
     var s = document.createElement('script');
@@ -23,10 +43,11 @@ function load_script(url, onload) {
 }
 
 function main() {
-    var $ = jQuery;
+    if (! jQuery) {
+        return;
+    }
 
-    $(markit_script).remove();
-    markit_script = null;
+    var $ = jQuery;
 
     var dialog = $('#markit-dialog');
 
@@ -49,6 +70,13 @@ function main() {
                 window.scrollTo(left, top);
             }
         });
+
+        // must be after markit-dialog is created!
+        if (markit_script) {
+            $(markit_script).remove();
+            markit_script = null;
+        }
+
     } else {
         dialog.toggle();
     }
