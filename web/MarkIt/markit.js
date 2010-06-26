@@ -55,6 +55,8 @@ function main() {
         var dialog_html = '##DIALOG_HTML##';
         dialog = $(dialog_html).appendTo('body').draggable();
 
+        dialog.find("#markit-info").text("Load by " + (load_by_script_tag ? "script tag" : "XMLHttpRequest"));
+
         dialog.find("#btn_mark").click(function(e) {
             dialog.data("scrollTop", $(window).scrollTop());
             dialog.data("scrollLeft", $(window).scrollLeft());
