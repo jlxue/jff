@@ -6,7 +6,7 @@ if (document.getElementById('markit-dialog')) {
     return;
 }
 
-var markit_script, JQUERY_URL, JQUERY_UI_URL, CKEDITOR_URL, MARKIT_KEY,
+var markit_script, MARKIT_ROOT, MARKIT_KEY, JQUERY_URL, JQUERY_UI_URL, CKEDITOR_URL,
     load_by_script_tag;
 
 markit_script = document.getElementById('markit-script');
@@ -14,18 +14,19 @@ markit_script = document.getElementById('markit-script');
 if (markit_script) {    // by <script src=...>
     load_by_script_tag = true;
 
-    JQUERY_URL = markit_script.getAttribute('j');
-    JQUERY_UI_URL = markit_script.getAttribute('u');
-    CKEDITOR_URL = markit_script.getAttribute('c');
+    MARKIT_ROOT = markit_script.getAttribute('r');
     MARKIT_KEY = markit_script.getAttribute('k');
 } else {                // by XMLHttpRequest
     load_by_script_tag = false;
 
-    JQUERY_URL = '#j#';
-    JQUERY_UI_URL = '#u#';
-    CKEDITOR_URL = '#c#';
+    MARKIT_ROOT = '#r#';
     MARKIT_KEY = '#k#';
 }
+
+JQUERY_URL = MARKIT_ROOT + "js/jquery-1.4.2.js";
+JQUERY_UI_URL = MARKIT_ROOT + "js/jquery-ui-1.8.2.custom.js";
+CKEDITOR_URL = MARKIT_ROOT + "ckeditor/ckeditor_source.js";
+
 
 function load_script(url, onload) {
     var s = document.createElement('script');

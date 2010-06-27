@@ -52,23 +52,10 @@ $(function() {
     update_link();
 
     function update_link() {
-        if (debug) {
-            a.href = href.replace(
+        a.href = href.replace(
                     /##MARKIT_ROOT##/g, root).replace(
-                    /##MARKIT_URL##/g, "markit.js").replace(
-                    /##JQUERY_URL##/g, "js/jquery-1.4.2.js").replace(
-                    /##JQUERY_UI_URL##/g, "js/jquery-ui-1.8.2.custom.js").replace(
-                    /##CKEDITOR_URL##/g, "ckeditor/ckeditor_source.js");
-        } else {
-            a.href = href.replace(
-                    /##MARKIT_ROOT##/g, root).replace(
-                    /##MARKIT_URL##/g, "markit.min.js").replace(
-                    /##JQUERY_URL##/g, "js/jquery-1.4.2.min.js").replace(
-                    /##JQUERY_UI_URL##/g, "js/jquery-ui-1.8.2.custom.min.js").replace(
-                    /##CKEDITOR_URL##/g, "ckeditor/ckeditor.js");
-        }
-
-        a.href = a.href.replace(/##MARKIT_KEY##/, $("#markit_key").val());
+                    /##MARKIT_URL##/g, debug ? "markit.js" : "markit.min.js").replace(
+                    /##MARKIT_KEY##/g, $("#markit_key").val());
 
         $("#loader-url").fadeOut(1000, function() {
             $(this).fadeIn(1000);
