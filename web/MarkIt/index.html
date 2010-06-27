@@ -27,17 +27,23 @@ $(function() {
     var root = location.href.substring(0, location.href.lastIndexOf("/")) + "/";
     var debug = false;
 
-    $("input[type=text]").attr("size", "80");
-
-    $("#markit_key").val("my.secret.markit.key");
+    $("#markit_key").val("change me!");
+    $("#markit_key").one("focus", function() {
+        $(this).val("");
+    });
 
     $("#btn_update").click(function() {
+        if ($("#markit_key").val().length == 0) {
+            alert("MarkIt 密钥不能为空!");
+            return false;
+        }
+
         update_link();
 
         if (debug) {
             alert("Mark It! : " + a.href.length + "\n" + a.href);
         } else {
-            alert("Update link successfully, please create your \"Mark It!\" bookmark again!");
+            alert("请重新拖动\"Mark It!\"链接到书签栏，并请记住 MarkIt 密钥！");
         }
 
         return false;   // avoid submit the form!
@@ -85,11 +91,9 @@ $(function() {
 <p>
 使用说明：
 <ul>
-    <li>填写 "Mark It key" 后，点击 "Update link"，然后 "Mark It!" 链接拖到浏览器的书签栏(Bookmarks Toolbar)，点击此书签，会在当前窗口显示或隐藏 MarkIt 对话框；</li>
+    <li>填写 "MarkIt 密钥" 后，点击 "更新链接"，然后将 "Mark It!" 链接拖到浏览器的书签栏(Bookmarks Toolbar)，点击此书签，会在当前窗口显示或隐藏 MarkIt 对话框；</li>
 
-    <li>升级 "Mark It" 时，需要填入之前的 "Mark It key"， 然后点击 "Update link"，重做书签；</li>
-
-    <li><a href="#more">更多说明……</a></li>
+    <li>请记录好 MarkIt 密钥，升级 "Mark It" 时，需要填入此密钥， 然后点击 "更新链接"，重做书签；</li>
 
 </ul>
 </p>
@@ -97,22 +101,15 @@ $(function() {
 <hr/>
 <form>
     <p>
-    <label for="markit_key">Mark It key: a secret string used as storage key:</label><br/>
-    <input type="text" id="markit_key"/><br/>
+    <label for="markit_key">MarkIt 密钥：</label>
+    <input type="text" id="markit_key"/>
     </p>
 
     </p>
-    <button id="btn_update">Update link</button>
-    </p>
-
-    <p>
-    <a id="loader-url" href='##LOADER_URL##'>Mark It!</a><br/>
+    <button id="btn_update">更新链接</button>
+    <a id="loader-url" href='##LOADER_URL##'>Mark It!</a>
     </p>
 </form>
-
-<hr/>
-<a name="more">更多说明:</a><br/>
-待续。。。。
 
 <hr/>
 <p> 作者：Liu Yubao (yubao dot liu at gmail dot com), 2010-06-27</p>
