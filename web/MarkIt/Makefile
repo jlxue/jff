@@ -23,7 +23,7 @@ $(shell perl -e 'my @a=<>; chomp @a; my $$a=join("", @a); $$a =~ s/;$$//; \
 	$$a =~ s/\x27/%27/g; print "javascript:void(", $$a, ")"' $(2) > $(1))
 endef
 
-all: prepare $(addprefix $(BUILD_DIR)/, index.html ckeditor css js)
+all: prepare $(addprefix $(BUILD_DIR)/, index.html markit.html ckeditor css js)
 
 prepare: build
 
@@ -51,9 +51,11 @@ $(BUILD_DIR)/index.html: $(BUILD_DIR)/markit.loader.url.js index.html
 $(BUILD_DIR)/markit.min.js: $(BUILD_DIR)/markit.js
 	$(call compress_js, $@, $^)
 
-$(BUILD_DIR)/markit.js: markit.html markit.js
+$(BUILD_DIR)/markit.js: dialog.html markit.js
 	perl merge.pl $^ > $@
 
+$(BUILD_DIR)/markit.html: markit.html
+	perl -pe '' $< > $@
 
 ################ ckeditor/js/css #######################################
 $(addprefix $(BUILD_DIR)/, ckeditor css js): ckeditor css js

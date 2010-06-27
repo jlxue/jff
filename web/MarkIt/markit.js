@@ -54,6 +54,7 @@ function main() {
 
     if (dialog.length == 0) {
         var dialog_html = '##DIALOG_HTML##';
+        dialog_html = dialog_html.replace(/##MARKIT_ROOT##/, MARKIT_ROOT);
         dialog = $(dialog_html).appendTo('body').draggable();
 
         dialog.find("#markit-info").text("Load by " + (load_by_script_tag ? "script tag" : "XMLHttpRequest"));
