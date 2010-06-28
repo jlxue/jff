@@ -2,7 +2,7 @@
 
 VERSION		:= 1.0
 BUILD_DIR	:= build
-DEPLOY_DEST_DIR ?= MarkItServer/public
+DEPLOY_DEST_DIR ?= MarkItServer/t/www
 USE_YUI_COMPRESSOR	?= true
 # ungzipped 时 YUI 产生的 js 体积小，gzipped 时 Google Closure 产生的 js 体积小。
 
