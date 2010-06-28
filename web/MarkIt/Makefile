@@ -1,7 +1,8 @@
-.PHONY: all prepare release
+.PHONY: all prepare release deploy
 
 VERSION		:= 1.0
 BUILD_DIR	:= build
+DEPLOY_DEST_DIR ?= MarkItServer/public
 USE_YUI_COMPRESSOR	?= true
 # ungzipped 时 YUI 产生的 js 体积小，gzipped 时 Google Closure 产生的 js 体积小。
 
@@ -67,6 +68,11 @@ release: $(BUILD_DIR)/MarkIt-$(VERSION).tar.gz
 $(BUILD_DIR)/MarkIt-$(VERSION).tar.gz: all
 	tar czf $@ -C $(BUILD_DIR) --transform 's#^#MarkIt-$(VERSION)/#' \
 		index.html markit.min.js  ckeditor css js
+
+################ deploy      ###########################################
+deploy: release
+	tar xzf $(BUILD_DIR)/MarkIt-$(VERSION).tar.gz -C $(DEPLOY_DEST_DIR) \
+		--transform 's#^MarkIt-$(VERSION)/##'
 
 ################ clean       ###########################################
 clean:
