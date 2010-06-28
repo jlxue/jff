@@ -58,23 +58,17 @@ function main() {
 
         dialog.find("#markit-info").text("Load by " + (load_by_script_tag ? "script tag" : "XMLHttpRequest"));
 
-        dialog.find("#btn_mark").click(function(e) {
-            dialog.data("scrollTop", $(window).scrollTop());
-            dialog.data("scrollLeft", $(window).scrollLeft());
+        dialog.find("#markit-btn_mark").click(function(e) {
+            var marks_table = dialog.find("#markit-marks"),
+                left = $(window).scrollLeft(),
+                top = $(window).scrollTop(),
+                coord = left + ',' + top;
+
+            marks_table.append('<tr><td><a href="javascript:window.scrollTo(' +
+                coord + ')">(' + coord + ')</a></td></tr>');
         });
 
-        dialog.find("#btn_scroll").click(function(e) {
-            var top = dialog.data("scrollTop");
-            var left = dialog.data("scrollLeft");
-
-            if (typeof(top) == 'undefined' || typeof(left) == 'undefined') {
-                alert("No mark has been set!");
-            } else {
-                window.scrollTo(left, top);
-            }
-        });
-
-        dialog.find("#btn_favor").click(function(e) {
+        dialog.find("#markit-btn_favor").click(function(e) {
             var title, url;
             title = $("title").text();
             url = location.href;
