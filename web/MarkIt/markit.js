@@ -50,14 +50,11 @@ function main() {
 
     var $ = jQuery;
 
-    var markit_dialog = $('#markit-dialog');
+    var dialog = $('#markit-dialog');
 
-    if (markit_dialog.length == 0) {
+    if (dialog.length == 0) {
         var dialog_html = '##DIALOG_HTML##';
-        dialog_html = dialog_html.replace(/##MARKIT_ROOT##/, MARKIT_ROOT);
-        markit_dialog = $(dialog_html).appendTo('body').draggable();
-
-        var dialog = $(markit_dialog.find("iframe")[0].contentDocument);
+        dialog = $(dialog_html).appendTo('body').draggable();
 
         dialog.find("#markit-info").text("Load by " + (load_by_script_tag ? "script tag" : "XMLHttpRequest"));
 
@@ -98,7 +95,7 @@ function main() {
         }
 
     } else {
-        markit_dialog.toggle();
+        dialog.toggle();
     }
 }
 
