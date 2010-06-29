@@ -36,15 +36,26 @@ function load_script(url, onload) {
     var s = document.createElement('script');
     s.setAttribute('src', url);
     s.setAttribute('charset', 'UTF-8');
-    document.getElementsByTagName('body')[0].appendChild(s);
+
     s.ontimeout = s.onerror = function() {
+        s.ontimeout = s.onerror = null;
         this.parentNode.removeChild(this);
         alert("Can't load " + url);
     }
-    s.onload = function() {
-        this.parentNode.removeChild(this);
-        onload();
+
+    var done = false;
+    // IE 6 requires onreadystatechange
+    s.onreadystatechange = s.onload = function() {
+        if (! done && (!this.readyState ||
+                    this.readyState === "loaded" || this.readyState === "complete")) {
+            done = true;
+            s.onreadystatechange = s.onload = null;
+            this.parentNode.removeChild(this);
+            onload();
+        }
     }
+
+    document.getElementsByTagName('body')[0].appendChild(s);
 }
 
 function main() {
