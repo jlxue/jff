@@ -4,8 +4,8 @@ LICENSE
 MANIFEST
 MANIFEST.SKIP
 README
-lib/MarkItServer.pm
-lib/MarkItServer/templates/runmode1.html
+lib/MarkIt.pm
+lib/MarkIt/templates/runmode1.html
 server.pl
 t/00-signature.t
 t/01-load.t

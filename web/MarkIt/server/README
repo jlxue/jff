@@ -1,4 +1,4 @@
-MarkItServer
+MarkIt
 
 The README is used to introduce the module and provide instructions on
 how to install the module, any machine dependencies it may have (for
@@ -60,21 +60,21 @@ SUPPORT AND DOCUMENTATION
 After installing, you can find documentation for this module with the perldoc 
 command.
 
-    perldoc MarkItServer
+    perldoc MarkIt
 
 You can also look for information at:
 
     Search CPAN
-        http://search.cpan.org/dist/MarkItServer
+        http://search.cpan.org/dist/MarkIt
 
     CPAN Request Tracker:
-        http://rt.cpan.org/NoAuth/Bugs.html?Dist=MarkItServer
+        http://rt.cpan.org/NoAuth/Bugs.html?Dist=MarkIt
 
     AnnoCPAN, annotated CPAN documentation:
-        http://annocpan.org/dist/MarkItServer
+        http://annocpan.org/dist/MarkIt
 
     CPAN Ratings:
-        http://cpanratings.perl.org/d/MarkItServer
+        http://cpanratings.perl.org/d/MarkIt
 
 COPYRIGHT AND LICENCE
 

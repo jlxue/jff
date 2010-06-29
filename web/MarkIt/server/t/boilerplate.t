@@ -61,6 +61,6 @@ not_in_file_ok(
 not_in_file_ok( Changes => 'placeholder date/time' => qr{Date/time}msx );
 
 
-module_boilerplate_ok('lib/MarkItServer.pm');
+module_boilerplate_ok('lib/MarkIt.pm');
 
 

@@ -7,12 +7,12 @@ use Test::More tests => 1;
 
 BEGIN {
 
-    use_ok('MarkItServer');
+    use_ok('MarkIt');
 
 }
 
 diag(
 
-    "Testing MarkItServer $MarkItServer::VERSION, Perl $], $^X\n",
+    "Testing MarkIt $MarkIt::VERSION, Perl $], $^X\n",
 
 );

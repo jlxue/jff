@@ -5,13 +5,13 @@ use strict;
 use warnings;
 use Test::More tests => 1;
 use Test::WWW::Mechanize::CGIApp;
-use MarkItServer;
+use MarkIt;
 
 my $mech = Test::WWW::Mechanize::CGIApp->new;
 
 $mech->app(
     sub {
-        my $app = MarkItServer->new(PARAMS => {
+        my $app = MarkIt->new(PARAMS => {
 
         });
         $app->run();

@@ -3,8 +3,8 @@ use warnings;
 use Module::Build;
 
 my $builder = Module::Build->new(
-    dist_name           => 'MarkItServer',
-    module_name         => 'MarkItServer',
+    dist_name           => 'MarkIt',
+    module_name         => 'MarkIt',
     dist_abstract       => 'Abstract goes here.',
     dist_author         => 'Liu Yubao <Yubao.Liu@gmail.com>',
     license             => 'GPL v3',
@@ -18,7 +18,7 @@ my $builder = Module::Build->new(
                     }
                 },
             },
-            'lib/MarkItServer/templates',
+            'lib/MarkIt/templates',
         );
         return \%tmpls;
     },
@@ -30,7 +30,7 @@ my $builder = Module::Build->new(
         'Titanium'                      => 0,
         'HTML::Template'                => 0,
     },
-    add_to_cleanup      => [ 'MarkItServer-*' ],
+    add_to_cleanup      => [ 'MarkIt-*' ],
     create_makefile_pl  => 'traditional',
     sign                => 1,
 );
