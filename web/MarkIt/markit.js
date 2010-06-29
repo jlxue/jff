@@ -27,9 +27,9 @@ if (markit_script) {    // by <script src=...>
     LOADER_VERSION = '#v#';
 }
 
-JQUERY_URL = MARKIT_ROOT + "js/jquery-1.4.2.js";
-JQUERY_UI_URL = MARKIT_ROOT + "js/jquery-ui-1.8.2.custom.js";
-CKEDITOR_URL = MARKIT_ROOT + "ckeditor/ckeditor_source.js";
+JQUERY_URL = MARKIT_ROOT + "js/jquery-1.4.2.min.js";
+JQUERY_UI_URL = MARKIT_ROOT + "js/jquery-ui-1.8.2.custom.min.js";
+CKEDITOR_URL = MARKIT_ROOT + "ckeditor/ckeditor.js";
 
 
 function load_script(url, onload) {
