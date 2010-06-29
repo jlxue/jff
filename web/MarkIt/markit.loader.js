@@ -20,6 +20,24 @@
         return s.replace(pattern, s2);
     }
 
+    function on_markit_js_loaded() {
+        script = xhr.responseText;
+
+        // XHR can't cross domains.
+        if (script.length > 0) {
+            //alert('got script: ' + script);
+
+            // YUI compressor refuses to optimize scripts containing eval(),
+            // so we do a trick in Makefile, where EVAL is replaced with eval.
+            EVAL(replace(replace(replace(script,
+                        /#v#/g, loader_version),
+                        /#r#/g, markit_root),
+                        /#k#/g, markit_key));
+        } else {
+            load_markit_js_by_script_tag();
+        }
+    }
+
     function load_markit_js_by_script_tag() {
         script = g_document.createElement('script');
         attr(attr(attr(attr(attr(attr(script,
@@ -51,6 +69,7 @@
         markit_url_is_local = (indexOf(markit_url, file_protocol) == 0),
         script, scripts,
         xhr,
+        isXDomainRequest = 0,
         i;
 
     if (dialog) {
@@ -79,60 +98,58 @@
             // prefer XMLHttpRequest to script tag for privacy, as other
             // scripts in this document won't peek into our private data,
             // especially `markit_key'.
-            //
-            // XMLHttpRequest in IE7 can't request local files, so we
-            // we use the ActiveXObject when it is available.
-            if (g_window.XMLHttpRequest && (! markit_url_is_local || ! g_window.ActiveXObject)) {
+
+            if (g_window.XDomainRequest) {
+                xhr = new XDomainRequest();
+                isXDomainRequest = 1;
+            } else if (g_window.XMLHttpRequest && (! markit_url_is_local || ! g_window.ActiveXObject)) {
+                // XMLHttpRequest in IE7 can't request local files, so we
+                // we use the ActiveXObject when it is available.
                 xhr = new XMLHttpRequest();     // Firefox, Opera, Safari
             } else {
                 xhr = new ActiveXObject('Microsoft.XMLHTTP');   // IE 5.5+
             }
 
-            xhr.open('GET', markit_url, true);
-
-            if (xhr.overrideMimeType) {
-                // avoid Firefox treating it as text/xml to report a syntax error.
-                // must be before send().
-                xhr.overrideMimeType('text/javascript; charset=UTF-8');
+            if (isXDomainRequest) {
+                xhr.onload = on_markit_js_loaded;
+                xhr.onerror = xhr.ontimeout = load_markit_js_by_script_tag;
             }
 
-            //if (! markit_url_is_local) {
-                // must be after open().
-                //xhr.setRequestHeader('User-Agent', 'Wget');
-            //}
+            // stupid Firefox requires this before setting onreadystatechange
+            xhr.open('GET', markit_url);
 
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState == 4) {
-                    xhr.onreadystatechange = function() {};
-                    i = xhr.status;
-
-                    if (i == 200 || i == 0) {
-                        script = xhr.responseText;
-
-                        // XHR can't cross domains.
-                        if (script.length > 0) {
-                            //alert('got script: ' + script);
-
-                            // YUI compressor refuses to optimize scripts containing eval(),
-                            // so we do a trick in Makefile, where EVAL is replaced with eval.
-                            EVAL(replace(replace(replace(script,
-                                        /#v#/g, loader_version),
-                                        /#r#/g, markit_root),
-                                        /#k#/g, markit_key));
-                            return;
-                        }
-                    }
-
-                    load_markit_js_by_script_tag();
+            if (! isXDomainRequest) {
+                if (xhr.overrideMimeType) {
+                    // avoid Firefox treating it as text/xml to report a syntax error.
+                    // must be before send().
+                    xhr.overrideMimeType('text/javascript; charset=UTF-8');
                 }
-            }
 
-            xhr.send(null);
+                //if (! markit_url_is_local) {
+                    // must be after open().
+                    //xhr.setRequestHeader('User-Agent', 'Wget');
+                //}
+
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState == 4) {
+                        xhr.onreadystatechange = function() {};
+                        i = xhr.status;
+
+                        if (i == 200 || i == 0) {
+                            on_markit_js_loaded();
+                        } else {
+                            load_markit_js_by_script_tag();
+                        } // end if
+                    } // end if
+                } //end function
+            } // end if
+
+            xhr.send();
             return;
         } catch (e) {
             alert(e);
-        }
-    }
+        } // end try
+    } // end if
 
     load_markit_js_by_script_tag();
 
