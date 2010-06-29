@@ -14,8 +14,9 @@ sub dispatch_args {
         },
 
         table   => [
-            'mark/:rm?' => { app => 'Mark' },
-            ':path?'    => { app => 'StaticFile' },
+            ''          => { app => 'StaticFile' },
+            'mark/:rm'  => { app => 'Mark' },
+            '*'         => { app => 'StaticFile', '*' => 'path' },
         ],
     };
 }
