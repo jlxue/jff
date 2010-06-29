@@ -6,9 +6,11 @@ if (document.getElementById('markit-dialog')) {
     return;
 }
 
-var markit_script, MARKIT_ROOT, MARKIT_KEY, JQUERY_URL, JQUERY_UI_URL, CKEDITOR_URL,
-    load_by_script_tag;
+var MARKIT_ROOT, MARKIT_KEY, JQUERY_URL, JQUERY_UI_URL, CKEDITOR_URL,
+    LATEST_LOADER_VERSION, LOADER_VERSION,
+    markit_script, load_by_script_tag;
 
+LATEST_LOADER_VERSION = ##LOADER_VERSION##;
 markit_script = document.getElementById('markit-script');
 
 if (markit_script) {    // by <script src=...>
@@ -16,11 +18,13 @@ if (markit_script) {    // by <script src=...>
 
     MARKIT_ROOT = markit_script.getAttribute('r');
     MARKIT_KEY = markit_script.getAttribute('k');
+    LOADER_VERSION = markit_script.getAttribute('v');
 } else {                // by XMLHttpRequest
     load_by_script_tag = false;
 
     MARKIT_ROOT = '#r#';
     MARKIT_KEY = '#k#';
+    LOADER_VERSION = '#v#';
 }
 
 JQUERY_URL = MARKIT_ROOT + "js/jquery-1.4.2.js";
@@ -54,9 +58,14 @@ function main() {
 
     if (dialog.length == 0) {
         var dialog_html = '##DIALOG_HTML##';
+        dialog_html = dialog_html.replace(/##MARKIT_ROOT##/, MARKIT_ROOT);
         dialog = $(dialog_html).appendTo('body').draggable();
 
-        dialog.find("#markit-info").text("Load by " + (load_by_script_tag ? "script tag" : "XMLHttpRequest"));
+        dialog.find("#markit-info").text("[Load by " + (load_by_script_tag ? "script tag]" : "XMLHttpRequest]"));
+        dialog.find("#markit-version").text(LOADER_VERSION);
+        if (LOADER_VERSION != LATEST_LOADER_VERSION) {
+            dialog.find("#markit-version2").text("(NEW: v" + LATEST_LOADER_VERSION + ")");
+        }
 
         dialog.find("#markit-btn_mark").click(function(e) {
             var marks_table = dialog.find("#markit-marks"),
@@ -68,7 +77,7 @@ function main() {
                 coord + ')">(' + coord + ')</a></td></tr>');
         });
 
-        dialog.find("#markit-btn_favor").click(function(e) {
+        dialog.find("#markit-btn_save").click(function(e) {
             var title, url;
             title = $("title").text();
             url = location.href;

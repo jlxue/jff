@@ -1,6 +1,7 @@
 .PHONY: all prepare release deploy
 
 VERSION		:= 1.0
+LOADER_VERSION	:= 1
 BUILD_DIR	:= build
 DEPLOY_DEST_DIR ?= server/t/www
 USE_YUI_COMPRESSOR	?= true
@@ -40,7 +41,7 @@ $(BUILD_DIR)/markit.loader.min.js: $(BUILD_DIR)/markit.loader.js
 	perl -i -pe 's/\bEVAL\b/eval/g' $@
 
 $(BUILD_DIR)/markit.loader.js: markit.loader.js $(BUILD_DIR)/markit.min.js
-	perl -pe '' $< > $@
+	perl -pe 's/##LOADER_VERSION##/$(LOADER_VERSION)/g' $< > $@
 
 
 ################ markit index.html #####################################
@@ -54,6 +55,7 @@ $(BUILD_DIR)/markit.min.js: $(BUILD_DIR)/markit.js
 
 $(BUILD_DIR)/markit.js: dialog.html markit.js
 	perl merge.pl $^ > $@
+	perl -i -pe 's/##LOADER_VERSION##/$(LOADER_VERSION)/g' $@
 
 
 ################ ckeditor/js/css #######################################
