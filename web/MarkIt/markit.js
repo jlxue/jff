@@ -58,42 +58,45 @@ function load_script(url, onload) {
     document.getElementsByTagName('body')[0].appendChild(s);
 }
 
+function show_version_info(dialog) {
+    dialog.find("#markit-info").text("[Load by " + (load_by_script_tag ? "script tag]" : "XMLHttpRequest]"));
+    dialog.find("#markit-version").text(LOADER_VERSION);
+    if (LOADER_VERSION != LATEST_LOADER_VERSION) {
+        dialog.find("#markit-version2").text("(NEW: v" + LATEST_LOADER_VERSION + ")");
+    }
+}
+
+function on_mark(dialog) {
+    var marks_table = dialog.find("#markit-marks"),
+        left = $(window).scrollLeft(),
+        top = $(window).scrollTop(),
+        coord = left + ',' + top;
+
+    marks_table.append('<tr><td><a href="javascript:window.scrollTo(' +
+        coord + ')">(' + coord + ')</a></td>' +
+        '<td><input type="text" size="20" value="a mark"/></td>' +
+        '<td><a href="#">delete</a></td></tr>');
+}
+
+function on_save(dialog) {
+    var url = location.href;
+
+}
+
 function initialize() {
     var dialog_html = '##DIALOG_HTML##';
     dialog_html = dialog_html.replace(/##MARKIT_ROOT##/, MARKIT_ROOT);
 
     var dialog = $(dialog_html).appendTo('body').draggable();
 
-    dialog.find("#markit-info").text("[Load by " + (load_by_script_tag ? "script tag]" : "XMLHttpRequest]"));
-    dialog.find("#markit-version").text(LOADER_VERSION);
-    if (LOADER_VERSION != LATEST_LOADER_VERSION) {
-        dialog.find("#markit-version2").text("(NEW: v" + LATEST_LOADER_VERSION + ")");
-    }
+    show_version_info(dialog);
 
     dialog.find("#markit-btn_mark").click(function(e) {
-        var marks_table = dialog.find("#markit-marks"),
-            left = $(window).scrollLeft(),
-            top = $(window).scrollTop(),
-            coord = left + ',' + top;
-
-        marks_table.append('<tr><td><a href="javascript:window.scrollTo(' +
-            coord + ')">(' + coord + ')</a></td>' +
-            '<td><input type="text" size="20" value="a mark"/></td>' +
-            '<td><a href="#">delete</a></td></tr>');
+        on_mark(dialog);
     });
 
     dialog.find("#markit-btn_save").click(function(e) {
-        var title, url;
-        title = $("title").text();
-        url = location.href;
-
-        if ($.browser.msie) {
-            window.external.addFavorite(url, title);
-        } else if ($.browser.mozilla) {
-            window.sidebar.addPanel(title, url, "");
-        } else {
-            alert("This browser isn't supported!");
-        }
+        on_save(dialog);
     });
 
     $("#markit-marks a[href=#]").live("click", function() {
