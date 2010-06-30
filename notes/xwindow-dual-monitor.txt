@@ -1,0 +1,75 @@
+XWindow 使用双显示器
+
+如果 /etc/X11/xorg.conf 不存在，则可以查看 /var/log/Xorg.0.log，把
+xorg.conf 抠出来，比如:
+(==) Using default built-in configuration (30 lines)
+(==) --- Start of built-in configuration ---
+        Section "Device"
+                Identifier      "Builtin Default nv Device 0"
+                Driver  "nv"
+        EndSection
+        Section "Screen"
+                Identifier      "Builtin Default nv Screen 0"
+                Device  "Builtin Default nv Device 0"
+        EndSection
+        Section "Device"
+                Identifier      "Builtin Default vesa Device 0"
+                Driver  "vesa"
+        EndSection
+        Section "Screen"
+                Identifier      "Builtin Default vesa Screen 0"
+                Device  "Builtin Default vesa Device 0"
+        EndSection
+        Section "Device"
+                Identifier      "Builtin Default fbdev Device 0"
+                Driver  "fbdev"
+        EndSection
+        Section "Screen"
+                Identifier      "Builtin Default fbdev Screen 0"
+                Device  "Builtin Default fbdev Device 0"
+        EndSection
+        Section "ServerLayout"
+                Identifier      "Builtin Default Layout"
+                Screen  "Builtin Default nv Screen 0"
+                Screen  "Builtin Default vesa Screen 0"
+                Screen  "Builtin Default fbdev Screen 0"
+        EndSection
+(==) --- End of built-in configuration ---
+
+把 Start 和 End 之间的行复制出来，保存到 /etc/X11/xorg.conf，修改
+每个 Section "Screen" 节，在其内的 Device 那行下插入：
+   SubSection "Display"
+      Virtual WIDTH HEIGHT
+   EndSubSection
+
+这里 WIDTH 和 HEIGHT 是期望的虚拟屏幕的大小，比如我的两个显示器：
+$ xrandr
+Screen 0: minimum 320 x 200, current 3200 x 1080, maximum 3200 x 1880
+VGA1 connected 1920x1080+1280+0 520mm x 290mm
+   1920x1080      60.0*+   60.0  
+   1600x1200      60.0  
+   1680x1050      60.0  
+   1400x1050      60.0  
+   1280x1024      75.0     60.0  
+   1440x900       59.9  
+   1280x960       60.0  
+   1152x864       75.0  
+   1024x768       75.0     70.1     60.0  
+   832x624        74.6  
+   800x600        72.2     75.0     60.3     56.2  
+   640x480        75.0     72.8     66.7     59.9  
+   720x400        70.1  
+DVI1 disconnected
+LVDS connected 1280x800+0+0 304mm x 190mm
+   1280x800       60.0*+
+
+我期望是左右并排，所以 WIDTH 是 1280 + 1920 = 3200，HEIGHT 是 max(1080+800)=1080，
+这是两个数值的最小值。
+
+设置好 xorg.conf 后，注销再登录，也就是重启了 Xorg，然后执行命令行：
+$ xrandr --output VGA1 --auto --right-of LVDS
+
+这样两个屏幕就并排了，鼠标移动到第一个屏幕右边界再往右就到了第二个屏幕。
+支持多显示器的窗口管理器负责新窗口放在哪个显示器上，一般是第一个屏幕或者
+鼠标指针所在的屏幕，用鼠标拖动窗口到其它显示器上。
+
