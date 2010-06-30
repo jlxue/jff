@@ -85,7 +85,9 @@ function main() {
                 coord = left + ',' + top;
 
             marks_table.append('<tr><td><a href="javascript:window.scrollTo(' +
-                coord + ')">(' + coord + ')</a></td></tr>');
+                coord + ')">(' + coord + ')</a></td>' +
+                '<td><input type="text" size="20" value="a mark"/></td>' +
+                '<td><a href="#">delete</a></td></tr>');
         });
 
         dialog.find("#markit-btn_save").click(function(e) {
@@ -101,6 +103,14 @@ function main() {
                 alert("This browser isn't supported!");
             }
         });
+
+        $("#markit-marks a[href=#]").live("click", function() {
+            var tr = this.parentNode.parentNode;
+            tr.parentNode.removeChild(tr);
+            return false;
+        });
+
+        $("#markit-marks").sortable({items: 'tr'});
 
         // must be after markit-dialog is created!
         if (markit_script) {

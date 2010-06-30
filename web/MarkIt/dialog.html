@@ -6,7 +6,18 @@
         top: 20px;
         background: #F39814;
         border: 1px solid black;
-        padding: 5px;
+        padding: 5px 5px;
+    }
+
+    #markit-marks {
+        padding: 2px 5px;
+        border-collapse:separate;
+        border-spacing: 0px 10px;
+    }
+
+    #markit-marks tr {
+        background: white;
+        padding: 2px;
     }
 </style>
 <div>
@@ -15,6 +26,7 @@
 </div>
 <button id="markit-btn_mark">标记</button>
 <button id="markit-btn_save">保存</button>
+<button id="markit-btn_comment">评论</button>
 <p>
 <table id="markit-marks">
 </table>
