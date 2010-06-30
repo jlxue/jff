@@ -79,8 +79,12 @@ function on_mark(dialog) {
 }
 
 function on_save(dialog) {
-    var url = location.href;
+    var marks = "url=" + location.href + "\n";
 
+    dialog.find("#markit-marks tr").each(function(i, tr) {
+        var tds = $(tr).children();
+        marks += "mark=" + $(tds[0]).text() + $(tds[1]).children().val() + "\n";
+    });
 }
 
 function initialize() {
