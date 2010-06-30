@@ -58,6 +58,53 @@ function load_script(url, onload) {
     document.getElementsByTagName('body')[0].appendChild(s);
 }
 
+function initialize() {
+    var dialog_html = '##DIALOG_HTML##';
+    dialog_html = dialog_html.replace(/##MARKIT_ROOT##/, MARKIT_ROOT);
+
+    var dialog = $(dialog_html).appendTo('body').draggable();
+
+    dialog.find("#markit-info").text("[Load by " + (load_by_script_tag ? "script tag]" : "XMLHttpRequest]"));
+    dialog.find("#markit-version").text(LOADER_VERSION);
+    if (LOADER_VERSION != LATEST_LOADER_VERSION) {
+        dialog.find("#markit-version2").text("(NEW: v" + LATEST_LOADER_VERSION + ")");
+    }
+
+    dialog.find("#markit-btn_mark").click(function(e) {
+        var marks_table = dialog.find("#markit-marks"),
+            left = $(window).scrollLeft(),
+            top = $(window).scrollTop(),
+            coord = left + ',' + top;
+
+        marks_table.append('<tr><td><a href="javascript:window.scrollTo(' +
+            coord + ')">(' + coord + ')</a></td>' +
+            '<td><input type="text" size="20" value="a mark"/></td>' +
+            '<td><a href="#">delete</a></td></tr>');
+    });
+
+    dialog.find("#markit-btn_save").click(function(e) {
+        var title, url;
+        title = $("title").text();
+        url = location.href;
+
+        if ($.browser.msie) {
+            window.external.addFavorite(url, title);
+        } else if ($.browser.mozilla) {
+            window.sidebar.addPanel(title, url, "");
+        } else {
+            alert("This browser isn't supported!");
+        }
+    });
+
+    $("#markit-marks a[href=#]").live("click", function() {
+        var tr = this.parentNode.parentNode;
+        tr.parentNode.removeChild(tr);
+        return false;
+    });
+
+    $("#markit-marks").sortable({items: 'tr'});
+}
+
 function main() {
     if (! jQuery) {
         return;
@@ -68,49 +115,7 @@ function main() {
     var dialog = $('#markit-dialog');
 
     if (dialog.length == 0) {
-        var dialog_html = '##DIALOG_HTML##';
-        dialog_html = dialog_html.replace(/##MARKIT_ROOT##/, MARKIT_ROOT);
-        dialog = $(dialog_html).appendTo('body').draggable();
-
-        dialog.find("#markit-info").text("[Load by " + (load_by_script_tag ? "script tag]" : "XMLHttpRequest]"));
-        dialog.find("#markit-version").text(LOADER_VERSION);
-        if (LOADER_VERSION != LATEST_LOADER_VERSION) {
-            dialog.find("#markit-version2").text("(NEW: v" + LATEST_LOADER_VERSION + ")");
-        }
-
-        dialog.find("#markit-btn_mark").click(function(e) {
-            var marks_table = dialog.find("#markit-marks"),
-                left = $(window).scrollLeft(),
-                top = $(window).scrollTop(),
-                coord = left + ',' + top;
-
-            marks_table.append('<tr><td><a href="javascript:window.scrollTo(' +
-                coord + ')">(' + coord + ')</a></td>' +
-                '<td><input type="text" size="20" value="a mark"/></td>' +
-                '<td><a href="#">delete</a></td></tr>');
-        });
-
-        dialog.find("#markit-btn_save").click(function(e) {
-            var title, url;
-            title = $("title").text();
-            url = location.href;
-
-            if ($.browser.msie) {
-                window.external.addFavorite(url, title);
-            } else if ($.browser.mozilla) {
-                window.sidebar.addPanel(title, url, "");
-            } else {
-                alert("This browser isn't supported!");
-            }
-        });
-
-        $("#markit-marks a[href=#]").live("click", function() {
-            var tr = this.parentNode.parentNode;
-            tr.parentNode.removeChild(tr);
-            return false;
-        });
-
-        $("#markit-marks").sortable({items: 'tr'});
+        initialize();
 
         // must be after markit-dialog is created!
         if (markit_script) {
