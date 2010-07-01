@@ -42,7 +42,6 @@ sub view {
 
     $c->log->info("response static file: [$path]\n");
 
-    $c->header_add(-charset => "UTF-8");
     if (my $content = $c->send_file($path)) {
         return $content;
     } else {

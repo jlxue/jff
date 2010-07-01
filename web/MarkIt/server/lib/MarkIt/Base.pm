@@ -10,6 +10,8 @@ our $VERSION = '0.01';
 
 sub cgiapp_prerun {
     my ($c) = @_;
+
+    $c->header_add(-charset => "UTF-8");
 }
 
 sub cgiapp_postrun {
