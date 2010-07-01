@@ -8,6 +8,16 @@ use Log::Dispatch::File;
 
 our $VERSION = '0.01';
 
+sub cgiapp_init {
+    my ($c) = @_;
+
+    my $data_source = "dbi:SQLite:dbname=./markit.db";
+    my $username = "";
+    my $password = "";
+    my %attr = ();
+    $c->dbh_config($data_source, $username, $passwd, \%attr);
+}
+
 sub cgiapp_prerun {
     my ($c) = @_;
 
