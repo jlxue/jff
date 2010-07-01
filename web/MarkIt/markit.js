@@ -138,8 +138,7 @@ function initialize() {
 
     $.get(MARKIT_ROOT + "mark/view", {key: MARKIT_KEY, url: location.href},
             function(data, textStatus, xhr) {
-                dialog.offset({left: data[0], top: data[1]});
-
+                // add marks
                 var marks_table = dialog.find("#markit-marks");
 
                 var marks = data[2].split("\n");
@@ -149,6 +148,31 @@ function initialize() {
                         add_mark(marks_table, matches[1], matches[2]);
                     }
                 }
+
+                // restore position
+                var left = data[0], top = data[1];
+                var window_height = $(window).height();
+                var window_width = $(window).width();
+                var dialog_height = dialog.height();
+                var dialog_width = dialog.width();
+
+                //alert("dialog: " + left +  " " + top + " " + dialog_width + " " + dialog_height + "\n" +
+                //      "window: " + window_width + " " + window_height);
+
+                if (left + dialog_width > window_width)
+                    left = window_width - dialog_width;
+                if (left < 0)
+                    left = 0;
+
+                if (top + dialog_height > window_height)
+                    top = window_height - dialog_height;
+                if (top < 0)
+                    top = 0;
+
+                //alert("dialog new: " + left + " " + top);
+
+                dialog.offset({left: left, top: top});
+
             }, "json");
 }
 
