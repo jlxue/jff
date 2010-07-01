@@ -66,16 +66,20 @@ function show_version_info(dialog) {
     }
 }
 
+function add_mark(table, coord, text) {
+    table.append('<tr><td><a href="javascript:window.scrollTo(' +
+        coord + ')">(' + coord + ')</a></td>' +
+        '<td><input type="text" size="20" value="' + text + '"/></td>' +
+        '<td><a href="#">delete</a></td></tr>');
+}
+
 function on_mark(dialog) {
     var marks_table = dialog.find("#markit-marks"),
         left = $(window).scrollLeft(),
         top = $(window).scrollTop(),
         coord = left + ',' + top;
 
-    marks_table.append('<tr><td><a href="javascript:window.scrollTo(' +
-        coord + ')">(' + coord + ')</a></td>' +
-        '<td><input type="text" size="20" value="a mark"/></td>' +
-        '<td><a href="#">delete</a></td></tr>');
+    add_mark(marks_table, coord, "a mark");
 }
 
 function on_save(dialog) {
