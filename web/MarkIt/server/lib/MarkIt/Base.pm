@@ -15,7 +15,7 @@ sub cgiapp_init {
     my $username = "";
     my $password = "";
     my %attr = ();
-    $c->dbh_config($data_source, $username, $passwd, \%attr);
+    $c->dbh_config($data_source, $username, $password, \%attr);
 }
 
 sub cgiapp_prerun {
