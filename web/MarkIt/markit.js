@@ -79,12 +79,33 @@ function on_mark(dialog) {
 }
 
 function on_save(dialog) {
-    var marks = "url=" + location.href + "\n";
+    var args = [];
+    var offset = dialog.offset();
+    args.push("left", offset.left);
+    args.push("top", offset.top);
+    args.push("key", MARKIT_KEY);
+    args.push("url", location.href);
+    args.push("title", $("title").text());
 
     dialog.find("#markit-marks tr").each(function(i, tr) {
         var tds = $(tr).children();
-        marks += "mark=" + $(tds[0]).text() + $(tds[1]).children().val() + "\n";
+        args.push("mark", $(tds[0]).text() + $(tds[1]).children().val());
     });
+
+    var data = encode_request(args);
+    $.post(MARKIT_ROOT + "mark/add", data, function(data, textStatus, xhr) {
+        alert("Success!");
+    });
+}
+
+function encode_request(args) {
+    var data = [];
+
+    for (var i = 0; i < args.length; i += 2) {
+        data[data.length] = encodeURIComponent(args[i]) + "=" + encodeURIComponent(args[i+1]);
+    }
+
+    return data.join("&").replace(/%20/g, "+");
 }
 
 function initialize() {
