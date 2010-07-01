@@ -82,7 +82,7 @@ sub view {
 
     $dbh = $c->dbh;
 
-    $sth = $dbh->prepare("SELECT left, top, title, marks FROM marks WHERE key=? AND url=?");
+    $sth = $dbh->prepare("SELECT left, top, marks FROM marks WHERE key=? AND url=?");
     $sth->bind_param(1, $key, SQL_VARCHAR);
     $sth->bind_param(2, $url, SQL_VARCHAR);
     $rv = $sth->execute();

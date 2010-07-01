@@ -131,6 +131,11 @@ function initialize() {
     });
 
     $("#markit-marks").sortable({items: 'tr'});
+
+    $.get(MARKIT_ROOT + "mark/view", {key: MARKIT_KEY, url: location.href},
+            function(data, textStatus, xhr) {
+                dialog.offset({left: data[0], top: data[1]});
+            }, "json");
 }
 
 function main() {
