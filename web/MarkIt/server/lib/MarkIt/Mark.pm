@@ -78,6 +78,8 @@ sub view {
     my $key = $q->param("key");
     my $url = $q->param("url");
 
+    $c->log->info("view mark: key=[$key], url=[$url]\n");
+
     my ($dbh, $sth, $rv);
 
     $dbh = $c->dbh;

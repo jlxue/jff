@@ -139,6 +139,16 @@ function initialize() {
     $.get(MARKIT_ROOT + "mark/view", {key: MARKIT_KEY, url: location.href},
             function(data, textStatus, xhr) {
                 dialog.offset({left: data[0], top: data[1]});
+
+                var marks_table = dialog.find("#markit-marks");
+
+                var marks = data[2].split("\n");
+                for (var i = 0; i < marks.length; ++i) {
+                    var matches = marks[i].match(/^\s*\((\d+\s*,\s*\d+)\)(.*)$/);
+                    if (matches && matches.length == 3) {
+                        add_mark(marks_table, matches[1], matches[2]);
+                    }
+                }
             }, "json");
 }
 
