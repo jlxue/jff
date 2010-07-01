@@ -91,12 +91,11 @@ sub view {
 
     if ($rv) {
         my $row = $sth->fetch;
-        if ($row) {
-            return to_json($row, {utf8 => 1});
-        }
+        $row = [] if ! $row;
+        return to_json($row, {utf8 => 1});
+    } else {
+        return "[]";
     }
-
-    return "";
 }
 
 1;

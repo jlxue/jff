@@ -138,6 +138,9 @@ function initialize() {
 
     $.get(MARKIT_ROOT + "mark/view", {key: MARKIT_KEY, url: location.href},
             function(data, textStatus, xhr) {
+                if (! data || data.length < 3)
+                    return;
+
                 // add marks
                 var marks_table = dialog.find("#markit-marks");
 
