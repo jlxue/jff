@@ -1,6 +1,7 @@
 package MarkIt::Mark;
 
 use DBI qw(:sql_types);
+use JSON;
 use base 'MarkIt::Base';
 
 our $VERSION = '0.01';
@@ -73,7 +74,25 @@ sub add {
 sub view {
     my ($c) = @_;
 
-    return "hello world";
+    my $q = $c->query;
+    my $key = $q->param("key");
+    my $url = $q->param("url");
+
+    my ($dbh, $sth, $rv);
+
+    $dbh = $c->dbh;
+
+    $sth = $dbh->prepare("SELECT left, top, title, marks FROM marks WHERE key=? AND url=?");
+    $sth->bind_param(1, $key, SQL_VARCHAR);
+    $sth->bind_param(2, $url, SQL_VARCHAR);
+    $rv = $sth->execute();
+
+    if ($rv) {
+        my $row = $sth->fetch;
+        return to_json($row, {utf8 => 1});
+    } else {
+        return "";
+    }
 }
 
 1;
