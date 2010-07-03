@@ -128,7 +128,7 @@ function initialize() {
         on_save(dialog);
     });
 
-    $("#markit-marks a[href=#]").live("click", function() {
+    $("#markit-marks a[href='#']").live("click", function() {
         var tr = this.parentNode.parentNode;
         tr.parentNode.removeChild(tr);
         return false;
