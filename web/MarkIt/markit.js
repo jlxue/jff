@@ -35,54 +35,6 @@ function load_script(url, onload) {
 }
 
 
-function show_version_info(dialog) {
-    dialog.find("#markit-info").text("[Load by " + (load_by_script_tag ? "script tag]" : "XMLHttpRequest]"));
-    dialog.find("#markit-version").text(LOADER_VERSION);
-    if (LOADER_VERSION != LATEST_LOADER_VERSION) {
-        dialog.find("#markit-version2").text("(NEW: v" + LATEST_LOADER_VERSION + ")");
-    }
-}
-
-
-function add_mark(table, coord, text) {
-    table.append('<tr><td><a href="javascript:window.scrollTo(' +
-        coord + ')">(' + coord + ')</a></td>' +
-        '<td><input type="text" size="20" value="' + text + '"/></td>' +
-        '<td><a href="#">delete</a></td></tr>');
-}
-
-
-function on_mark(dialog) {
-    var marks_table = dialog.find("#markit-marks"),
-        left = $(window).scrollLeft(),
-        top = $(window).scrollTop(),
-        coord = left + ',' + top;
-
-    add_mark(marks_table, coord, "a mark");
-}
-
-
-function on_save(dialog) {
-    var args = [];
-    var offset = dialog.offset();
-    args.push("left", offset.left);
-    args.push("top", offset.top);
-    args.push("key", MARKIT_KEY);
-    args.push("url", location.href);
-    args.push("title", $("title").text());
-
-    dialog.find("#markit-marks tr").each(function(i, tr) {
-        var tds = $(tr).children();
-        args.push("mark", $(tds[0]).text() + $(tds[1]).children().val());
-    });
-
-    var data = encode_request(args);
-    $.post(MARKIT_ROOT + "mark/add", data, function(data, textStatus, xhr) {
-        alert("Success!");
-    });
-}
-
-
 function encode_request(args) {
     var data = [];
 
@@ -94,21 +46,110 @@ function encode_request(args) {
 }
 
 
-function initialize() {
+function initialize($) {
+    ////////////////////////   FUNCTIONS  //////////////////////////////
+
+    function show_version_info() {
+        dialog.find("#markit-info").text("[Load by " + (load_by_script_tag ? "script tag]" : "XMLHttpRequest]"));
+        dialog.find("#markit-version").text(LOADER_VERSION);
+        if (LOADER_VERSION != LATEST_LOADER_VERSION) {
+            dialog.find("#markit-version2").text("(NEW: v" + LATEST_LOADER_VERSION + ")");
+        }
+    }
+
+
+    function add_mark(table, coord, text) {
+        table.append('<tr><td><a href="javascript:window.scrollTo(' +
+            coord + ')">(' + coord + ')</a></td>' +
+            '<td><input type="text" size="20" value="' + text + '"/></td>' +
+            '<td><a href="#">delete</a></td></tr>');
+    }
+
+
+    function on_mark() {
+        var marks_table = dialog.find("#markit-marks"),
+            left = $(window).scrollLeft(),
+            top = $(window).scrollTop(),
+            coord = left + ',' + top;
+
+        add_mark(marks_table, coord, "a mark");
+    }
+
+
+    function on_save() {
+        var args = [];
+        var offset = dialog.offset();
+        args.push("left", offset.left);
+        args.push("top", offset.top);
+        args.push("key", MARKIT_KEY);
+        args.push("url", location.href);
+        args.push("title", $("title").text());
+
+        dialog.find("#markit-marks tr").each(function(i, tr) {
+            var tds = $(tr).children();
+            args.push("mark", $(tds[0]).text() + $(tds[1]).children().val());
+        });
+
+        var data = encode_request(args);
+        $.post(MARKIT_ROOT + "mark/add", data, function(data, textStatus, xhr) {
+            alert("Success!");
+        });
+    }
+
+
+    function restore_marks(data, textStatus, xhr) {
+        if (! data || data.length < 3)
+            return;
+
+        // add marks
+        var marks_table = dialog.find("#markit-marks");
+
+        var marks = data[2].split("\n");
+        for (var i = 0; i < marks.length; ++i) {
+            var matches = marks[i].match(/^\s*\((\d+\s*,\s*\d+)\)(.*)$/);
+            if (matches && matches.length == 3) {
+                add_mark(marks_table, matches[1], matches[2]);
+            }
+        }
+
+        // restore position
+        var left = data[0], top = data[1];
+        var window_height = $(window).height();
+        var window_width = $(window).width();
+        var dialog_height = dialog.height();
+        var dialog_width = dialog.width();
+
+        //alert("dialog: " + left +  " " + top + " " + dialog_width + " " + dialog_height + "\n" +
+        //      "window: " + window_width + " " + window_height);
+
+        if (left + dialog_width > window_width)
+            left = window_width - dialog_width;
+        if (left < 0)
+            left = 0;
+
+        if (top + dialog_height > window_height)
+            top = window_height - dialog_height;
+        if (top < 0)
+            top = 0;
+
+        //alert("dialog new: " + left + " " + top);
+
+        dialog.offset({left: left, top: top});
+    }
+
+
+    ////////////////////////   CODE   //////////////////////////////////
+
     var dialog_html = '##DIALOG_HTML##';
     dialog_html = dialog_html.replace(/##MARKIT_ROOT##/, MARKIT_ROOT);
 
     var dialog = $(dialog_html).appendTo('body').draggable();
 
-    show_version_info(dialog);
+    show_version_info();
 
-    dialog.find("#markit-btn_mark").click(function(e) {
-        on_mark(dialog);
-    });
+    dialog.find("#markit-btn_mark").click(on_mark);
 
-    dialog.find("#markit-btn_save").click(function(e) {
-        on_save(dialog);
-    });
+    dialog.find("#markit-btn_save").click(on_save);
 
     $("#markit-marks a[href='#']").live("click", function() {
         var tr = this.parentNode.parentNode;
@@ -119,46 +160,7 @@ function initialize() {
     $("#markit-marks").sortable({items: 'tr'});
 
     $.get(MARKIT_ROOT + "mark/view", {key: MARKIT_KEY, url: location.href},
-            function(data, textStatus, xhr) {
-                if (! data || data.length < 3)
-                    return;
-
-                // add marks
-                var marks_table = dialog.find("#markit-marks");
-
-                var marks = data[2].split("\n");
-                for (var i = 0; i < marks.length; ++i) {
-                    var matches = marks[i].match(/^\s*\((\d+\s*,\s*\d+)\)(.*)$/);
-                    if (matches && matches.length == 3) {
-                        add_mark(marks_table, matches[1], matches[2]);
-                    }
-                }
-
-                // restore position
-                var left = data[0], top = data[1];
-                var window_height = $(window).height();
-                var window_width = $(window).width();
-                var dialog_height = dialog.height();
-                var dialog_width = dialog.width();
-
-                //alert("dialog: " + left +  " " + top + " " + dialog_width + " " + dialog_height + "\n" +
-                //      "window: " + window_width + " " + window_height);
-
-                if (left + dialog_width > window_width)
-                    left = window_width - dialog_width;
-                if (left < 0)
-                    left = 0;
-
-                if (top + dialog_height > window_height)
-                    top = window_height - dialog_height;
-                if (top < 0)
-                    top = 0;
-
-                //alert("dialog new: " + left + " " + top);
-
-                dialog.offset({left: left, top: top});
-
-            }, "json");
+            restore_marks, "json");
 }
 
 
@@ -168,11 +170,10 @@ function main() {
     }
 
     var $ = jQuery;
-
     var dialog = $('#markit-dialog');
 
     if (dialog.length == 0) {
-        initialize();
+        initialize($);
 
         // must be after markit-dialog is created!
         if (markit_script) {
