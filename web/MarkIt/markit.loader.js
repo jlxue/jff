@@ -1,24 +1,31 @@
 (function() {
 
+    //////////////////////    FUNCTIONS      ///////////////////////////
+
     function elem(id) {
         return g_document.getElementById(id);
     }
+
 
     function tags(name) {
         return g_document.getElementsByTagName(name);
     }
 
+
     function attr(node, name, value) {
         return value ? (node.setAttribute(name, value), node) : node.getAttribute(name);
     }
+
 
     function indexOf(s, s2) {
         return s.indexOf(s2);
     }
 
+
     function replace(s, pattern, s2) {
         return s.replace(pattern, s2);
     }
+
 
     function on_markit_js_loaded() {
         script = xhr.responseText;
@@ -38,6 +45,7 @@
         }
     }
 
+
     function load_markit_js_by_script_tag() {
         script = g_document.createElement('script');
         attr(attr(attr(attr(attr(attr(script,
@@ -55,6 +63,9 @@
 
         tags('body')[0].appendChild(script);
     }
+
+
+    //////////////////////     CODE          ///////////////////////////
 
     var g_document = document,      /* help YUI compressor */
         g_window = window,
@@ -78,7 +89,6 @@
         return;
     }
 
-
     if (elem(id)) {
         alert(msg);
         return;
@@ -92,6 +102,7 @@
             }
         }
     }
+
 
     if (! (indexOf(location.href, file_protocol) != 0 && markit_url_is_local)) {
         try {

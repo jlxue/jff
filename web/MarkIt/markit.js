@@ -6,32 +6,8 @@ if (document.getElementById('markit-dialog')) {
     return;
 }
 
-var MARKIT_ROOT, MARKIT_KEY, JQUERY_URL, JQUERY_UI_URL, CKEDITOR_URL,
-    LATEST_LOADER_VERSION, LOADER_VERSION,
-    markit_script, load_by_script_tag;
 
-LATEST_LOADER_VERSION = ##LOADER_VERSION##;
-markit_script = document.getElementById('markit-script');
-
-if (markit_script) {    // by <script src=...>
-    load_by_script_tag = true;
-
-    MARKIT_ROOT = markit_script.getAttribute('r');
-    MARKIT_KEY = markit_script.getAttribute('k');
-    LOADER_VERSION = markit_script.getAttribute('v');
-} else {                // by XMLHttpRequest
-    load_by_script_tag = false;
-
-    MARKIT_ROOT = '#r#';
-    MARKIT_KEY = '#k#';
-    LOADER_VERSION = '#v#';
-}
-
-JQUERY_URL = MARKIT_ROOT + "js/jquery-1.4.2.min.js";
-JQUERY_UI_URL = MARKIT_ROOT + "js/jquery-ui-1.8.2.custom.min.js";
-CKEDITOR_URL = MARKIT_ROOT + "ckeditor/ckeditor.js";
-
-
+////////////////////////   FUNCTIONS    ////////////////////////////////
 function load_script(url, onload) {
     var s = document.createElement('script');
     s.setAttribute('src', url);
@@ -58,6 +34,7 @@ function load_script(url, onload) {
     document.getElementsByTagName('body')[0].appendChild(s);
 }
 
+
 function show_version_info(dialog) {
     dialog.find("#markit-info").text("[Load by " + (load_by_script_tag ? "script tag]" : "XMLHttpRequest]"));
     dialog.find("#markit-version").text(LOADER_VERSION);
@@ -66,12 +43,14 @@ function show_version_info(dialog) {
     }
 }
 
+
 function add_mark(table, coord, text) {
     table.append('<tr><td><a href="javascript:window.scrollTo(' +
         coord + ')">(' + coord + ')</a></td>' +
         '<td><input type="text" size="20" value="' + text + '"/></td>' +
         '<td><a href="#">delete</a></td></tr>');
 }
+
 
 function on_mark(dialog) {
     var marks_table = dialog.find("#markit-marks"),
@@ -81,6 +60,7 @@ function on_mark(dialog) {
 
     add_mark(marks_table, coord, "a mark");
 }
+
 
 function on_save(dialog) {
     var args = [];
@@ -102,6 +82,7 @@ function on_save(dialog) {
     });
 }
 
+
 function encode_request(args) {
     var data = [];
 
@@ -111,6 +92,7 @@ function encode_request(args) {
 
     return data.join("&").replace(/%20/g, "+");
 }
+
 
 function initialize() {
     var dialog_html = '##DIALOG_HTML##';
@@ -179,6 +161,7 @@ function initialize() {
             }, "json");
 }
 
+
 function main() {
     if (! jQuery) {
         return;
@@ -201,6 +184,35 @@ function main() {
         dialog.toggle();
     }
 }
+
+
+////////////////////////     CODE       ////////////////////////////////
+
+var MARKIT_ROOT, MARKIT_KEY, JQUERY_URL, JQUERY_UI_URL, CKEDITOR_URL,
+    LATEST_LOADER_VERSION, LOADER_VERSION,
+    markit_script, load_by_script_tag;
+
+LATEST_LOADER_VERSION = ##LOADER_VERSION##;
+markit_script = document.getElementById('markit-script');
+
+if (markit_script) {    // by <script src=...>
+    load_by_script_tag = true;
+
+    MARKIT_ROOT = markit_script.getAttribute('r');
+    MARKIT_KEY = markit_script.getAttribute('k');
+    LOADER_VERSION = markit_script.getAttribute('v');
+} else {                // by XMLHttpRequest
+    load_by_script_tag = false;
+
+    MARKIT_ROOT = '#r#';
+    MARKIT_KEY = '#k#';
+    LOADER_VERSION = '#v#';
+}
+
+JQUERY_URL = MARKIT_ROOT + "js/jquery-1.4.2.min.js";
+JQUERY_UI_URL = MARKIT_ROOT + "js/jquery-ui-1.8.2.custom.min.js";
+CKEDITOR_URL = MARKIT_ROOT + "ckeditor/ckeditor.js";
+
 
 if (typeof(jQuery) == 'undefined') {
     load_script(JQUERY_URL,
