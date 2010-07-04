@@ -1,3 +1,6 @@
 http://lifesinger.org/blog/2009/03/how-to-pass-params-to-javascript-file/
 
 http://noscript.net/abe/
+
+frame 的处理，用 top 引用窗口？
+
