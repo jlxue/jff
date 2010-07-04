@@ -16,6 +16,8 @@ sub setup {
 sub cgiapp_prerun {
     my ($c) = @_;
 
+    $c->SUPER::cgiapp_prerun(@_);
+
     $c->header_add(-expires         => "-1",
                    -Cache_Control   => "must-revalidate, no-cache, no-store",
                    -Pragma          => "no-cache",
