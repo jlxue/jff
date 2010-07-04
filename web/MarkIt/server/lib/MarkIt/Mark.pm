@@ -75,9 +75,9 @@ sub add {
     }
 
     if ($rv) {
-        return "ok";
+        return '"ok"';
     } else {
-        return "bad";
+        return '"bad"';
     }
 }
 
