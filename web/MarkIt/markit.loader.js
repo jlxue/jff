@@ -122,6 +122,7 @@
             }
 
             if (isXDomainRequest) {
+                xhr.timeout = 10000;
                 xhr.onload = on_markit_js_loaded;
                 xhr.onerror = xhr.ontimeout = load_markit_js_by_script_tag;
             }

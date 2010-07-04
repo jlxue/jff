@@ -46,6 +46,62 @@ function encode_request(args) {
 }
 
 
+function XDomainRequest_request(method, url, data, success) {
+    if (data && typeof(data) !== "string") {
+        data = jQuery.param(data);
+    }
+
+    var xdr = new XDomainRequest();
+
+    xdr.onerror = function() {
+        xdr.onerror = xdr.ontimeout = xdr.onload = null;
+        alert("error happened!");
+    };
+
+    xdr.ontimeout = function() {
+        xdr.onerror = xdr.ontimeout = xdr.onload = null;
+        alert("request timeout!");
+    };
+
+    xdr.timeout = 10000;
+    xdr.onload = function() {
+        xdr.onerror = xdr.ontimeout = xdr.onload = null;
+        success(xdr.responseText);
+    };
+
+    xdr.open(method, url);
+    xdr.send(data);
+}
+
+
+function ajax_post(url, data, success) {
+    if (window.XDomainRequest) {
+        try {
+            XDomainRequest_request("POST", url, data, success);
+            return;
+        } catch (e) {
+        }
+    }
+
+    $.post(url, data, success);
+}
+
+
+function ajax_getJSON(url, data, success) {
+    if (window.XDomainRequest) {
+        try {
+            XDomainRequest_request("GET", url, data, function(data) {
+                    success(EVAL(data));
+                });
+            return;
+        } catch (e) {
+        }
+    }
+
+    $.getJSON(url, data, success);
+}
+
+
 function initialize($) {
     ////////////////////////   FUNCTIONS  //////////////////////////////
 
@@ -91,13 +147,13 @@ function initialize($) {
         });
 
         var data = encode_request(args);
-        $.post(MARKIT_ROOT + "mark/add", data, function(data, textStatus, xhr) {
+        ajax_post(MARKIT_ROOT + "mark/add", data, function(data) {
             alert("Success!");
         });
     }
 
 
-    function restore_marks(data, textStatus, xhr) {
+    function restore_marks(data) {
         if (! data || data.length < 3)
             return;
 
@@ -159,8 +215,8 @@ function initialize($) {
 
     $("#markit-marks").sortable({items: 'tr'});
 
-    $.get(MARKIT_ROOT + "mark/view", {key: MARKIT_KEY, url: location.href},
-            restore_marks, "json");
+    ajax_getJSON(MARKIT_ROOT + "mark/view", {key: MARKIT_KEY, url: location.href},
+            restore_marks);
 }
 
 

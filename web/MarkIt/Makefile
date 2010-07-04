@@ -52,6 +52,7 @@ $(BUILD_DIR)/index.html: $(BUILD_DIR)/markit.loader.url.js index.html
 ################ markit js #############################################
 $(BUILD_DIR)/markit.min.js: $(BUILD_DIR)/markit.js
 	$(call compress_js, $@, $^)
+	perl -i -pe 's/\bEVAL\b/eval/g' $@
 
 $(BUILD_DIR)/markit.js: dialog.html markit.js
 	perl merge.pl $^ > $@
