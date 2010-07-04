@@ -79,38 +79,37 @@ function XDomainRequest_request(method, url, data, success) {
 }
 
 
-function ajax_post(url, data, success) {
-    if (window.XDomainRequest) {
-        try {
-            XDomainRequest_request("POST", url, data, success);
-            return;
-        } catch (e) {
-            alert(e);
-        }
-    }
-
-    $.post(url, data, success);
-}
-
-
-function ajax_getJSON(url, data, success) {
-    if (window.XDomainRequest) {
-        try {
-            XDomainRequest_request("GET", url, data, function(data) {
-                    success(EVAL(data));
-                });
-            return;
-        } catch (e) {
-            alert(e);
-        }
-    }
-
-    $.getJSON(url, data, success);
-}
-
-
 function initialize($) {
     ////////////////////////   FUNCTIONS  //////////////////////////////
+    function ajax_post(url, data, success) {
+        if (window.XDomainRequest) {
+            try {
+                XDomainRequest_request("POST", url, data, success);
+                return;
+            } catch (e) {
+                alert(e);
+            }
+        }
+
+        $.post(url, data, success);
+    }
+
+
+    function ajax_getJSON(url, data, success) {
+        if (window.XDomainRequest) {
+            try {
+                XDomainRequest_request("GET", url, data, function(data) {
+                        success(EVAL(data));
+                    });
+                return;
+            } catch (e) {
+                alert(e);
+            }
+        }
+
+        $.getJSON(url, data, success);
+    }
+
 
     function show_version_info() {
         dialog.find("#markit-info").text("[Load by " + (load_by_script_tag ? "script tag]" : "XMLHttpRequest]"));
