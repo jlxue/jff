@@ -51,6 +51,11 @@ function XDomainRequest_request(method, url, data, success) {
         data = jQuery.param(data);
     }
 
+    if (method === "GET" && data && data.length > 0) {
+        url = url + "?" + data;
+        data = "";
+    }
+
     var xdr = new XDomainRequest();
 
     xdr.onerror = function() {
@@ -80,6 +85,7 @@ function ajax_post(url, data, success) {
             XDomainRequest_request("POST", url, data, success);
             return;
         } catch (e) {
+            alert(e);
         }
     }
 
@@ -95,6 +101,7 @@ function ajax_getJSON(url, data, success) {
                 });
             return;
         } catch (e) {
+            alert(e);
         }
     }
 

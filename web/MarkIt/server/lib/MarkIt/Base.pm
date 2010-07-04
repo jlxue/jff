@@ -46,6 +46,7 @@ sub cgiapp_prerun {
 
     if (exists $ENV{"HTTP_ORIGIN"}) {
         $c->header_add('-Access_Control_Allow_Origin' => '*');
+        #$c->header_add('-XDomainRequestAllowed' => 1);
         $hasAccessControl = 1;
     }
 
