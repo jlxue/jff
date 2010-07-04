@@ -8,6 +8,8 @@ if (document.getElementById('markit-dialog')) {
 
 
 ////////////////////////   FUNCTIONS    ////////////////////////////////
+var from_json = JSON ? JSON.parse : EVAL;
+
 function load_script(url, onload) {
     var s = document.createElement('script');
     s.setAttribute('src', url);
@@ -99,7 +101,7 @@ function initialize($) {
         if (window.XDomainRequest) {
             try {
                 XDomainRequest_request("GET", url, data, function(data) {
-                        success(EVAL(data));
+                        success(from_json(data));
                     });
                 return;
             } catch (e) {
