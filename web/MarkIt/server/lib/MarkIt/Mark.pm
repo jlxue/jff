@@ -20,8 +20,7 @@ sub cgiapp_prerun {
 
     $c->header_add(-expires         => "-1",
                    -Cache_Control   => "must-revalidate, no-cache, no-store",
-                   -Pragma          => "no-cache",
-                   -type            => "application/json");
+                   -Pragma          => "no-cache");
 }
 
 sub add {
