@@ -13,6 +13,14 @@ sub setup {
     $c->run_modes([qw/add view/]);
 }
 
+sub cgiapp_prerun {
+    my ($c) = @_;
+
+    $c->header_add(-expires         => "-1",
+                   -Cache_Control   => "must-revalidate, no-cache, no-store",
+                   -Pragma          => "no-cache");
+}
+
 sub add {
     my ($c) = @_;
 
