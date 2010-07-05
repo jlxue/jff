@@ -1,8 +1,11 @@
 (function() {
 
 
+var g_window = window.top,
+    g_document = g_window.document;
+
 // avoid evaluating this script twice in same window.
-if (document.getElementById('markit-dialog')) {
+if (g_document.getElementById('markit-dialog')) {
     return;
 }
 
@@ -11,7 +14,7 @@ if (document.getElementById('markit-dialog')) {
 var from_json = JSON ? JSON.parse : EVAL;
 
 function load_script(url, onload) {
-    var s = document.createElement('script');
+    var s = g_document.createElement('script');
     s.setAttribute('src', url);
     s.setAttribute('charset', 'UTF-8');
 
@@ -33,7 +36,7 @@ function load_script(url, onload) {
         }
     }
 
-    document.getElementsByTagName('body')[0].appendChild(s);
+    g_document.getElementsByTagName('body')[0].appendChild(s);
 }
 
 
@@ -84,7 +87,7 @@ function XDomainRequest_request(method, url, data, success) {
 function initialize($) {
     ////////////////////////   FUNCTIONS  //////////////////////////////
     function ajax_post(url, data, success) {
-        if (window.XDomainRequest) {
+        if (g_window.XDomainRequest) {
             try {
                 XDomainRequest_request("POST", url, data, success);
                 return;
@@ -98,7 +101,7 @@ function initialize($) {
 
 
     function ajax_getJSON(url, data, success) {
-        if (window.XDomainRequest) {
+        if (g_window.XDomainRequest) {
             try {
                 XDomainRequest_request("GET", url, data, function(data) {
                         success(from_json(data));
@@ -123,7 +126,7 @@ function initialize($) {
 
 
     function add_mark(table, coord, text) {
-        table.append('<tr><td><a href="javascript:window.scrollTo(' +
+        table.append('<tr><td><a href="javascript:top.scrollTo(' +
             coord + ')">(' + coord + ')</a></td>' +
             '<td><input type="text" size="20" value="' + text + '"/></td>' +
             '<td><a href="#">delete</a></td></tr>');
@@ -132,8 +135,8 @@ function initialize($) {
 
     function on_mark() {
         var marks_table = dialog.find("#markit-marks"),
-            left = $(window).scrollLeft(),
-            top = $(window).scrollTop(),
+            left = $(g_window).scrollLeft(),
+            top = $(g_window).scrollTop(),
             coord = left + ',' + top;
 
         add_mark(marks_table, coord, "a mark");
@@ -178,13 +181,13 @@ function initialize($) {
 
         // restore position
         var left = data[0], top = data[1];
-        var window_height = $(window).height();
-        var window_width = $(window).width();
+        var window_height = $(g_window).height();
+        var window_width = $(g_window).width();
         var dialog_height = dialog.height();
         var dialog_width = dialog.width();
 
         //alert("dialog: " + left +  " " + top + " " + dialog_width + " " + dialog_height + "\n" +
-        //      "window: " + window_width + " " + window_height);
+        //      "top: " + window_width + " " + window_height);
 
         if (left + dialog_width > window_width)
             left = window_width - dialog_width;
@@ -258,7 +261,7 @@ var MARKIT_ROOT, MARKIT_KEY, JQUERY_URL, JQUERY_UI_URL, CKEDITOR_URL,
     markit_script, load_by_script_tag;
 
 LATEST_LOADER_VERSION = ##LOADER_VERSION##;
-markit_script = document.getElementById('markit-script');
+markit_script = g_document.getElementById('markit-script');
 
 if (markit_script) {    // by <script src=...>
     load_by_script_tag = true;

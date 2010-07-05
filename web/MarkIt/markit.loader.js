@@ -67,8 +67,8 @@
 
     //////////////////////     CODE          ///////////////////////////
 
-    var g_document = document,      /* help YUI compressor */
-        g_window = window,
+    var g_window = window.top,              /* help YUI compressor */
+        g_document = g_window.document,
         dialog = elem('markit-dialog'),
         id = 'markit-script',
         msg = 'Loading MarkIt dialog!',
