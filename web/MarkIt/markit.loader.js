@@ -115,7 +115,7 @@
                 isXDomainRequest = 1;
             } else if (g_window.XMLHttpRequest && (! markit_url_is_local || ! g_window.ActiveXObject)) {
                 // XMLHttpRequest in IE7 can't request local files, so we
-                // we use the ActiveXObject when it is available.
+                // use the ActiveXObject when it is available.
                 xhr = new XMLHttpRequest();     // Firefox, Opera, Safari
             } else {
                 xhr = new ActiveXObject('Microsoft.XMLHTTP');   // IE 5.5+

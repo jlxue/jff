@@ -1,7 +1,7 @@
 (function() {
 
 
-// avoid evaluate this script twice in same window.
+// avoid evaluating this script twice in same window.
 if (document.getElementById('markit-dialog')) {
     return;
 }
@@ -279,7 +279,7 @@ JQUERY_UI_URL = MARKIT_ROOT + "js/jquery-ui-1.8.2.custom.min.js";
 CKEDITOR_URL = MARKIT_ROOT + "ckeditor/ckeditor.js";
 
 
-if (typeof(jQuery) == 'undefined') {
+if (typeof(jQuery) === 'undefined') {
     load_script(JQUERY_URL,
         function() {
             jQuery.noConflict();
