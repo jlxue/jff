@@ -86,6 +86,27 @@ $(function() {
 
     <li>与 Firefox 的 NoScript 扩展冲突，请禁用 NoScript，或者关闭 NoScript 配置中的 ABE 并允许此网站以及所访问网站的 JavaScript 脚本执行；</li>
 
+    <!--
+    把 markit.min.js 放在本地用 file:// 协议访问时，Firefox 会报告 Security
+    Error，无法加载 markit.min.js，请参考:
+    http://stackoverflow.com/questions/192080/firefox-links-to-local-or-network-pages-do-not-work
+
+    This could be turned off in firefox:
+
+        * type "about:config" in the address bar and accept "i'll be careful"
+        * find "security.checkloaduri" in older versions or "security.fileuri.strict_origin_policy" in newer versions of firefox and change the value to "false"
+        * restart firefox
+
+    That should do it for you. You have more information here:
+
+        * http://kb.mozillazine.org/Security.fileuri.strict_origin_policy
+        * http://kb.mozillazine.org/Security.fileuri.origin_policy
+
+
+    if you are using the NoScript add-on, check the Advanced \ Trusted \
+    Allow local links option.
+    -->
+
 </ul>
 </p>
 

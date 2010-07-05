@@ -1,7 +1,7 @@
 .PHONY: all prepare release deploy
 
 VERSION		:= 1.0
-LOADER_VERSION	:= 1
+LOADER_VERSION	:= 2
 BUILD_DIR	:= build
 DEPLOY_DEST_DIR ?= server/t/www
 USE_YUI_COMPRESSOR	?= true
