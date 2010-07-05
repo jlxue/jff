@@ -1,0 +1,9 @@
+* select text, select dom node
+* set tags for marks?
+* comment
+* web page to manage marks
+* enhance Makefile to pack server.pl for easy distribution
+* fix bug in multi frames web page
+* markit dialog can't show on some web page
+* how to register a user?
+* set full style for dialog
