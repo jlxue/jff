@@ -1,6 +1,6 @@
 package MarkIt::Mark;
 
-use DBI qw(:sql_types);
+use DBI 1.40 qw(:sql_types);    # 1.40 introduces $if_active=3 in $dbh->prepare_cached()
 use JSON;
 use base 'MarkIt::Base';
 
@@ -27,12 +27,16 @@ sub add {
     my ($c) = @_;
 
     my $q = $c->query;
-    my $left = $q->param("left");
-    my $top = $q->param("top");
     my $key = $q->param("key");
     my $url = $q->param("url");
     my $title = $q->param("title");
     my @marks = $q->param("mark");
+    my $tags = $q->param("tags");
+    my $left = $q->param("left");
+    my $top = $q->param("top");
+
+    trim($key, $url, $title, @marks, $tags, $left, $top);
+
     my $marks = join("\n", @marks);
 
     $c->log->info("add mark: ($left, $top), key=[$key], url=[$url], title=[$title]\n");
@@ -43,7 +47,7 @@ sub add {
     $dbh = $c->dbh;
     $dbh->begin_work;
 
-    $sth = $dbh->prepare("INSERT INTO marks VALUES (?, ?, ?, ?, ?, ?)");
+    $sth = $dbh->prepare_cached("INSERT INTO marks VALUES (?, ?, ?, ?, ?, ?)", 3);
     $sth->bind_param(1, $left, SQL_INTEGER);
     $sth->bind_param(2, $top, SQL_INTEGER);
     $sth->bind_param(3, $key, SQL_VARCHAR);
@@ -56,7 +60,7 @@ sub add {
         $c->log->info("add mark: insert successfully!\n");
         $dbh->commit;
     } else {
-        $sth = $dbh->prepare("UPDATE OR FAIL marks SET left=?, top=?, title=?, marks=? WHERE key=? AND url=?");
+        $sth = $dbh->prepare_cached("UPDATE OR FAIL marks SET left=?, top=?, title=?, marks=? WHERE key=? AND url=?", 3);
         $sth->bind_param(1, $left, SQL_INTEGER);
         $sth->bind_param(2, $top, SQL_INTEGER);
         $sth->bind_param(3, $title, SQL_VARCHAR);
@@ -88,13 +92,15 @@ sub view {
     my $key = $q->param("key");
     my $url = $q->param("url");
 
+    trim($key, $url);
+
     $c->log->info("view mark: key=[$key], url=[$url]\n");
 
     my ($dbh, $sth, $rv);
 
     $dbh = $c->dbh;
 
-    $sth = $dbh->prepare("SELECT left, top, marks FROM marks WHERE key=? AND url=?");
+    $sth = $dbh->prepare_cached("SELECT left, top, marks FROM marks WHERE key=? AND url=?", 3);
     $sth->bind_param(1, $key, SQL_VARCHAR);
     $sth->bind_param(2, $url, SQL_VARCHAR);
     $rv = $sth->execute();
@@ -105,6 +111,12 @@ sub view {
         return to_json($row, {utf8 => 1});
     } else {
         return "[]";
+    }
+}
+
+sub trim {
+    for (@_) {
+        s/^\s+|\s+$//g if defined;
     }
 }
 
