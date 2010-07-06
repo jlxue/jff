@@ -140,6 +140,8 @@ function initialize($) {
             coord = left + ',' + top;
 
         add_mark(marks_table, coord, "a mark");
+
+        return false;
     }
 
 
@@ -161,6 +163,8 @@ function initialize($) {
         ajax_post(MARKIT_ROOT + "mark/add", data, function(data) {
             alert("Success!");
         });
+
+        return false;
     }
 
 
