@@ -8,3 +8,5 @@
 ^_build/
 .svn
 .tmp
+^markit\.db$
+\.bak$

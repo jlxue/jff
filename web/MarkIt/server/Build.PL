@@ -7,8 +7,8 @@ my $builder = Module::Build->new(
     module_name         => 'MarkIt',
     dist_abstract       => 'Abstract goes here.',
     dist_author         => 'Liu Yubao <Yubao.Liu@gmail.com>',
-    license             => 'GPL v3',
-    dist_version        => '0.01',
+    license             => 'gpl3',
+    dist_version        => '1.0',
     tmpl_files          => eval {
         my %tmpls; File::Find::find(
             {
@@ -29,6 +29,7 @@ my $builder = Module::Build->new(
     requires => {
         'Titanium'                      => 0,
         'HTML::Template'                => 0,
+        'CGI::Application::Server'      => 0,
     },
     add_to_cleanup      => [ 'MarkIt-*' ],
     create_makefile_pl  => 'traditional',

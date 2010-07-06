@@ -1,0 +1,34 @@
+---
+name: MarkIt
+version: 1.0
+author:
+  - 'Liu Yubao <Yubao.Liu@gmail.com>'
+abstract: Abstract goes here.
+license: gpl3
+resources:
+  license: http://www.gnu.org/licenses/gpl-3.0.txt
+build_requires:
+  Test::More: 0
+  Test::WWW::Mechanize::CGIApp: 0
+requires:
+  CGI::Application::Server: 0
+  HTML::Template: 0
+  Titanium: 0
+configure_requires:
+  Module::Build: 0.340201
+provides:
+  MarkIt:
+    file: lib/MarkIt.pm
+  MarkIt::Base:
+    file: lib/MarkIt/Base.pm
+    version: 0.01
+  MarkIt::Mark:
+    file: lib/MarkIt/Mark.pm
+    version: 0.01
+  MarkIt::StaticFile:
+    file: lib/MarkIt/StaticFile.pm
+    version: 0.01
+generated_by: Module::Build version 0.340201
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
