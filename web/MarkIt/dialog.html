@@ -20,16 +20,26 @@
         background: white;
         padding: 2px;
     }
+
 </style>
 <div>
-    <span id="markit-info"></span>
-    <a href="##MARKIT_ROOT##" target="_blank">MarkIt v<span id="markit-version"></span><span id="markit-version2"></span></a>
+<span id="markit-info"></span>
+<a href="##MARKIT_ROOT##" target="_blank">MarkIt v<span id="markit-version"></span><span id="markit-version2"></span></a>
 </div>
+
+<div>
 <button id="markit-btn_mark">标记</button>
 <button id="markit-btn_save">保存</button>
 <button id="markit-btn_comment">评论</button>
-<p>
+</div>
+
+<div>
+<label for="markit-tags">Tags: </label><input type="text" id="markit-tags" size="30" value="tag1 tag2"/>
+</div>
+
+<div>
 <table id="markit-marks">
 </table>
-</p>
+</div>
+
 </div>
