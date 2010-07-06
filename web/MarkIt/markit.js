@@ -153,6 +153,7 @@ function initialize($) {
         args.push("key", MARKIT_KEY);
         args.push("url", location.href);
         args.push("title", $("title").text());
+        args.push("tags", $("#markit-tags").val());
 
         dialog.find("#markit-marks tr").each(function(i, tr) {
             var tds = $(tr).children();
@@ -169,13 +170,16 @@ function initialize($) {
 
 
     function restore_marks(data) {
-        if (! data || data.length < 3)
+        if (! data || ! data.hasOwnProperty("tags"))
             return;
+
+        // restore tags
+        $("#markit-tags").val(data.tags);
 
         // add marks
         var marks_table = dialog.find("#markit-marks");
 
-        var marks = data[2].split("\n");
+        var marks = data.marks.split("\n");
         for (var i = 0; i < marks.length; ++i) {
             var matches = marks[i].match(/^\s*\((\d+\s*,\s*\d+)\)(.*)$/);
             if (matches && matches.length == 3) {
@@ -184,7 +188,7 @@ function initialize($) {
         }
 
         // restore position
-        var left = data[0], top = data[1];
+        var left = data.left, top = data.top;
         var window_height = $(g_window).height();
         var window_width = $(g_window).width();
         var dialog_height = dialog.height();

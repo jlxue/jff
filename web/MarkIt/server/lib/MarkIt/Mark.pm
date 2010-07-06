@@ -39,6 +39,7 @@ sub add {
 
     my $marks = join("\n", @marks);
 
+    $c->log->info("add mark: tags=[$tags]\n");
     $c->log->info("add mark: ($left, $top), key=[$key], url=[$url], title=[$title]\n");
     $c->log->info("          marks:\n$marks\n");
 
@@ -47,26 +48,28 @@ sub add {
     $dbh = $c->dbh;
     $dbh->begin_work;
 
-    $sth = $dbh->prepare_cached("INSERT INTO marks VALUES (?, ?, ?, ?, ?, ?)", 3);
-    $sth->bind_param(1, $left, SQL_INTEGER);
-    $sth->bind_param(2, $top, SQL_INTEGER);
-    $sth->bind_param(3, $key, SQL_VARCHAR);
-    $sth->bind_param(4, $url, SQL_VARCHAR);
-    $sth->bind_param(5, $title, SQL_VARCHAR);
-    $sth->bind_param(6, $marks, SQL_VARCHAR);
+    $sth = $dbh->prepare_cached("INSERT INTO marks VALUES (?, ?, ?, ?, ?, ?, ?)", {}, 3);
+    $sth->bind_param(1, $key, SQL_VARCHAR);
+    $sth->bind_param(2, $url, SQL_VARCHAR);
+    $sth->bind_param(3, $title, SQL_VARCHAR);
+    $sth->bind_param(4, $marks, SQL_VARCHAR);
+    $sth->bind_param(5, $tags, SQL_VARCHAR);
+    $sth->bind_param(6, $left, SQL_INTEGER);
+    $sth->bind_param(7, $top, SQL_INTEGER);
     $rv = $sth->execute();
 
     if ($rv) {
         $c->log->info("add mark: insert successfully!\n");
         $dbh->commit;
     } else {
-        $sth = $dbh->prepare_cached("UPDATE OR FAIL marks SET left=?, top=?, title=?, marks=? WHERE key=? AND url=?", 3);
+        $sth = $dbh->prepare_cached("UPDATE OR FAIL marks SET left=?, top=?, title=?, marks=?, tags=? WHERE key=? AND url=?", {}, 3);
         $sth->bind_param(1, $left, SQL_INTEGER);
         $sth->bind_param(2, $top, SQL_INTEGER);
         $sth->bind_param(3, $title, SQL_VARCHAR);
         $sth->bind_param(4, $marks, SQL_VARCHAR);
-        $sth->bind_param(5, $key, SQL_VARCHAR);
-        $sth->bind_param(6, $url, SQL_VARCHAR);
+        $sth->bind_param(5, $tags, SQL_VARCHAR);
+        $sth->bind_param(6, $key, SQL_VARCHAR);
+        $sth->bind_param(7, $url, SQL_VARCHAR);
         $rv = $sth->execute();
 
         if ($rv) {
@@ -100,17 +103,17 @@ sub view {
 
     $dbh = $c->dbh;
 
-    $sth = $dbh->prepare_cached("SELECT left, top, marks FROM marks WHERE key=? AND url=?", 3);
+    $sth = $dbh->prepare_cached("SELECT left, top, marks, tags FROM marks WHERE key=? AND url=?", {}, 3);
     $sth->bind_param(1, $key, SQL_VARCHAR);
     $sth->bind_param(2, $url, SQL_VARCHAR);
     $rv = $sth->execute();
 
     if ($rv) {
-        my $row = $sth->fetch;
-        $row = [] if ! $row;
+        my $row = $sth->fetchrow_hashref;
+        $row = {} if ! $row;
         return to_json($row, {utf8 => 1});
     } else {
-        return "[]";
+        return "{}";
     }
 }
 
