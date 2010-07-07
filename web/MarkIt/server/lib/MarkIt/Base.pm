@@ -5,15 +5,16 @@ use strict;
 use base 'Titanium';
 use Carp qw( croak );
 use Log::Dispatch::File;
+use MarkIt::Configuration;
 
 our $VERSION = '0.01';
 
 sub cgiapp_init {
     my ($c) = @_;
 
-    my $data_source = "dbi:SQLite:dbname=./markit.db";
-    my $username = "";
-    my $password = "";
+    my $data_source = MarkIt::Configuration::DB_SOURCE;
+    my $username = MarkIt::Configuration::DB_USERNAME;
+    my $password = MarkIt::Configuration::DB_PASSWORD;
     my %attr = ();
     $c->dbh_config($data_source, $username, $password, \%attr);
 

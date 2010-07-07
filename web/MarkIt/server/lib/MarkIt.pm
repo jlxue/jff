@@ -1,14 +1,16 @@
 package MarkIt;
 use base 'CGI::Application::Dispatch';
+use MarkIt::Configuration;
 use strict;
 use warnings;
+
 
 sub dispatch_args {
     return {
         prefix  => 'MarkIt',
 
         args_to_new => {
-            TMPL_PATH   => 'templates',
+            TMPL_PATH   => MarkIt::Configuration::TEMPLATE_DIR,
             PARAMS  => {
             },
         },

@@ -4,6 +4,7 @@ use strict;
 use CGI::Application::Server;
 use lib 'lib';
 use MarkIt;
+use MarkIt::Configuration;
 
 *{CGI::Application::Server::valid_http_method} = sub {
     my $self   = shift;
@@ -12,7 +13,7 @@ use MarkIt;
 };
 
 my $server = CGI::Application::Server->new();
-$server->document_root('./t/www');
+$server->document_root(MarkIt::Configuration::ROOT_DIR);
 $server->entry_points({
     '/' => 'MarkIt',
 });

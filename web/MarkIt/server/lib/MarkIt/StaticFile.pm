@@ -5,9 +5,10 @@ use File::MMagic ();
 use File::Spec::Functions qw(canonpath);
 use MIME::Types  ();
 use URI::Escape  ();
+use MarkIt::Configuration;
 use base 'MarkIt::Base';
 
-use constant ROOT   => abs_path('t/www');
+use constant ROOT   => abs_path(MarkIt::Configuration::ROOT_DIR);
 
 our $VERSION = '0.01';
 
