@@ -11,3 +11,11 @@ CREATE TABLE IF NOT EXISTS marks
     PRIMARY KEY (key, url)
 );
 
+CREATE TABLE IF NOT EXISTS users
+(
+    name        string  NOT NULL CHECK (length(name) > 0) PRIMARY KEY,
+    password    string  NOT NULL CHECK (length(password) > 0),
+    key         string  NOT NULL CHECK (length(key) > 0),
+    email       string
+);
+
