@@ -126,10 +126,15 @@ function initialize($) {
 
 
     function add_mark(table, coord, text) {
-        table.append('<tr><td><a href="javascript:top.scrollTo(' +
+        return table.append('<tr><td><a href="javascript:top.scrollTo(' +
             coord + ')">(' + coord + ')</a></td>' +
             '<td><input type="text" size="20" value="' + text + '"/></td>' +
             '<td><a href="#">delete</a></td></tr>');
+    }
+
+
+    function empty_input_once() {
+        $(this).val("");
     }
 
 
@@ -139,7 +144,7 @@ function initialize($) {
             top = $(g_window).scrollTop(),
             coord = left + ',' + top;
 
-        add_mark(marks_table, coord, "a mark");
+        add_mark(marks_table, coord, "a mark").find("input").one("focus", empty_input_once);
 
         return false;
     }
@@ -174,6 +179,7 @@ function initialize($) {
             return;
 
         // restore tags
+        $("#markit-tags").unbind("focus");
         $("#markit-tags").val(data.tags);
 
         // add marks
@@ -219,6 +225,7 @@ function initialize($) {
     dialog_html = dialog_html.replace(/##MARKIT_ROOT##/, MARKIT_ROOT);
 
     var dialog = $(dialog_html).appendTo('body').draggable();
+    $("#markit-tags").one("focus", empty_input_once);
 
     show_version_info();
 
