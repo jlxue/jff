@@ -18,6 +18,7 @@ sub dispatch_args {
         table   => [
             ''          => { app => 'StaticFile' },
             'mark/:rm'  => { app => 'Mark' },
+            'captcha'   => { app => 'Captcha', rm => 'create' },
             '*'         => { app => 'StaticFile', '*' => 'path' },
         ],
     };

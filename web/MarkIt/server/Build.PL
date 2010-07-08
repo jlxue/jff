@@ -30,6 +30,7 @@ my $builder = Module::Build->new(
         'Titanium'                      => 0,
         'HTML::Template'                => 0,
         'CGI::Application::Server'      => 0,
+        'GD::SecurityImage'             => 0,
     },
     add_to_cleanup      => [ 'MarkIt-*' ],
     create_makefile_pl  => 'traditional',
