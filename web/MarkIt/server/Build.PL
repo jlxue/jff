@@ -10,7 +10,9 @@ my $builder = Module::Build->new(
     license             => 'gpl3',
     dist_version        => '1.0',
     tmpl_files          => eval {
-        my %tmpls; File::Find::find(
+        my %tmpls = ();
+        my $tmpl_dir = 'lib/MarkIt/templates';
+        File::Find::find(
             {
                 wanted => sub {
                     if ( -f $_ ) {
@@ -18,8 +20,8 @@ my $builder = Module::Build->new(
                     }
                 },
             },
-            'lib/MarkIt/templates',
-        );
+            $tmpl_dir
+        ) if -d $tmpl_dir;
         return \%tmpls;
     },
     build_requires => {
