@@ -25,7 +25,7 @@ $(shell perl -e 'my @a=<>; chomp @a; my $$a=join("", @a); $$a =~ s/;$$//; \
 	$$a =~ s/\x27/%27/g; print "javascript:void(", $$a, ")"' $(2) > $(1))
 endef
 
-all: prepare $(addprefix $(BUILD_DIR)/, index.html ckeditor css js)
+all: prepare $(addprefix $(BUILD_DIR)/, install.html ckeditor css js)
 
 prepare: build
 
@@ -44,8 +44,8 @@ $(BUILD_DIR)/markit.loader.js: markit.loader.js $(BUILD_DIR)/markit.min.js
 	perl -pe 's/##LOADER_VERSION##/$(LOADER_VERSION)/g' $< > $@
 
 
-################ markit index.html #####################################
-$(BUILD_DIR)/index.html: $(BUILD_DIR)/markit.loader.url.js index.html
+################ markit install.html #####################################
+$(BUILD_DIR)/install.html: $(BUILD_DIR)/markit.loader.url.js install.html
 	perl replace.pl "##LOADER_URL##" $^ > $@
 
 
@@ -70,7 +70,7 @@ release: $(BUILD_DIR)/MarkIt-$(VERSION).tar.gz
 
 $(BUILD_DIR)/MarkIt-$(VERSION).tar.gz: all
 	tar czf $@ -C $(BUILD_DIR) --transform 's#^#MarkIt-$(VERSION)/#' \
-		index.html markit.min.js  ckeditor css js
+		install.html markit.min.js  ckeditor css js
 
 ################ deploy      ###########################################
 deploy: release
