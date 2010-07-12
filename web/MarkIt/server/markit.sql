@@ -1,21 +1,30 @@
-CREATE TABLE IF NOT EXISTS marks
-(
-    key     string NOT NULL CHECK (length(key) > 0),
-    url     string NOT NULL CHECK (length(url) > 0),
-    title   string DEFAULT "",
-    marks   string DEFAULT "",
-    tags    string DEFAULT "",
-    left    integer DEFAULT 0 CHECK (left >= 0),
-    top     integer DEFAULT 0 CHECK (top >= 0),
-
-    PRIMARY KEY (key, url)
-);
-
 CREATE TABLE IF NOT EXISTS users
 (
-    name        string  NOT NULL CHECK (length(name) > 0) PRIMARY KEY,
-    password    string  NOT NULL CHECK (length(password) > 0),
-    key         string  NOT NULL CHECK (length(key) > 0),
-    email       string
+    name        TEXT NOT NULL CHECK (length(name) > 0) PRIMARY KEY,
+    password    TEXT NOT NULL CHECK (length(password) > 0),
+    key         TEXT NOT NULL CHECK (length(key) > 0) UNIQUE,
+    email       TEXT DEFAULT "",
+
+    ctime       DATETIME NOT NULL,
+    mtime       DATETIME NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS marks
+(
+    key         TEXT NOT NULL CHECK (length(key) > 0) REFERENCES users (key),
+    url         TEXT NOT NULL CHECK (length(url) > 0),
+
+    left        INTEGER DEFAULT 0 CHECK (left >= 0),
+    top         INTEGER DEFAULT 0 CHECK (top >= 0),
+
+    title       TEXT DEFAULT "",
+    tags        TEXT DEFAULT "",
+    marks       TEXT DEFAULT "",
+    comments    TEXT DEFAULT "",
+
+    ctime       DATETIME NOT NULL,
+    mtime       DATETIME NOT NULL,
+
+    PRIMARY KEY (key, url)
 );
 
