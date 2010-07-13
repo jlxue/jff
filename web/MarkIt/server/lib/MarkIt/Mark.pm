@@ -2,6 +2,7 @@ package MarkIt::Mark;
 
 use DBI 1.40 qw(:sql_types);    # 1.40 introduces $if_active=3 in $dbh->prepare_cached()
 use JSON;
+use MarkIt::Util qw/trim/;
 use base 'MarkIt::Base';
 
 our $VERSION = '0.01';
@@ -114,12 +115,6 @@ sub view {
         return to_json($row, {utf8 => 1});
     } else {
         return "{}";
-    }
-}
-
-sub trim {
-    for (@_) {
-        s/^\s+|\s+$//g if defined;
     }
 }
 
