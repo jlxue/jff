@@ -1,0 +1,84 @@
+MarkIt 设计文档
+
+MarkIt 分成 MarkIt bookmarklet 和 MarkIt web site 两部分，前者
+依赖后者。
+
+1. MarkIt web site
+
+网站分前台和后台，前台指用户可见部分，呈现标记和评论，以及用户信息管理。
+后台指用户不可见部分，包含 web 服务器、数据库。
+
+1.1 前台提供的特性：
+
+a. 模仿 www.reddit.com、gmail 网站，主页即呈现标记、评论列表。
+
+b. 主页上有登录、注册功能，放在 header 那里。
+
+c. 用户登录后，主页的登录、注册功能被用户问候信息替代，其它功能不变。
+
+d. 用户登录成功后可以看到个人信息界面，显示自己的标记、评论列表。
+
+e. 用户登录成功后可以看到修改密码界面。
+
+f. 用户登录成功后可以看到 MarkIt bookmarklet 安装界面，在这个界面可以
+   重新生成 markit key，此 markit key 被放在生成的 markit bookmarklet
+   里，以让用户无需登录，即可识别他的身份。
+
+g. 支持搜索功能: tag, 关键字，url，为了隐私考虑，不支持按用户搜索。
+
+
+1.2 后台提供的特性：
+
+1.2.1 为前台提供
+
+a. 提供所有人标记、评论列表，按条数、按时间段给出;
+
+b. 支持登录、注册、修改密码、重新生成 markit key;
+
+c. 提供某个用户的标记、评论列表，支持删除、修改功能;
+
+
+1.2.2 为 MarkIt bookmarklet 提供
+
+a. 根据 markit key + url，保存 tag, marks, comments，每个 mark、comment
+   都有自己的公开和私有权限，以及评分（分 very bad, bad, none, good, very good 五等)
+
+b. 根据 markit key + url，提供 1 中保存的信息。
+
+c. 根据 url，提供此页面有多少人收藏的信息。
+
+d. 根据 url，提供关于此页面的所有 tag，便于用户选择分类时自动补全。
+
+
+2. MarkIt bookmarklet
+
+功能参考 1.2.2，界面如下：
+
+a. 点击 MarkIt bookmarklet，切换 MarkIt dialog 的显示。
+
+b. MarkIt dialog 从上到下显示如下信息：
+ [被 script tag/xhr 装载(调试用)] [MarkIt bookmarklet 版本信息，以及主页链接]
+ [标记按钮]  [评论按钮] [保存] [评价分数下拉框]
+ [tags 输入框                                 ]
+ [标记表格                                    ]
+ [评论表格                                    ]
+
+ 点击标记按钮，插入一行到标记表格;
+ 点击评论按钮，创建评论框（因为 MarkIt dialog 太小不方便输入);
+
+c. 标记表格分成如下列：
+ [坐标，也是链接][是否公开单选框][标记注释文字输入框] [ delete 链接]
+
+ 点击坐标，跳转到标记位置。
+
+d. 评论表格分成如下列：
+ [坐标，也是链接][是否公开单选框][评论文字第一句    ] [ delete 链接]
+
+ 坐标记录了评论框的位置，宽高。
+ 点击坐标或者双击评论文字，打开对应评论框。
+
+e. 评论框界面：
+ [  ckeditor                      ]
+ [ 确定按钮 ]   [取消按钮]
+ 
+
