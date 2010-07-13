@@ -9,7 +9,7 @@ sub setup {
     my ($c) = @_;
 
     $c->start_mode('login');
-    $c->run_modes([qw/login/]);
+    $c->run_modes([qw/login register key/]);
 }
 
 
@@ -17,6 +17,11 @@ sub login {
     my ($c) = @_;
 }
 
+sub register {
+}
+
+sub key {
+}
 
 1;
 
