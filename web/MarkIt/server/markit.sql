@@ -19,8 +19,10 @@ CREATE TABLE IF NOT EXISTS marks
 
     title       TEXT DEFAULT "",
     tags        TEXT DEFAULT "",
-    marks       TEXT DEFAULT "",
-    comments    TEXT DEFAULT "",
+    pub_marks   TEXT DEFAULT "",
+    pri_marks   TEXT DEFAULT "",
+    pub_comments    TEXT DEFAULT "",
+    pri_comments    TEXT DEFAULT "",
 
     ctime       DATETIME NOT NULL,
     mtime       DATETIME NOT NULL,
