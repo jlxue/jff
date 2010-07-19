@@ -133,7 +133,7 @@ XML 处理
 
 HTML 信息提取
 =============
-    Web::Scaper
+    Web::Scraper
     Template::Extract
     HTML::Seamstress
     HTML::Selector::XPath
