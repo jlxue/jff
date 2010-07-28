@@ -198,7 +198,7 @@ korg/master 表示开源的 master 分支：
  f. 不断的合并 xxx 到 xxx-release;
  g. xxx 比较稳定后，从 xxx 创建 xxx-plus-aosp，不断的将 xxx 和 korg/master
     合并入 xxx-plus-aosp;
- h. xxx 发布，由于 korg/master 以及被合并入 xxx-plus-aosp，所以 korg/master
+ h. xxx 发布，由于 korg/master 已经被合并入 xxx-plus-aosp，所以 korg/master
     被 fast forward，直接指向 xxx-plus-aosp.
 
 注意 xxx 发展过程中，也可能吸取前一个发布分支上的修改，比如 froyo 可以去
