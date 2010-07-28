@@ -1,0 +1,239 @@
+android 分支管理之无责任猜测
+
+一、缘由
+
+鼓捣 android 开源代码一个头疼问题是： 我应该跟踪哪个分支或者版本？
+这个问题有如下可能的答案：
+
+* master 分支；
+* 譬如 froyo、eclair 这样的分支;
+* 譬如 froyo-release, eclair-release 这样的分支，注意对应 froyo、eclair
+  各自的 release 分支可能不只一个;
+* android-n.n 这样的 tag；
+
+另一个头疼问题是：android 发布新版本后，我如何将自己的修改合并过去？
+这个问题也有两个答案:
+
+* git merge 第一个问题中的某个版本;
+* git rebase 第一个问题中的某个版本;
+
+如果第一个问题选择第二个答案，而且 eclair 分支包含一些 froyo 分支没
+有的东西，那么 git merge eclair，再 git merge froyo 会留下 eclair 分支
+上多余的东西，也就是 my-froyo = froyo + my-eclair, my-eclair = eclair +
+my,  出了问题，也不确定是自己改出来的，还是 eclair 上多出的那些修改。
+
+如果用 git rebase，由于需要在 froyo 上重新打一系列补丁，冲突的次数
+大大增加了，但这种方式结果挺放心，确保 my-froyo = froyo + my。
+
+在 http://source.android.com/source/code-lines.html 中对 android 各个
+代码线有个模糊的描述，我是没能从中理解 android 各个分支的具体关系，所以
+这篇小文试图从 android 开源代码的版本历史中，猜测出 google 是如何管理
+android 的众多分支，从而评估上两个问题的答案。
+
+由于 git 里 fast forward 的合并特性，以及 git 里分支、合并相对容易导致
+分支的滥用，android 源码的版本历史初看、细看都是非常庞杂的，所以我下面
+的描述和猜测很可能有误，欢迎大家指正。
+
+
+二、分支管理介绍
+
+在看 android 众多分支关系前，先根据个人经验介绍下分支管理。一般来说，开
+发是只有单条主线的，即使版本控制工具很容易支持多条主线。 到某一定时间，
+团队觉得预定的目标达到了，就开始准备发布，进入代码冻结期，在此时期，主线
+上不允许提交新特性，只允许修正 bug。过一段时间后，bug 修正的差不多了，
+就创建一个发布分支出来，比如 1.x，在这个上面再测试，同时主线解冻，可以
+继续提交新特性，实现下一个阶段的目标。
+
+在主线和发布分支的进展中，两个主线上都可能修正一些彼此都存在的 bug，所以
+很可能要互相取对方的修改，这个应用修改的过程可以是 cherry pick 或者 merge。
+
+
+示意图如下：
+
+-------A--------B------------------A'-----------B'------------> master
+                \    ^    :                      \    :   ^
+                 \   :    :                       \   :   :
+                  \  :    v                        \  v   :
+                   `---o-----o-----o--> 1.x         `---o-----o---> 2.x
+                     1.0a    1.0b  1.0                 2.0a  2.0b
+
+这里 A-B 和 A'-B' 就是两个主线冻结期。不从 A 和 A' 直接创建 1.x 和 2.x
+的原因是，刚刚准备发布时，必然有大量 bug 修正，如果太早创建发布分支，就
+会发生许多无谓的从发布分支到主干的合并，因为主干也需要这些 bug 修正。
+
+1.0a, 1.0b, 1.0 这些是在发布分支上创建的 tag。
+
+在 master 和 1.x, 2.x 之间的竖直虚线箭头，表示互相取对方的 bug 修正。
+
+冻结期的长短，取决于团队的人力，以及下一阶段计划的紧迫性，如果人力足够，
+下一阶段计划非常紧，那么冻结期可以尽量缩短，让主线上可以尽快开始实现下一阶段
+的特性。
+
+
+在后面的 android 版本历史分析中，可以看到其分支管理跟这个路子颇有相似。
+
+
+三、android 代码中的分支合并
+
+要分析分支关系，必然要先找出有哪些分支，有哪些合并者，如下两个命令可以找
+出这些信息：
+
+1. 找出有哪些分支：
+
+cd build        # 也可以去看其它模块，都是类似的
+git log -i --grep=merge | grep -i "merge.*into\s\+\w\+$" | sed -e 's/.*into\s\+//' | sort -u
+
+这里不用 git branch -a 看的原因，是因为 git 里分支可以理解为一个浮动标记，它是可以被
+更名、移动位置、删除的，所以只好从 log 里找蛛丝马迹。
+
+
+2. 找出有哪些合并者：
+
+repo forall -c "git log -i --grep=merge --pretty=tformat:%ce" > merge.txt
+sort merge.txt | uniq -c | sort -n -k1,1 -r 
+
+排在前面的几个合并者是：
+  22065 android-git-automerger@android.com
+  11714 android-gerrit@google.com
+   7248 initial-contribution@android.com
+   1142 jbq@google.com
+    433 code-review@android.com
+    378 enf@google.com
+    169 steveblock@google.com
+    150 android-build@android.com
+     87 android-build@sekiwake.mtv.corp.google.com
+     73 xav@android.com
+     61 mathias@google.com
+     48 klobag@google.com
+     45 jessewilson@google.com
+     42 wink@google.com
+     37 android-build@undroid16.corp.google.com
+     33 phanna@android.com
+     32 raphael@google.com
+
+结合 gitk --all 的输出，可以看到有五类合并者是最重要的：
+    (1) android-gerrit@google.com,  code-review@android.com
+        这两个账号貌似是 gerrit 代码评审系统专用的，android 代码的每次提
+        交都是被评审通过后，被此 gerrit 账号 git merge  --no-ff 到目标分
+        支，看起来此 merge 的 author 是评审者。
+
+        个人觉得评审系统的 merge 策略太过火了，评审信息完全可以记录到其
+        它地方，git 1.7 就增加了 git notes 命令，将评审信息揉入提交历史，
+        搞的版本图纠结的很。
+
+        在后面的分支关系分析中，会忽略掉由 gerrit 造成的 merge，此种
+        merge 很容易辨认：committer 是上面两个账号，log 是 Merge "....."。
+
+    (2) android-git-automerger@android.com
+        这个账号一般用于 google 内部分支间互取修改。有极少数修改是
+        个人 cherry pick 的。由于 android-git-automerger 的合并行为，
+        也导致版本图纠结的很。
+
+    (3) initial-contribution@android.com
+        这个账号主要用于将开源的 master 分支合并入即将成为新的开源 master 的
+        xxxx-plus-aosp 分支上。
+
+        早期此账号也用于将 xxx 分支合并入 xxx-release 分支。 
+
+    (4) android-build@.*
+        这个账号用于将 xxx 分支合并入 xxx-release 分支，从名字上看，是自动构建
+        工具取 xxx 的一个版本，构建成功后再合并入  xxx-release。
+
+    (5) jbq@google.com
+        Jean-Baptiste Queru 貌似是 android 开源代码的管理者，他在
+        android 准备发布版本时，将开源的 master 分支合并入内部的 master 分支。
+        这种合并的 log 很规则，都是 merge from open-source master。
+
+
+早期 android 代码在 google 内部是用 Perforce 管理的，导出到 git 库里再开
+源出来，这个痕迹可以在 android 代码早期的提交历史里看到。
+
+在 google 开发出 gerrit、repo、将代码分模块后，我猜测 google 内部也从
+perforce 转向了 git，因为
+
+ * 后来的 android 历史看不到从 perforce 导入到 git 的痕迹
+ * 开源的 master 分支会被合并入 google 内部的 master 分支，为了避免合并
+   麻烦，应该也不会整两套版本控制系统
+ * 开源的 master 分支以及内部的 master 分支都有 gerrit 的痕迹，所以猜测
+   内部也是用 git 管理代码
+ * 为了代码管理的简化，应该也不会耗费精力跟踪两种版本库里的同一个修改
+
+google 内部的 master 分支可以通过如下方式看出来：
+
+ * 上面的找分支的命令会发现有 goog/master，internal 的字样
+ * xxx-release 的合并历史一开始是 merge master into xxx-release，之后
+   才是 merge xxx into xxx-release，这里 xxx 相当于第二节中的发布分支，
+   而 xxx-release 是经过构建测试的 xxx，发布版本的标签在 xxx-release
+   分支上，这种两分支的做法跟第二节说的单发布分支做法不一样。
+
+因此回溯 xxx-release 的历史，其第一次发生 "merge master into xxx-release"
+的地方就是刚从内部的 master 分支上分出来不久。这里 master 不是 open
+source master，因为 open source master 在更新前，是落后于 xxx-release 的。
+
+发布分支采取 xxx 和 xxx-release 两个分支的做法，猜测是因为模块太多，
+每次构建都需要对所有模块打个标记，而采用 git tag 就会导致大量 tag，
+所以单独分出来 xxx-release，专门记录构建时的版本，版本信息放在 log、
+commit 的 parents 信息以及 core/build_id.mk 中。
+
+
+四、android 分支关系图
+
+根据人肉分析 gitk --first-parent --all 以及 gitk --all 显示的版本图，猜
+测出如下的分支关系图，图中 goog/master 表示 google 内部的 master 分支，
+korg/master 表示开源的 master 分支：
+
+[附图]
+
+注意图中的分支创建时间只是根据版本图猜测出来的。
+
+
+猜测 android 某个版本发布过程如下：
+
+ a. 从 goog/master 创建 xxx-release 分支，用于自动构建；
+ b. 合并 korg/master 到 goog/master，这步是 jbq@google.com 做的;
+ c. 冻结 goog/master 分支，在 goog/master 上修正 bug;
+ d. 不断的合并 goog/master 到 xxx-release，xxx-release 的版本历史相当于
+    一系列 tag;
+ e. 从 goog/master 创建 xxx 分支，继续修正 bug； 解冻 goog/master 分支；
+ f. 不断的合并 xxx 到 xxx-release;
+ g. xxx 比较稳定后，从 xxx 创建 xxx-plus-aosp，不断的将 xxx 和 korg/master
+    合并入 xxx-plus-aosp;
+ h. xxx 发布，由于 korg/master 以及被合并入 xxx-plus-aosp，所以 korg/master
+    被 fast forward，直接指向 xxx-plus-aosp.
+
+注意 xxx 发展过程中，也可能吸取前一个发布分支上的修改，比如 froyo 可以去
+获取 eclair 上的修改。而 goog/master 也可以吸取 froyo 上的修改，这种行为
+在第二节讲过。
+
+从上面的过程可以看到，
+  a. xxx-release 只是用来构建、测试、发布的，android-n.n 的标签打在 xxx-release 分支,
+     此分支相当于一系列稳定的 xxx 版本;
+  b. xxx 上修正 bug, xxx-release 上不是修正 bug 的地方，这俩分支名字叫
+     xxx-release 和 xxx-build 似乎更合适;
+  c. 在创建 xxx-release 分支后，korg/master 才被合并入 goog/master，不清楚之前是否可以
+     cherry-pick korg/master 的修改到 goog/master;
+     本着 goog/master 和 korg/master 合并不能产生剧烈冲突的前提，goog/master 不可能接受
+     开源界剧烈、频繁的修改。
+  d. korg/master 会落后 goog/master 一个版本周期。
+
+
+在上面的 android 分支版本图中，有这么几个时间点是很有意思的：
+  a. xxx-release 被创建的时间，从这个时间点可以发现 goog/master 的轨迹；
+  b. xxx-plus-aosp 和 korg/master 最后一次合并的时间，这个时间点之后 xxx
+     就被开源了，可以看出开源的新版本 korg/master 落后 goog/master 多长时间。
+
+
+五、问题的答案
+
+回到一开始提出的问题，答案就明确了（但愿没分析错）：
+
+* 应该跟踪 xxx 最后一次被 xxx-release 合并的点，也就是 xxx 最后一次被测试的版本;
+    (跟踪 korg/master 不大好，因为它包含了开源界提交的修改，没有被测试过)
+    (跟踪 xxx 不大好，因为它包含了些修改没有被测试过)
+    (跟踪 xxx-release 或者 android-n.n 也不好，它们会可能出现在不同分支上——
+     会有多个 xxx-release 以及多个 android-n.n，而且都是些没有本质必要的修改）
+
+* 由于这个版本肯定被 xxx-plus-aosp 合并过了，而 xxx-plus-aosp 也就是将来
+  的新的 korg/master 会被合并入 goog/master，所以 git merge 它到自己的分支即可，
+  不会多出 goog/master 没有的修改。
+
