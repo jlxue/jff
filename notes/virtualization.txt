@@ -1,0 +1,11 @@
+VMWare: vSphere Hypervisor (ESXi)
+        PCoIP
+
+CITRIX: XenServer
+        CIA, VNC
+
+RedHat: Xen, KVM
+        SPICE
+
+Microsoft: Virtual Server
+        RDP
