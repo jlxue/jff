@@ -22,3 +22,7 @@ modeling methods:
     metaball
     digital sculpting
 
+雕刻建模： ZBrush, Mudbox
+silo, modo
+rhino, google sketchup, blender
+

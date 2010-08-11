@@ -83,7 +83,7 @@ i wine
 
 ### disc recording
 # Or: k3b
-i brasero
+#i brasero
 
 ### archive manager
 i file-roller
