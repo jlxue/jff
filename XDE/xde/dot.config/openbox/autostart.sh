@@ -38,7 +38,7 @@ fi
 
 # Run XDG autostart things.  By default don't run anything desktop-specific
 # See xdg-autostart --help more info
-DESKTOP_ENV=""
+DESKTOP_ENV="OPENBOX"
 if which /usr/lib/openbox/xdg-autostart >/dev/null; then
   /usr/lib/openbox/xdg-autostart $DESKTOP_ENV
 fi

@@ -89,13 +89,14 @@ i wine
 ### disc recording
 # Or: k3b
 #i brasero
+i genisoimage wodim
 
 ### archive manager
 i file-roller
 
 ### instant messaging
 # Or: emesene
-i pidgin pidgin-encryption
+i pidgin pidgin-encryption pidgin-hotkeys msn-pecan
 
 ### movie player
 i mplayer
@@ -156,9 +157,9 @@ update-alternatives --set x-terminal-emulator /usr/bin/urxvt
 [ "$debsums_already_installed" ] || debsums_init
 
 f=/etc/default/debsums
-[ -f $f ] && grep -q '^CRON_CHECK="never"' $f && {
+[ -f $f ] && grep -q '^CRON_CHECK="\?never"\?' $f && {
     echo "Change $f to daily check in cron."
-    sed -i -e '/^CRON_CHECK="never".*/s//CRON_CHECK="daily"/' $f
+    sed -i -e '/^CRON_CHECK="\?never"\?.*/s//CRON_CHECK=daily/' $f
 }
 
 ###########################################################

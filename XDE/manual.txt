@@ -1,0 +1,20 @@
+XDE 使用手册
+
+1. 主题的切换：主题在 openbox/rc.xml 和 user-xde.sh 中指定，默认是 Clearlooks。
+
+2. pidgin 安装了 pidgin-encryption 和 pidgin-hotkeys 插件，以及 WLM 协议
+   支持 msn-pecan，新建 msn 帐户时选择 WLM 协议而不是 MSN 协议。
+
+3. 简单刻盘可以用 genisoimage 和 wodim，见
+   http://www.debian.org/doc/manuals/debian-reference/ch10.en.html#_making_the_iso9660_image_file
+
+4. 截图用的 scrot，已经配置 openbox 用 PrintScreen 截取屏幕以及用 Alt-PrintScreen 截取窗口，
+   截图后会用 feh 查看，截图保存在 $HOME 目录里。
+
+5. 安装了 etckeeper 以管理 /etc 下配置文件。
+
+6. user-xde.sh 会做个人设置，复制一些配置文件到 $HOME 目录下，原有版本会
+   被备份到 $HOME/.git 里。
+
+7. 在 slim 界面关机和重启： 登录用户名选择 halt 或者 reboot，密码用 root 用户密码。
+

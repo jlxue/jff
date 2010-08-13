@@ -33,7 +33,7 @@
 #   Liu Yubao <yubao.liu@gmail.com>
 #
 # Copyright:
-#   Copyright (c) 2008 Liu Yubao, all rights reserved. 
+#   Copyright (c) 2008 Liu Yubao, all rights reserved.
 #
 # License:
 #   This program is free software; you can redistribute it and/or
@@ -47,7 +47,7 @@
 #   2008-1-26 Liu Yubao
 #       * add APT hook support, version 0.2.
 #   2008-4-27 Liu Yubao
-#	    * remove hg support to make it simple.
+#       * remove hg support to make it simple.
 #       * remove simple wrapper functions.
 #       * rewrite some code to make it more robust.
 #       * release 0.3.
@@ -59,7 +59,7 @@
 #       * fix a syntax error, bash doesn't allow "&&" at the beginning of line
 #       * move dpkg hook to /etc/apt/apt.conf.d/80cfgtool
 #       * release 0.4
-#   
+#
 # TODO:
 #   * record file permission
 #
@@ -280,7 +280,7 @@ and record installed software list under version control.
 
 Most commands are simple wrappers to the corresponding commands in GIT,
 you can use GIT directly.
-    
+
 Available sub commands and their equivalent commands in GIT:
 
     init      : git --git-dir=/path/to/.git --work-tree=/path/to init
