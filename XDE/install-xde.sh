@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 ###########################################################
 ## global variables
 
@@ -121,7 +123,7 @@ i cups
 i evince
 
 ### utilities
-i git
+i git screen
 
 ### file integrity checker
 debsums_already_installed=$(is_installed debsums)
@@ -143,10 +145,6 @@ install -R $PKGS_INSTALL_WITHOUT_RECOMMENDS
 ###########################################################
 ## set locale for chinese input method
 update-locale LC_CTYPE=zh_CN.UTF-8
-
-###########################################################
-## set theme
-gtk-theme-switch2 /usr/share/themes/Clearlooks
 
 ###########################################################
 ## configure debsums
