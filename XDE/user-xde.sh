@@ -9,6 +9,24 @@ XDE_HOME="`dirname $0`"
 
 
 ###########################################################
+## functions
+
+sync_dot_file () {
+    local f="$1" dest="$2"
+
+    [ -z "$dest" ] && dest="$HOME/${f#$XDE_HOME/xde/dot}"
+
+    if [ -d "$f" ]; then
+        echo "rsync directory: $f..."
+        rsync -ar $f/ $dest
+    else
+        echo "rsync file: $f..."
+        rsync -a $f $dest
+    fi
+}
+
+
+###########################################################
 ## set theme
 gtk-theme-switch2 /usr/share/themes/Clearlooks
 
@@ -17,7 +35,10 @@ gtk-theme-switch2 /usr/share/themes/Clearlooks
 ## dot files
 
 for f in $XDE_HOME/xde/dot.*; do
-    echo "rsync $f..."
-    rsync -ar $f $HOME/${f#$XDE_HOME/xde/dot}
+    sync_dot_file "$f"
 done
+
+sync_dot_file $XDE_HOME/xde/vim/_vimrc $HOME/.vimrc
+sync_dot_file $XDE_HOME/xde/vim/_gvimrc $HOME/.gvimrc
+sync_dot_file $XDE_HOME/xde/vim/vimfiles/ $HOME/.vim
 
