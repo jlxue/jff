@@ -81,7 +81,7 @@ init_env () {
     export LANG LC_ALL
 
     VCS=git
-    IS_ROOT=0
+    IS_ROOT=
     VCS_ROOT="$HOME"
     VCS_REPOS=
     VCS_REPOS_ARG=
@@ -145,7 +145,7 @@ cmd_init () {
     fi
 
     # save output from dpkg --list and dpkg --get-selections
-    if [ 1 -eq $IS_ROOT ] && which dpkg >/dev/null 2>&1; then
+    if [ "$IS_ROOT" ] && which dpkg >/dev/null 2>&1; then
         a=0
         [ -e root/dpkg--list.txt ] && { $VCS_CMD add root/dpkg--list.txt; a=1; }
         [ -e root/dpkg--get-selections.txt ] && { $VCS_CMD add root/dpkg--get-selections.txt;
@@ -171,7 +171,7 @@ cmd_init () {
 
 
 cmd_hook () {
-    if [ 0 -eq $IS_ROOT ]; then
+    if [ ! "$IS_ROOT" ]; then
         log "Only root can use this function!"
         return 1
     fi
@@ -223,7 +223,7 @@ EOF
 do_hook () {
     local pid
 
-    if [ 0 -eq $IS_ROOT ]; then
+    if [ ! "$IS_ROOT" ]; then
         log "Only root can use this function!"
         return 1
     fi
