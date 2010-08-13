@@ -17,10 +17,10 @@ sync_dot_file () {
     [ -z "$dest" ] && dest="$HOME/${f#$XDE_HOME/xde/dot}"
 
     if [ -d "$f" ]; then
-        echo "rsync directory: $f..."
+        echo "rsync directory : $f to $dest ..."
         rsync -ar $f/ $dest
     else
-        echo "rsync file: $f..."
+        echo "rsync file      : $f to $dest ..."
         rsync -a $f $dest
     fi
 }
@@ -41,4 +41,6 @@ done
 sync_dot_file $XDE_HOME/xde/vim/_vimrc $HOME/.vimrc
 sync_dot_file $XDE_HOME/xde/vim/_gvimrc $HOME/.gvimrc
 sync_dot_file $XDE_HOME/xde/vim/vimfiles/ $HOME/.vim
+
+sync_dot_file $XDE_HOME/xde/bin/ $HOME/bin
 
