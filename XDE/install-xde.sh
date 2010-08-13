@@ -41,6 +41,9 @@ is_installed () {
 ### X server, X display manager, X window manager
 i xserver-xorg slim openbox
 
+### theme
+i gtk2-engines gtk-theme-switch
+
 ### chinese fonts
 i ttf-arphic-uming ttf-arphic-ukai ttf-wqy-microhei
 
@@ -111,17 +114,20 @@ i network-manager
 #i rdesktop
 
 ### bluetooth
-i gnome-bluetooth
+#i gnome-bluetooth
 
 ### PDF reader
 # Or: apvlv
 i evince
 
+### utilities
+i git
+
 ### file integrity checker
 debsums_already_installed=$(is_installed debsums)
 aide_already_installed=$(is_installed aide)
 
-i aide samhain fcheck debsums
+i debsums   #aide samhain fcheck
 
 ###########################################################
 ## install packages
@@ -140,6 +146,10 @@ grep -q LC_CTYPE $f && {
     echo 'LC_CTYPE="zh_CN.UTF-8"' >> $f
     echo 'Done.'
 }
+
+###########################################################
+## set theme
+gtk-theme-switch2 /usr/share/themes/Clearlooks
 
 ###########################################################
 ## configure debsums
