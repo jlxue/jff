@@ -123,6 +123,9 @@ i cups
 # Or: apvlv
 i evince
 
+### audio mixer
+i alsa-utils
+
 ### utilities
 i git screen expect etckeeper
 
@@ -150,6 +153,10 @@ update-locale LC_CTYPE=zh_CN.UTF-8
 ###########################################################
 ## use urxvt
 update-alternatives --set x-terminal-emulator /usr/bin/urxvt
+
+###########################################################
+## flash plugin
+/usr/sbin/update-flashplugin-nonfree --install
 
 ###########################################################
 ## configure debsums
