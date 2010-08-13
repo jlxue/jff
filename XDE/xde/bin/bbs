@@ -1,7 +1,7 @@
 #!/usr/bin/expect --
 
 if { 0 == $argc } {
-    spawn -noecho ssh newsmth
+    spawn -noecho ssh -1 newsmth.net
 } else {
     eval spawn -noecho $argv
     #eval [linsert $argv 0 spawn -noecho]

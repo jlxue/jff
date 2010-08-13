@@ -123,7 +123,7 @@ i cups
 i evince
 
 ### utilities
-i git screen
+i git screen expect
 
 ### file integrity checker
 debsums_already_installed=$(is_installed debsums)
@@ -145,6 +145,10 @@ install -R $PKGS_INSTALL_WITHOUT_RECOMMENDS
 ###########################################################
 ## set locale for chinese input method
 update-locale LC_CTYPE=zh_CN.UTF-8
+
+###########################################################
+## use urxvt
+update-alternatives --set x-terminal-emulator /usr/bin/urxvt
 
 ###########################################################
 ## configure debsums

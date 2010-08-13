@@ -1,6 +1,6 @@
 #!/bin/sh
 
-[ -z "$1" ] && cmd="spawn -noecho ssh newsmth" ||
+[ -z "$1" ] && cmd="spawn -noecho ssh -1 newsmth.net" ||
     cmd="spawn -noecho $@"
 cmd="$cmd; "'
 expect_background eof {     # avoid nasty error when the spawned process exits
