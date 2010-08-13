@@ -107,7 +107,7 @@ i cups
 
 ### network configuration
 # Or: wicd
-i network-manager
+#i network-manager
 
 ### MS Windows remote desktop
 # Or: grdesktop
@@ -129,23 +129,20 @@ aide_already_installed=$(is_installed aide)
 
 i debsums   #aide samhain fcheck
 
+
+
 ###########################################################
 ## install packages
 
 install -r $PKGS_INSTALL_WITH_RECOMMENDS
 install -R $PKGS_INSTALL_WITHOUT_RECOMMENDS
 
+
+
+
 ###########################################################
 ## set locale for chinese input method
-
-f=/etc/default/locale
-grep -q LC_CTYPE $f && {
-    echo "*** LC_CTYPE has been set in $f."
-} || {
-    echo -n "Adding LC_CTYPE=\"zh_CN.UTF-8\" to $f..."
-    echo 'LC_CTYPE="zh_CN.UTF-8"' >> $f
-    echo 'Done.'
-}
+update-locale LC_CTYPE=zh_CN.UTF-8
 
 ###########################################################
 ## set theme
