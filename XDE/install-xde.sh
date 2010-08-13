@@ -123,7 +123,7 @@ i cups
 i evince
 
 ### utilities
-i git screen expect
+i git screen expect etckeeper
 
 ### file integrity checker
 debsums_already_installed=$(is_installed debsums)
