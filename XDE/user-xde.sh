@@ -17,10 +17,21 @@ backup () {
     local f="$1"
     local dest="$BACKUP_DIR/${f#$HOME/}_$TIMESTAMP~"
 
-    [ -e "$f" ] && {
+    if [ -e "$f" ]; then
         mkdir -p "$(dirname "$dest")"
         cp "$f" "$dest"
-    }
+    fi
+}
+
+remove_backup_if_not_modified () {
+    local f="$1"
+    local dest="$BACKUP_DIR/${f#$HOME/}_$TIMESTAMP~"
+
+    if [ -e "$f" -a -e "$dest" ]; then
+        if cmp -s "$f" "$dest"; then
+            rm "$dest"
+        fi
+    fi
 }
 
 sync_dot_file () {
@@ -57,10 +68,9 @@ mkdir -p "$BACKUP_DIR"
 ###########################################################
 ## set theme
 f=$HOME/.gtkrc-2.0
-t=$BACKUP_DIR/.gtkrc-2.0_$TIMESTAMP~
 backup "$f"
 gtk-theme-switch2 /usr/share/themes/Clearlooks
-cmp "$f" "$t" && rm "$t"
+remove_backup_if_not_modified "$f"
 
 
 ###########################################################
@@ -75,4 +85,17 @@ sync_dot_file $XDE_HOME/xde/vim/_gvimrc $HOME/.gvimrc
 sync_dot_file $XDE_HOME/xde/vim/vimfiles/ $HOME/.vim
 
 sync_dot_file $XDE_HOME/xde/bin/ $HOME/bin
+
+###########################################################
+## menu
+backup $HOME/.config/openbox/fd-menu.xml
+backup $HOME/.config/openbox/menu.xml
+update-menu.pl --template $HOME/.config/openbox/menu.xml.tmpl \
+    --menu $HOME/.config/openbox/menu.xml \
+    --output $HOME/.config/openbox/fd-menu.xml \
+    /etc/xdg/menus/lxde-applications.menu
+remove_backup_if_not_modified $HOME/.config/openbox/fd-menu.xml
+remove_backup_if_not_modified $HOME/.config/openbox/menu.xml
+
+openbox --reconfigure
 
