@@ -7,28 +7,43 @@
 case "$1" in
     shutdown|halt|stop)
         action=org.freedesktop.consolekit.system.stop
+
         dest=org.freedesktop.ConsoleKit
         path=/org/freedesktop/ConsoleKit/Manager
         message=org.freedesktop.ConsoleKit.Manager.Stop
+
+        pre_cmd="openbox --exit"
         ;;
+
     restart|reboot)
         action=org.freedesktop.consolekit.system.restart
+
         dest=org.freedesktop.ConsoleKit
         path=/org/freedesktop/ConsoleKit/Manager
         message=org.freedesktop.ConsoleKit.Manager.Restart
+
+        pre_cmd="openbox --exit"
         ;;
+
     hibernate)
         action=org.freedesktop.upower.hibernate
+
         dest=org.freedesktop.UPower
         path=/org/freedesktop/UPower
         message=org.freedesktop.UPower.Hibernate
+
+        pre_cmd="xscreensaver-command -lock"
         ;;
     suspend)
         action=org.freedesktop.upower.suspend
+
         dest=org.freedesktop.UPower
         path=/org/freedesktop/UPower
         message=org.freedesktop.UPower.Suspend
+
+        pre_cmd="xscreensaver-command -lock"
         ;;
+
     *)
         echo "ERROR: unknown command '$1'" >&2
         exit 1;
@@ -42,6 +57,8 @@ fi
 
 msg="Sure to $1?"
 if [ `xmessage -buttons "Cancel,Ok" -default Cancel -nearmouse -print "$msg"` = Ok ]; then
+    $pre_cmd
+    sleep 2
     dbus-send --system --dest=$dest --type=method_call $path $message
 fi
 
