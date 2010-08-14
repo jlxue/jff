@@ -1,20 +1,25 @@
 # This shell script is run before Openbox launches.
 # Environment variables set here are passed to the Openbox session.
 
-# Set a background color
-BG=""
-if which hsetroot >/dev/null; then
-    BG=hsetroot
+BG=/usr/share/images/desktop-base/moreblue-orbit-wallpaper-widescreen.png
+if [ -e $BG ]; then
+    feh --bg-scale $BG
 else
-    if which esetroot >/dev/null; then
-	BG=esetroot
+    # Set a background color
+    BG=""
+    if which hsetroot >/dev/null; then
+        BG=hsetroot
     else
-	if which xsetroot >/dev/null; then
-	    BG=xsetroot
-	fi
+        if which esetroot >/dev/null; then
+        BG=esetroot
+        else
+        if which xsetroot >/dev/null; then
+            BG=xsetroot
+        fi
+        fi
     fi
+    test -z $BG || $BG -solid "#303030"
 fi
-test -z $BG || $BG -solid "#303030"
 
 # D-bus
 if which dbus-launch >/dev/null && test -z "$DBUS_SESSION_BUS_ADDRESS"; then
@@ -39,7 +44,7 @@ fi
 # Run XDG autostart things.  By default don't run anything desktop-specific
 # See xdg-autostart --help more info
 DESKTOP_ENV="OPENBOX"
-if which /usr/lib/openbox/xdg-autostart >/dev/null; then
+if [ -x /usr/lib/openbox/xdg-autostart ]; then
   /usr/lib/openbox/xdg-autostart $DESKTOP_ENV
 fi
 

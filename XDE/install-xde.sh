@@ -44,7 +44,7 @@ is_installed () {
 i xserver-xorg slim openbox
 
 ### theme
-i gtk2-engines gtk-theme-switch
+i gtk2-engines gtk-theme-switch desktop-base
 
 ### menu
 i menu menu-l10n extra-xdg-menus menu-xdg
