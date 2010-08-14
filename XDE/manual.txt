@@ -18,3 +18,7 @@ XDE 使用手册
 
 7. 在 slim 界面关机和重启： 登录用户名选择 halt 或者 reboot，密码用 root 用户密码。
 
+8. 终端用户挂载 U 盘:
+    udisks --mount /dev/sdb1
+    udisks --umount /dev/sdb1
+

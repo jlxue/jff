@@ -1,2 +1,0 @@
-ps -eo pcpu,pmem,pri,rss,size,sz,vsz,cmd --sort rss
-

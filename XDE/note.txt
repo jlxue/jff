@@ -116,10 +116,8 @@ gqview      too many dependencies
 xpaint      too old
 gpaint      no rect selection tool
 
-jff dot_files
-
-devicekit-disks
-devicekit-power
+devicekit-disks -> udisks
+devicekit-power -> upower
 policykit
 
 dzen2
@@ -164,3 +162,17 @@ apparmor, tomoyo, smack, selinux 的界面，模仿网络防火墙，拦截 open
 
 utility: shush
 
+=========================================
+背景图片
+desktop-base:
+
+moreblue-orbit-grub.png  moreblue-orbit-splash.png
+moreblue-orbit-wallpaper.png  moreblue-orbit-wallpaper-widescreen.png
+
+=========================================
+检查内存占用
+ps -eo pcpu,pmem,pri,rss,size,sz,vsz,cmd --sort rss
+
+=========================================
+检查终端用户可以执行的特权操作：
+pkaction --verbose | perl -ne 'if (s/^org.*\K:$//) { push @a, $_ } elsif (/\sactive:\s*yes$/) { print $a[$#a]; @a=() }'
