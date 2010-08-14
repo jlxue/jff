@@ -47,4 +47,5 @@ fi
 xset b off
 tint2 &
 conky-1.7.2 &
+xscreensaver -no-splash &
 
