@@ -2,7 +2,7 @@
 { # begin package
 use File::BaseDir qw/:lookup/;
 use Getopt::Long;
-use Smart::Comments;
+#use Smart::Comments;
 use strict;
 use warnings;
 

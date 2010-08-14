@@ -46,6 +46,10 @@ i xserver-xorg slim openbox
 ### theme
 i gtk2-engines gtk-theme-switch
 
+### menu
+i menu menu-l10n extra-xdg-menus menu-xdg
+i libfile-basedir-perl libxml-sax-perl      # for update-menu.pl
+
 ### chinese fonts
 i ttf-arphic-uming ttf-arphic-ukai ttf-wqy-microhei
 
