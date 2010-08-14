@@ -63,7 +63,7 @@ uppercase               no
 use_spacer              none
 use_xft                 yes
 xftalpha                0.8
-xftfont                 DejaVu Sans Mono:size=12
+xftfont                 DejaVu Sans Mono:size=8
 
 # left-right graphs
 # Usage: ${template0 cmd1 dev1 cmd2 dev2}
