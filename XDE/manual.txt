@@ -14,7 +14,7 @@ XDE 使用手册
 5. 安装了 etckeeper 以管理 /etc 下配置文件。
 
 6. user-xde.sh 会做个人设置，复制一些配置文件到 $HOME 目录下，原有版本会
-   被备份到 $HOME/.git 里。
+   被备份到 $HOME/.dot_files 里。
 
 7. 在 slim 界面关机和重启： 登录用户名选择 halt 或者 reboot，密码用 root 用户密码。
 

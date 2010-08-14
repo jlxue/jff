@@ -41,6 +41,13 @@ sync_dot_file () {
         echo "rsync file      : $f to $dest ..."
         rsync -a -b --suffix=_$TIMESTAMP~ --backup-dir="$backup_dir" $f $dest
     fi
+
+    if [ "$BACKUP_DIR" != "$backup_dir" ]; then
+        (
+            cd $BACKUP_DIR;
+            rmdir --ignore-fail-on-non-empty -p "${backup_dir#$BACKUP_DIR/}"
+        )
+    fi
 }
 
 ###########################################################
@@ -49,8 +56,11 @@ mkdir -p "$BACKUP_DIR"
 
 ###########################################################
 ## set theme
-backup $HOME/.gtkrc-2.0
+f=$HOME/.gtkrc-2.0
+t=$BACKUP_DIR/.gtkrc-2.0_$TIMESTAMP~
+backup "$f"
 gtk-theme-switch2 /usr/share/themes/Clearlooks
+cmp "$f" "$t" && rm "$t"
 
 
 ###########################################################
