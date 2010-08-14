@@ -130,6 +130,9 @@ i evince
 ### audio mixer
 i alsa-utils
 
+### power management
+i upower
+
 ### utilities
 i git screen expect etckeeper
 

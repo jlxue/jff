@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# References:
+#   ConsoleKit/src/ck-manager.c
+#   https://wiki.edubuntu.org/DebuggingGNOMEPowerManager
+
+case "$1" in
+    shutdown|halt|stop)
+        action=org.freedesktop.consolekit.system.stop
+        dest=org.freedesktop.ConsoleKit
+        path=/org/freedesktop/ConsoleKit/Manager
+        message=org.freedesktop.ConsoleKit.Manager.Stop
+        ;;
+    restart|reboot)
+        action=org.freedesktop.consolekit.system.restart
+        dest=org.freedesktop.ConsoleKit
+        path=/org/freedesktop/ConsoleKit/Manager
+        message=org.freedesktop.ConsoleKit.Manager.Restart
+        ;;
+    hibernate)
+        action=org.freedesktop.upower.hibernate
+        dest=org.freedesktop.UPower
+        path=/org/freedesktop/UPower
+        message=org.freedesktop.UPower.Hibernate
+        ;;
+    suspend)
+        action=org.freedesktop.upower.suspend
+        dest=org.freedesktop.UPower
+        path=/org/freedesktop/UPower
+        message=org.freedesktop.UPower.Suspend
+        ;;
+    *)
+        echo "ERROR: unknown command '$1'" >&2
+        exit 1;
+        ;;
+esac
+
+if ! pkcheck --action-id $action --process $$; then
+    xmessage "Disallow to $1!"
+    exit 1
+fi
+
+msg="Sure to $1?"
+if [ `xmessage -buttons "Cancel,Ok" -default Cancel -nearmouse -print "$msg"` = Ok ]; then
+    dbus-send --system --dest=$dest --type=method_call $path $message
+fi
+
