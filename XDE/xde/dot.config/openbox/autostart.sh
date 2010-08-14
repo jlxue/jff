@@ -42,3 +42,9 @@ DESKTOP_ENV="OPENBOX"
 if which /usr/lib/openbox/xdg-autostart >/dev/null; then
   /usr/lib/openbox/xdg-autostart $DESKTOP_ENV
 fi
+
+# My extra autostart things
+xset b off
+tint2 &
+conky-1.7.2 &
+

@@ -131,16 +131,16 @@ ${stippled_hr 1}
 #
 #   Network I/O
 #
-${template1 eth0 0}${endif}${template1 wlan0 1}
-ESSID: ${wireless_essid wlan0} - Quality: ${wireless_link_qual_perc wlan0}%${endif}
+${template1 eth0 0}${endif}${template1 eth1 1}
+ESSID: ${wireless_essid eth1} - Quality: ${wireless_link_qual_perc eth1}%${endif}
 ${stippled_hr 1}
 #
 #   Battery, temperature
 #
 Battery: $battery ${battery_percent}% $battery_time
 Temperature: CPU ${acpitemp}°C - HDD /dev/sda ${hddtemp sda}°C
-  (hwmon cpu temp: ${hwmon temp 1}°C - i8k cpu temp: ${i8k_cpu_temp}°C)
-Fans: left ${i8k_left_fan_rpm}rpm $i8k_left_fan_status - right ${i8k_right_fan_rpm}rpm $i8k_right_fan_status
+##  (hwmon cpu temp: ${hwmon temp 1}°C - i8k cpu temp: ${i8k_cpu_temp}°C)
+##Fans: left ${i8k_left_fan_rpm}rpm $i8k_left_fan_status - right ${i8k_right_fan_rpm}rpm $i8k_right_fan_status
 ${stippled_hr 1}
 #
 #   Volume, multimedia info, date, calendar
