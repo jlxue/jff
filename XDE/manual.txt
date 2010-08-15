@@ -1,5 +1,13 @@
 XDE 使用手册
 
+!!!! 只在 Debian Squeeze 上测试过 !!!!
+
+安装: # ./install-xde.sh
+配置: $ ./user-xde.sh
+
+user-xde.sh 可重复运行，它把 xde/ 下配置文件复制到 $HOME 下，同时把旧版
+本备份到 ~/.dot_files 下，因此修改配置应该修改 xde/ 下那份。
+
 1. 主题的切换：主题在 openbox/rc.xml 和 user-xde.sh 中指定，默认是 Clearlooks。
 
 2. pidgin 安装了 pidgin-encryption 和 pidgin-hotkeys 插件，以及 WLM 协议
@@ -13,12 +21,9 @@ XDE 使用手册
 
 5. 安装了 etckeeper 以管理 /etc 下配置文件。
 
-6. user-xde.sh 会做个人设置，复制一些配置文件到 $HOME 目录下，原有版本会
-   被备份到 $HOME/.dot_files 里。
+6. 在 slim 界面关机和重启： 登录用户名选择 halt 或者 reboot，密码用 root 用户密码。
 
-7. 在 slim 界面关机和重启： 登录用户名选择 halt 或者 reboot，密码用 root 用户密码。
-
-8. 终端用户挂载 U 盘:
+7. 终端用户挂载 U 盘:
     udisks --mount /dev/sdb1
     udisks --umount /dev/sdb1
 

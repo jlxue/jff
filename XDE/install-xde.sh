@@ -88,7 +88,7 @@ i -R icedove
 i -R openoffice.org
 
 ### MS Windows compatibility
-i wine
+i wine cifs-utils
 
 ### disc recording
 # Or: k3b
