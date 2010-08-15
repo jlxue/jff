@@ -1,0 +1,38 @@
+http://www.newsmth.net/bbscon.php?bid=116&id=38391
+
+这两天用了下，已然比较适应了：
+  * win-d 显示桌面、恢复窗口
+  * ctrl-alt-l 和 ctrl-alt-m 显示 pidgin 的 list 和 message 窗口 (pidgin-hotkeys)
+  * ctrl-alt-Left 和 ctrl-alt-Right 切换虚拟桌面
+  * alt-space 显示窗口菜单
+  * alt-f4 关闭当前窗口
+  * alt-tab、alt-shift-tab 显示窗口列表并切换
+  * conky 显示大量系统信息，偶尔 win-d 显示桌面看一下，虽然不怎么实时，忍忍也行了，
+    反正提供的信息很多，值得放桌面上显示
+  * tint2 当作 taskbar，applet tray, notification area
+  * PrintScr、Alt-PrintScr 调用 scrot 截图，全屏或者当前窗口，截完图调用 feh 查看，
+    图片保存在 $HOME 下
+  * user-xde.sh 实现一个简单的配置文件集中管理的办法
+  * pidgin-encryption 实现加密消息，msn-pecan 支持 WLM 协议，在 Debian Squeeze 上
+    比 pidgin 标配的 msn 协议支持稳定的多
+  * OpenBox 菜单加入了 shutdown/restart/hibernate/suspend/lock
+  * 直接使用物理机器的用户可以用 udisks --mount 和 udisks --unmount 加载、卸载 U 盘
+    和光盘，无需输入密码
+  * Openbox 和 Gtk 都使用 Clearlooks 主题
+  * 安装新的 X 软后，用 ./user-xde.pl 更新 OpenBox 菜单
+  * Firefox、ThunderBird、Pidgin 启动时隐藏窗口，因为 Openbox 不支持 startup notification
+    而这几个常用而且启动慢，会中断在其它窗口的输入
+  * 用 etckeeper 记录 /etc 下配置文件变更
+  * 每日运行 debsums 作粗略的文件完整性检查
+
+跟 Gnome 下习惯有区别的地方：
+  * 没有 panel 上的音量调节，显示的日历不能点击弹出详细日历 (忍了)
+  * panel 没有快速启动图标，桌面没有放置快速启动图标  (用 openbox 菜单第一级菜单代替)
+  * openbox 菜单没有图标 (难看)
+  * 没装文件管理器 (不是很需要)
+  * panel 上没有显示桌面按钮，我经常点击它而不是按快捷键 (用 win-d 代替)
+  * 没有 system monitor applet, network manager applet  (用 win-d, conky 代替)
+  * term 用的 urxvt，中键点击查看超链接，而非 Ctrl+click
+  * urxvt 里不知道怎么粘贴 CLIPBOARD 的内容，gnome-terminal 下是 ctrl-shift-v。
+    也不知道复制到 CLIPBOARD
+
