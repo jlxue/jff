@@ -71,7 +71,7 @@ template0 ${\1 \2 25,130 ff0000 0000ff} $alignr${\3 \4 25,130 0000ff ff0000}
 
 # network speed info
 # Usage: ${template1 net isNotLeading}...${endif}
-template1 ${if_up \1}${if_match \2 != 0}\n${endif}\1: total down ${totaldown \1}${offset 40}total up ${totalup \1}\n    down ${downspeedf \1} KiB/s ${offset 90}up ${upspeedf \1} KiB/s\n${template0 downspeedgraph \1 upspeedgraph \1}
+template1 ${if_up \1}${if_match \2 != 0}\n${endif}\1: total down ${totaldown \1}${alignr}total up ${totalup \1}\n    down ${downspeedf \1} KiB/s ${alignr}up ${upspeedf \1} KiB/s\n${template0 downspeedgraph \1 upspeedgraph \1}
 
 # hard disk I/O info
 # Usage: ${template2 dev isNotLeading}
