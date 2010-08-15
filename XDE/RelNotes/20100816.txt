@@ -1,5 +1,7 @@
 http://www.newsmth.net/bbscon.php?bid=116&id=38391
 
+最新版本见 svn checkout http://jff.googlecode.com/svn/trunk/XDE/ 。
+
 这两天用了下，已然比较适应了：
   * win-d 显示桌面、恢复窗口
   * ctrl-alt-l 和 ctrl-alt-m 显示 pidgin 的 list 和 message 窗口 (pidgin-hotkeys)
