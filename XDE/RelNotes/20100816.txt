@@ -21,7 +21,7 @@ http://www.newsmth.net/bbscon.php?bid=116&id=38391
   * 直接使用物理机器的用户可以用 udisks --mount 和 udisks --unmount 加载、卸载 U 盘
     和光盘，无需输入密码
   * Openbox 和 Gtk 都使用 Clearlooks 主题
-  * 安装新的 X 软后，用 ./user-xde.pl 更新 OpenBox 菜单
+  * 安装新的 X 软后，用 ./user-xde.sh 更新 OpenBox 菜单
   * Firefox、ThunderBird、Pidgin 启动时隐藏窗口，因为 Openbox 不支持 startup notification
     而这几个常用而且启动慢，会中断在其它窗口的输入
   * 用 etckeeper 记录 /etc 下配置文件变更
@@ -36,5 +36,5 @@ http://www.newsmth.net/bbscon.php?bid=116&id=38391
   * 没有 system monitor applet, network manager applet  (用 win-d, conky 代替)
   * term 用的 urxvt，中键点击查看超链接，而非 Ctrl+click
   * urxvt 里不知道怎么粘贴 CLIPBOARD 的内容，gnome-terminal 下是 ctrl-shift-v。
-    也不知道复制到 CLIPBOARD
+    也不知道复制到 CLIPBOARD。
 
