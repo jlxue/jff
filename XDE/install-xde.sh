@@ -34,7 +34,20 @@ install () {
 }
 
 is_installed () {
-    dpkg -s "$1" 2>/dev/null | grep "^Status: install ok installed"
+    if dpkg -s "$1" 2>/dev/null | grep "^Status: install ok installed"; then
+        echo "installed"
+    else
+        echo ""
+    fi
+}
+
+subst () {
+    local f="$1" msg="$2" from="$3" to="$4"
+
+    [ -f "$f" ] && grep -q "$from" $f && {
+        echo "AUTO-MODIFY $f: $msg"
+        sed -i -e "/$from.*/s//$to/" $f
+    }
 }
 
 ###########################################################
@@ -134,7 +147,10 @@ i alsa-utils
 i upower
 
 ### utilities
-i git screen expect etckeeper
+i git screen expect etckeeper unrar
+
+### firewall
+i shorewall-init    # it depends shorewall
 
 ### file integrity checker
 debsums_already_installed=$(is_installed debsums)
@@ -166,15 +182,23 @@ update-alternatives --set x-terminal-emulator /usr/bin/urxvt
 /usr/sbin/update-flashplugin-nonfree --install
 
 ###########################################################
+## configure shorewall
+subst /etc/default/shorewall "enable shorewall..." \
+    '^startup="\?0"\?' 'startup=1'
+
+subst /etc/default/shorewall-init "enable shorewall-init..." \
+    'PRODUCTS=""' 'PRODUCTS="shorewall"'
+
+subst /etc/default/shorewall-init "enable shorewall-init for ifupdown..." \
+    'IFUPDOWN="\?0"\?' 'IFUPDOWN=1'
+
+###########################################################
 ## configure debsums
 
 [ "$debsums_already_installed" ] || debsums_init
 
-f=/etc/default/debsums
-[ -f $f ] && grep -q '^CRON_CHECK="\?never"\?' $f && {
-    echo "Change $f to daily check in cron."
-    sed -i -e '/^CRON_CHECK="\?never"\?.*/s//CRON_CHECK=daily/' $f
-}
+subst /etc/default/debsums "enable daily check in cron..." \
+    '^CRON_CHECK="\?never"\?' 'CRON_CHECK=daily'
 
 ###########################################################
 ## configure fcheck
