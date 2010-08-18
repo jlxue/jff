@@ -76,6 +76,7 @@ dzen2
 wmctrl
 
 ===========================================
+i3      wmii 的改进版
 wmii    (Mod: alt)
     需要 9base 软件包才能使用 ~/.wmii-3.5/rc.wmii.local 配置，
     没有安装则用 wmiirc 配置。而且 rc.wmii.local 中用 # Overrides
@@ -93,7 +94,6 @@ dwm         配置需要编译
 ratpoison   类似 GNU screen，不支持浮动窗口，难以使用 Gimp
 scrotwm     pcmanfm -d、tint2、lxpanel 都显示成单独窗口，lxpanel 显示混乱，
             也许能通过 quirk 配置解决。快捷键功能稍嫌混乱。
-i3-wm       太简单，不支持左右布局，不支持窗口大小调整
 larswm      buggy, 按键被 urxvt 拦截，而不是 wm
 stumpwm     can't startup
 
