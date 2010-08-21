@@ -20,6 +20,17 @@ public class Mathematica {
         String[] kl_args;
         String MATH_ROOT = System.getenv("MATH_ROOT");
         boolean isDebug = System.getenv("MATH_DEBUG") != null;
+        int windowWidth = 0;
+        if (System.getenv("MATH_WINDOW_WIDTH") != null) {
+            try {
+                windowWidth = Integer.parseInt(System.getenv("MATH_WINDOW_WIDTH"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if (windowWidth < 0)
+                windowWidth = 0;
+        }
 
         if (MATH_ROOT == null) {
             kl_args = new String[] { "-linkmode", "launch", "-linkname", "math -mathlink" };
@@ -50,7 +61,7 @@ public class Mathematica {
             String input, output;
 
             while (null != (input = readLine(in))) {
-                output = kl.evaluateToOutputForm(input, 70);
+                output = kl.evaluateToOutputForm(input, windowWidth);
                 System.out.println(output);
             }
         } catch (IOException e) {

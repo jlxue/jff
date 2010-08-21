@@ -4,3 +4,32 @@ http://reference.wolfram.com/mathematica/JLink/tutorial/Overview.html
 
 http://www.wolfram.com/learningcenter/tutorialcollection/JLinkUserGuide/
 
+“破解”Mathematica Player
+
+Mathematica Player 带了完整的 Mathematica kernel，但 Mathematica Player 界面
+不允许编辑，安装文件也没有 MathLink 所需头文件，所幸它带了 JLink，所以可以
+使用 Mathematica kernel 做纯计算。
+
+代码在 Debian Squeeze、Mathematica Player 7.0 测试通过，其它平台需要
+稍微修改源码中的一些路径。使用办法：
+1) 在 Wolfram 网站下载并安装 Mathematica Player;
+2) 设置 PATH，能找到 mathematicaplayer，或者设置 MATH_ROOT 环境变量，指向
+   /path/to/Wolfram/MathematicaPlayer/7.0;
+3) 执行 ./math.sh (如果安装了 rlwrap 或者 uniread，编辑时有 Readline 支持)
+
+其它的环境变量：
+    MATH_DEBUG          值任意，如果存在，启用调试模式
+    MATH_WINDOW_WIDTH   值为整数，表示一行多少字符，超过则自动换行
+
+已知的限制：
+    * 不能写文件(可以用 JLink 绕过)，只能读取 $Path 所列目录中的文件
+    * 不能画图，不能导出图形
+    * 不支持 % 和 Out[n] 记号
+
+利用 JLink 绕过读写文件限制的办法：
+$ ./math.sh
+Input[0] := Needs["JLink`"]
+Input[1] := InstallJava[]
+Input[2] := reader=JavaNew["java.io.FileReader", "/etc/passwd"]
+Input[3] := reader@getEncoding[]
+
