@@ -71,7 +71,7 @@ i ttf-arphic-uming ttf-arphic-ukai ttf-wqy-microhei
 i rxvt-unicode-ml
 
 ### editor
-i vim-gtk
+i vim-gtk exuberant-ctags
 
 ### panel
 i tint2
@@ -85,6 +85,10 @@ i scrot
 ### picture viewer
 # Or: gpicview geeqie gliv
 i feh
+
+### Image Manipulation
+#i mtpaint
+#i gimp inkscape
 
 ### input method
 i scim-pinyin
@@ -107,6 +111,7 @@ i wine cifs-utils
 # Or: k3b
 #i brasero
 i genisoimage wodim
+#i bchunk   # for .bin/.cue
 
 ### archive manager
 i file-roller
@@ -147,7 +152,7 @@ i alsa-utils
 i upower
 
 ### utilities
-i git screen expect etckeeper unrar
+i git screen expect etckeeper zip unzip unrar rlwrap #uniread
 
 ### firewall
 i shorewall-init    # it depends shorewall
