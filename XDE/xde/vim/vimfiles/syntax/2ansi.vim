@@ -1,14 +1,19 @@
-
 " Vim syntax support file
 " Author: Rogerz Zhang <rogerz.zhang@gmail.com>
 " Create: 2004 Nov 10
 " Update:
-" 	2004 Nov 12,	Guess color from RGB when in gui
-" 	2004 Nov 11,	Correct bugs when T_co =16
-" 			Set bold as default attribute when in gui
-" 			Correct bug of unmatched AnsiOpening and AnsiClosing
-" 	
+"	2004 Nov 15,	Greatly improved processing speed
+"	2004 Nov 12,	Guess color from RGB when in gui
+"	2004 Nov 11,	Correct bugs when T_co =16
+"			Set bold as default attribute when in gui
+"			Correct bug of unmatched AnsiOpening and AnsiClosing
+"	2004 Nov 10,	Initial Version
 " Transform a file into ANSI sequence, using the current syntax highlighting.
+"
+" This script is based on 2html.vim
+" Thanks: Bram Moolenaar <Bram@vim.org>
+"	  dodowolf@drl
+
 
 " Number lines when explicitely requested or when `number' is set
 if exists("ansi_number_lines")
@@ -18,28 +23,36 @@ else
 endif
 
 " Guess color from RGB
-function! s:GetR(rgb)
-  return "0x".strpart(a:rgb,1,2)
-endfun
+if has("gui_running")
+  let s:whatterm = "gui"
+else
+  let s:whatterm = "cterm"
+endif
 
-function! s:GetG(rgb)
-  return "0x".strpart(a:rgb,3,2)
-endfun
+if s:whatterm == "gui"
+  function! s:GetR(rgb)
+    return "0x".strpart(a:rgb,1,2)
+  endfun
 
-function! s:GetB(rgb)
-  return "0x".strpart(a:rgb,5,2)
-endfun
+  function! s:GetG(rgb)
+    return "0x".strpart(a:rgb,3,2)
+  endfun
 
-function! s:GetAnsiColor(rgb)
-  let red = s:GetR(a:rgb)
-  let green = s:GetG(a:rgb)
-  let blue = s:GetB(a:rgb)
-  let bold = (red>=0xc0 || green>=0xc0 || blue>=0xc0)
-  if bold | let color=(red>0x7f)*1+(green>0x7f)*2+(blue>0x7f)*4
-  else | let color=(red>0x3f)*1+(green>0x3f)*2+(blue>0x3f)*4
-  endif
-  return color+bold*8
-endfun
+  function! s:GetB(rgb)
+    return "0x".strpart(a:rgb,5,2)
+  endfun
+
+  function! s:GetAnsiColor(rgb)
+    let red = s:GetR(a:rgb)
+    let green = s:GetG(a:rgb)
+    let blue = s:GetB(a:rgb)
+    let bold = (red>=0xc0 || green>=0xc0 || blue>=0xc0)
+    if bold | let color=(red>0x7f)*1+(green>0x7f)*2+(blue>0x7f)*4
+    else | let color=(red>0x3f)*1+(green>0x3f)*2+(blue>0x3f)*4
+    endif
+    return color+bold*8
+  endfun
+endif
 
 " Return opening Ansi Sequence tag for given highlight id
 function! s:AnsiOpening(id)
@@ -50,7 +63,7 @@ function! s:AnsiOpening(id)
   let ul = synIDattr(a:id, "underline")
   let bd = synIDattr(a:id, "bold")
 " When in gui guess the ansi color
-  if has("gui_running")
+  if s:whatterm == "gui"
     let fg = s:GetAnsiColor(fg)
     let bg = s:GetAnsiColor(bg)
   endif
@@ -62,7 +75,7 @@ function! s:AnsiOpening(id)
 " Resume system color
   if fg == -1 | let bd = 0 | endif
 " Add modifiers
-  let a = "\<C-Q>\<C-[>["
+  let a = "\<C-[>["
   " For inverse
   if inv
     let a = a . "7"
@@ -83,7 +96,7 @@ endfun
 
 " Return closing Ansi Sequence for given highlight id
 function! s:AnsiClosing(id)
-  if !(s:normal) | let a = "\<C-Q>\<C-[>[m" | else | let a = "" | endif
+  if !(s:normal) | let a = "\<C-[>[m" | else | let a = "" | endif
   return a
 endfun
 
@@ -137,6 +150,9 @@ else
   let s:end = line("$")
 endif
 
+" List of all id's
+let s:idlist = ","
+
 while s:lnum <= s:end
 
   " Get the current line
@@ -156,24 +172,38 @@ while s:lnum <= s:end
 
     " Output the text with the same synID enclosed by ansi sequence
     let s:id = synIDtrans(s:id)
-    let s:new = s:AnsiOpening(s:id) . strpart(s:line, s:startcol - 1, s:col - s:startcol) . s:AnsiClosing(s:id)
-    exe s:newwin . "wincmd w"
-    exe "normal! a" . s:new
-    exe s:orgwin . "wincmd w"
+    let s:id_name = synIDattr(s:id, "name", s:whatterm)
+    let s:new = s:new . '<span class="' . s:id_name . '">' . strpart(s:line, s:startcol - 1, s:col - s:startcol) . '</span>'
+
+    " Add the class to class list if it's not there yet
+    if stridx(s:idlist, ",".s:id.",") == -1
+      let s:idlist = s:idlist . s:id . ","
+    endif
     if s:col > s:len
       break
     endif
   endwhile
 
-  " Do the last loop
   exe s:newwin . "wincmd w"
-  exe "normal! a" . "\n\e"
+  exe "normal! a" . s:new .  "\n\e"
   exe s:orgwin . "wincmd w"
   let s:lnum = s:lnum + 1
+  +
 endwhile
 
-" Cleanup
 exe s:newwin . "wincmd w"
+
+" Gather attributes for all other classes
+let s:idlist = strpart(s:idlist, 1)
+while s:idlist != ""
+  let s:attr = ""
+  let s:col = stridx(s:idlist, ",")
+  let s:id = strpart(s:idlist, 0, s:col)
+  let s:idlist = strpart(s:idlist, s:col + 1)
+  let s:id_name = synIDattr(s:id, "name", s:whatterm)
+  " Apply the class attribute
+  execute '%s+<span class="' . s:id_name . '">\(.\{-}\)</span>+' . s:AnsiOpening(s:id) . '\1' . s:AnsiClosing(s:id) . '+g'
+endwhile
 
 " Restore old settings
 let &title = s:old_title

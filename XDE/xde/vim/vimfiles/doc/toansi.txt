@@ -1,0 +1,46 @@
+*toansi.txt*    Convert Vim Highlighting to Ansi Escape Sequences Dec 15, 2004
+
+==============================================================================
+1. Description:                                         *toansi*
+
+       Convert vim highlighted files into ANSI control sequence
+       Base on tohtml script
+
+==============================================================================
+2. Installation:                                        *toansi-install*
+
+       1.Unzip
+       2.Copy files to your vim directory.
+	   3.Install document
+		  cp doc/toansi.txt ~/.vim/doc
+		  vim
+		  :helptags ~/.vim/doc
+	      :q
+
+==============================================================================
+3. Usage:                                               *toansi-usage*
+       Switch to normal mode, enter :TOansi to run the script
+       You can specify the converting range, consulting :help TOhtml for more information
+
+==============================================================================
+4. Update History:                                      *toansi-history*
+
+   2005/02/22 Ver 1.3b
+		   Help document added
+   2004/12/14 Ver 1.3a
+           Fix a bug when source file contains "<"
+           English readme added
+   2004/11/15 Ver 1.3
+           Greatly improved processing speed Improved algorithm
+           Thanks to dodowolf@drl for bug reporting
+   2004/11/12 Ver 1.2
+           Guess color from RGB when in gui
+   2004/11/11 Ver 1.1
+           Fix a bug when T_Co=16
+           Fix a bug: mismatching of AnsiOpening and AnsiClosing
+           Set bold as default when in gui mode
+   2004/11/10 Ver 1.0
+           Initial Version
+
+rogerz@smth
+2004 Dec 14
