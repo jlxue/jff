@@ -33,3 +33,27 @@ Input[1] := InstallJava[]
 Input[2] := reader=JavaNew["java.io.FileReader", "/etc/passwd"]
 Input[3] := reader@getEncoding[]
 
+---------------------------------------
+http://library.wolfram.com/infocenter/TechNotes/174/
+A MathLink Tutorial, by Todd Gayley
+
+通过 MathLink 可以发送给 MathKernel 的三种 packet：
+* EvaluatePacket
+  只是求职，没有历史记录功能，%、In[n], Out[n] 不可用
+
+* EnterTextPacket
+  Mathematica Player 的 MathKernel 处理时原样返回 EnterTextPacket["...."],
+  且没有 InputNamePacket 和 OutputNamePacket;
+  而 Mathematica 的  MathKernel 正常返回计算结果字符串，也有InputNamePacket
+  和 OutputNamePacket;
+
+* EnterExpressionPacket
+  Mathematica Player 的 MathKernel 处理时返回 EnterExpressionPacket["result"],
+  且没有 InputNamePacket 和 OutputNamePacket;
+  而 Mathematica 的  MathKernel 正常返回计算结果表达式，也有InputNamePacket
+  和 OutputNamePacket;
+
+所以 Mathematica Player 的 MathKernel 不支持会话功能，另外
+它也不支持绘图指令如 Plot, 所以 KernelLink.evaluateToImage()
+和 KernelLink.evaluateToTypeset() 无法使用。
+

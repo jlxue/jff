@@ -11,7 +11,7 @@ public class Mathematica {
     }
 
     public String readLine(BufferedReader in) throws IOException {
-        System.out.print("Input[" + inputCount++ + "] := ");
+        System.out.print("In[" + ++inputCount + "]:= ");
 
         return in.readLine();
     }
@@ -39,7 +39,7 @@ public class Mathematica {
                 "\"" + MATH_ROOT + "/Executables/math\" -mathlink" };
         }
 
-        KernelLink kl;
+        KernelLink kl = null;
 
         try {
             kl = MathLinkFactory.createKernelLink(kl_args);
@@ -48,8 +48,12 @@ public class Mathematica {
                 kl.addPacketListener(new PacketPrinter(System.err));
 
             kl.addPacketListener(new MyPacketListener());
+
+            kl.connect(10000);
         } catch (MathLinkException e) {
             e.printStackTrace();
+            if (kl != null)
+                kl.close();
             return;
         }
 
@@ -61,8 +65,34 @@ public class Mathematica {
             String input, output;
 
             while (null != (input = readLine(in))) {
+                // Method 1:
                 output = kl.evaluateToOutputForm(input, windowWidth);
                 System.out.println(output);
+
+
+                /*
+                // Method 2:
+                kl.evaluate(input);
+                kl.waitForAnswer();
+
+                Expr expr = kl.getExpr();
+                System.out.println(expr);
+                expr.dispose();
+                */
+
+
+                /*
+                // Method 3:
+                kl.putFunction("EnterTextPacket", 1);
+                kl.put(input);
+
+                //kl.putFunction("EnterExpressionPacket", 1);
+                //kl.putFunction("ToString", 1);
+                //kl.putFunction("ToExpression", 1);
+                //kl.put(input);
+
+                kl.discardAnswer();     // let PacketListener process all packets
+                */
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -75,9 +105,28 @@ public class Mathematica {
 
     class MyPacketListener implements PacketListener {
         public boolean packetArrived(PacketArrivedEvent evt) throws MathLinkException {
-            if (evt.getPktType() == MathLink.TEXTPKT) {
-                KernelLink kl = (KernelLink) evt.getSource();
-                System.out.println(kl.getString());
+            int type = evt.getPktType();
+            KernelLink kl = (KernelLink) evt.getSource();
+
+            //System.out.println("got pkt type: " + type);
+            //System.out.println("evt: " + evt);
+
+            switch (type) {
+                case MathLink.RETURNEXPRPKT:
+                //case MathLink.RETURNPKT:
+                case MathLink.RETURNTEXTPKT:
+                case MathLink.TEXTPKT:
+                    System.out.println(kl.getString());
+                    break;
+
+                //case MathLink.INPUTNAMEPKT:
+                case MathLink.OUTPUTNAMEPKT:
+                    System.out.print(kl.getString());
+                    break;
+
+                default:
+                    //System.out.println("default got pkt type: " + type);
+                    break;
             }
 
             return true;
