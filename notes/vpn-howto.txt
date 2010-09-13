@@ -1,0 +1,50 @@
+推荐使用: ip_gre.ko, strongswan, openvpn
+
+(1)
+http://lartc.org/
+Linux Advanced Routing & Traffic Control
+
+使用 iproute2 配置。
+ipip.ko, ip_gre.ko, sit.ko。
+
+(2) 使用 ssh
+secvpn
+
+(3) PPTP    (有安全缺陷)
+pptpd       http://poptop.sourceforge.net/
+
+client:
+    pptp-linux
+
+(4) IPSec
+FreeS/WAN: 不再维护，派生出 OpenSWAN 和 StrongSWAN。
+
+Openswan
+strongSwan
+
+clients:
+    ike         http://www.shrew.net/
+    racoon
+    IsaKmpD
+    ipsec-tools
+
+(5) L2TP
+xl2tpd      http://www.xelerance.com/software/xl2tpd/
+
+(6) CIPE
+http://sites.inka.de/sites/bigred/devel/cipe.html
+
+(7) 专有协议，基于 SSL
+openvpn     http://openvpn.net/
+tinc        http://www.tinc-vpn.org/
+vtun        http://vtune.sourceforge.net
+vpnd
+
+(8) Cisco-compatible VPN client
+vpnc
+
+(9) others
+httptunnel
+stunnel
+udptunnel
+
