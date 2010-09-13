@@ -141,6 +141,16 @@ HTML 信息提取
     HTML::TreeBuilder::XPath
     WWW::Mechanize
 
+Email 处理
+=========
+    http://search.cpan.org/dist/Task-Email-PEP-All/
+    http://www.slideshare.net/rjbs/how-i-learned-to-stop-worrying-and-love-email-the-2007-pep-talk/
+    Email::Simple
+    Mail::SendEasy
+    Email::Sender
+    Email::Send, Email::Send::IO        (old, problematic)
+    http://www.caspian.dotconf.net/menu/Software/SendEmail/
+                ( http://www.blat.net/ for Win32)
 
 进程管理
 =======
@@ -148,6 +158,9 @@ HTML 信息提取
     Parallel::ForkManager
     Proc::ProcessTable
 
+多线程
+======
+    http://migo.sixbit.org/papers/Perl_Threads/slide-index.html
 
 模块编写
 ========
@@ -249,6 +262,7 @@ CPAN::Mini::FromList
 Cwd
 Data::Dumper
 Data::FormValidator
+Data::Section, Inline::Files
 Date::Business
 Date::Calc
 Date::Manip (太庞大，不推荐)
@@ -287,6 +301,8 @@ List::AllUtils
 List::MoreUtils
 List::Util
 List::Utils
+Log::Any
+Log::Dispatch
 Log::Log4perl
 LWP::*
 Mail::Mailer
