@@ -54,7 +54,7 @@ subst () {
 ## packages to be installed
 
 ### X server, X display manager, X window manager
-i xserver-xorg slim openbox
+i xserver-xorg slim openbox x11-xserver-utils xscreensaver
 
 ### theme
 i gtk2-engines gtk-theme-switch desktop-base

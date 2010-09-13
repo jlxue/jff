@@ -51,6 +51,6 @@ fi
 # My extra autostart things
 xset b off
 tint2 &
-conky-1.7.2 &
+conky -q &
 xscreensaver -no-splash &
 
