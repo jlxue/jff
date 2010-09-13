@@ -138,7 +138,7 @@ ${stippled_hr 1}
 #   Battery, temperature
 #
 Battery: $battery ${battery_percent}% $battery_time
-Temperature: CPU ${acpitemp}°C - HDD /dev/sda ${hddtemp sda}°C
+Temperature: CPU ${acpitemp}°C - HDD /dev/sda ${hddtemp /dev/sda}°C
 ##  (hwmon cpu temp: ${hwmon temp 1}°C - i8k cpu temp: ${i8k_cpu_temp}°C)
 ##Fans: left ${i8k_left_fan_rpm}rpm $i8k_left_fan_status - right ${i8k_right_fan_rpm}rpm $i8k_right_fan_status
 ${stippled_hr 1}
