@@ -138,7 +138,7 @@ i cups
 
 ### PDF reader
 # Or: apvlv
-i evince
+i evince-gtk poppler-data
 
 ### audio mixer
 i alsa-utils

@@ -140,6 +140,7 @@ http://www.sagemath.org
 http://www.r-project.org
 http://www.axiom-developer.org
 http://maxima.sourceforge.net
+http://magma.maths.usyd.edu.au/magma/
 
 The AXIOM family:
   Axiom:     http://www.axiom-developer.org/
