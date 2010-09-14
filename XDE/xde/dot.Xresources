@@ -32,7 +32,7 @@ URxvt.scrollWithBuffer: True
 !URxvt.perl-ext-common: default,matcher,tabbed
 URxvt.perl-ext-common: default,matcher
 URxvt.urlLauncher: firefox
-URxvt.matcher.button: 2
+URxvt.matcher.button: C1
 URxvt*matcher.pattern.1: \\b(mailto|http|https|ftp|file):[/]*[\\w-]\\.[\\w./?&@#-]*[\\w/-]
 URxvt*matcher.pattern.2: \\bwww\\.[\\w-]\\.[\\w./?&@#-]*[\\w/-]
 URxvt.preeditType:      Root
