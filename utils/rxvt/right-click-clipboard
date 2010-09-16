@@ -12,37 +12,40 @@
 #
 #   Liu Yubao <yubao.liu@gmail.com>, 2010-09-16
 
-#use Data::Dumper;
-    #open my $fh, ">>/tmp/aa";
-    #print $fh Dumper($self, $event);
-    #close $fh;
-
-    # No modifier pressed
-    #$self->tt_write("# " . (sprintf "%b %b ", urxvt::AnyModifier, $event->{state}));
-    #$self->tt_write("# button=" . $event->{button} . " ");
-
 sub on_button_release {
     my ($self, $event) = @_;
 
 
+    # Only right button clicked
     if ( $event->{state} == (urxvt::Mod2Mask | urxvt::Button3Mask) ) {
         my $selection = $self->selection;
 
+        # cancel selection
+        my ($row, $col) = ($event->{row}, $event->{col});
+        $self->selection_beg($row, $col);
+        $self->selection_end($row, $col);
+        $self->selection_make(urxvt::NOW);
+        $self->selection("");
+
+        #$self->tt_write("# selection=[$selection]");
+
         if ( length($selection) > 0 ) {
-            $self->tt_write("# copy");
+            #$self->tt_write("# copy");
 
             open my $fh, "| xsel -ib" or return;
-            print $fh, $selection;
+            binmode $fh;
+            print $fh $selection;
             close $fh;
 
         } else {
-            $self->tt_write("# paste");
+            #$self->tt_write("# paste");
 
             open my $fh, "xsel -ob |" or return;
             binmode $fh;
             {
                 local $/;
-                $self->tt_write($_) if <$fh>;
+                my $text = <$fh>;
+                $self->tt_write($text) if defined $text;
             }
             close $fh;
         }
