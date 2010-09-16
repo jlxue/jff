@@ -52,6 +52,7 @@ web app framework
 
 Server
 ======
+    Gearman
     Starman (High-performance preforking PSGI web server, UNIX only!)
     PerlBal
     Net::Server
@@ -186,6 +187,7 @@ Email 处理
     Devel::Size
     Devel::Size::Report
     Devel::SmallProf
+    Debug::Trace
     Devel::Trace
 
     Test::*
