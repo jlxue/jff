@@ -29,8 +29,7 @@ URxvt.scrollTtyOutput: False
 URxvt.scrollTtyKeypress: True
 URxvt.scrollWithBuffer: True
 
-!URxvt.perl-ext-common: default,matcher,tabbed
-URxvt.perl-ext-common: default,matcher
+URxvt.perl-ext-common: default,matcher,tabbed
 URxvt.urlLauncher: firefox
 URxvt.matcher.button: C1
 URxvt*matcher.pattern.1: \\b(mailto|http|https|ftp|file):[/]*[\\w-]\\.[\\w./?&@#-]*[\\w/-]

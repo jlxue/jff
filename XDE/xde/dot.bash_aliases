@@ -18,7 +18,7 @@ alias rm=safe_rm
 alias c=clear
 
 export ACK_PAGER="less -R"
-alias ack=ack-grep
+which ack-grep >/dev/null 2>&1 && alias ack=ack-grep
 
 alias locallib='eval $(perl -Mlocal::lib)'
 
