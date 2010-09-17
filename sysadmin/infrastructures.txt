@@ -1,3 +1,20 @@
+Single Sign-On
+http://www.ibm.com/developerworks/cn/security/se-sso/
+1) GSS-API, OSF DCE, PAM
+2) Broker-Based SSO: Kerberos v5, Sesame, IBM KryptoKnight
+3) Agent-Based SSO: SSH
+4) Token-Based SSO
+
+Web SSO:
+    CAS: Central Authentication Service
+    JOSSO: www.josso.org
+    CoSign:
+    WebAuth:
+    SAML:
+    OpenID:
+
+=====================================================================
+
 帐户管理: OpenLDAP, MySQL/PostgreSQL
 源码管理: Subversion, GIT
 代码评审: ReviewBoard, Rietveld, Gerrit
