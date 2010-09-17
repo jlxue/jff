@@ -14,10 +14,13 @@
 
 sub on_button_release {
     my ($self, $event) = @_;
+    my $mask = $self->ModLevel3Mask | $self->ModMetaMask | urxvt::ShiftMask | urxvt::ControlMask;
 
 
     # Only right button clicked
-    if ( $event->{state} == (urxvt::Mod2Mask | urxvt::Button3Mask) ) {
+    return if $event->{state} & $mask;
+
+    if ( $event->{state} & urxvt::Button3Mask ) {
         my $selection = $self->selection;
 
         # cancel selection
