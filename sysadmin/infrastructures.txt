@@ -1,3 +1,12 @@
+libnss-ldap
+libpam-ldap
+libpam-ccreds
+nss-updatedb
+nscd
+slapd
+kerberos
+sasl
+=====================================================================
 Single Sign-On
 http://www.ibm.com/developerworks/cn/security/se-sso/
 1) GSS-API, OSF DCE, PAM
