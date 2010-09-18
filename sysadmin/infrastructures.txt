@@ -6,6 +6,9 @@ nscd
 slapd
 kerberos
 sasl
+sssd
+radius
+
 =====================================================================
 Single Sign-On
 http://www.ibm.com/developerworks/cn/security/se-sso/
