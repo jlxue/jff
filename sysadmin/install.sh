@@ -3,10 +3,9 @@
 set -e
 
 PACKAGES="isc-dhcp-server-ldap \
-    pdns-backend-ldap \
-    slapd ldap-utils \
-    libpam-ldapd libnss-ldapd \
-    krb5-admin-server krb5-kdc libpam-krb5"
+ pdns-backend-ldap \
+ slapd ldap-utils libnss-ldapd \
+ krb5-admin-server krb5-kdc-ldap libpam-krb5"
 
 aptitude install $PACKAGES
 
