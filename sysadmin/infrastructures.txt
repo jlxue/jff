@@ -1,3 +1,9 @@
+Kerberos:
+    http://techpubs.spinlocksolutions.com/dklar/kerberos.html
+    http://kerberos.org/index.html
+    http://web.mit.edu/kerberos/
+
+=====================================================================
 libnss-ldap
 libpam-ldap
 libpam-ccreds
