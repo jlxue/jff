@@ -1,0 +1,53 @@
+### optimize database ######################################
+
+dn: olcDatabase={1}hdb,cn=config
+changetype: modify
+add: olcDbIndex
+olcDbIndex: default sub
+
+dn: olcDatabase={1}hdb,cn=config
+changetype: modify
+add: olcDbIndex
+olcDbIndex: cn,sn,uid,displayName pres,sub,eq
+
+dn: olcDatabase={1}hdb,cn=config
+changetype: modify
+add: olcDbIndex
+olcDbIndex: uidNumber,gidNumber,dc eq
+
+dn: olcDatabase={1}hdb,cn=config
+changetype: modify
+add: olcDbIndex
+olcDbIndex: mail,givenName eq,subinitial
+
+
+### security consideration ###################################
+
+dn: cn=config
+changetype: modify
+add: olcDisallows
+olcDisallows: bind_anon
+
+dn: cn=config
+changetype: modify
+add: olcRequires
+olcRequires: authc
+
+#dn: cn=config
+#changetype: modify
+#add: olcSecurity
+#olcSecurity: ssf=1 update_ssf=112 simple_bind=112
+
+# "simple" auth method sends password in clear text, so disable it.
+dn: cn=config
+changetype: modify
+add: olcDisallows
+olcDisallows: bind_simple
+
+### Using TLS #################################################
+
+#olcTLSCACertificateFile: /etc/ldap/ca-cert.pem
+olcTLSCertificateFile: /etc/ldap/self-ca-cert.pem
+olcTLSCertificateKeyFile: /etc/ldap/self-ca-key.pem
+olcTLSVerifyClient: never
+
