@@ -1,0 +1,80 @@
+== http 请求处理 ==
+
+Perl 脚本在 web 编程上有三种运行模式：
+
+  * CGI 模式：每次请求都派生一个进程执行某个程序，简单，通用，但效率低下；
+
+    libcgi-pm-perl:: CGI.pm 等基础模块，提供 CGI、mod_perl 下的 request
+    解析以及 response 输出功能；
+
+  * Daemon 模式：派生一个进程执行某个程序，服务多次请求，效率很高，比如
+  FastCGI, SpeedyCGI, SCGI；
+
+    libfcgi-perl:: FCGI.pm，提供 FastCGI 支持；
+
+    libcgi-fast-perl:: CGI::Fast，封装 FCGI，提供 CGI.pm 的接口
+
+    libapache2-mod-scgi:: SCGI 协议
+
+    libapache2-mod-speedycgi::
+
+    speedy-cgi-perl::
+
+  * 内嵌模式：使用 Web Server 的 API，直接嵌入到 Web server 的进程中，效率
+  更高，但不通用，编程复杂，比如 Apache 的 mod_perl，IIS 的 ISAPI。
+
+    libapache2-mod-perl2:: Apache2 的 mod-perl 2.0 版本，libapache2-mod-perl2
+    提供的核心模块：
+      * ModPerl::RegistryCooker 提供接口供子类实现
+        * ModPerl::Registry
+          * ModPerl::RegistryPrefork
+        * ModPerl::RegistryBB
+        * ModPerl::PerlRun
+          * ModPerl::PerlRunPrefork
+      * ModPerl::RegistryLoader 在 Apache 启动时编译 Perl 脚本，从而派生的
+      子进程可以共享编译结果，以提高效率并节省内存
+
+
+<<Anchor(Template)>>
+== 页面模板 ==
+
+  libtemplate-perl:: Template::Toolkit，特性很丰富
+
+  libtext-template-perl:: 简洁，直接替换 {...} 中的 Perl 代码执行结果，但是
+  不支持跨模板片段的循环、分支是个极大的缺陷，而且以 { 和 } 做标记很容易发生
+  冲突，虽然支持用其它字符作为标记，但又失去了 \n 等转义序列的功能。
+
+  libhtml-template-perl:: '''推荐使用'''，简洁但功能也不弱，只有 <TMPL_VAR>,
+  <TMPL_LOOP>, <TMPL_ELSE>, <TMPL_UNLESS>, <TMPL_INCLUDE> 这几个标签，遗憾的
+  是不支持模板继承，一些有意思的特性：
+    * 标记的 <> 可以用 <!-- --> 代替，以方便 HTML 标记合法性检查；
+    * 模板内容可以缓存起来；
+    * TMPL_LOOP 支持特殊变量 {{{__first__, __odd__, __inner__, __last__,
+    __counter__}}}；
+    * 支持 filter 选项，可以把其它模板格式转换到 H::T 的模板格式；
+    * 支持 TMPL_VAR 的 html、js、url 转义；
+    * output() 支持在处理时就地输出，以提高效率并节省内存；
+
+  (!) '''libhtml-template-pro-perl''' 是 HTML::Template 的 Perl/XS 版本并扩展
+  了一些功能，将 use HTML::Template 替换成 use HTML::Template::Pro 即可，可提升
+  50% 的性能。
+
+  (!) [[/TemplateExamples#HTML::Template | HTML::Template 的例子]]
+
+  libpetal-perl:: 使用标签里的 petal:xxx 属性来替换标签内容，虽然有利于所见
+  即所得编辑，但是语法有点古怪，效率比 HTML::Template 慢了近一倍，而且输出时
+  只能用 print $templ->process(...)，这个字符串拼接过程降低效率，另外这个库
+
+  近来已很少维护了。
+
+  (!) [[/TemplateExamples#Petal | Petal 的例子]]
+
+  libembperl-perl:: 在模板里嵌入 Perl 代码，模仿 PHP 的原始形式，不利于页面
+  和代码分离，但性能比 HTML::Template 高 50%。
+
+  (!) [[/TemplateExamples#EmbPerl | EmbPerl 的例子]]
+
+  libhtml-mason-perl:: 在模板里嵌入代码；过于复杂 :-(
+
+  libclearsilver-perl::
+
