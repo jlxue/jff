@@ -1,0 +1,26 @@
+http://cpanratings.perl.org/
+http://cpantesters.org/
+CPAN-Dependency
+http://www.dev411.com/perl/cpancompare
+http://deps.cpantesters.org/
+http://static.cpantesters.org/
+http://cpan.uwinnipeg.ca/
+http://kobesearch.cpan.org/
+http://cpan.perl.org/
+
+
+        ＊ 创建日期
+        ＊ 最后更新日期
+        ＊ 更新频率
+        ＊ 模块依赖其它模块的个数，递归一直到基础模块
+        ＊ 被其它模块依赖的次数
+        ＊ dist 包含的模块个数
+        ＊ 代码行数
+        ＊ 推荐分数
+        ＊ 评论条数
+        ＊ 测试用例通过的百分比
+        ＊ 测试用例个数
+        ＊ 作者在 cpan 持有的模块个数
+        ＊ 被安装次数（有记录这个数据么？）
+        ＊ bug 数目，bug 提出日期和解决日期
+        ＊ See also
