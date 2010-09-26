@@ -235,6 +235,10 @@ AMQP/STOMP
     Net::STOMP::Client
     Net::RabbitMQ
 
+Cache
+=====
+    CHI
+    Cache::Cache
 #######################################################################
 
 
