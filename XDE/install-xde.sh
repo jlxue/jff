@@ -96,10 +96,13 @@ i scim-pinyin
 ### web browser
 # And: fireftp chatzilla
 i -R iceweasel icedtea6-plugin flashplugin-nonfree
+i xul-ext-downloadstatusbar xul-ext-fission
 
 ### mail user agent
 # And: lightning or iceowl-extension
 i -R icedove
+i iceowl-extension xul-ext-dispmua icedove-quotecolors
+# Provider for Microsoft Exchange https://addons.mozilla.org/en-US/thunderbird/addon/195279/
 
 ### Office
 i -R openoffice.org
