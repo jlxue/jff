@@ -102,7 +102,8 @@ i xul-ext-downloadstatusbar xul-ext-fission
 # And: lightning or iceowl-extension
 i -R icedove
 i iceowl-extension xul-ext-dispmua icedove-quotecolors
-# Provider for Microsoft Exchange https://addons.mozilla.org/en-US/thunderbird/addon/195279/
+# Minimized to Tray Plus: https://addons.mozilla.org/af/thunderbird/addon/2831/
+# Provider for Microsoft Exchange: https://addons.mozilla.org/en-US/thunderbird/addon/195279/
 
 ### Office
 i -R openoffice.org
