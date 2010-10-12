@@ -1,0 +1,18 @@
+cl-postoffice
+    cl-acl-compat
+    cl+ssl
+      cl-flexi-streams cl-alexandria cl-babel cl-trivial-features cl-cffi
+    cl-sasl
+
+mel-base
+clonsigna
+usocket
+iolib
+cl-http
+cl-smtp
+cl-pop3
+rfc2822
+cl-mime
+mime4cl
+smtp4cl
+
