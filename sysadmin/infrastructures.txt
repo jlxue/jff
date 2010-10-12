@@ -41,6 +41,7 @@ Web SSO:
 Wiki系统: TWiki/Foswiki, MoinMoin
 任务跟踪: Bugzilla
 自动构建: Hudson
+搜索引擎: mairix, swish++, namazu2
 
 =====================================================================
 http://en.wikipedia.org/wiki/Network-attached_storage
