@@ -1,0 +1,398 @@
+cl-asdf
+cl-flexichain
+cl-iterate
+cl-kmrcl
+cl-launch
+cl-metering
+cl-series
+
+cl-fad  ****
+cl-port ****
+cl-utilities ****
+
+Lisp: symbol+S-expression+lisp form, reader+evaluator, cons+list,
+      macro, condition, package, clos
+
+Chapter 1: Introduction - Why Lisp?
+===================================
+
+
+Chapter 2: Lather, Rinse, Repeat - A Tour of the REPL
+=====================================================
+
+* M-x slime 启动 slime
+  C-c C-c 对光标所在函数定义执行slime-compile-defun
+  REPL 里输入 ,quit 退出 slime
+  宏开始括号 C-c RET 查看宏展开结果
+  C-c C-q or C-c C-] 补全括号
+  C-c C-l   (load "a.lisp")
+  C-c C-k   (load (compile-file "a.lisp"))
+
+
+Chapter 3: Practical - A Simple Database
+========================================
+
+
+Chapter 4: Syntax and Semantics
+===============================
+
+* text 经 reader 读入转成 s-expressions，s-expression 分成
+  list 和 atom; lisp forms 是 s-expressions 的子集，lisp 
+  forms 被 evaluator 执行; atoms 和第一个元素是 symbol 的
+  列表都是 lisp forms。
+* 10 个特殊字符不能直接出现在符号名中：( ) " ' ` , : ; \ |
+* nil 既是 atom 也是 list，它等价于 ()。
+* 列表形式的 lisp forms 分成三类：function call forms, macro
+  forms, special forms(25 个)，三者遵循不同的求值规则。
+* 相等：
+    eq  对象相等
+    eql 保证对相同数字和字母返回相等
+    equal   扩展到字符串和列表
+    equalp  忽略大小写的 equal，以及数学意义上的数字相等
+* 缩进规则：
+    函数调用形式参数对齐
+    宏和特殊形式针对最后一个左括号缩进两格
+    ;;;; 文件级别注释
+    ;;; 段落级别注释
+    ;;  函数内部代码注释
+    ;   函数内部代码单行注释，放在代码后面
+
+
+Chapter 5: Functions
+====================
+
+* (defun name (parameter*)
+    "Optional documentation string."
+    body-form*)
+* (defun name (a b &optional c d) ...)
+  (defun name (a b &optional (c 10) (d 20)) ...)
+  (defun name (a b &optional (c 10 c-supplied-p) d) ...)
+* (defun name (a b &rest values) ...)
+* (defun name (a b &key c d) ...)
+  (defun name (a b &key (c 10) (d 20) ...)
+  (defun name (a b &key (c 10 c-supplied-p) d) ...)
+  (defun name (a b &key ((:color c) 10 c-supplied-p) d) ...)
+* 参数顺序：required, optional, rest, keyword。
+    &optional 和 &rest 都不应该与 &key 同时使用。
+* 从函数中间返回：(return-from func-name value)
+* 函数对象：(function foo) 或者 #'foo，
+    (foo 1 2 3) 等价于 (funcall #'foo 1 2 3)
+    不定数目的参数：(apply #'foo arg-list)
+* 匿名函数：
+    ((lambda (x) (* x x)) 2) 等价于
+    (funcall #'(lambda (x) (* x x)) 2)。
+    可以将 lambda 表达式看做特殊的函数名。
+
+
+Chapter 6: Variables
+====================
+
+* (defparameter *x* 10 "document")
+  (defvar *x* 10 "document")    只有当 *x* 没有定义时才复制
+  (defconst +PI+ 3.14 "document")
+* (let ((a 10)
+        (b 20))
+    (...))
+* setf, incf, decf, rotatef, shiftf, push, pop, pushnew
+
+
+Chapter 7: Macros - Standard Control Constructs
+===============================================
+
+* (if condition then-form else-form), progn
+* (when condition then-form*)
+  (unless condition else-form*)
+* (cond (test-1 form*)
+        ...
+        (test-N form*)
+        (T  form*))
+* and, or, not
+* (dolist (var list-form)
+    body-form*)
+  (dotimes (var count-form)
+    body-form*)
+  (do ((var init-form step-form)
+       ...)
+      (end-test-form result-form*)
+    statement*)
+* loop
+
+
+Chapter 8: Macros - Defining Your Own
+=====================================
+
+* (defmacro name (parameter*)
+    "Optional documentation string."
+    body-form*)
+* &body, destructuring parameter list 
+* ` 和 , 和 ,@
+* 编写宏的注意事项：
+    如无特殊需要，要保证参数按序被求值
+    如无特殊需要，要保证参数只被求值一次
+    用 GENSYM 在宏展开过程中来产生变量名
+* (macroexpand-1 '(some-macro ....))
+  slime 中光标放在 macro form 起始括号，按 C-c RET 展开，
+  设置 *print-pretty* 为 t 有助于排版展开结果。
+
+
+Chapter 9: Practical - Building a Unit Test Framework
+=====================================================
+
+
+Chapter 10: Numbers, Characters, and Strings
+============================================
+
+* 整数运算是精确的
+  123，123., 2/3, #b... #o... #x 分别为二进制、八进制和十六进制
+  #nr... 表示 n 进制，最大到 36 进制
+
+* 浮点数：1.0, 1e0, 1d2, .123
+    s, f, d, l 表示 short, single, double, long precise float
+    e 表示默认精度，一般是 single precise float
+* 复数 #c(... ...)
+* + - * / mod(取模) rem(整除余数) 1+ 1-
+  floor 向负无穷取整
+  ceiling 向正无穷取整
+  truncate 向零取整
+  round 向最近整数取整，如果与两个整数等距，则向最近偶数取整
+* 数字比较：= /= > < >= <=  (两个或两个以上参数)
+  = 数学意义上的数字相等，eql 会考虑类型，对于 1 和 1.0，= 和
+  equalp 返回 t，eq、eql、equal 会返回 nil
+* max, min, zerop, minusp, plusp, evenp, oddp, log, exp, expt,
+  sin/cos/tan, asin/acos/atan, sinh/cosh/tanh, asinh/acosh/atanh
+
+* 字符: #\x, #\Space, #\Newline, #\Tab, #\Page, #\Rubout, #\Linefeed,
+  #\Return, #\Backspace
+* 字符比较：(两个或两个以上参数)
+  char= char/= char< char> char<= char>=
+  char-equal char-not-equal char-lessp char-greaterp
+  char-not-greaterp char-not-lessp
+
+* 字符串: "...."，用 \ 转义。
+* 字符串比较：(两个必要参数以及四个关键字参数 :start1 :end1 :start2 :end2)
+  string= string/= string< string> string<= string>=
+  string-equal string-not-equal string-lessp string-greaterp
+  string-not-greaterp string-not-lessp
+ 
+
+Chapter 11: Collections
+=======================
+
+* 一维固定大小数组: (vector ...) 或 #(...) 后者表示常量
+* (make-array arg0 &key
+    adjustable  可否扩展容量
+    element-type 元素类型，比如 'CHARACTER
+    initial-element 元素初始值
+    initial-contents 数组初始值
+    fill-pointer    填充指针，可用 vector-push, vector-pop，如果是
+                    可扩容的向量，则用 vector-push-extend 自动扩容
+    displaced-to
+    displaced-index-offset)
+  arg0 为数字表示一维数组，数字表示长度，arg0 为列表时表示多维数组，
+  列表的每一元素表示对应维的长度
+* (length v)
+  (elt v i) 向量 v 的第 i 个元素，SETFable
+* (count element sequence)
+  (find element sequence)
+  (position element sequence)
+  (remove element sequence)
+  (substitute new-element old-element sequence)
+  都接受 :from-end :start :end :key :test :test-not 关键字参数，
+  remove 和 substitute 还接受 :count 关键字参数。其中 :test-not
+  建议用 :test 和 complement 函数代替。
+* (count-if #'foo sequence)
+  (count-if-not #'foo sequence)
+  对应的有 find, position, remove, substitute 的各两个版本。
+  (remove-duplications sequence)
+  它们接受的关键字参数都类似。
+
+* copy-seq, reverse
+  (concatenate 'xxx sequance*)  xxx 最常用的是 vector, list, string
+
+* (setf seq (sort seq #'comparator))
+  (setf seq (stable-sort seq #'comparator))
+  排序会破坏原来的 seq。
+  (merge 'xxx seq1 seq2 #'comparator) xxx 最常用的是 vector, list, string
+* (subseq seq begin end)    SETFable
+  fill, search, mismatch
+* every, some, notany, notevery
+* map, map-into, reduce
+
+* (make-hash-table :test 'xxx)  xxx 默认是 eql，可以设置为 eq, eql,
+   equal, equalp，如果要用字符串做键，则要用 equal 或者 equalp。
+  (gethash key hashtable)   SETFable，区分不出是不存在还是值确实为 nil
+  (multiple-value-bind (value present) (gethash key hashtable))
+  remhash, clrhash
+  maphash
+
+
+Chapter 12: They Called It LISP for a Reason - List Processing
+==============================================================
+
+* cons, list
+  car/first, cdr/rest       SETFable
+* destructive operations 分成两类：
+  for-side-effect operations: (只是为了副作用)，比如 setf, vector-push,
+                              vector-pop
+  recycling operations: 使用返回值，但参数被破坏，参数中的 cons 被重用
+
+* nreverse, nconc, nsubstitude，delete, delete-if, delete-if-not,
+  delete-duplications 是 reverse, append, substitute, remove, remove-if,
+  remove-if-not, remove-duplications 的 recycling 版本。
+* append    返回的列表与最后一个列表参数共享数据
+* sort, stable-sort, merge 对 list 都是 recycling 的. sort, stable-sort 对
+  vector 是 for-side-effect 的，为了保持一致，应该都只使用它们的返回值。
+  如果不想破坏参数，可以用 copy-list 复制一份。
+* second, third, ..., tenth
+  (nth 0 '(1 2 3))
+  (nthcdr 1 '(1 2 3))
+* last, butlast, nbutlast, ldiff, tailp, list*,
+  make-list, revappend, nrevconc, consp, atom, listp, null
+* mapcar, maplist
+  mapcan, mapcon
+  mapc, mapl
+
+
+Chapter 13: Beyond Lists - Other Uses for Cons Cells
+====================================================
+
+* tree: copy-tree, tree-equal, subst, subst-if, subst-if-not,
+        nsubst, nsubst-if, nsubst-if-not
+* set: adjoin, pushnew, member, member-if-not, intersection,
+       union, set-difference, set-exclusive-or, subsetp
+       以及对应的 recycling 的 n... 版本
+* alist: acons, assoc/assoc-if/assoc-if-not, rassoc/rassoc-if/
+         rassoc-if-not, copy-alist, pairlis
+* plist: getf, remf, get-properties
+  每一个 symbol 都有一个 plist，用 symbol-plist 获得。
+  getf, get 都是 SETFable 的。
+  (get 'symbol 'key) 等价于 (getf (symbol-plist 'symbol) 'key)
+  (remprop 'symbol 'key) 等价于 (remf (symbol-plist 'symbol) 'key)
+  plist 的键一般是 symbol，由于 plist 用 eq 判断键，所以不要用数字或者
+  字符作为 plist 的键。
+* (destructuring-bind (parameter*) list
+    body-form*)
+
+
+Chapter 14: Files and File I/O
+==============================
+
+* open, read-char, read-line, read-byte, read-sequence, read, close
+* 读写 binary data: (open ... :element-type '(unsigned-byte 8))
+* 字符编码: (open ... :external-format ...)
+* 打开不存在的文件读取时不报错，返回 nil：
+  (open "a.txt" :if-does-not-exist nil)
+  读取到文件末尾不报错:
+  (read-char/read-line/read stream error default)
+  error 默认为 t，default 默认为 nil，如果 error 为 nil，
+  则读取到文件末尾时不报错，返回 default 的值。
+  打开存在的文件写出时不报错：
+  (open "a.txt" :direction :output :if-exists :supersede)
+  :supersede 表示替换原有文件，:append 表示向原有文件添加，
+  :overwrite 表示覆盖写。
+* write-char, write-line, write-string, write-byte, write-sequence
+  terpri 输出一个换行符 (terminate print)
+  fresh-line 如果当前行不为空则输出一个换行符
+  print/pprint, prin1/pprin1, princ 输出 S-expression
+  *print-readably* 变量默认为 nil。
+* (with-open-file (stream-var open-argument*)
+    body-form*)
+  利用 unwind-protect 确保文件被关闭。
+* (pathname "...") 或者 #P"..." 构造一个 pathname 对象。
+  pathname-host, pathname-device, pathname-directory,
+  pathname-name, pathname-type, pathname-version
+  namestring, directory-namestring, file-namestring
+
+  make-pathname 从头创建 pathname 对象。
+  (make-pathname :type "html" :defaults *oldpathname*) 获得 html
+    后缀的名字
+  merge-pathnames, enough-namestring
+
+* probe-file 探测文件（非目录）存在与否
+  directory, delete-file, rename-file, ensure-directories-exist,
+  file-write-date, file-author, file-length, file-position
+  (with-open-file (in filename :element-type '(unsigned-byte 8))
+    (file-length in))
+  Osicat 库封装了 posix fs api (http://common-lisp.net/project/osicat)
+
+* make-string-input-stream, make-string-output-stream,
+  get-output-stream-string
+  with-input-from-string, with-output-to-string
+  make-broadcast-stream, make-concatenated-stream,
+  make-two-way-stream, make-echo-stream
+
+
+Chapter 15: Practical - A Portable Pathname Library
+===================================================
+
+* *FEATURES*
+  #+clisp
+  #-clisp
+
+
+Chapter 16: Object Reorientation - Generic Functions
+====================================================
+
+* defgeneric, defmethod
+* 四种方法：:around, :before, primary, :after method
+* 九种简单内置方法组合规则：+, AND, OR, LIST, APPEND,
+    NCONC, MIN, MAX, PROGN
+
+
+Chapter 17: Object Reorientation - Classes
+==========================================
+
+* defclass, make-instance, slot-value
+* (defmethod initialize-instance :after ((var some-class) &key)
+    ...)
+* with-slots, with-accessors
+
+
+Chapter 18:
+===============================
+
+
+Chapter 19: Beyond Exception Handling - Conditions and Restarts
+===============================================================
+
+* define-condition, make-condition
+* 用 error 来触发 condition(ERROR 是 CONDITION 的子类)，error 调用更
+  低级的 signal，另外几个触发 condtion 的是 warn, cerror。
+* (handler-case expression
+    (condition-type ([var]) code)*)
+  相当于 Java 里的 try catch。
+* restart-case 建立一个 restart
+  handler-bind 是不 unwind call stack 的 try catch，用
+  invoke-restart 调用创建的 restart。
+  一般都为 restart 定义一个 restart function：
+  (defun skip-log-entry (c)
+    (let ((restart (find-restart 'skip-log-entry)))
+      (when restart (invoke-restart restart))))
+
+
+Chapter 20:
+====================
+
+
+Chapter 21: Programming in the Large - Packages and Symbols
+===========================================================
+
+* find-package, find-symbol, intern, *package*
+* pkg-name:symbol-name      只能引用包中导出的符号
+  pkg-name::symbol-name     能引用包中所有的符号
+* keyword symbols 全位于 KEYWORD 包中，语法是 :symbol-name，
+  reader 在 intern 这些符号时会创建一个同名常量，值就是符号本身。
+  uninterned symbols 的语法是 #:symbol-name，reader 每次读取时
+  都会创建一个新的 symbol，这些 symbols 不在任何包中。
+* 三个标准包：common-lisp, common-lisp-user, keyword，前两个别名
+  叫 cl 和 cl-user。
+* defpackage, in-package, 推荐用 keyword symbol 做包名。
+    :use, :export, :import-from, :shadow, :shadowing-import-from
+* 创建包的最佳实践：
+    1. 将 defpackage 定义与这些包中的代码分开，每一个包创建一个
+    foo-package.lisp 或者所有 defpackage 都放入一个 packages.lisp
+    中，并手动编写 load.lisp 依次加载所有文件或使用 cl-asdf 库。
+    2. 每个源文件以 (in-package :...) 开头，包含 defpackage 的
+    文件用 (in-package :common-lisp-user) 开头。
+* 在 REPL 中用 use-package :xxx 引入包。
+
