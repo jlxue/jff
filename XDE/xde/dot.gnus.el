@@ -14,6 +14,10 @@
                 (nnimap-address "kr1-webmail.corp.yahoo.com")
                 (nnimap-server-port 993)
                 (nnimap-stream ssl))
+        ;(nnmaildir ""
+        ;           (directory "~/.nnmaildir")
+        ;           (target-prefix "../maildirs/")
+        ;           (get-new-mail t))
         ))
 
 ;; 自动登录
@@ -23,12 +27,23 @@
 ;; 允许 [Gmail]/... 这样的邮箱名字
 ;(setq gnus-ignored-newsgroup "...")
 
-;; 下载邮件到本地再阅读
-;(setq mail-source-primary-source)
-;(setq mail-sources)
-
 ;; 保留 pop3 服务器上备份
 (setq pop3-leave-mail-on-server t)
+
+;; 下载邮件到本地再阅读
+;(setq mail-source-primary-source)
+(setq mail-sources
+      '(
+        ;(pop :server "pop.126.com"
+        ;     :port   110
+        ;     :user   "dieken")
+        ))
+
+;; 分类下载的邮件
+(setq nnmail-split-methods
+      '(
+        ("mail.other" "")
+        ))
 
 ;; 异步预取邮件
 (setq gnus-asynchronous t)
@@ -153,4 +168,7 @@
 
 ;; 设置信件自动删除的时间为一个月
 (setq nnmail-expiry-wait 30)
+
+;; Unconditionally read the dribble file.
+(setq gnus-always-read-dribble-file t)
 
