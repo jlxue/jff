@@ -1,0 +1,25 @@
+ThunderBird
+    邮件量大时 UI 响应非常差
+
+Opera Mail
+    UI 响应非常好，功能少点，不支持 LDAP 地址簿
+
+Mutt
+    收取全部邮件头，收取过程中不显示邮件列表，不响应操作
+
+Alpine
+    逐页收取邮件头，按需下载，但速度偏慢
+
+Emacs Gnus
+    会询问下载邮件数量，界面比较复杂
+
+Emacs VM (aptitude install vm)
+    连接 gmail 失败
+    据说对 imap 支持不好
+
+Emacs Mew (aptitude install mew)
+    连接 gmail 失败
+    据说对 pop 支持不错，但对 imap 支持不好
+
+Emacs Wanderlust (aptitude install wl-beta)
+    连接 gmail 成功，默认配置 UI 停顿明显，header 显示很乱
