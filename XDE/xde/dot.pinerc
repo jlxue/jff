@@ -343,7 +343,8 @@ incoming-folders=
 # List of directories where saved-message folders may be. First one is
 # the default for Saves. Example: Main {host1}mail/[], Desktop mail\[]
 # Syntax: optnl-label {optnl-imap-hostname}optnl-directory-path[]
-folder-collections=
+folder-collections=mail/[],
+	GMail {imap.googlemail.com/ssl/user=yubao.liu}[]
 
 # List, only needed if nntp-server not set, or news is on a different host
 # than used for NNTP posting. Examples: News *[] or News *{host3/nntp}[]
