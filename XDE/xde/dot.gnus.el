@@ -1,10 +1,4 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; 用户缺省名字和邮件地址
-
-(setq user-full-name "Yubao Liu")
-(setq user-mail-address "Yubao.Liu@gmail.com")
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 收信的配置
 
 (setq gnus-select-method
@@ -58,66 +52,43 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 发信的配置
 
-(setq message-send-mail-function 'message-smtpmail-send-it
-      smtpmail-starttls-credentials '(("smtp.googlemail.com" 465 nil nil))
-      smtpmail-auth-credentials '(("smtp.googlemail.com" 465 "Yubao.Liu@gmail.com" nil))
-      smtpmail-default-smtp-server "smtp.googlemail.com"
-      smtpmail-smtp-server "smtp.googlemail.com"
-      smtpmail-smtp-service 465)
+(setq message-send-mail-function 'message-smtpmail-send-it)
+
+(setq smtpmail-auth-credentials
+      '(
+        ("smtp.googlemail.com" 465 "Yubao.Liu@gmail.com" nil)
+        ("smtp.126.com"        25  "dieken" nil)
+        ("smarthost.yahoo.com" 25  "liuyb" nil)
+        )
+
+      smtpmail-starttls-credentials
+      '(
+        ("smtp.googlemail.com" 465 nil nil)
+        ))
 
 (setq gnus-posting-styles
       '(
-        ("*"
+        (".*"
          (name "Yubao Liu")
          (address "Yubao.Liu@gmail.com")
-         (sigature (lamabda () (concat "Hello world:\n\n" (shell-command-to-string "fortune"))))
-         (eval (setq smtpmail-starttls-credentials '(("smtp.googleemail.com" 465 nil nil))
-                     smtpmail-auth-credentials '(("smtp.googlemail.com" 465 "Yubao.Liu@gmail.com" nil))
-                     smtpmail-default-smtp-server "smtp.googleemail.com"
-                     smtp-smtp-service 465)))
+         (signature (lambda () (shell-command-to-string "fortune")))
+         (eval (setq smtpmail-smtp-server "smtp.googlemail.com"
+                     smtpmail-smtp-service 465)
+               (message "Use %s:%d to send mail." smtpmail-smtp-server smtpmail-smtp-service)))
 
-        ("nnmaildir:126"
+        ("^nnmaildir+126"
          (name "dieken")
          (address "dieken@126.com")
-         (eval (setq message-sendmail-extra-arguments '("-a" "gmail"))))
+         (eval (setq smtpmail-smtp-server "smtp.126.com"
+                     smtpmail-smtp-service 25)
+               (message "Use %s:%d to send mail." smtpmail-smtp-server smtpmail-smtp-service)))
 
-        ("nnimap:yahoo-corp"
+        ("^nnimap+yahoo-corp"
          (address "liuyb@yahoo-inc.com")
-         (eval (setq smtpmail-auth-credentials '(("smarthost.yahoo.com" 25 "liuyb" nil))
-                     smtp-smtp-service 25)))
+         (eval (setq smtpmail-smtp-server "smarthost.yahoo.com"
+                     smtpmail-smtp-service 25)
+               (message "Use %s:%d to send mail." smtpmail-smtp-server smtpmail-smtp-service)))
         ))
-
-;; 不同邮箱用各自的 SMTP 服务器
-;(defun fs-change-smtp ()
-;  "Change the SMTP server according to the current from line."
-;  (save-excursion
-;    (let ((from
-;           (save-restriction
-;             (message-narrow-to-headers)
-;             (message-fetch-field "from"))))
-;      (message "From is `%s', setting `smtpmail-smtp-server' to `%s'"
-;               from
-;               (cond
-;                ((string-match YouAccount@gmail.com from)
-;                 ;; Use stmp-auth
-;                 (message "Using smtp-auth")
-;                 ;; Sending mail
-;                 (setq message-send-mail-function 'smtpmail-send-it)
-;                 (setq smtpmail-starttls-credentials '(("127.0.0.1" 466 nil nil)))
-;                 (setq smtpmail-auth-credentials '(("127.0.0.1" 466 "YouAccount@gmail.com" nil)))
-;                 (setq smtpmail-default-smtp-server "127.0.0.1")
-;                 (setq smtpmail-smtp-server "127.0.0.1")
-;                 (setq smtpmail-smtp-service 466)
-;                 )
-;                ;;((string-match "YouAccount@gmail.com" from)
-;                ;; Use local sendmail
-;                ;; (message "Using local sendmail")
-;                ;;(setq message-send-mail-function `message-send-mail-with-sendmail))
-;                (t
-;                 (error
-;                  (concat "Don't know which mail server to use for "
-;                          from))))))))
-;(add-hook 'message-setup-hook 'fs-change-smtp)
 
 ;; 拼写检查
 (add-hook 'message-send-hook 'ispell-message)
@@ -158,8 +129,12 @@
         (not gnus-thread-sort-by-number)
         ))
 
-;; 防止在新闻组中将 f 按成 r
-(setq gnus-confirm-mail-reply-to-news t)
+;; 发信时确认，防止发送没写完的邮件
+(setq message-confirm-send t)
+
+;; 防止在新闻组中将 f 按成 r，对邮件列表也要求确认
+(setq gnus-confirm-mail-reply-to-news t
+      gnus-confirm-treat-mail-like-news t)
 
 ;; 将邮件的发出时间转换成本地时间
 (add-hook 'gnus-article-prepare-hook 'gnus-article-date-local)
