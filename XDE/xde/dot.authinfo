@@ -1,0 +1,2 @@
+# used by .gnus.el
+machine imap.googlemail.com login Yubao.Liu@gmail.com port 993
