@@ -153,6 +153,11 @@ Email 处理
     http://www.caspian.dotconf.net/menu/Software/SendEmail/
                 ( http://www.blat.net/ for Win32)
 
+    Net::IMAP::Simple
+    Mail::IMAPClient
+    Mail::IMAPTalk
+    Net::IMAP::Client
+
 进程管理
 =======
     Parallel::Prefork
