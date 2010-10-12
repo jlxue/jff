@@ -35,7 +35,7 @@ Web SSO:
 =====================================================================
 
 帐户管理: OpenLDAP, MySQL/PostgreSQL
-源码管理: Subversion, GIT
+源码管理: Subversion, GIT, gitolite, git-http-backend, GRack
 代码评审: ReviewBoard, Rietveld, Gerrit
 邮件系统: Postfix, Mailman
 Wiki系统: TWiki/Foswiki, MoinMoin
