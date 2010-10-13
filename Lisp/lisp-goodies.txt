@@ -1,3 +1,9 @@
+aptitude install slime hyperspec paredit-el
+
+====================================================================
+http://www.quicklisp.org/
+自动安装 lisp 第三方库
+
 http://weitz.de/starter-pack/
     提供一份 Windows 环境下常用 Lisp 库的打包下载工具，以及一份
 很不错的指导文档。基于 LispWorks Personal Edition。

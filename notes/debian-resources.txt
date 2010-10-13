@@ -1,0 +1,188 @@
+snapshot.debian.net
+http://screenshots.debian.net/
+
+
+发行版自测题 - Debian 答案：有关 Debian 的有用信息
+发信人: Dieken (风催草低 - 明月何尝不照人), 信区: LinuxApp
+标  题: 自测了，看对各自发行版的了解程度
+发信站: 水木社区 (Mon Oct 15 15:36:21 2007), 站内
+
+文中绝大部分链接都可以从 www.debian.org 左边导航栏找到。
+
+
+: [1] 安装手册在哪个 URL 上？完整看过没有？
+
+http://www.debian.org/releases/stable/installmanual （稳定版）
+http://d-i.alioth.debian.org/manual/    （开发版）
+ 
+: [2] bug 系统在哪里？如何报告 bug？
+
+http://www.debian.org/Bugs/
+最好用 reportbug 这个程序报告，当然也能给邮件列表直接发信，
+这个 bug 系统没有 web 界面报告 bug
+
+{plateauwolf}
+bug.debian.org。
+用 email 给 submit@bugs.debian.org 发信，信有要求的格式。
+一般用 Debian提供的工具比较方便，比如 reportbug。
+
+{GunRock}
+DPL 说要加一个 web 界面。
+
+: [3] 此发行版的安全公告在哪里？如果你的发行版分
+: 不同版本（比如 stable, unstable)，那么各个版本
+: 的安全补丁是如何引入的？
+
+http://www.debian.org/security/
+Debian 分 unstable, testing, stable 三个版本，stable 有安全
+小组，其它两个没有，unstable 中的软件包更新会过一段时间才进入
+testing。
+
+{plateauwolf}
+安全公告在首页上有，也可以订阅
+debian-security-announce@lists.debian.org 列表。
+stable 的安全补丁有团队专门负责，由单独的 security update
+repository 提供；testing 也有团队和半官方的 repository；
+unstable 则直接通过上传新版本解决安全问题。
+
+http://secure-testing-master.debian.net/
+
+: [4] 官方 web 论坛在哪里？注册帐号了没？
+
+http://forums.debian.net
+http://www.debianhelp.org
+
+: [5] 官方新闻在哪里？官方有多少个邮件列表？官方的
+: 版本控制服务器在哪里？这个发行版的官方软件源有
+: 多少个软件包？
+
+http://www.debian.org/News/
+http://www.debian.org/events/
+http://times.debian.net/        (非官方？)
+http://debaday.debian.net/      (非官方？)
+
+http://lists.debian.org/completeindex.html
+212 个邮件列表。
+
+官方项目主页：http://alioth.debian.org，版本控制服务器
+有 http://(git|hg|bzr|svn|cvs|darcs|arch).debian.org。
+
+主页宣称有 18733 个软件包，目前 sid 是 21661 个
+ 
+{plateauwolf}
+http://lists.debian.org
+http://lists.alioth.debian.org
+
+: [6] 官方中文翻译小组的主页在哪里？
+
+http://www.debian.org/international/l10n/po/zh_CN
+http://www.debian.org/international/Chinese/
+
+{plateauwolf}
+debian-chinese-gb@lists.debian.org
+
+: [7] 参与官方开发的流程的文档在哪里？软件包打包的文档
+: 在哪里？
+
+http://www.debian.org/doc/manuals/maint-guide/
+http://www.debian.org/doc/manuals/developers-reference/
+更多文档见 http://www.debian.org/doc/
+
+{plateauwolf}
+debian-mentors@lists.debian.org
+
+:
+: [8] 你所用的软件包管理工具有多少个可执行文件（bin/ 下面）？
+: 纪录可用软件包列表、已安装软件包列表、下载软件包缓存、安装日志
+: 各自在什么地方？
+
+dpkg 10 个，apt 5 个, aptitude 1 个, synaptic 一个, dselect
+1 个，update-manager 2 个(ubuntu 的？) , apt-utils 3 个。
+
+可用软件列表：
+/var/lib/apt/lists/, /var/lib/dpkg/available
+
+已安装软件包列表：
+/var/lib/dpkg/status
+
+下载软件包缓存：
+/var/cache/apt/archives
+
+安装日志：
+/var/log/aptitude*, /var/log/dpkg*
+ 
+: [9] 如何查找一个软件包被哪些软件包依赖？如果加了多个
+: 软件源，如何在不安装的前提下知道这个软件包会从哪里下载？
+
+apt-cache rdepends xxx
+apt-cache policy xxx
+
+: [10] 如何阻止一个软件包升级？
+
+aptitude hold xxx
+
+{plateauwolf}
+简单说就是 hold 了。aptitude 里分得更细一点，有三种 hold 的方法。
+另外复杂的情况可以用 APT pinning。
+
+: [11] 这个发行版的发起人是谁？哪一年发起的？现在的头头是谁？
+: 正式开发人员有多少？
+
+http://www.debian.org/doc/manuals/project-history/index.en.html
+1993-8-16  Ian Murdock 发起，名字来源于他和女朋友（现在是他妻子:-)
+Debra 的名字。
+
+1993.8 - 1996.3         Ian Murdock
+1996.4 - 1997.12        Bruce Perens
+1998.1 - 1998.12        Ian Jackson
+1999.1 - 2001.3         Wichert Akkerman
+2001.4 - 2002.4         Ben Collins
+2002.4 - 2003.4         Bdale Garbee
+2003.3 - 2005.3         Martin michlmayr
+2005.4 - 2006.4         Branden Robinson
+2006.4 - 2007.4         Anthony Towns
+2007.4 - now            Sam Hocevar
+
+1993.8-12       Debian 0.01
+1994.1          Debian 0.91
+1995.3          Debian 0.93R5   dpkg
+1995.11         Debian 0.93R6   dselect
+1996 ?          Debian 1.0      被冒名发布  -_-b
+1996.6.17       Debian 1.1 Buzz         以玩具总动员电影中角色名作代号
+1996.12.12      Debian 1.2 Rex
+1997.6.5        Debian 1.3 Bo
+1998.7.24       Debian 2.0 Hamm
+1999.3.9        Debian 2.1 Slink        apt
+2000.8.15       Debian 2.2 Potato       支持 PPC 和 ARM。
+2002.7.19       Debian 3.0 Woody        KDE; IA64, PA-RISC, MIPS, S/390
+                                        >900 开发人员
+2005.6.6        Debian 3.1 Sarge
+2007.4.8        Debian 4.0 Etch         支持 AMD64, 去掉 M68K。
+
+{plateauwolf}
+正式开发人员 1000 多一点。
+
+: [12] 官方主页有无查找软件包的功能？如有，url 是？
+
+http://packages.debian.org
+http://www.debian.org/distrib/packages
+
+: [13] 这个发行版有irc, wiki 或者 blog 吗？有的话在哪里？
+http://www.debian.org/support
+
+irc.debian.org#debian, freenode.net, irc.oftc.net
+http://wiki.debian.org
+http://planet.debian.net (http://planet.debian.org/ ?)
+http://www.debian-administration.org/
+
+
+--
+On Sat, 22 Sep 2007, Dmitry Kakurin wrote:
+> We've had this theoretical (and IMHO pointless) discussion C vs. C++ *in
+> general*.
+
+I think "pointless" is more to the point.
+We don't want C++.  Why is that so hard to accept?
+                      Re: C++ *for Git*           Johannes Schindelin
+http://thread.gmane.org/gmane.comp.version-control.git/58929/focus=58933
+
