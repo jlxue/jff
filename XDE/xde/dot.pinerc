@@ -587,7 +587,7 @@ personal-print-command=
 personal-print-category=
 
 # Patterns and their actions are stored here.
-patterns-roles=
+patterns-roles=LIT:pattern="/NICK=default/COMM=Always use to set From: header.\\n/FLDTYPE=ANY" action="/ROLE=1/FROM=Yubao Liu <yubao.liu@gmail.com>/RTYPE=NC/FTYPE=NC/CTYPE=NC"
 
 # Patterns and their actions are stored here.
 patterns-filters2=

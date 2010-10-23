@@ -71,7 +71,7 @@
 
 (setq smtpmail-auth-credentials
       '(
-        ("smtp.googlemail.com" 465 "Yubao.Liu@gmail.com" nil)
+        ("smtp.googlemail.com" 465 "yubao.liu@gmail.com" nil)
         ("smtp.126.com"        25  "dieken" nil)
         ("smarthost.yahoo.com" 25  "liuyb" nil)
         )
@@ -85,7 +85,7 @@
       '(
         (".*"
          (name "Yubao Liu")
-         (address "Yubao.Liu@gmail.com")
+         (address "yubao.liu@gmail.com")
          (signature (lambda () (shell-command-to-string "fortune")))
          (eval (setq smtpmail-smtp-server "smtp.googlemail.com"
                      smtpmail-smtp-service 465)
@@ -118,7 +118,7 @@
 (setq bbdb-north-american-phone-numbers-p nil)
 
 (setq bbdb-user-mail-names
-      (regexp-opt '("Yubao.Liu@gmail.com"
+      (regexp-opt '("yubao.liu@gmail.com"
                     "dieken@126.com")))
 
 ;; 自动添加联系人
