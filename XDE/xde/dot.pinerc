@@ -13,13 +13,13 @@
 # Lines beginning with "#" are comments, and ignored by Alpine.
 
 # Over-rides your full name from Unix password file. Required for PC-Alpine.
-personal-name=
+personal-name=Yubao Liu
 
 # Sets domain part of From: and local addresses in outgoing mail.
 user-domain=
 
 # List of SMTP servers for sending mail. If blank: Unix Alpine uses sendmail.
-smtp-server=
+smtp-server=smtp.googlemail.com:587/tls/user=yubao.liu@gmail.com
 
 # NNTP server for posting news. Also sets news-collections for news reading.
 nntp-server=
@@ -71,19 +71,133 @@ signature-file=
 # List of features; see Alpine's Setup/options menu for the current set.
 # e.g. feature-list= select-without-confirm, signature-at-bottom
 # Default condition for all of the features is no-.
-feature-list=
+feature-list=save-will-not-delete,
+	enable-mouse-in-xterm,
+	warn-if-blank-subject,
+	warn-if-blank-to-and-cc-and-newsgroups,
+	disable-sender,
+	enable-multiple-newsrcs,
+	hide-nntp-path,
+	enable-sigdashes,
+	spell-check-before-sending,
+	signature-at-bottom,
+	strip-from-sigdashes-on-reply,
+	enable-background-sending,
+	convert-dates-to-localtime,
+	show-sort,
+	enable-msg-view-addresses,
+	enable-msg-view-attachments,
+	no-enable-8bit-nntp-posting,
+	print-offers-custom-cmd-prompt,
+	print-index-enabled,
+	enable-full-header-and-text,
+	enable-mail-check-cue,
+	enable-newmail-in-xterm-icon,
+	enable-newmail-short-text-in-icon,
+	enable-suspend
 
 # Alpine executes these keys upon startup (e.g. to view msg 13: i,j,1,3,CR,v)
 initial-keystroke-list=
 
 # Only show these headers (by default) when composing messages
-default-composer-hdrs=
+default-composer-hdrs=INHERIT,
+	From,
+	To,
+	Cc,
+	Subject,
+	Lcc,
+	Bcc,
+	Fcc,
+	Newsgroups,
+	Organization
 
 # Add these customized headers (and possible default values) when composing
 customized-hdrs=
 
 # When viewing messages, include this list of headers
-viewer-hdrs=
+viewer-hdrs=INHERIT,
+	From,
+	Bcc,
+	Lcc,
+	Comment,
+	Content-return,
+	Delivered-To,
+	X-Delivered-To,
+	X-Envelope-To,
+	Envelope-To,
+	X-Original-To,
+	X-Apparently-To,
+	X-Rcpt-To,
+	X-Real-To,
+	X-To,
+	X-Cc,
+	Deliver,
+	Apparently,
+	List-ID,
+	List-Post,
+	List-Archive,
+	Newsgroups,
+	Summary,
+	Keywords,
+	Approved,
+	Reply-To,
+	Followup-To,
+	Mail-Followup-To,
+	Organization,
+	X-X-Sender,
+	X-Sender,
+	Sender,
+	Originator,
+	Resent-From,
+	Resent-To,
+	Resent-Date,
+	Resent-Message-ID,
+	X-Message-ID,
+	Message-ID,
+	X-Mailer,
+	X-Newsreader,
+	X-Mail-Agent,
+	X-News-Agent,
+	User-Agent,
+	Mail-System-Version,
+	Mailer,
+	Originating-Client,
+	Precedence,
+	Distribution,
+	Posted-To,
+	X-Also-Posted-To,
+	X-URL,
+	X-Image-URL,
+	X-Status,
+	Status,
+	Priority,
+	X-Priority,
+	X-MSMail-Priority,
+	Content-type,
+	Content-description,
+	Content-transfer-encoding,
+	Parts/Attachments,
+	X-MimeOLE,
+	X-MIME-Autoconverted,
+	Attchmnt,
+	X-attachments,
+	X-Keywords,
+	X-face,
+	X-pgp,
+	Supersedes,
+	Mail-Copies-To,
+	NNTP-Posting-Host,
+	X-Trace,
+	Path,
+	X-No-Archive,
+	Date,
+	To,
+	Cc,
+	Posted-And-Mailed,
+	Subject,
+	X-Habeas
+
+
 
 # When viewing messages, number of blank spaces between left display edge and text
 viewer-margin-left=
@@ -135,7 +249,7 @@ pruning-rule=
 folder-reopen-rule=
 
 # Style that MESSAGE INDEX is displayed in when threading.
-threading-display-style=
+threading-display-style=mutt
 
 # Style of THREAD INDEX or default MESSAGE INDEX when threading.
 threading-index-style=
@@ -163,7 +277,7 @@ keyboard-character-set=
 
 # Defaults to UTF-8. This is used for outgoing messages.
 # It is usually correct to leave this unset.
-posting-character-set=
+posting-character-set=UTF-8
 
 # Defaults to nothing, which is equivalent to US-ASCII. This is used for
 # unlabeled incoming messages. It is ok to leave this unset but if you receive
@@ -344,7 +458,7 @@ incoming-folders=
 # the default for Saves. Example: Main {host1}mail/[], Desktop mail\[]
 # Syntax: optnl-label {optnl-imap-hostname}optnl-directory-path[]
 folder-collections=mail/[],
-	GMail {imap.googlemail.com/ssl/user=yubao.liu}[]
+	GMail {imap.googlemail.com/ssl/user=yubao.liu@gmail.com}[]
 
 # List, only needed if nntp-server not set, or news is on a different host
 # than used for NNTP posting. Examples: News *[] or News *{host3/nntp}[]
@@ -491,7 +605,7 @@ patterns-other=
 patterns-search=
 
 # Controls display of color
-color-style=
+color-style=use-termdef
 
 # Controls display of color for current index line
 current-indexline-style=
@@ -500,8 +614,8 @@ current-indexline-style=
 titlebar-color-style=
 
 # Choose: black, blue, green, cyan, red, magenta, yellow, or white.
-normal-foreground-color=
-normal-background-color=
+normal-foreground-color=255,255,255
+normal-background-color=000,000,000
 reverse-foreground-color=
 reverse-background-color=
 title-foreground-color=
