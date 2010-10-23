@@ -91,7 +91,7 @@ i feh
 #i gimp inkscape
 
 ### input method
-i scim-pinyin
+i ibus-pinyin
 
 ### web browser
 # And: fireftp chatzilla
@@ -122,7 +122,7 @@ i file-roller
 
 ### instant messaging
 # Or: emesene
-i pidgin pidgin-encryption pidgin-hotkeys msn-pecan
+i pidgin pidgin-encryption pidgin-hotkeys msn-pecan pidgin-guifications
 
 ### movie player
 i mplayer
