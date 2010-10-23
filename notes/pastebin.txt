@@ -1,0 +1,7 @@
+http://github.com/sartak/app-nopaste
+    libapp-nopaste-perl
+
+http://pastebin.ca/
+http://paste.lisp.org/
+http://pastebin.com/
+
