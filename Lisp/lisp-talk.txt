@@ -1,0 +1,59 @@
+安装：
+    aptitude install emacs slime hyperspec paredit-el sbcl-source w3m-el-snapshot
+
+基础操作：
+    进入 slime: M-x slime
+    退出 slime: *slime repl* 缓冲区里 ,q   (输入逗号然后按 TAB 可显示所有命令)
+    退出 emacs: C-x C-c
+    取消 mini buffer 命令: C-g
+    查看当前所有 Emacs mode 的简短帮助：C-h m
+    查看当前所有可用按键帮定：C-h b
+    buffer 间跳转： slime selector
+
+REPL 操作：
+    加载 system: ,l
+    补全： <TAB>
+
+SLDB 操作：
+    v, t, a, q
+
+源码编辑：
+    缩进：????
+    优化参数：(declaim (optimize (speed 0) (safety 3) (debug 3)))
+             for CCL:   http://permalink.gmane.org/gmane.lisp.openmcl.devel/157
+    补全: M-TAB  or C-c TAB
+    查找符号：M-.  M-,
+
+文档查找：
+    C-c C-d h
+
+其它：
+    M-x paredit-mode
+    M-x show-parent-mode
+    electrify-return
+    quicklisp.org
+
+mel-base
+    (load "/home/dieken/account.lisp")
+    (defvar *imap* (mel.folders.imap:make-imaps-folder :host "imap.googlemail.com"
+                                                       :username *my-username*
+                                                       :password *my-password*))
+    (mel.public:count-messages *imap*)
+    (defvar *messages* (mel.public:messages *imap*))
+    (dolist (message *messages*)
+	   (format t "~A ~A~%"
+           (mel.mime:from message)
+		   (mel.mime:subject message)))
+
+===============================
+asdf 2
+mk-defsystem
+
+common-lisp-controller
+cl-build
+asdf-install
+cl-launch
+starter pack
+
+quicklisp.org
+

@@ -29,12 +29,12 @@ URxvt.scrollTtyOutput: False
 URxvt.scrollTtyKeypress: True
 URxvt.scrollWithBuffer: True
 
-URxvt.perl-ext-common: default,matcher,tabbed
+URxvt.perl-ext-common: default,right-click-clipboard,matcher,tabbed
 URxvt.urlLauncher: firefox
 URxvt.matcher.button: C1
 URxvt*matcher.pattern.1: \\b(mailto|http|https|ftp|file):[/]*[\\w-]\\.[\\w./?&@#-]*[\\w/-]
 URxvt*matcher.pattern.2: \\bwww\\.[\\w-]\\.[\\w./?&@#-]*[\\w/-]
-URxvt.preeditType:      Root
+!URxvt.preeditType:      Root
 URxvt*imLocale:         zh_CN.UTF-8
 
 

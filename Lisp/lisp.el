@@ -30,3 +30,13 @@ cursor to the new line."
   (define-key slime-repl-mode-map
     (read-kbd-macro paredit-backward-delete-key) nil))
 (add-hook 'slime-repl-mode-hook 'override-slime-repl-bindings-with-paredit)
+
+;; slime selector
+(global-set-key "\C-cs" 'slime-selector)
+
+;; use w3m to browse CLHS
+;(require 'w3m)
+(when (fboundp 'w3m-browse-url)
+  (setq browse-url-browser-function '(("hyperspec" . w3m-browse-url)
+                                      ("." . browse-url-default-browser))))
+
