@@ -1,0 +1,34 @@
+http://en.wikipedia.org/wiki/NAT_traversal
+
+UPNP
+STUN    (Session Traversal Utilities for NAT)
+TURN    (Traversal Using Relay NAT)
+ICE     (Interactive Connectivity Establishment)
+ALG     (Application Layer Gateway)
+SBC     (Session Border Controller)
+RFC3093 - Firewall Enhancement Protocol (FEP)
+RFC3620 - The TUNNEL Profile
+NAT-T   (Negotiation of NAT-Traversal in the IKE)
+UDP hole punching
+TCP hole punching
+
+Internet Key Exchange (IKE) - udp port 500
+Encapsulating Security Payload (ESP) - IP protocol number 50
+Authentication Header (AH) - IP protocol number 51
+IPsec NAT-T - UDP port 4500
+
+Private Address Space: (RFC 1918)
+     10.0.0.0        -   10.255.255.255  (10/8 prefix)
+     172.16.0.0      -   172.31.255.255  (172.16/12 prefix)
+     192.168.0.0     -   192.168.255.255 (192.168/16 prefix)
+
+===========================================================
+http://folks.o-hand.com/ross/gupnp-docs/gupnp-igd/
+libgupnp-igd        (internet gateway devices)
+gupnp-tools         /usr/bin/gupnp-universal-cp
+upnp-router-control /usr/bin/upnp-router-control
+
+libupnp4
+
+libnet-upnp-perl
+
