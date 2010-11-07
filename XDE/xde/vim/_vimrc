@@ -218,6 +218,7 @@ set shiftwidth=4
 set smarttab
 "set cinoptions=t0,:0,(0,g0,j1
 set cinoptions=t0,:0,g0,j1
+set linespace=2
 
 "set guifont=Bitstream\ Vera\ Sans\ Mono\ 10,Monospace\ 10,Courier\ New\ 11
 
