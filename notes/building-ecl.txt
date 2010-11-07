@@ -1,0 +1,2 @@
+./configure --enable-threads --enable-unicode --enable-c99complex --enable-gengc
+make
