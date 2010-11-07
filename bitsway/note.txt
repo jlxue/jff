@@ -1,0 +1,25 @@
+log4cplus
+google-glog
+google-perftools
+google-sparsehash
+google-breakpad
+google-gflags
+googletest
+googlemock
+http://code.google.com/p/socorro/
+
+Any
+Array
+Assign
+Bimap
+Bind
+Circular Buffer
+CRC
+Date Time
+Exception
+Filesystem
+Foreach
+Format
+Function
+Member Function
+Program Options

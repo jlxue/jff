@@ -16,11 +16,16 @@ else if [ os.name ] = HPUX
 }
 
 lib boost_system ;
+lib breakpad_client
+  :
+  : <file>google-breakpad/src/client/linux/libbreakpad_client.a
+  ;
 
 project
   : requirements
     <define>BOOST_ALL_NO_LIB=1
     <threading>multi
+    <include>google-breakpad/src
     <library>boost_system
     <os>SOLARIS:<library>socket
     <os>SOLARIS:<library>nsl
@@ -32,5 +37,5 @@ project
     <os>HPUX:<library>ipv6
   ;
 
-exe bitsway : main.cpp ;
+exe bitsway : main.cpp .//breakpad_client ;
 
