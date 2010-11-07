@@ -1,0 +1,18 @@
+Adblock Plus
+Element Hiding Helper for Adblock Plus  (Ctrl-Shift-S or Ctrl-Shift-K)
+ChatZilla
+CHMReader
+Download Statusbar
+DownThemAll!
+Firebug
+Fission     (Progress bar in the address bar)
+FoxTab      (3D tab management)
+FoxProxy
+Greasemonkey
+NoScript
+ReminderFox
+Remove It Permanently
+ScrapBook
+Stylish
+Tab Mix Plus
+userChromJS
