@@ -1,6 +1,7 @@
 http://en.wikipedia.org/wiki/NAT_traversal
 
 UPNP
+NAT-PMP
 STUN    (Session Traversal Utilities for NAT)
 TURN    (Traversal Using Relay NAT)
 ICE     (Interactive Connectivity Establishment)
@@ -32,3 +33,4 @@ libupnp4
 
 libnet-upnp-perl
 
+miniupnp    (http://miniupnp.tuxfamily.org/)
