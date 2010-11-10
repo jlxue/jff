@@ -10,7 +10,7 @@ static bool dumpCallback(const char* dump_path,
                          void* context,
                          bool succeeded)
 {
-    fprintf(stderr, "Minidump file created: %s/%s.dmp\n", dump_path, minidump_id);
+    std::cerr << "Minidump file created: " << dump_path << "/" << minidump_id << ".dmp\n";
     return succeeded;
 }
 
