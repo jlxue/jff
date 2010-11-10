@@ -1,4 +1,5 @@
-For Linux:
+Google breakpad for Linux step by step
+======================================
 
 $ ( cd google-breakpad; ./configure; make; )
 $ ( cd google-breakpad/src/tools/linux/dump_syms/; make; )
@@ -43,7 +44,19 @@ $ ./test
 
     or
 
-    $ google-breakpad/src/tools/linux/dump_syms/dump_syms ./test > symbols/test/xxxxxxxxxxxxxxxxx/test.sym
-      (路径可以从下面命令输出的 "simple_symbol_supplier.cc:192: INFO: No symbol file at ......" 看出)
-    $ google-breakpad/src/processor/minidump_stackwalk ./*.dmp symbols
+    $ google-breakpad/src/tools/linux/dump_syms/dump_syms ./test | head -1
+    MODULE Linux x86_64 6EDC6ACDB282125843FD59DA9C81BD830 test
+    $ mkdir -p ./symbols/test/6EDC6ACDB282125843FD59DA9C81BD830
+    $ google-breakpad/src/tools/linux/dump_syms/dump_syms ./test > symbols/test/6EDC6ACDB282125843FD59DA9C81BD830/test.sym
+    $ google-breakpad/src/processor/minidump_stackwalk ./328eaddc-c1d5-9eee-3ca1e6a4-0ce3f6a6.dmp symbols
+
+    or (see http://groups.google.com/group/google-breakpad-discuss/browse_thread/thread/153ba641904d95ec )
+
+    $ wget -O symbolstore.py http://mxr.mozilla.org/mozilla-central/source/toolkit/crashreporter/tools/symbolstore.py?raw=1
+    $ python ./symbolstore.py google-breakpad/src/tools/linux/dump_syms/dump_syms ./symbols ./test
+    $ google-breakpad/src/processor/minidump_stackwalk ./328eaddc-c1d5-9eee-3ca1e6a4-0ce3f6a6.dmp symbols
+
+
+Also reference:
+http://mxr.mozilla.org/mozilla-central/source/toolkit/crashreporter/
 
