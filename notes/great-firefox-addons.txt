@@ -16,3 +16,6 @@ ScrapBook
 Stylish
 Tab Mix Plus
 userChromJS
+
+http://code.google.com/speed/page-speed/docs/overview.html
+
