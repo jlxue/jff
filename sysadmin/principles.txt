@@ -1,0 +1,53 @@
+1. 基于 Kerberos + OpenLDAP 单点登录，统一账户名
+
+  * 从 PC 登录后，不用再输入密码即可访问所有授权的服务
+  * 可以根据用户名查询其在所有服务中的分组、授权情况
+  * 可以注销一个账户即可注销其之前授权的所有服务
+
+2. 工作涉及的 IT 基础设施越少越好，特别是文档不要有多种存储途径
+
+Foswiki     : 知识的积累，规章制度，公告
+Bugzilla    : 工作流引擎，包括请假、报销、bug 修正、新特性、会议预订都可以纳入，不要引入多种工作流引擎
+              缺点：没有 task queue 特性，没有日历服务
+                    不支持标记为精华的操作，不便做知识积累
+Gitolite    : 源码管理 (git-http-backend, GRack ?)
+              代码评审 (gitweb, ReviewBoard, Rietveld, Gerrit)
+Hudson      : 持续集成
+Pkg repos   : 软件包仓库，所有机器的软件安装来源一致，可重复，使用 apt、yum 之类的软件包管理机制
+              http://packages.debian.org/
+              http://qa.debian.org/
+              http://packages.qa.debian.org/
+              http://bugs.debian.org/
+              http://alioth.debian.org/
+
+              有软件包门户网站的概念，背景知识、参与人员联系方式、目的、
+              源码位置、构建/测试/部署步骤，release note
+
+Cfengine    : 配置管理，保证所有机器的配置、软件包版本符合预期
+Postfix     : 内部邮件服务，服务端的邮件分类 (imapd ?)
+Mailman     : 邮件列表，自由讨论
+Samba       : 文件共享 (OpenAFS ?)
+OpenLDAP    : 地址簿，组织关系
+OpenFire    : 内部即时通讯 (ejabberd? IRC?)
+PowerDNS    : 内部域名管理 (maradns?, djbdns? mydns?)
+系统监控    : nagios, cacti, zabbix, icinga
+自动备份    : Amanda, Bacula
+
+
+3. 信息的良好分类，平铺网状结构的知识库是一个垃圾场，要尽量在 wiki 中使用树形导航结构
+   信息要分级别：核心文档，零碎笔记，流水式的记录 （twiki 的 vote/comment 功能？)
+
+4. 建立内部搜索引擎
+
+5. 软件包命令、版本号记法、依赖关系的规范化
+    http://www.debian.org/doc/
+    http://www.debian.org/doc/devel-manuals#policy
+    http://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Version
+    http://apr.apache.org/versioning.html
+    http://www.debian.org/doc/manuals/maint-guide/
+    http://www.debian.org/doc/manuals/developers-reference/
+    
+6. 开发人员手册，系统、规范、与时俱进的记录开发过程中需要了解的基本信息，方便新人融入工作
+
+7. 容器、虚拟化技术，方便快速建立统一的开发、测试、运行环境
+
