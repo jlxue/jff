@@ -1,0 +1,49 @@
+For Linux:
+
+$ ( cd google-breakpad; ./configure; make; )
+$ ( cd google-breakpad/src/tools/linux/dump_syms/; make; )
+  # remove "-m32" in dump_syms/Makefile if on 64-bit OS
+$ ( cd google-breakpad/src/tools/linux/md2core/;
+    g++ -I ../../../ -o md2core minidump-2-core.cc; )
+
+$ cat test.cpp
+#include <iostream>
+#include "client/linux/handler/exception_handler.h"
+
+
+static bool dumpCallback(const char* dump_path,
+                         const char* minidump_id,
+                         void* context,
+                         bool succeeded)
+{
+    std::cerr << "Minidump file created: " << dump_path << "/" << minidump_id << ".dmp\n";
+    return succeeded;
+}
+
+void hello()
+{
+    int a = 2/0;
+}
+
+int main(int argc, char* argv[])
+{
+    google_breakpad::ExceptionHandler eh(".", NULL, dumpCallback, NULL, true);
+
+    hello();
+
+    return 0;
+}
+
+$ g++ -g -I google-breakpad/src -o test test.cpp google-breakpad/src/client/linux/libbreakpad_client.a
+$ ./test
+
+    $ google-breakpad/src/tools/linux/md2core/md2core ./test > core
+    $ gdb ./test core
+    (gdb) bt
+
+    or
+
+    $ google-breakpad/src/tools/linux/dump_syms/dump_syms ./test > symbols/test/xxxxxxxxxxxxxxxxx/test.sym
+      (路径可以从下面命令输出的 "simple_symbol_supplier.cc:192: INFO: No symbol file at ......" 看出)
+    $ google-breakpad/src/processor/minidump_stackwalk ./*.dmp symbols
+
