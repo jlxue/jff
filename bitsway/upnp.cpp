@@ -15,8 +15,9 @@ static const char*      UPNP_IGD_SEARCH_REQUEST =
     "M-SEARCH * HTTP/1.1\r\n"
     "Host: 239.255.255.250:1900\r\n"
     "Man: \"ssdp:discover\"\r\n"
-    "ST: upnp:rootdevice\r\n"
-    "MX: 5\r\n"
+    //"ST: upnp:rootdevice\r\n"
+    "ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1\r\n"
+    "MX: 3\r\n"
     "\r\n";
 
 UPnPIGDClient::UPnPIGDClient(io_service& io_svc)
