@@ -16,6 +16,9 @@ ScrapBook
 Stylish
 Tab Mix Plus
 userChromJS
+MultirowBookmarksToolbar
+Autofill Forms
+ScribeFire
 
 http://code.google.com/speed/page-speed/docs/overview.html
 
