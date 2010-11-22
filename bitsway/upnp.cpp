@@ -9,9 +9,12 @@ using namespace boost::asio;
 static const char*      UPNP_MULTI_CAST_ADDR = "239.255.255.250";
 static unsigned short   UPNP_MULTI_CAST_PORT = 1900;
 static const char*      UPNP_IGD_SEARCH_REQUEST =
-    ""
-    ""
-    "";
+    "M-SEARCH * HTTP/1.1\r\n"
+    "Host: 239.255.255.250:1900\r\n"
+    "Man: \"ssdp:discover\"\r\n"
+    "ST: upnp:rootdevice\r\n"
+    "MX: 3\r\n"
+    "\r\n";
 
 UPnPIGDClient::UPnPIGDClient(io_service& io_svc)
     : multicast_address_(ip::address::from_string(UPNP_MULTI_CAST_ADDR)),
