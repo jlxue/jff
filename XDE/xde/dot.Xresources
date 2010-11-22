@@ -5,12 +5,12 @@
 
 ! http://www.newsmth.net/bbscon.php?bid=392&id=663697
 !
-URxvt.font:xft:DejaVu Sans Mono-10:book,xft:WenQuanYi Bitmap Song-10:medium
+URxvt.font:xft:DejaVu Sans Mono-10:Book,xft:AR PL UMing CN-10:Light
 !URxvt.boldFont:xft:DejaVu Sans Mono-10:bold,xft:AR PL UMing CN-10:bold
 !URxvt.italicFont:xft:DejaVu Sans Mono-10:italic,xft:AR PL UMing CN-10:italic
 !URxvt.boldItalicFont:xft:DejaVu Sans Mono-10:bold:italic,xft:AR PL UMing CN-10:bold:italic
 
-URxvt.keysym.M-C-z: command:\033]701;zh_CN.GBK\007
+!URxvt.keysym.M-C-z: command:\033]701;zh_CN.GBK\007
 
 URxvt.background: black
 URxvt.foreground: gray
@@ -35,7 +35,7 @@ URxvt.matcher.button: C1
 URxvt*matcher.pattern.1: \\b(mailto|http|https|ftp|file):[/]*[\\w-]\\.[\\w./?&@#-]*[\\w/-]
 URxvt*matcher.pattern.2: \\bwww\\.[\\w-]\\.[\\w./?&@#-]*[\\w/-]
 !URxvt.preeditType:      Root
-URxvt*imLocale:         zh_CN.UTF-8
+!URxvt*imLocale:         zh_CN.UTF-8
 
 
 ! for ssh-askpass
