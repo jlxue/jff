@@ -59,6 +59,8 @@ Perl 脚本在 web 编程上有三种运行模式：
   了一些功能，将 use HTML::Template 替换成 use HTML::Template::Pro 即可，可提升
   50% 的性能。
 
+  (!)'''libhtml-template-compiled-perl''' 性能比 HTML::Template::Pro 更好。
+
   (!) [[/TemplateExamples#HTML::Template | HTML::Template 的例子]]
 
   libpetal-perl:: 使用标签里的 petal:xxx 属性来替换标签内容，虽然有利于所见

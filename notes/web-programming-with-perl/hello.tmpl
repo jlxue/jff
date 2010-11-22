@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+    <title>hello <TMPL_VAR name ESCAPE="HTML"></title>
+  </head>
+  <body>
+    @INC: <TMPL_VAR incs ESCAPE="HTML"><br/>
+    user info: <TMPL_VAR user_info ESCAPE="HTML"><br/>
+    cwd: <TMPL_VAR cwd ESCAPE="HTML"><br/>
+
+    <h1>Environment variables</h1>
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <TMPL_EACH envs><tr>
+          <td><TMPL_VAR __key__ ESCAPE="HTML"></td>
+          <td><TMPL_VAR __value__ ESCAPE="HTML"></td>
+        </tr></TMPL_EACH>
+      </tbody>
+    </table>
+  </body>
+</html>
