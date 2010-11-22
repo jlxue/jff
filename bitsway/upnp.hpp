@@ -13,6 +13,7 @@ public:
             std::size_t bytes_transferred);
     void handleReceiveFrom(const boost::system::error_code& ec,
             std::size_t bytes_transferred);
+    void handleTimeout(const boost::system::error_code& ec);
 
 private:
     boost::asio::ip::address        multicast_address_;
@@ -22,6 +23,7 @@ private:
     boost::asio::deadline_timer     timer_;
     enum { max_length = 1024 };
     char                            data_[max_length];
+    int                             message_count_;
 };
 
 } /* end namespace bitsway */
