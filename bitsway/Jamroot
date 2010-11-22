@@ -16,6 +16,7 @@ else if [ os.name ] = HPUX
 }
 
 lib boost_system ;
+lib glog ;
 lib breakpad_client
   :
   : <file>google-breakpad/src/client/linux/libbreakpad_client.a
@@ -27,6 +28,7 @@ project
     <threading>multi
     <include>google-breakpad/src
     <library>boost_system
+    <library>glog
     <os>SOLARIS:<library>socket
     <os>SOLARIS:<library>nsl
     <os>NT:<define>_WIN32_WINNT=0x0501
