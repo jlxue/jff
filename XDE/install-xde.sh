@@ -98,6 +98,8 @@ i ibus-pinyin
 i -R iceweasel icedtea6-plugin flashplugin-nonfree
 i xul-ext-downloadstatusbar xul-ext-fission
 
+i default-jre       # freemind depends it, else it'll install gcj related packages
+
 ### mail user agent
 # And: lightning or iceowl-extension
 i -R icedove
