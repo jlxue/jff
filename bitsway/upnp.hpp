@@ -16,6 +16,10 @@ public:
     void handleTimeout(const boost::system::error_code& ec);
 
 private:
+    void startSend();
+    void startReceive();
+    void startTimer();
+
     boost::asio::ip::address        multicast_address_;
     boost::asio::ip::udp::endpoint  multicast_endpoint_;
     boost::asio::ip::udp::endpoint  server_endpoint_;
