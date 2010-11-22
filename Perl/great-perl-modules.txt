@@ -283,6 +283,9 @@ DBD::RAM
 DBD::SQLite
 Directory::Transactional
 Encode
+Encode::Detect::Detector
+Encode::Guess
+Lingua::ZH::HanDetect
 ExtUtils::Installed
 File::Basename
 File::Copy
