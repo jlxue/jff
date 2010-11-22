@@ -9,9 +9,9 @@ class UPnPIGDClient {
 public:
     UPnPIGDClient(boost::asio::io_service& io_service);
     ~UPnPIGDClient();
-}
+};
 
-}
+} /* end namespace bitsway */
 
 #endif /* BITSWAY_UPNP_HPP_ */
 

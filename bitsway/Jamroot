@@ -37,5 +37,8 @@ project
     <os>HPUX:<library>ipv6
   ;
 
-exe bitsway : main.cpp .//breakpad_client ;
+exe bitsway
+  : main.cpp
+    upnp.cpp
+    .//breakpad_client ;
 

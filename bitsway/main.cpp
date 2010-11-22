@@ -3,6 +3,7 @@
 #include <boost/asio.hpp>
 
 #include "client/linux/handler/exception_handler.h"
+#include "upnp.hpp"
 
 
 static bool dumpCallback(const char* dump_path,
@@ -20,6 +21,9 @@ int main(int argc, char* argv[])
     google_breakpad::ExceptionHandler eh(".", NULL, dumpCallback, NULL, true);
 
     boost::asio::io_service io_service;
+
+    bitsway::UPnPIGDClient upnp_igd_client(io_service);
+
     io_service.run();
 
     return 0;
