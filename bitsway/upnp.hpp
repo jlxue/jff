@@ -23,7 +23,6 @@ private:
     boost::asio::deadline_timer     timer_;
     enum { max_length = 1024 };
     char                            data_[max_length];
-    int                             message_count_;
 };
 
 } /* end namespace bitsway */
