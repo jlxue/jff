@@ -39,7 +39,7 @@ PowerDNS    : 内部域名管理 (maradns?, djbdns? mydns?)
 
 4. 建立内部搜索引擎
 
-5. 软件包命令、版本号记法、依赖关系的规范化
+5. 软件包命名、版本号记法、依赖关系的规范化
     http://www.debian.org/doc/
     http://www.debian.org/doc/devel-manuals#policy
     http://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Version
