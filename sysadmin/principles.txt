@@ -10,6 +10,8 @@ Foswiki     : 知识的积累，规章制度，公告
 Bugzilla    : 工作流引擎，包括请假、报销、bug 修正、新特性、会议预订都可以纳入，不要引入多种工作流引擎
               缺点：没有 task queue 特性，没有日历服务
                     不支持标记为精华的操作，不便做知识积累
+                    缺乏类似 Trac 的 Timeline，milestone 界面，不容易看到全局
+                    comment 不支持版本记录
 Gitolite    : 源码管理 (git-http-backend, GRack ?)
               代码评审 (gitweb, ReviewBoard, Rietveld, Gerrit)
 Hudson      : 持续集成
