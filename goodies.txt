@@ -141,6 +141,8 @@ http://www.r-project.org
 http://www.axiom-developer.org
 http://maxima.sourceforge.net
 http://magma.maths.usyd.edu.au/magma/
+http://freemat.sourceforge.net/
+http://gretl.sourceforge.net/
 
 The AXIOM family:
   Axiom:     http://www.axiom-developer.org/
