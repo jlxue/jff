@@ -63,6 +63,8 @@ Server
     POE::Loop::EV
     POE::Loop::Event
     POE::XS::Queue::Array
+    Mojo::Server::Hypnotoad
+    Twiggy
 
 
 数据库访问

@@ -1,0 +1,8 @@
+libqt4-dev
+libfreetype6-dev
+libcairo2-dev
+libimlib2-dev
+guile-1.8-dev
+
+./configure --prefix=$HOME/usr/texmacs --enable-experimental --enable-pdf-renderer --enable-qt --with-freetype --with-cairo --with-imlib2 --with-qt
+
