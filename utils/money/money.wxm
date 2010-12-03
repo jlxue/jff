@@ -1,0 +1,130 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 0.8.5 ] */
+
+/* [wxMaxima: title   start ]
+贷款计算器
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: comment start ]
+还款总月数：
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+g_total_month: 12 * 20;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+贷款总金额：
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+g_total_loan: 118 * 10000;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+年利率：
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+g_year_interest_rate: 0.0614;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+利率折扣：
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+g_interest_discount: 0.85;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+月利率：
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+g_month_interest_rate: g_year_interest_rate / 12.0 * g_interest_discount;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+等额本金方式第 n 月需还本金：
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+month_benjin_by_deng_e_benjin(n) := g_total_loan / g_total_month;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+等额本金方式第 n 月需还利息：
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+month_interest_by_deng_e_benjin(n) := (g_total_loan - 
+(sum(month_benjin_by_deng_e_benjin(i), i, 1, n - 1))) * g_month_interest_rate;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+等额本金方式第 n 月需还款：
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+month_repay_by_deng_e_benjin(n) := month_benjin_by_deng_e_benjin(n) + month_interest_by_deng_e_benjin(n);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+等额本金方式至第 n 月共还款：
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+total_repay_by_deng_e_benjin(n) := sum(month_repay_by_deng_e_benjin(i), i, 1, n);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+等额本息方式第 n 月需还款：
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+month_repay_by_deng_e_benxi(n) := g_total_loan * g_month_interest_rate * (1 + g_month_interest_rate)^g_total_month / ((1 + g_month_interest_rate)^g_total_month - 1);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+等额本息方式第 n 月需还利息：
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+month_interest_by_deng_e_benxi(n) := g_month_interest_rate * (
+                                         g_total_loan * (1 + g_month_interest_rate)^n
+                                         - month_repay_by_deng_e_benxi(n) * ((1 + g_month_interest_rate)^n - 1)/g_month_interest_rate);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+等额本息方式第 n 月需还本金：
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+month_benjin_by_deng_e_benxi(n) := month_repay_by_deng_e_benxi(n) - month_interest_by_deng_e_benxi(n);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+等额本息方式至第 n 月共还款：
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+total_repay_by_deng_e_benxi(n) := sum(month_repay_by_deng_e_benxi(i), i, 1, n);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+图示：
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+plot2d([month_repay_by_deng_e_benjin(i), month_benjin_by_deng_e_benjin(i),
+        month_interest_by_deng_e_benjin(i), 
+        month_repay_by_deng_e_benxi(i), month_benjin_by_deng_e_benxi(i),
+        month_interest_by_deng_e_benxi(i)], 
+        [i, 1, g_total_month],
+        [legend, "month_repay_by_deng_e_benjin", "month_benjin_by_deng_e_benjin", "month_interest_by_deng_e_benjin",
+                 "month_repay_by_deng_e_benxi", "month_benjin_by_deng_e_benxi", "month_interest_by_deng_e_benxi"]) $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$
