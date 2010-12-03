@@ -1,0 +1,7 @@
+R gui:
+
+R -g Tk
+JGR
+Rkward
+Emacs ESS
+TeXmacs
