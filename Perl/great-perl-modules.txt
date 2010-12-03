@@ -334,6 +334,9 @@ POSIX
 ptkdb
 Regex::Assemble
 Regex::Common
+Regexp::Trie
+Regexp::List
+Regexp::Optimizer
 Safe
 Scalar::MoreUtils
 Scalar::Util
