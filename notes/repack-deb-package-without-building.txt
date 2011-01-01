@@ -1,0 +1,13 @@
+http://ailoo.net/2009/06/repack-a-deb-archive-with-dpkg-deb/
+
+$ mkdir -p extract/DEBIAN
+$ dpkg-deb -x package.deb extract/
+$ dpkg-deb -e package.deb extract/DEBIAN
+[...do something, e.g. edit the control file...]
+$ mkdir build
+$ dpkg-deb -b extract/ build/
+
+    * -x extracts the package contents
+    * -e extracts the control files
+    * -b builds the new package
+
