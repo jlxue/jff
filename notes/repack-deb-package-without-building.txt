@@ -11,3 +11,9 @@ $ dpkg-deb -b extract/ build/
     * -e extracts the control files
     * -b builds the new package
 
+
+For example:
+    maxima-emacs: remove texlive from file "control"
+                  remove texlive from file "postinst"
+                  ln -s /usr/share/texmf/tex/latex/emaxima.sty `kpsexpand '$TEXMFHOME'`/tex/latex/
+                  tlmgr install mh
