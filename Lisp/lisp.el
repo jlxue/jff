@@ -24,6 +24,11 @@ cursor to the new line."
                            (show-paren-mode t))))
         '(emacs-lisp-mode-hook lisp-mode-hook lisp-interaction-mode-hook slime-repl-mode-hook)))
 
+(autoload 'turn-on-cldoc-mode "cldoc" nil t)
+(dolist (hook '(lisp-mode-hook
+                slime-repl-mode-hook))
+  (add-hook hook 'turn-on-cldoc-mode))
+
 ;; Stop SLIME's REPL from grabbing DEL,
 ;; which is annoying when backspacing over a '('
 (defun override-slime-repl-bindings-with-paredit ()
