@@ -50,3 +50,15 @@ u () {
 # for j() function
 . $HOME/bin/jump.sh
 
+function ranger-cd {
+    local before after
+    before="$(pwd)"
+    ranger --fail-unless-cd "$@" || return 0
+    after="$(grep \^\' ~/.config/ranger/bookmarks | cut -b3-)"
+    if [[ "$before" != "$after" ]]; then
+      cd "$after"
+    fi
+}
+bind '"\C-k":"ranger\C-m"'
+bind '"\C-o":"ranger-cd\C-m"'
+

@@ -163,6 +163,7 @@ i -R laptop-mode-tools
 
 ### utilities
 i git screen expect etckeeper zip unzip unrar rlwrap #uniread
+i highlight atool caca-utils # for ranger file manager
 
 ### firewall
 i shorewall-init    # it depends shorewall
