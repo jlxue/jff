@@ -1,0 +1,72 @@
+dpkg --get-selections [package-name-pattern...]
+dpkg --set-selections
+dpkg -l, --list package-name-pattern...
+    rpm -qa pattern...
+    yum list installed pattern...
+dpkg -s, --status package-name...
+dpkg -L, --listfiles package-name...
+    rpm -ql package-name...
+dpkg -S, --search filename-search-pattern...
+    rpm -qf filename...
+
+dpkg-reconfigure
+update-alternatives
+dpkg-divert
+
+apt-cache show pkg(s)
+apt-cache depends pkg(s)
+    yum deplist
+apt-cache rdepends pkg(s)
+apt-cache policy pkg(s)
+apt-cache dotty(s)
+
+apt-get source
+
+aptitude build-dep
+
+aptitude update
+    yum makecache
+    
+aptitude install
+    yum install
+    yum downgrade
+aptitude reinstall
+    yum reinstall
+aptitude remove
+    yum remove
+aptitude purge
+aptitude safe-upgrade
+    yum update
+aptitude full-upgrade
+    yum upgrade
+    yum distro-sync
+aptitude clean
+    yum clean
+
+aptitude changelog
+aptitude download
+aptitude hold
+aptitude unhold
+aptitude markauto
+aptitude unmarkauto
+aptitude show
+    yum info
+aptitude why
+aptitude why-not
+
+aptitude search pattern...
+    yum search
+    yum list
+
+tasksel
+    yum groupinstall/grouplist/groupremove/groupinfo/groupupdate
+
+aptitude
+    yum shell
+
+???
+    yum list updates
+
+???
+    yum history
+
