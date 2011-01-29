@@ -130,7 +130,7 @@ apt-listbugs
 
 系统菜单  ： # gnome-menu
              libfile-basedir-perl
-文件管理器： xfe/tuxcmd/thunar/rox-filer/pcmanfm/nautilus
+文件管理器： xfe/tuxcmd/emelfm2/thunar/rox-filer/pcmanfm/nautilus
 密钥管理： keychain
 自动 mount：
 配置管理： cfgtool/etckeeper/changetrack/filetraq/diffmon/metastore 

@@ -159,6 +159,7 @@ i alsa-utils
 
 ### power management
 i upower
+i -R laptop-mode-tools
 
 ### utilities
 i git screen expect etckeeper zip unzip unrar rlwrap #uniread
