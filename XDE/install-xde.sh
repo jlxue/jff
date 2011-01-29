@@ -86,6 +86,9 @@ i scrot
 # Or: gpicview geeqie gliv
 i feh
 
+### file manager
+i -R xfe
+
 ### Image Manipulation
 #i mtpaint
 #i gimp inkscape
