@@ -81,10 +81,14 @@ Server
     Moose
     MooseX
     Mouse
+    Moo
+    Class::XSAccessor
+    Class::XSAccessor::Array
     Class::Struct
     Class::Accessor
     Class::Std
     Class::MethodMaker
+    App::Benchmark::Accessors
 
 
 对象数据库
@@ -363,3 +367,8 @@ typesafety
 uniread
 Win32::AdminMisc
 Win32::FileOp
+Data::Rmap
+Parallel::Scoreboard
+JE (a JavaScript engine written in Perl)
+perl5i (Perl 5 Improved)
+snaked (Task scheduler)
