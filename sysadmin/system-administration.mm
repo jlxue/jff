@@ -580,6 +580,22 @@
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
 </node>
+<node COLOR="#00b439" CREATED="1297116389671" ID="ID_120710725" MODIFIED="1297116393584" TEXT="heartbeat">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
+<node COLOR="#00b439" CREATED="1297116394378" ID="ID_142069065" MODIFIED="1297116401069" TEXT="corosync">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
+<node COLOR="#00b439" CREATED="1297116401656" ID="ID_785118149" MODIFIED="1297116404607" TEXT="pacemaker">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
+<node COLOR="#00b439" CREATED="1297116418578" ID="ID_1571847090" MODIFIED="1297116421818" TEXT="ldirectord">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
 <node COLOR="#00b439" CREATED="1251189000640" ID="ID_240687971" MODIFIED="1251189014813" TEXT="AoE (ATA over Ethernet)">
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
