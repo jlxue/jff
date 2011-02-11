@@ -1,3 +1,5 @@
+# vi: ts=8
+
 .PHONY: all prepare release deploy
 
 VERSION		:= 1.0
