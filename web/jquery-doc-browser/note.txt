@@ -1,0 +1,17 @@
+http://jqapi.com/                   (excellent)
+    http://github.com/mustardamus/jqapi
+    http://jqapi.com/jqapi-latest.zip
+
+http://api.jquery.com/visual/       (beauty, but old)
+http://remysharp.com/2008/07/04/jquery-api-update-offline-and-anywhere/
+    https://github.com/jquery/visual-jquery
+    http://code.google.com/p/jquery-api-browser/    (old)
+
+http://api.jquery.com/browser/      (old)
+    https://github.com/jquery/jquery-api-browser
+
+http://view.jquery.com/trunk/tools/api-browser/     (tree navigator menu, but old)
+    http://view.jquery.com/trunk/tools/api-browser/jquery-api-browser.zip
+
+http://remysharp.com/jquery-api/        (no navigator menu)
+    https://github.com/remy/jquery-api-browser
