@@ -94,9 +94,10 @@ i -R xfe
 #i gimp inkscape
 
 ### input method
-i ibus-pinyin
+i ibus-pinyin ibus-gtk ibus-qt4
 # prefer brige-client IM module for GTK and Qt, not old scim-gtk2-immodule and scim-qtimm
 #i scim-pinyin scim-bridge-client-gtk scim-bridge-client-qt scim-bridge-client-qt4
+#i fcitx
 
 ### web browser
 # And: fireftp chatzilla
