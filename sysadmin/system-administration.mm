@@ -550,6 +550,10 @@
 <font NAME="SansSerif" SIZE="14"/>
 </node>
 </node>
+<node COLOR="#00b439" CREATED="1296203183413" ID="ID_1623542735" LINK="http://www.mongodb.org/" MODIFIED="1296203201188" TEXT="MongoDB">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
 <node COLOR="#00b439" CREATED="1241589057812" ID="ID_1052421594" MODIFIED="1241589773096" TEXT="memcached">
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>

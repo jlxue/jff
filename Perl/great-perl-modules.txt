@@ -5,6 +5,9 @@ http://perl.net.au/wiki/Recommended_Perl_Modules
 http://wiki.perlchina.org/index.php/%E6%A8%A1%E5%9D%97%E6%8E%A8%E4%BB%8B
 http://search.cpan.org/~perigrin/Task-Kensho-0.18/lib/Task/Kensho.pm
 
+https://github.com/CPAN-API/cpan-api/wiki/API-docs
+http://search.metacpan.org
+
 #######################################################################
 
 POD 文档 GUI 查看器
@@ -147,6 +150,14 @@ HTML 信息提取
     HTML::TreeBuilder
     HTML::TreeBuilder::XPath
     WWW::Mechanize
+
+HTTP Client
+===========
+    LWP::*
+    HTTP::Tiny
+    HTTP::Lite  (Doesn't support redirection and mirroring)
+    Mojo::Client
+
 
 Email 处理
 =========
@@ -326,7 +337,6 @@ List::Utils
 Log::Any
 Log::Dispatch
 Log::Log4perl
-LWP::*
 Mail::Mailer
 Mail::Send
 Markdown
