@@ -1,0 +1,71 @@
+Debian Squeeze 中输入法的初始化过程
+
+0. Xwindow 系统里输入法主要有两种使用办法：
+    a) XIM
+    b) GTK/Qt im-module
+
+    对于 scim，由于 C++ ABI 兼容问题，又引入了 bridge 版 im-module 和非 bridge 版 im-module，
+    依靠 GTK_IM_MODULE 和 QT_IM_MODULE 的取值来区分，这俩如何取值，取决于系统是否安装了对应的
+    im-module 动态库，具体判断方法在/usr/share/im-config/data/ (im-config) 或者 /etc/X11/xinit/xinput.d/
+    (im-switch)的脚本里。
+
+1. im-config 替代了 im-switch。
+
+2. 初始化流程
+
+/etc/X11/Xsession
+  /etc/X11/Xsession.d/80im-config_launch
+    /usr/share/im-config/xinputrc.common
+      /etc/default/im-config
+    ~/.xinputrc
+      /usr/share/im-config/data/xxxx.im
+      or
+    /etc/X11/xinit/xinputrc
+      /usr/share/im-config/data/00_default.im
+        /usr/share/im-config/data/01_auto.im
+        选择排在最前面的输入法，目前是 ibus。
+
+ * xinputrc.common 定义了 run_im 函数;
+ * /usr/share/im-config/data 中定义了可用的输入法;
+ * ~/.xinputrc 由 /usr/bin/im-config 程序生成，比如内容为 run_im scim 就
+   是执行 /usr/share/im-config/data/22_scim.im 并导出 XMODIFIERS,
+   GTK_IM_MODULE 和 QT_IM_MODULE 三个环境变量。；
+
+   22_scim.im 的作用就是设置上述三个环境变量：
+
+      XMODIFIERS=@im=SCIM
+
+      如果安装了 scim-bridge-client-gtk 则设置 GTK_IM_MODULE=scim-bridge;
+      否则如果安装了 scim-gtk2-immodule 则设置 GTK_IM_MODULE=scim;
+      否则设置 GTK_IM_MODULE=xim.
+
+      如果安装了 scim-bridge-client-qt 和 scim-bridge-client-qt4 则设置 QT_IM_MODULE=scim-bridge;
+      否则如果安装了 scim-qtimm, 则设置 QT_IM_MODULE=scim;
+      否则设置 QT_IM_MODULE=xim.
+
+      scim-bridge-client-gtk 和 scim-gtk2-immodule 都是 gtk im-module，
+      区别在于前者是 C 实现，通过 scim-bridge-agent 与 scim daemon 交互，
+      后者是 C++ 实现，直接与 scim daemon 交互，由于 C++ ABI 不兼容问题，
+      前者要稳定些。
+
+ * /etc/default/im-config 可以设定默认输入法，可能的取值为 /usr/share/im-config/data 下去掉前缀和后缀的文件名 。
+   普通用户用 im-config 切换输入法。
+
+3. 旧的 im-switch 方式：
+/etc/X11/Xsession
+  /etc/X11/Xsession.d/80im-switch
+    执行 ~/.xinput.d/$LNG 或者 /etc/X11/xinit/xinput.d/$LNG
+
+    $LNG 从 $LC_ALL or $LC_CTYPE or $LANG 获取。
+
+    由于 /etc/X11/xinit/xinput.d/$LNG 是符号链接到 /etc/alternatives/xinput-$LNG，后者又
+    符号链接到 /etc/X11/xinit/xinput.d/ 里具体的输入法设置，所以修改 /etc/alternatives/xinput-$LNG
+    的指向就可以修改默认输入法。
+
+    可能的 alternatives: ls /var/lib/dpkg/alternatives/xinput-*;
+    配置：update-alternative --config xinput-$LNG，或者直接修改符号链接。
+
+    普通用户用 im-switch 命令切换输入法。
+
+im-config 的配置方式不取决于 locale，不使用多重符号链接也显得简洁些。
+
