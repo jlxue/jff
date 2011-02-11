@@ -95,6 +95,8 @@ i -R xfe
 
 ### input method
 i ibus-pinyin
+# prefer brige-client IM module for GTK and Qt, not old scim-gtk2-immodule and scim-qtimm
+#i scim-pinyin scim-bridge-client-gtk scim-bridge-client-qt scim-bridge-client-qt4
 
 ### web browser
 # And: fireftp chatzilla

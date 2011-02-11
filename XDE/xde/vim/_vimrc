@@ -172,6 +172,9 @@ set tags=./tags;,tags;
 " recursively search file downwards for gf command
 "set path+=/home/dieken/src/vim7/**
 
+" I often do gf on XXXXX=/some/file, so let vim not think '=' is valid char in file name.
+set isfname-==
+
 set nu
 
 set ignorecase smartcase
