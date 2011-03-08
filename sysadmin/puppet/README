@@ -1,0 +1,4 @@
+puppet configuration for Debian Squeeze.
+
+See modules/puppet/bootstrap/README for instruction to install.
+

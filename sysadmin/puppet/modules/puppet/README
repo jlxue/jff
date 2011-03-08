@@ -1,0 +1,8 @@
+Installation
+~~~~~~~~~~~~
+
+  FACTER_MODULES=`pwd`/modules puppet modules/puppet/bootstrap/bootstrap.pp
+
+Use FACTER_PREFIX to specify target directory, for example:
+  FACTER_PREFIX=$HOME/puppet FACTER_MODULES=... puppet .../bootstrap.pp
+

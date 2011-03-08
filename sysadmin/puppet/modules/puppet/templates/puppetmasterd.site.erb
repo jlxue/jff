@@ -1,0 +1,46 @@
+PassengerHighPerformance on
+PassengerUseGlobalQueue on
+PassengerMaxPoolSize 15
+PassengerPoolIdleTime 300
+PassengerStatThrottleRate 120
+# PassengerMaxRequests 1000
+
+RackAutoDetect Off
+RailsAutoDetect Off
+
+Listen 8140
+
+<VirtualHost *:8140>
+        ServerName <%= fqdn %>
+        ServerAlias puppet.<%= domain %> puppet
+
+        SSLEngine on
+        SSLProtocol -ALL +SSLv3 +TLSv1
+        SSLCipherSuite ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:-LOW:-SSLv2:-EXP
+
+        SSLCertificateFile      /var/lib/puppet/ssl/certs/<%= fqdn %>.pem
+        SSLCertificateKeyFile   /var/lib/puppet/ssl/private_keys/<%= fqdn %>.pem
+        SSLCertificateChainFile /var/lib/puppet/ssl/ca/ca_crt.pem
+        SSLCACertificateFile    /var/lib/puppet/ssl/ca/ca_crt.pem
+        # If Apache complains about invalid signatures on the CRL, you can try disabling
+        # CRL checking by commenting the next line, but this is not recommended.
+        SSLCARevocationFile     /var/lib/puppet/ssl/ca/ca_crl.pem
+        SSLVerifyClient optional
+        SSLVerifyDepth  1
+        SSLOptions +StdEnvVars
+
+        # The following client headers allow the same configuration to work with Pound
+        RequestHeader set X-SSL-Subject %{SSL_CLIENT_S_DN}e
+        RequestHeader set X-Client-DN %{SSL_CLIENT_S_DN}e
+        RequestHeader set X-Client-Verify %{SSL_CLIENT_VERIFY}e
+
+        DocumentRoot /usr/share/puppet/rack/puppetmasterd/public/
+        RackBaseURI /
+        <Directory /usr/share/puppet/rack/puppetmasterd/>
+                Options None
+                AllowOverride None
+                Order allow,deny
+                allow from all
+        </Directory>
+</VirtualHost>
+

@@ -1,0 +1,4 @@
+node /localhost/ {
+    include generic
+    include puppet::server
+}
