@@ -7,8 +7,15 @@ http://search.cpan.org/~perigrin/Task-Kensho-0.18/lib/Task/Kensho.pm
 
 https://github.com/CPAN-API/cpan-api/wiki/API-docs
 http://search.metacpan.org
+http://deps.cpantesters.org
 
 #######################################################################
+
+Perl 5 改进
+==========
+    perl5i (Perl 5 Improved)
+    Moose/Mouse/Any::Moose
+    Modern::Perl
 
 POD 文档 GUI 查看器
 ==================
@@ -380,5 +387,4 @@ Win32::FileOp
 Data::Rmap
 Parallel::Scoreboard
 JE (a JavaScript engine written in Perl)
-perl5i (Perl 5 Improved)
 snaked (Task scheduler)
