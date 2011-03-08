@@ -1,0 +1,19 @@
+deb http://mirrors.sohu.com/debian/ testing  main contrib non-free
+deb http://mirrors.sohu.com/debian/ testing-updates main contrib non-free
+deb http://mirrors.sohu.com/debian/ testing-proposed-updates main contrib non-free
+
+deb http://mirrors.sohu.com/debian-security/ testing/updates main contrib non-free
+
+deb http://mirrors.sohu.com/debian-backports/ squeeze-backports main contrib non-free
+
+deb http://mirrors.sohu.com/debian-multimedia/ testing main contrib non-free
+
+deb-src http://mirrors.sohu.com/debian/ testing  main contrib non-free
+deb-src http://mirrors.sohu.com/debian/ testing-updates main contrib non-free
+deb-src http://mirrors.sohu.com/debian/ testing-proposed-updates main contrib non-free
+
+deb-src http://mirrors.sohu.com/debian-security/ testing/updates main contrib non-free
+
+deb-src http://mirrors.sohu.com/debian-backports/ squeeze-backports main contrib non-free
+
+deb-src http://mirrors.sohu.com/debian-multimedia/ testing main contrib non-free

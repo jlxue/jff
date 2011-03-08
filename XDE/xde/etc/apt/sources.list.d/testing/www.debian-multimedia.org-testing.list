@@ -1,0 +1,3 @@
+deb http://www.debian-multimedia.org testing main contrib non-free
+
+deb-src http://www.debian-multimedia.org sid main contrib non-free

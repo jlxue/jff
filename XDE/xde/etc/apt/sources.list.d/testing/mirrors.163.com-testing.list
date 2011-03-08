@@ -1,0 +1,11 @@
+deb http://mirrors.163.com/debian/ testing  main contrib non-free
+deb http://mirrors.163.com/debian/ testing-proposed-updates main contrib non-free
+
+deb http://mirrors.163.com/debian-security/ testing/updates main contrib non-free
+
+
+deb-src http://mirrors.163.com/debian/ testing  main contrib non-free
+deb-src http://mirrors.163.com/debian/ testing-proposed-updates main contrib non-free
+
+deb-src http://mirrors.163.com/debian-security/ testing/updates main contrib non-free
+
