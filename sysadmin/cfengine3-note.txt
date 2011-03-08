@@ -49,31 +49,39 @@ $ make
 
 
 4. cfengine syntax
-promise-type:       (vars, classes, interfaces, processes, storage, packages,
-                     commands, methods, files, access, reports)
-                    (delete_lines, field_edits, replace_patterns, insert_lines)
-  class-expression::
-  
-   "promiser" -> { "promisee1", "promisee2", ... }
-  
-      ifvarclass => other-class-expression,
-      attribute_1 => value_1,
-      attribute_2 => value_2,
-      ...
-      attribute_n => value_n;
 
-bundle TYPE name     (common, agent, server, knowledge, monitor)
+COMPONENT_TYPE: common, agent, server, executor, monitor, reporter, runagent, knowledge
+PROMISE_TYPE: vars, classes, interfaces, processes, storage, packages,
+              commands, methods, files, access, reports,
+              delete_lines, field_edits, replace_patterns, insert_lines
+
+bundle COMPONENT_TYPE <name>
 {
-....
+PROMISE_TYPE:
+
+CLASSES::
+PROMISER -> { PROMISEE1, PROMISEE2 }
+    ATTRIBUTE => <value>,
+    ATTRIBUTE => <value>;
 }
 
-body TYPE name      (common)
+=====================================
+body ATTRIBUTE_TYPE <name>
 {
-... => ....;
-
+    ATTRIBUTE => <value>;
 classes::
- ... => ....;
+    ATTRIBUTE => <value>;
 }
 
-######ch 2.9
+body COMPONENT_TYPE control
+{
+    ... => ...;
+    ... => ...;
+}
 
+=====================================
+"ifelapsed" parameter for all promises.
+cf-agent --verbose -K -f some.cf
+        -I (inform)
+=====================================
+report: -r option for all cfengine component.
