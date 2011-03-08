@@ -1,0 +1,85 @@
+Practical mod_perl, Stas Bekman & Eric Cholet
+
+<<ch04>>
+
+1. mod_perl configuration
+
+<IfModule mod_perl.c>
+  Include conf/mod_perl.conf
+</IfModule>
+
+PerlWarn        On
+PerlTaintCheck  On
+ServerTokens    Minimal
+
+<Location /doit>
+    SetHandler  perl-script
+    PerlHandler +My:DoIt
+    PerlSetupEnv    off
+    PerlSendHeader  Off
+</Location>
+    
+ScriptAlias /cgi-bin/   /home/httpd/perl/
+Alias       /perl/      /home/httpd/perl/
+Alias       /cgi-perl/  /home/httpd/perl/
+<Location /perl/>
+    SetHandler  perl-script
+    PerlHandler +Apache::Registry
+    Options     +ExecCGI
+    PerlSendHeader  Off
+    PerlSetupEnv    Off
+</Location>
+
+<Location /cgi-perl/>
+    SetHandler  perl-script
+    PerlHandler +Apache::PerlRun
+    Options     +ExecCGI
+    PerlSendHeader  On
+    PerlSetupEnv    On
+</Location>
+
+2. Enable Carp::cluck globally
+
+startup.pl:
+    use strict;
+    use lib qw(...);
+    use Apache::DBI ();
+    use DBI ();
+
+    use Carp ();
+    $SIG{__WARN__} = \&Carp::cluck;
+
+    use CGI ();
+    CGI->compile(':all');
+
+    Apache::DBI->connect_on_init(...);
+
+    # $Apache::Registry::NameWithVirtualHost = 0;
+
+3. Apache Restarts Twice
+
+When the server is started, the configuration and module initialization
+phases are called twice before the children are forked. The second
+restart is done to test that all modules can survive a restart (SIGHUP),
+in order to ensure that future graceful restarts will work correctly.
+This is very important if you are going to restart a production server.
+
+apachectl start:
+    $Apache::Server::Starting       true
+    $Apache::Server::ReStarting     true
+apachectl restart:
+    $Apache::Server::Starting       false
+    $Apache::Server::ReStarting     true
+
+<<ch05>>
+4. Upgrading 24x7 Internet Servers
+ 1) The server cluster: use Load Balancer
+ 2) The single server
+    a. Swapping machines
+        master box + slave box + heartbeat: same IP address and domain name
+    b. Port forwarding
+        iptables/ipchains/ipfwadm: redirect port 80 to port 8000 or 8001
+    c. Symbolic links
+        /usr/local/apache   -> /usr/local/apache-1.3.17
+        /usr/local/apache-1.3.17
+        /usr/local/apache-1.3.19
