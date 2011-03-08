@@ -1,0 +1,8 @@
+#
+# ldap.cf
+#
+
+bundle agent ldap
+{
+}
+

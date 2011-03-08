@@ -1,0 +1,8 @@
+#
+# mta.cf
+#
+
+bundle agent mta
+{
+}
+

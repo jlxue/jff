@@ -1,0 +1,8 @@
+#
+# imap.cf
+#
+
+bundle agent imap
+{
+}
+

@@ -1,59 +1,78 @@
-#########################################################
+#
+# update.cf
+#
 
-bundle agent update
+bundle common g_update
 {
 vars:
 
- "master_location" string => "/var/lib/cfengine3/masterfiles";
+    "master_location" string    => "$(sys.workdir)/masterfiles";
+    "policy_servers"  slist     => { "localhost" };
+}
 
+######################################################################
+
+bundle agent update
+{
 files:
 
-  "/var/lib/cfengine3/inputs"
+    "$(sys.workdir)/inputs"
+        comment         => "Update the policy files from the master",
+        action          => u_immediate,
+        copy_from       => u_cp("$(g_update.master_location)", "@(g_update.policy_servers)"),
+        depth_search    => u_recurse("inf"),
+        perms           => u_m("600");
 
-    perms => u_p("600"),
-    copy_from => mycopy("$(master_location)","localhost"),
-    depth_search => recurse("inf"),
-    action => uimmediate;
-
-  "/var/lib/cfengine3/bin"
-
-    perms => u_p("700"),
-    copy_from => mycopy("/usr/sbin","localhost"),
-    depth_search => recurse("inf"),
-    file_select => cf3_files,
-    action => uimmediate;
+    "$(sys.workdir)/bin"
+        comment         => "Update the cached binaries from installation",
+        copy_from       => u_cp("/usr/sbin", "@(g_update.policy_servers)"),
+        depth_search    => u_recurse("1"),
+        file_select     => u_select_cf_binaries,
+        perms           => u_m("700");
 }
 
-############################################
+######################################################################
 
-body perms u_p(p)
-
+body perms u_m(p)
 {
-mode  => "$(p)";
+    mode    => "$(p)";
 }
 
-############################################
+######################################################################
 
-body file_select cf3_files
-
+body depth_search u_recurse(d)
 {
-leaf_name => { "cf-.*" };
-
-file_result => "leaf_name";
+    depth   => "$(d)";
 }
 
-#########################################################
+######################################################################
 
-body copy_from mycopy(from,server)
-
+body copy_from u_cp(from, servers)
 {
-source      => "$(from)";
-compare     => "digest";
+    compare     => "digest";
+    copy_backup => "timestamp";
+    encrypt     => "true";
+    preserve    => "true";
+    purge       => "true";
+    servers     => { @(servers) };
+    source      => "$(from)";
+    stealth     => "true";
+    trustkey    => "true";
+    verify      => "true";
 }
 
-#########################################################
+######################################################################
 
-body action uimmediate
+body action u_immediate
 {
-ifelapsed => "1";
+    ifelapsed   => "1";
 }
+
+######################################################################
+
+body file_select u_select_cf_binaries
+{
+    leaf_name   => { "cf-.*" };
+    file_result => "leaf_name";
+}
+

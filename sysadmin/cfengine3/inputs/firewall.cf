@@ -1,0 +1,8 @@
+#
+# firewall.cf
+#
+
+bundle agent firewall
+{
+}
+

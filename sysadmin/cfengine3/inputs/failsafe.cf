@@ -1,19 +1,10 @@
 #
-# Failsafe file
+# failsafe.cf
 #
 
 body common control
-
 {
-bundlesequence => { "update" };
-
-inputs => { "update.cf" };
+    bundlesequence  => { "update" };
+    inputs          => { "update.cf" };
 }
 
-############################################
-
-body depth_search recurse(d)
-
-{
-depth => "$(d)";
-}

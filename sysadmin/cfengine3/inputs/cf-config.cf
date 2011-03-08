@@ -1,0 +1,77 @@
+#
+# cf-config.cf
+#
+
+body agent control
+{
+    # if default runtime is 5 mins we need this for long jobs
+    ifelapsed => "15";
+}
+
+######################################################################
+
+body monitor control
+{
+    forgetrate => "0.7";
+    histograms => "true";
+}
+
+######################################################################
+
+body executor control
+{
+    exec_command    => "$(sys.workdir)/bin/cf-agent -f $(sys.workdir)/inputs/failsafe.cf && $(sys.workdir)/bin/cf-agent";
+    mailmaxlines    => "30";
+    mailto          => "cfengine_mail@corp.example.org";
+    smtpserver      => "localhost";
+    splaytime       => "1";
+}
+
+######################################################################
+
+body reporter control
+{
+    reports         => { "performance", "last_seen", "monitor_history" };
+    build_directory => "$(sys.workdir)/reports";
+    report_output   => "html";
+}
+
+######################################################################
+
+body runagent control
+{
+    hosts   => {
+                "127.0.0.1"
+                # , "myhost.example.com:5308", ...
+               };
+}
+
+######################################################################
+
+body server control
+{
+    allowallconnects    => { "127.0.0.1" , "::1" };
+    allowconnects       => { "127.0.0.1" , "::1" };
+    allowusers          => { "root" };
+    cfruncommand        => "$(sys.workdir)/bin/cf-agent -f $(sys.workdir)/inputs/failsafe.cf && $(sys.workdir)/bin/cf-agent";
+    logallconnections   => "true";
+    maxconnections      => "100";
+    trustkeysfrom       => { "127.0.0.1" , "::1" };
+}
+
+######################################################################
+
+bundle server access_rules
+{
+access:
+
+    "$(g_update.master_location)"
+        admit   => { ".*" };
+
+
+roles:
+
+    ".*"
+        authorize   => { ".*" };
+}
+

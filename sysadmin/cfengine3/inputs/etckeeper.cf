@@ -1,0 +1,8 @@
+#
+# etckeeper.cf
+#
+
+bundle agent etckeeper
+{
+}
+

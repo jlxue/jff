@@ -1,0 +1,8 @@
+#
+# backup.cf
+#
+
+bundle agent backup
+{
+}
+

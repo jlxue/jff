@@ -1,0 +1,8 @@
+#
+# pam.cf
+#
+
+bundle agent pam
+{
+}
+
