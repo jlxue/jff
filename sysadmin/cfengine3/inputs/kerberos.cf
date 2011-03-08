@@ -4,5 +4,9 @@
 
 bundle agent kerberos
 {
+reports:
+
+  cfengine_3::
+    "Hello from kerberos!";
 }
 

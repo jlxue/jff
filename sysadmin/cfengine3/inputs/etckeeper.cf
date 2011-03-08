@@ -4,5 +4,9 @@
 
 bundle agent etckeeper
 {
+reports:
+
+  cfengine_3::
+    "Hello from etckeeper!";
 }
 

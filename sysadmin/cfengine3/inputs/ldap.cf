@@ -4,5 +4,9 @@
 
 bundle agent ldap
 {
+reports:
+
+  cfengine_3::
+    "Hello from ldap!";
 }
 

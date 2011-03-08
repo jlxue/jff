@@ -4,5 +4,9 @@
 
 bundle agent apt
 {
+reports:
+
+  cfengine_3::
+    "Hello from apt!";
 }
 

@@ -4,5 +4,9 @@
 
 bundle agent ntp
 {
+reports:
+
+  cfengine_3::
+    "Hello from ntp!";
 }
 

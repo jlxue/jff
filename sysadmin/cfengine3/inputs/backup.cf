@@ -4,5 +4,9 @@
 
 bundle agent backup
 {
+reports:
+
+  cfengine_3::
+    "Hello from backup!";
 }
 

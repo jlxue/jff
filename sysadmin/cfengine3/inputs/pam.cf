@@ -4,5 +4,9 @@
 
 bundle agent pam
 {
+reports:
+
+  cfengine_3::
+    "Hello from pam!";
 }
 

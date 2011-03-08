@@ -4,5 +4,9 @@
 
 bundle agent imap
 {
+reports:
+
+  cfengine_3::
+    "Hello from imap!";
 }
 

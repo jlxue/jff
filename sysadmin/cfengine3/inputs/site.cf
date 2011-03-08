@@ -1,22 +1,6 @@
 #
 # site.cf
 #
-
-bundle common g
-{
-vars:
-
-  SuSE::
-    "crontab" string    => "/var/spool/cron/tabs/root";
-
-  redhat::
-    "crontab" string    => "/var/spool/cron/root";
-
-  (!SuSE).(!redhat)::
-    "crontab" string    => "/var/spool/cron/crontabs/root";
-
-}
-
 ######################################################################
 # Start with cfengine itself
 ######################################################################
@@ -72,22 +56,6 @@ vars:
 
     "component" slist   => { "cf-monitord", "cf-serverd" };
 
-files:
-
-    "$(sys.resolv)"  # test on "/tmp/resolv.conf" #
-
-         comment        => "Edit the resolver file",
-         create         => "true",
-         edit_line      => resolver,
-         edit_defaults  => def;
-
-    # Uncomment this to perform a change-detection scan
-
-    #"/usr"
-    #   action          => measure,
-    #   changes         => lay_trip_wire,
-    #   depth_search    => recurse("inf");
-
 processes:
 
     "cfenvd" signals    => { "term" };
@@ -119,49 +87,6 @@ files:
         delete          => tidy,
         depth_search    => recurse("inf"),
         file_select     => days_old("3");
-}
-
-######################################################################
-
-bundle edit_line resolver
-{
-vars:
-
-    "search" slist  => { "search cfengine.com" };
-
-delete_lines:
-
-    "search.*";
-
-insert_lines:
-
-    "$(search)" location    => start;
-}
-
-######################################################################
-
-body file_select OldCf2Files
-{
-    leaf_name   => {
-                    "promises.cf",
-                    "site.cf",
-                    "library.cf",
-                    "failsafe.cf",
-                    ".*.txt",
-                    ".*.html",
-                    ".*~",
-                    "#.*"
-                   };
-    file_result => "!leaf_name";
-}
-
-######################################################################
-
-body action measure
-{
-    measurement_class   => "Detect Changes in /usr";
-    ifelapsed           => "240";
-    expireafter         => "240";
 }
 
 ######################################################################
@@ -210,11 +135,28 @@ reports:
 
 ######################################################################
 
+body file_select OldCf2Files
+{
+    leaf_name   => {
+                    "promises.cf",
+                    "site.cf",
+                    "library.cf",
+                    "failsafe.cf",
+                    ".*.txt",
+                    ".*.html",
+                    ".*~",
+                    "#.*"
+                   };
+    file_result => "!leaf_name";
+}
+
+######################################################################
+
 bundle edit_line upgrade_cfexecd
 {
 classes:
 
-    "exec_fix" not  => regline(".*cf-execd.*","$(edit.filename)");
+    "exec_fix" not  => regline(".*cf-execd.*", "$(edit.filename)");
 
 insert_lines:
 
@@ -231,11 +173,3 @@ reports:
     "Added a 5 minute schedule to crontabs";
 }
 
-######################################################################
-
-body edit_defaults def
-{
-    edit_backup                 => "false";
-    empty_file_before_editing   => "false";
-    max_file_size               => "100000";
-}

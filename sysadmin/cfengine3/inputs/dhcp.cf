@@ -4,5 +4,9 @@
 
 bundle agent dhcp
 {
+reports:
+
+  cfengine_3::
+    "Hello from dhcp!";
 }
 
