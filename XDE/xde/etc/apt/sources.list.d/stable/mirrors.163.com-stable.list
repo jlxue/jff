@@ -1,6 +1,6 @@
 deb http://mirrors.163.com/debian/ stable  main contrib non-free
-deb http://mirrors.163.com/debian/ stable-updates main contrib non-free
-deb http://mirrors.163.com/debian/ stable-proposed-updates main contrib non-free
+deb http://mirrors.163.com/debian/ squeeze-updates main contrib non-free
+deb http://mirrors.163.com/debian/ squeeze-proposed-updates main contrib non-free
 
 deb http://mirrors.163.com/debian-security/ stable/updates main contrib non-free
 
@@ -8,8 +8,8 @@ deb http://mirrors.163.com/debian-backports/ squeeze-backports main contrib non-
 
 
 deb-src http://mirrors.163.com/debian/ stable  main contrib non-free
-deb-src http://mirrors.163.com/debian/ stable-updates main contrib non-free
-deb-src http://mirrors.163.com/debian/ stable-proposed-updates main contrib non-free
+deb-src http://mirrors.163.com/debian/ squeeze-updates main contrib non-free
+deb-src http://mirrors.163.com/debian/ squeeze-proposed-updates main contrib non-free
 
 deb-src http://mirrors.163.com/debian-security/ stable/updates main contrib non-free
 
