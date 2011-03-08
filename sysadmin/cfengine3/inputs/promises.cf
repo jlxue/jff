@@ -5,6 +5,7 @@
 #######################################################
 
 body common control
+
 {
 bundlesequence  => {
                    "update",
@@ -16,7 +17,7 @@ bundlesequence  => {
 inputs          => {
                    "update.cf",
                    "site.cf",
-                   "library.cf"
+                   "cfengine_stdlib.cf"
                    };
 }
 
@@ -39,6 +40,7 @@ histograms => "true";
 #######################################################
 
 body executor control
+
 {
 splaytime => "1";
 mailto => "cfengine_mail@example.org";
@@ -53,6 +55,7 @@ exec_command => "$(sys.workdir)/bin/cf-agent -f failsafe.cf && $(sys.workdir)/bi
 #######################################################
 
 body reporter control
+
 {
 reports => { "performance", "last_seen", "monitor_history" };
 build_directory => "$(sys.workdir)/reports";
@@ -73,6 +76,7 @@ hosts => {
 #######################################################
 
 body server control
+
 {
 allowconnects         => { "127.0.0.1" , "::1" };
 allowallconnects      => { "127.0.0.1" , "::1" };
@@ -83,4 +87,5 @@ trustkeysfrom         => { "127.0.0.1" , "::1" };
 cfruncommand          => "$(sys.workdir)/bin/cf-agent -f failsafe.cf && $(sys.workdir)/bin/cf-agent";
 allowusers            => { "root" };
 }
+
 
