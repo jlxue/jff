@@ -1,0 +1,5 @@
+deb http://mirrors.sohu.com/debian/ unstable  main contrib non-free
+deb http://mirrors.sohu.com/debian-multimedia/ unstable main contrib non-free
+
+deb-src http://mirrors.sohu.com/debian/ unstable  main contrib non-free
+deb-src http://mirrors.sohu.com/debian-multimedia/ unstable main contrib non-free
