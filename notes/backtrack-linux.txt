@@ -1,0 +1,317 @@
+repos:
+
+http://sun.backtrack-linux.org/
+http://archive.offensive-security.com/
+
+
+$ /usr/sbin/debootstrap --arch i386 --components=main,microverse,macroverse,restricted,universe,multiverse --variant=minbase  --verbose --print-debs pwnsauce bt4 http://archive.offensive-security.com
+E: No such script: /usr/share/debootstrap/scripts/pwnsauce
+
+
+BackTrack menu
+~~~~~~~~~~~~~~~
+
+- 1.1 Information Gathering
+- 1.1.1 0trace 0.01
+- 1.1.2 Ass
+- 1.1.3 dig
+- 1.1.4 DMitry
+- 1.1.5 DNS-Ptr
+- 1.1.6 dnstracer 1.5
+- 1.1.7 dnswalk
+- 1.1.8 dns-bruteforce
+- 1.1.9 dnsenum
+- 1.1.10 dnsmap
+- 1.1.11 DNSPredict
+- 1.1.12 Finger Google
+- 1.1.13 Firewalk
+- 1.1.14 Fport 2.0 (Windows Executable)
+- 1.1.15 Goog Mail Enum
+- 1.1.16 Google-search
+- 1.1.17 Googrape
+- 1.1.18 Gooscan
+- 1.1.19 Host
+- 1.1.20 InTrace 1.3
+- 1.1.21 Itrace
+- 1.1.22 Maltego 2.0
+- 1.1.23 Metagoofil 1.4
+- 1.1.24 Mbenum 1.5.0 (Windows Executable)
+- 1.1.25 Netenum
+- 1.1.26 Netmask
+- 1.1.27 Nmbscan 1.2.4
+- 1.1.28 Protos
+- 1.1.29 PsTools (Windows Executables)
+- 1.1.29.1 PsInfo
+- 1.1.29.2 PsFile
+- 1.1.29.3 PsList
+- 1.1.29.4 PsGetSID
+- 1.1.29.5 PsLoggedOn
+- 1.1.29.6 PsLogList
+- 1.1.30 PStoreView 1.0 (Windows Binary)
+- 1.1.31 QGoogle
+- 1.1.32 Relay Scanner
+- 1.1.33 SMTP-Vrfy
+- 1.1.34 Subdomainer 1.3
+- 1.1.35 TCPtraceroute 1.5beta7
+- 1.1.36 TCtrace
+- 1.1.37 Whoami (Windows Executable)
+- 1.2 Network Mapping
+- 1.2.1 Amap 5.2
+- 1.2.2 Angry IP Scanner (ipscan) 3.0-beta3
+- 1.2.3 Autoscan 0.99_R1
+- 1.2.4 Fierce 0.9.9 beta 03/24/07
+- 1.2.5 Fping
+- 1.2.6 Genlist
+- 1.2.7 Hping
+- 1.2.8 Hping2 2.0.0-rc3
+- 1.2.9 Hping3 3.0.0-alpha-1
+- 1.2.10 IKE-Scan
+- 1.2.11 IKEProbe
+- 1.2.12 Netcat 0.7.1
+- 1.2.13 Netdiscover
+- 1.2.14 Nmap
+- 1.2.15 NmapFE
+- 1.2.16 P0f
+- 1.2.17 PSK-Crack
+- 1.2.18 Ping
+- 1.2.19 Protos
+- 1.2.20 ScanLine 1.01 (Windows Executable)
+- 1.2.21 Scanrand
+- 1.2.22 SinFP
+- 1.2.23 Umit
+- 1.2.24 UnicornScan
+- 1.2.25 UnicornScan pgsql 0.4.6e module version 1.03
+- 1.2.26 XProbe2
+- 1.2.27 PBNJ 2.04
+- 1.2.27.1 OutputPBNJ
+- 1.2.27.2 ScanPBNJ
+- 1.2.28 Zenmap 4.60
+- 1.3 Vulnerability Identification
+- 1.3.1 Absinthe
+- 1.3.2 Bed
+- 1.3.3 CIRT Fuzzer
+- 1.3.4 Checkpwd
+- 1.3.5 Cisco Auditing Tool
+- 1.3.6 Cisco Enable Bruteforcer
+- 1.3.7 Cisco Global Exploiter
+- 1.3.8 Cisco OCS Mass Scanner
+- 1.3.9 Cisco Scanner
+- 1.3.10 Cisco Torch
+- 1.3.11 Curl
+- 1.3.12 Fuzzer 1.2
+- 1.3.13 GFI LanGuard 2.0
+- 1.3.14 GetSids
+- 1.3.15 HTTP PUT
+- 1.3.16 Halberd
+- 1.3.17 Httprint
+- 1.3.18 Httprint GUI
+- 1.3.19 ISR-Form
+- 1.3.20 Jbrofuzz
+- 1.3.21 List-Urls
+- 1.3.22 Lynx
+- 1.3.23 Merge Router Config
+- 1.3.24 Metacoretex
+- 1.3.25 Metoscan
+- 1.3.26 Mezcal HTTP/S
+- 1.3.27 Mibble MIB Browser
+- 1.3.28 Mistress
+- 1.3.29 Nikto
+- 1.3.30 OAT
+- 1.3.31 Onesixtyone
+- 1.3.32 OpenSSL-Scanner
+- 1.3.33 Paros Proxy
+- 1.3.34 Peach
+- 1.3.35 RPCDump
+- 1.3.36 RevHosts
+- 1.3.37 SMB Bruteforcer
+- 1.3.38 SMB Client
+- 1.3.39 SMB Serverscan
+- 1.3.40 SMB-NAT
+- 1.3.41 SMBdumpusers
+- 1.3.42 SMBgetserverinfo
+- 1.3.43 SNMP Scanner
+- 1.3.44 SNMP Walk
+- 1.3.45 SQL Inject
+- 1.3.46 SQL Scanner
+- 1.3.47 SQLLibf
+- 1.3.48 SQLbrute
+- 1.3.49 Sidguess
+- 1.3.50 Smb4K
+- 1.3.51 Snmpcheck
+- 1.3.52 Snmp Enum
+- 1.3.53 Spike
+- 1.3.54 Stompy
+- 1.3.55 SuperScan
+- 1.3.56 TNScmd
+- 1.3.57 Taof
+- 1.3.58 VNC_bypauth
+- 1.3.59 Wapiti
+- 1.3.60 Yersinia
+- 1.3.61 sqlanlz
+- 1.3.62 sqldict
+- 1.3.63 sqldumplogins
+- 1.3.64 sqlquery
+- 1.3.65 sqlupload
+- 1.4 Penetration
+- 1.4.1 Framework3-MsfC
+- 1.4.2 Framework3-MsfUpdate
+- 1.4.3 Framework3-Msfcli
+- 1.4.4 Framework3-Msfweb
+- 1.4.5 Init Pgsql (autopwn)
+- 1.4.6 Milw0rm Archive
+- 1.4.7 MsfCli
+- 1.4.8 MsfConsole
+- 1.4.9 MsfUpdate
+- 1.4.10 OpenSSL-To-Open
+- 1.4.11 Pirana
+- 1.4.12 Update Milw0rm
+- 1.5 Privilege Escalation
+- 1.5.1 Ascend attacker
+- 1.5.2 CDP Spoofer
+- 1.5.3 Cisco Enable Bruteforcer
+- 1.5.4 Crunch Dictgen
+- 1.5.5 DHCPX Flooder
+- 1.5.6 DNSspoof
+- 1.5.7 Driftnet
+- 1.5.8 Dsniff
+- 1.5.9 Etherape
+- 1.5.10 EtterCap
+- 1.5.11 File2Cable
+- 1.5.12 HSRP Spoofer
+- 1.5.13 Hash Collision
+- 1.5.14 Httpcapture
+- 1.5.15 Hydra
+- 1.5.16 Hydra GTK
+- 1.5.17 ICMP Redirect
+- 1.5.18 ICMPush
+- 1.5.19 IGRP Spoofer
+- 1.5.20 IRDP Responder
+- 1.5.21 IRDP Spoofer
+- 1.5.22 John
+- 1.5.23 Lodowep
+- 1.5.24 Mailsnarf
+- 1.5.25 Medusa
+- 1.5.26 Msgsnarf
+- 1.5.27 Nemesis Spoofer
+- 1.5.28 NetSed
+- 1.5.29 Netenum
+- 1.5.30 Netmask
+- 1.5.31 Ntop
+- 1.5.32 PHoss
+- 1.5.33 PackETH
+- 1.5.34 Rcrack
+- 1.5.35 SIPdump
+- 1.5.36 SMB Sniffer
+- 1.5.37 Sing
+- 1.5.38 TFTP-Brute
+- 1.5.39 THC PPTP
+- 1.5.40 TcPick
+- 1.5.41 URLsnarf
+- 1.5.42 VNCrack
+- 1.5.43 WebCrack
+- 1.5.44 Wireshark
+- 1.5.45 Wireshark Wifi
+- 1.5.46 WyD
+- 1.5.47 XSpy
+- 1.5.48 chntpw
+- 1.6 Maintaining Access
+- 1.6.1 3proxy
+- 1.6.2 Backdoors
+- 1.6.3 Matahari
+- 1.6.4 CryptCat
+- 1.6.5 HttpTunnel Client
+- 1.6.6 HttpTunnel Server
+- 1.6.7 ICMPTX
+- 1.6.8 Iodine
+- 1.6.9 NSTX
+- 1.6.10 Privoxy
+- 1.6.11 ProxyTunnel
+- 1.6.12 Rinetd
+- 1.6.13 TinyProxy
+- 1.6.14 sbd
+- 1.6.15 socat
+- 1.7 Covering Tracks
+- 1.7.1 Housekeeping
+- 1.8 Radio Network Analysis
+- 1.8.1 802.11 WIFI
+- 1.8.1.1 AFrag
+- 1.8.1.2 ASLeap
+- 1.8.1.3 aircrack-ng
+- 1.8.1.4 airdecap-ng
+- 1.8.1.5 aireplay-ng
+- 1.8.1.6 airmon-ng
+- 1.8.1.7 Airpwn
+- 1.8.1.8 AirSnarf
+- 1.8.1.9 airbase-ng
+- 1.8.1.10 airodump-ng
+- 1.8.1.11 Airoscript
+- 1.8.1.12 Airsnort
+- 1.8.1.13 CowPatty
+- 1.8.1.14 FakeAP
+- 1.8.1.15 Hotspotter
+- 1.8.1.16 Karma
+- 1.8.1.17 Kismet
+- 1.8.1.18 MDK3
+- 1.8.1.19 MacChanger
+- 1.8.1.20 WifiTap
+- 1.8.1.21 Wicrawl
+- 1.8.1.22 WifiZoo
+- 1.8.1.23 Wlassistant
+- 1.8.1.24 SpoonDRV
+- 1.8.1.25 SpoonWEP
+- 1.8.2 Bluetooth
+- 1.8.2.1 BTcrack
+- 1.8.2.2 Bluebugger
+- 1.8.2.3 Blueprint
+- 1.8.2.4 Bluesmash
+- 1.8.2.5 Bluesnarfer
+- 1.8.2.6 Btscanner
+- 1.8.2.7 Carwhisperer
+- 1.8.2.8 Frontline
+- 1.8.2.9 Minicom
+- 1.8.2.10 ObexFTP
+- 1.8.2.11 HCIDump
+- 1.8.2.12 Redfang
+- 1.8.2.13 Ussp-Push
+- 1.8.2.14 atshell
+- 1.8.2.15 attest
+- 1.8.2.16 bdaddr
+- 1.8.2.17 bss
+- 1.8.2.18 btftp
+- 1.8.2.19 hcidump-crash
+- 1.8.2.20 hidattack
+- 1.8.2.21 hstest
+- 1.8.2.22 rfcomm
+- 1.9 VOIP & Telephony Analysis
+- 1.9.1 PcapSipDump
+- 1.9.2 PcapToSip_RTP
+- 1.9.3 SIPSak
+- 1.9.4 SIPcrack
+- 1.9.5 SIPdump
+- 1.9.6 SIPp
+- 1.9.7 Smap
+- 1.10 Digital Forensics
+- 1.10.1 Allin1
+- 1.10.2 Autopsy
+- 1.10.3 DCFLDD
+- 1.10.4 DD_Rescue
+- 1.10.5 Foremost
+- 1.10.6 Magicrescue
+- 1.10.7 Mboxgrep
+- 1.10.8 Memfetch
+- 1.10.9 Memfetch Find
+- 1.10.10 Pasco
+- 1.10.11 Rootkithunter
+- 1.10.12 Sleuthkit
+- 1.10.13 Vinetto
+- 1.11 Reverse Engineering
+- 1.11.1 GDB GNU Debugger
+- 1.11.2 GDB Console GUI
+- 1.11.3 GDB Server
+- 1.11.4 GNU DDD
+- 1.11.5 Hexdump
+- 1.11.6 Hexedit
+- 1.11.7 OllyDBG
+- 1.12 Services
+- 1.12.1 SNORT
+
