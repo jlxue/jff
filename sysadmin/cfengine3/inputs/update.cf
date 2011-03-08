@@ -1,64 +1,48 @@
-#
-# update.cf
-#
-
-bundle common g_update
-{
-vars:
-
-    "master_location" string    => "/home/users/yubaoliu/cfengine3";
-    "policy_servers" slist      => { "localhost" };
-}
-
-######################################################################
+#########################################################
 
 bundle agent update
 {
+vars:
+
+ "master_location" string => "/var/cfengine/masterfiles";
+
 files:
 
-    "$(sys.workdir)/inputs"
-        perms           => u_p("600"),
-        copy_from       => remote("$(g_update.master_location)/inputs",
-                                  "@(g_update.policy_servers)"),
-        depth_search    => recurse("inf"),
-        action          => immediate;
+  "/var/lib/cfengine3/inputs"
+
+    perms => u_p("600"),
+    copy_from => mycopy("$(master_location)","localhost"),
+    depth_search => recurse("inf"),
+    action => immediate;
 }
 
-######################################################################
-
+############################################
 
 body perms u_p(p)
 {
-    mode    => "$(p)";
+mode  => "$(p)";
 }
 
-######################################################################
+############################################
 
-body depth_search recurse(d)
+body file_select cf3_files
 {
-    depth   => "$(d)";
+leaf_name => { "cf-.*" };
+
+file_result => "leaf_name";
 }
 
-######################################################################
+#########################################################
 
-body copy_from remote(from, servers)
+body copy_from mycopy(from,server)
 {
-    compare         => "digest";
-    copy_backup     => "timestamp";
-    encrypt         => "true";
-    preserve        => "true";
-    purge           => "true";
-    servers         => { @(servers) };
-    source          => "$(from)";
-    stealth         => "true";
-    trustkey        => "true";
-    verify          => "true";
+source      => "$(from)";
+compare     => "digest";
 }
 
-######################################################################
+#########################################################
 
 body action immediate
 {
-    ifelapsed   => "1";
+ifelapsed => "1";
 }
-
