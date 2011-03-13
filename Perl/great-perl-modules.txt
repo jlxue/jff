@@ -162,6 +162,7 @@ HTTP Client
 ===========
     LWP::*
     HTTP::Tiny
+    AnyEvent::HTTP
     HTTP::Lite  (Doesn't support redirection and mirroring)
     Mojo::Client
 

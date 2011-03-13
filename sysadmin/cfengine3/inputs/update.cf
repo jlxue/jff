@@ -8,6 +8,7 @@ vars:
 
     "master_location" string    => "$(sys.workdir)/masterfiles";
     "policy_servers"  slist     => { "localhost" };
+    "cf_bin_dir"      string    => "/usr/sbin";
 }
 
 ######################################################################
@@ -25,7 +26,7 @@ files:
 
     "$(sys.workdir)/bin"
         comment         => "Update the cached binaries from installation",
-        copy_from       => u_cp("/usr/sbin", "@(g_update.policy_servers)"),
+        copy_from       => u_cp("$(g_update.cf_bin_dir)", "@(g_update.policy_servers)"),
         depth_search    => u_recurse("1"),
         file_select     => u_select_cf_binaries,
         perms           => u_m("700");

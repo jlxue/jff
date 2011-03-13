@@ -2,6 +2,22 @@
 # cf-config.cf
 #
 
+bundle common g
+{
+vars:
+
+  SuSE::
+    "crontab" string    => "/var/spool/cron/tabs/root";
+
+  redhat::
+    "crontab" string    => "/var/spool/cron/root";
+
+  (!SuSE).(!redhat)::
+    "crontab" string    => "/var/spool/cron/crontabs/root";
+}
+
+######################################################################
+
 body agent control
 {
     # if default runtime is 5 mins we need this for long jobs

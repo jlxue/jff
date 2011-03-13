@@ -7,12 +7,7 @@ body common control
     bundlesequence  => {
                         "update",
 
-                        # in site.cf
-                        "cfengine",
-                        "garbage_collection",
-                        "main",
-                        #"anomalies",
-
+                        "cfengine", #"anomalies",
                         "apt",
                         "etckeeper",
                         "firewall",
@@ -30,10 +25,9 @@ body common control
     inputs          => {
                         "update.cf",
                         "cfengine_stdlib.cf",
-                        "globals.cf",
                         "cf-config.cf",
-                        "site.cf",
 
+                        "cfengine.cf",
                         "apt.cf",
                         "etckeeper.cf",
                         "firewall.cf",
@@ -47,5 +41,7 @@ body common control
                         "imap.cf",
                         "backup.cf",
                        };
+
+    version         => "1.0";
 }
 

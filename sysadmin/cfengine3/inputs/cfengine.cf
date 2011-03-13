@@ -1,92 +1,37 @@
 #
-# site.cf
+# cfengine.cf
 #
-######################################################################
-# Start with cfengine itself
-######################################################################
 
 bundle agent cfengine
-{
-classes:
-
-    "integrate_cfengine2"
-        and => {
-                fileexists("$(sys.workdir)/inputs/cfagent.conf"),
-                fileexists("$(sys.workdir)/bin/cfagent")
-               };
-
-vars:
-
-    "cf2bits" slist => { "cfenvd", "cfservd", "cfexecd" };
-
-commands:
-
-  integrate_cfengine2::
-    "$(sys.workdir)/bin/cfagent"
-        action  => if_elapsed("240");
-
-files:
-
-    # Warn about rules relating to cfengine 2 in inputs - could conflict
-    "$(sys.workdir)/inputs/.*"
-        comment     => "Check if there are still promises about cfengine 2 that need removing",
-        action      => warn_only,
-        edit_line   => delete_lines_matching(".*$(cf2bits).*"),
-        file_select => OldCf2Files;
-
-    # Check cf-execd and schedule is in crontab
-    "$(g.crontab)"
-        comment     => "Add cfengine as a cron job, or check for cfengine 2 jobs to replace",
-        create      => "true",
-        edit_line   => upgrade_cfexecd;
-
-processes:
-
-  exec_fix::
-    "cron" signals  => { "hup" };
-}
-
-######################################################################
-# General site issues can be in bundles like this one
-######################################################################
-
-bundle agent main
 {
 vars:
 
     "component" slist   => { "cf-monitord", "cf-serverd" };
 
-processes:
-
-    "cfenvd" signals    => { "term" };
-
-    # Uncomment this if/when you are ready to upgrade a cf2 server
-    #
-    #"cfservd"  signals => { "term" };
-    #
-
-    # Now make sure the new parts are running, cf-serverd will fail if
-    # the old server is still running
-    "$(component)" restart_class    => canonify("start_$(component)");
-
 commands:
 
     "$(sys.workdir)/bin/$(component)"
         ifvarclass => canonify("start_$(component)");
-}
 
-######################################################################
-# Garbage collection issues
-######################################################################
-
-bundle agent garbage_collection
-{
 files:
 
+    "$(g.crontab)"
+        comment     => "Add cfengine as a cron job, or check for cfengine 2 jobs to replace",
+        create      => "true",
+        edit_line   => upgrade_cfexecd;
+
     "$(sys.workdir)/outputs"
+        comment         => "Garbage collection issues",
         delete          => tidy,
         depth_search    => recurse("inf"),
         file_select     => days_old("3");
+
+processes:
+
+    exec_fix::
+    "cron" signals                  => { "hup" };
+
+    "$(component)" restart_class    => canonify("start_$(component)");
 }
 
 ######################################################################
@@ -135,23 +80,6 @@ reports:
 
 ######################################################################
 
-body file_select OldCf2Files
-{
-    leaf_name   => {
-                    "promises.cf",
-                    "site.cf",
-                    "library.cf",
-                    "failsafe.cf",
-                    ".*.txt",
-                    ".*.html",
-                    ".*~",
-                    "#.*"
-                   };
-    file_result => "!leaf_name";
-}
-
-######################################################################
-
 bundle edit_line upgrade_cfexecd
 {
 classes:
@@ -161,7 +89,7 @@ classes:
 insert_lines:
 
   exec_fix::
-      "0,5,10,15,20,25,30,35,40,45,50,55 * * * * /usr/sbin/cf-execd -F";
+    "0,5,10,15,20,25,30,35,40,45,50,55 * * * * $(g_update.cf_bin_dir)/cf-execd -F";
 
 replace_patterns:
 
