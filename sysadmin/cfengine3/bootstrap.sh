@@ -18,7 +18,7 @@ fi
 # http://www.cfengine.org/pages/getting_started
 cf-key
 #cp -a /usr/sbin/cf-* /var/lib/cfengine3/bin
-cp `dirname "$0"`/inputs/*.cf /var/lib/cfengine3/inputs
+cp -a `dirname "$0"`/inputs/* /var/lib/cfengine3/inputs
 chmod 600 /var/lib/cfengine3/inputs/*.cf
 cf-agent --bootstrap
 cf-agent
