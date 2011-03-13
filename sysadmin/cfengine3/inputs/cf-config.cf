@@ -6,13 +6,13 @@ bundle common g
 {
 vars:
 
-  SuSE::
+    SuSE::
     "crontab" string    => "/var/spool/cron/tabs/root";
 
-  redhat::
+    redhat::
     "crontab" string    => "/var/spool/cron/root";
 
-  (!SuSE).(!redhat)::
+    (!SuSE).(!redhat)::
     "crontab" string    => "/var/spool/cron/crontabs/root";
 }
 

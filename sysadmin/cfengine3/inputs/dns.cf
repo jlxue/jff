@@ -6,7 +6,7 @@ bundle agent dns
 {
 reports:
 
-  cfengine_3::
+    cfengine_3::
     "Hello from dns!";
 }
 
