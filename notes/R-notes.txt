@@ -1,7 +1,14 @@
+http://www.linuxlinks.com/article/20110306113701179/GUIsforR.html
+
 R gui:
 
 R -g Tk
+RStudio
+Rattle
+Red-R
+Deducer
+RKWard
+R Commander
 JGR
-Rkward
 Emacs ESS
 TeXmacs
