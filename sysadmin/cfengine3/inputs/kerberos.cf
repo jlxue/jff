@@ -51,12 +51,8 @@ packages:
 commands:
 
     realm_not_created::
-    "/bin/sh -c \"pw=`pwgen -cnys 24 1`; ( date; echo $(const.dollar)pw; ) >> $(kdc_db_pw); chmod 600 $(kdc_db_pw); ( echo $(const.dollar)pw; echo $(const.dollar)pw; ) | /usr/sbin/kdb5_util -r $(krb_realm) -d $(krb5kdc_db) create -s\""
-        comment => "Create the new realm";
-
-    realm_not_created::
-    "/bin/sh -c \"( echo 'add_policy -minlength 8 -minclasses 3 admin'; echo 'add_policy -minlength 8 -minclasses 4 host'; echo 'add_policy -minlength 8 -minclasses 4 service'; echo 'add_policy -minlength 8 -minclasses 2 user'; ) | /usr/sbin/kadmin.local\""
-        comment => "Create default policies";
+    "/bin/sh $(sys.workdir)/inputs/scripts/krb5_newrealm.sh $(kdc_db_pw) $(krb_realm) $(krb5kdc_db)"
+        comment => "Create the new realm and default policies";
 
     realm_not_created|krb5_conf_changed|kdc_conf_changed::
     "/usr/sbin/invoke-rc.d krb5-kdc restart"
