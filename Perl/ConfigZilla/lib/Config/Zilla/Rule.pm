@@ -6,30 +6,20 @@ use Any::Moose;
 has 'name'      => (is => 'ro', isa => 'Str', required => 1);
 has 'shortdesc' => (is => 'ro', isa => 'Str', required => 1);
 has 'longdesc'  => (is => 'ro', isa => 'Str');
+has 'target'    => (is => 'ro', isa => 'Str');
 has 'depend'    => (is => 'ro', isa => 'ArrayRef[Str]');
 has 'notify'    => (is => 'ro', isa => 'ArrayRef[Str]');
+has 'expect'    => (is => 'ro');
 has 'stash'     => (is => 'rw', isa => 'HashRef');
 
-sub needRepair {
-    return 1;
+sub check {
 }
 
-sub isRepaired {
-    return 0;
-}
-
-sub isKept {
-    return 0;
-}
-
-sub saveState {
-    my ($self, $isBeforeExecute) = @_;
-}
-
-sub execute {
+sub apply {
 }
 
 sub rollback {
 }
 
+no Any::Moose;
 __PACKAGE__->meta->make_immutable();
