@@ -1,0 +1,9 @@
+cf-server, cf-monitor ACL
+
+auditd, acct
+shorewall
+
+======================================================
+kerberos: TXT, SRV
+ldap: security, nsswitch
+pam
