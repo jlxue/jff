@@ -1,0 +1,30 @@
+http://lua-users.org/wiki/BindingCodeToLua
+
+LuaJIT FFI      http://luajit.org/ext_ffi.html
+
+LuaBind
+    http://www.rasterbar.com/products/luabind.html
+OOLua
+    http://code.google.com/p/oolua/
+SLB
+    http://code.google.com/p/slb/
+LunaWrapper
+    http://lua-users.org/wiki/LunaWrapper
+
+=======================================================
+tolua++
+swig
+=======================================================
+
+Luabridge ??
+
+Lux: C++ 支持不好
+MLuaBind    编译失败，停滞
+    http://sourceforge.net/projects/mluabind/
+CppLua: 停滞
+Diluculum: 太原始
+
+LuaCpp  (VC only, very new, bad code)
+    http://code.google.com/p/luacpp/
+LuaCpp  (not active)
+    https://github.com/JakobOvrum/LuaCpp
