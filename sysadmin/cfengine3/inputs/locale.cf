@@ -1,0 +1,29 @@
+#
+# locale.cf
+#
+
+bundle agent locale
+{
+vars:
+
+    "LANG" string           => "en_US.UTF-8";
+    "LANGUAGE" string       => "en_US:en";
+    "LC_CTYPE" string       => "zh_CN.UTF-8";
+    "default_locale" string => "/etc/default/locale";
+    "locale_gen" string     => "/etc/locale.gen";
+
+classes:
+
+    "dont_fix_locale" and   => {
+                                regline("\s*LANG=$(LANG)\s*", $(default_locale)),
+                                regline("\s*LANGUAGE=$(LANGUAGE)\s*", $(default_locale)),
+                                regline("\s*LC_CTYPE=$(LC_CTYPE)\s*", $(default_locale))
+                               };
+
+
+commands:
+
+    !dont_fix_locale::
+    "update-locale LANG=$(LANG) LANGUAGE=$(LANGUAGE) LC_CTYPE=$(LC_CTYPE)"
+}
+

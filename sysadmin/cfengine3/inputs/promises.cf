@@ -8,6 +8,7 @@ body common control
                         "update",
 
                         "cfengine", #"anomalies",
+                        "locale",
                         "apt",
                         "audit",
                         "etckeeper",
@@ -29,6 +30,7 @@ body common control
                         "cf-config.cf",
 
                         "cfengine.cf",
+                        "locale.cf",
                         "apt.cf",
                         "audit.cf",
                         "etckeeper.cf",
