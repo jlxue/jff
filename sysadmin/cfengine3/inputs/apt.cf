@@ -17,11 +17,11 @@ files:
 commands:
 
     apt_sources_list_changed.have_aptitude::
-    "/usr/bin/aptitude update"
+    "aptitude update"
         comment => "Update apt sources list with aptitude";
 
     apt_sources_list_changed.!have_aptitude::
-    "/usr/bin/apt-get update"
+    "apt-get update"
         comment => "Update apt sources list with apt-get";
 }
 
