@@ -108,5 +108,13 @@ files:
     "$(kdc_db_pw)"
         comment     => "Kerberos v5 key server's master database password",
         perms       => mog("0600", "root", "root");
+
+    "/etc/krb5.keytab"
+        comment     => "Kerberos v5 keytab file",
+        perms       => mog("0600", "root", "root");
+
+    "/etc/krb5kdc/stash"
+        comment     => "Kerberos v5 key server's stash file",
+        perms       => mog("0600", "root", "root");
 }
 
