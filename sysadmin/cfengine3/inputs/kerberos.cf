@@ -5,6 +5,7 @@
 bundle agent kerberos
 {
 vars:
+
     "match_package" slist  => {
                                 "gnutls-bin",
                                 "krb5-admin-server",
@@ -14,7 +15,8 @@ vars:
                                };
 
 packages:
-    "${match_package}"
+
+    "$(match_package)"
         package_method  => apt,
         package_policy  => "add";
 
@@ -40,12 +42,12 @@ files:
 
 commands:
 
-    krb5_conf_changed::
-    "/usr/sbin/invoke-rc.d krb5-admin-server restart"
-        comment => "Restart Kerberos v5 admin server";
-
     krb5_conf_changed|kdc_conf_changed::
     "/usr/sbin/invoke-rc.d krb5-kdc restart"
         comment => "Restart Kerberos v5 key server";
+
+    krb5_conf_changed::
+    "/usr/sbin/invoke-rc.d krb5-admin-server restart"
+        comment => "Restart Kerberos v5 admin server";
 }
 

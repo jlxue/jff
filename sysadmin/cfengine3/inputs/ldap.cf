@@ -4,9 +4,19 @@
 
 bundle agent ldap
 {
-reports:
+vars:
+    "match_package" slist   => {
+                                "slapd",
+                                "ldap-utils",
+                                "libnss-ldapd",
+                                "libsasl2-modules-gssapi-mit"
+                               };
 
-    cfengine_3::
-    "Hello from ldap!";
+packages:
+
+    "$(match_package)"
+        package_method  => apt,
+        package_policy  => "add";
+
 }
 
