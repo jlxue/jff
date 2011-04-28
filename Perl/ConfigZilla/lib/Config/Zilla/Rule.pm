@@ -10,14 +10,6 @@ has 'longdesc'  => (is => 'ro', isa => 'Str', default => '');
 # Depends on which rules
 has 'depend'    => (is => 'ro', isa => 'ArrayRef[Str]');
 
-# { eventName => arg }
-has 'notify'    => (is => 'ro', isa => 'HashRef');
-# { ruleName => { eventName => code } }
-has 'listen'    => (is => 'ro', isa => 'HashRef');
-
-# Extra expectation
-has 'expect'    => (is => 'ro', isa => 'HashRef');
-
 # Only execute this rule after 'ifelapsed' seconds
 has 'ifelapsed' => (is => 'ro', isa => 'Int', default => 0);
 
@@ -33,23 +25,6 @@ sub validate {
     my @deps = @{ $self->depend };
     for my $dep (@deps) {
         confess 'Dependent must match /^\w+$/' if $dep !~ /^\w+$/;
-    }
-
-    my @eventNames = keys %{ $self->notify };
-    for my $name (@eventNames) {
-        confess 'Event name must match /repaired|failed|kept/' if
-            $name !~ /^\w+$/;
-    }
-
-    my %listeners = %{ $self->listen };
-    while (my ($ruleName, $events) = each %listeners) {
-        confess 'Rule name must match /^\w+$/' if $ruleName !~ /^\w+$/;
-
-        my @eventNames = keys %$events;
-        for my $name (@eventNames) {
-            confess 'Event name must match /repaired|failed|kept/' if
-                $name !~ /^\w+$/;
-        }
     }
 }
 
