@@ -51,12 +51,12 @@ packages:
 commands:
 
     realm_not_created::
-    "pw=`pwgen -cnys 24 1`; ( date; echo $(const.dollar)pw; ) >> $(kdc_db_pw); chmod 600 $(kdc_db_pw); ( echo $(const.dollar)pw; echo $(const.dollar)pw; ) | /usr/sbin/kdb5_util -r $(krb_realm) -d $(krb5kdc_db) create -s"
+    "\"pw=`pwgen -cnys 24 1`; ( date; echo $(const.dollar)pw; ) >> $(kdc_db_pw); chmod 600 $(kdc_db_pw); ( echo $(const.dollar)pw; echo $(const.dollar)pw; ) | /usr/sbin/kdb5_util -r $(krb_realm) -d $(krb5kdc_db) create -s\""
         comment => "Create the new realm",
         contain => in_shell;
 
     realm_not_created::
-    "( echo 'add_policy -minlength 8 -minclasses 3 admin'; echo 'add_policy -minlength 8 -minclasses 4 host'; echo 'add_policy -minlength 8 -minclasses 4 service'; echo 'add_policy -minlength 8 -minclasses 2 user'; ) | /usr/sbin/kadmin.local"
+    "\"( echo 'add_policy -minlength 8 -minclasses 3 admin'; echo 'add_policy -minlength 8 -minclasses 4 host'; echo 'add_policy -minlength 8 -minclasses 4 service'; echo 'add_policy -minlength 8 -minclasses 2 user'; ) | /usr/sbin/kadmin.local\""
         comment => "Create default policies",
         contain => in_shell;
 
