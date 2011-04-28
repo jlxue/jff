@@ -1,0 +1,63 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Cwd qw/abs_path/;
+use File::Copy;
+use File::Find;
+use File::Path;
+use File::Spec;
+use File::Temp;
+use File::stat;
+use FindBin;
+use Getopt::Long;
+use if ! exists $ENV{PCM_INSTALLING}, lib => File::Spec->catdir("$FindBin::Bin", "inputs", "lib");
+
+my ($g_work_dir, $g_lock_dir);
+
+if ($^O =~ /MSwin32/) {
+    die "Can't find HOMEDRIVE and HOMEPATH environment variables!\n" if
+            !exists $ENV{HOMEDRIVE} or !exists $ENV{HOMEPATH};
+
+    my $home = $ENV{HOMEDRIVE} . $ENV{HOMEPATH};
+    $g_work_dir = File::Spec->catdir($home, "pcm");
+} else {
+    if ($> == 0) {  # root
+        $g_work_dir = File::Spec->catdir(File::Spec->rootdir(), qw/etc pcm/);
+        $g_lock_dir = File::Spec->catdir(File::Spec->rootdir(), qw/var lock pcm/);
+    } else {        # normal user
+        die "Can't find HOME environment variable!\n" if !exists $ENV{HOME};
+
+        $g_work_dir = File::Spec->catdir($ENV{HOME}, ".pcm");
+    }
+}
+
+$g_lock_dir = File::Spec->catdir($g_work_dir, "lock") if !defined $g_lock_dir;
+
+File::Path::make_path($g_work_dir, { mode => 0600 }) if ! -d $g_work_dir;
+File::Path::make_path($g_lock_dir, { mode => 0600 }) if ! -d $g_lock_dir;
+
+if ($FindBin::Bin eq $g_work_dir || abs_path($FindBin::Bin) eq abs_path($g_work_dir) {
+} else {
+    # Install scripts to work directory
+    system(qw/perl -c/, File::Spec->catfile($FindBin::Bin, "pcm.pl")) or die;
+
+    find({wanted => \&check_syntax, no_chdir => 1}, File::Spec->catdir($FindBin::Bin, qw/inputs lib/));
+
+    my $dir = File::Spec->catdir($FindBin::Bin, "inputs");
+    opendir my $dh, $dir or die "Can't open $dir: $!\n";
+    while (my $entry = readdir($dh)) {
+        $entry = File::Spec->catfile($dir, $entry);
+        if (-f $entry && /\.pl$/) {
+            system(qw/perl -c/, $entry) or die;
+        }
+    }
+    closedir $dh;
+}
+
+######################################################################
+sub check_syntax {
+    if (-f $_ && /\.pm$/) {
+        system(qw/perl -c/, $_) or die;
+    }
+}
+
