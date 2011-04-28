@@ -18,5 +18,50 @@ packages:
         package_method  => apt,
         package_policy  => "add";
 
+files:
+
+    "/etc/default/slapd"
+        comment     => "slapd defaults",
+        classes     => if_repaired("slapd_conf_changed"),
+        copy_from   => local_cp("$(sys.workdir)/inputs/etc/default/slapd"),
+        perms       => mog("0644", "root", "root");
+
+    "/etc/ldap/ldap.conf"
+        comment     => "OpenLDAP default configuration",
+        classes     => if_repaired("ldap_conf_changed"),
+        copy_from   => local_cp("$(sys.workdir)/inputs/etc/ldap/ldap.conf"),
+        perms       => mog("0644", "root", "root");
+
+    "/etc/nscd.conf"
+        comment     => "nscd configuration",
+        classes     => if_repaired("nscd_conf_changed"),
+        copy_from   => local_cp("$(sys.workdir)/inputs/etc/nscd.conf"),
+        perms       => mog("0644", "root", "root");
+
+    "/etc/nslcd.conf"
+        comment     => "nslcd configuration",
+        classes     => if_repaired("nslcd_conf_changed"),
+        copy_from   => local_cp("$(sys.workdir)/inputs/etc/nslcd.conf"),
+        perms       => mog("0640", "root", "nslcd");
+
+    "/etc/nsswitch.conf"
+        comment     => "nsswitch configuration",
+        classes     => if_repaired("nsswitch_conf_changed"),
+        copy_from   => local_cp("$(sys.workdir)/inputs/etc/nsswitch.conf"),
+        perms       => mog("0644", "root", "root");
+
+commands:
+
+    slapd_conf_changed::
+    "/usr/sbin/invoke-rc.d slapd restart"
+        comment => "Restart OpenLDAP server";
+
+    nscd_conf_changed::
+    "/usr/sbin/invoke-rc.d nscd restart"
+        comment => "Restart nscd";
+
+    nslcd_conf_changed::
+    "/usr/sbin/invoke-rc.d nslcd restart"
+        comment => "Restart nslcd"; 
 }
 
