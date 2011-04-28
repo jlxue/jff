@@ -1,4 +1,4 @@
-package Config::Zilla::FileRule;
+package Config::Zilla::PackageRule;
 use strict;
 use warnings;
 use Any::Moose;
@@ -7,16 +7,16 @@ extends 'Config::Zilla::Rule';
 
 has 'packages'      => (is => 'ro', isa => 'ArrayRef[Str]', required => 1);
 
-sub validate {
+override validate => sub {
     my ($self) = @_;
 
-    $self->SUPER::validate();
+    super();
 
     my @pkgNames = @{ $self->packages };
     for my $name (@pkgNames) {
         confess 'Package name must match /^[\w\.\-\~\+]+$/' if $name !~ /^[\w\.\-\~\+]+$/;
     }
-}
+};
 
 no Any::Moose;
 __PACKAGE__->meta->make_immutable();
