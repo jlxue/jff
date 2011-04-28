@@ -2,6 +2,7 @@ package Config::Zilla::Conf;
 
 use strict;
 use warnings;
+use utf8;
 use Params::Check;
 
 my ($default_work_dir, $default_bin_dir, $default_lib_dir,
@@ -14,20 +15,22 @@ if ($^O =~ /MSWin32/) {
             !exists $ENV{HOMEDRIVE} or !exists $ENV{HOMEPATH};
 
     my $home = $ENV{HOMEDRIVE} . $ENV{HOMEPATH};
-    $g_work_dir = File::Spec->catdir($home, "pcm");
+    $default_work_dir = File::Spec->catdir($home, "pcm");
 } else {
     if ($> == 0) {  # root
-        $g_work_dir = File::Spec->catdir(File::Spec->rootdir(), qw/etc pcm/);
-        $g_lock_dir = File::Spec->catdir(File::Spec->rootdir(), qw/var lock pcm/);
+        $default_work_dir = File::Spec->catdir(File::Spec->rootdir(), qw/etc pcm/);
+        $default_lock_dir = File::Spec->catdir(File::Spec->rootdir(), qw/var lock pcm/);
     } else {        # normal user
         die "Can't find HOME environment variable!\n" if !exists $ENV{HOME};
 
-        $g_work_dir = File::Spec->catdir($ENV{HOME}, ".pcm");
+        $default_work_dir = File::Spec->catdir($ENV{HOME}, ".pcm");
     }
+}
+
 sub new {
     my ($class, %args) = @_;
 
-    bless $self, $class;
+    bless {}, $class;
 }
 
 

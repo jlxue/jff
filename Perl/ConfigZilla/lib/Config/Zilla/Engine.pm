@@ -1,9 +1,10 @@
 package Config::Zilla::Engine;
 use strict;
 use warnings;
+use utf8;
 use Any::Moose;
 
-has 'ruleset'   => (is => 'ro', isa => 'HashRef[Config::Zilla::Rule]');
+has 'ruleset'       => (is => 'ro', isa => 'HashRef[Config::Zilla::Rule]');
 
 sub addRule {
     my ($self, $rule) = @_;
@@ -29,9 +30,7 @@ sub validate {
     return unless defined $rules;
 
     while (my ($name, $rule) = each %$rules) {
-        $rule->validate();
-
-        my $depends = $rule->depend();
+        my $depends = $rule->depends();
         next unless defined $depends;
 
         for my $dep (@$depends) {

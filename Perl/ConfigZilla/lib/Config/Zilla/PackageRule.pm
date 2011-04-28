@@ -1,20 +1,19 @@
 package Config::Zilla::PackageRule;
 use strict;
 use warnings;
+use utf8;
 use Any::Moose;
 
 extends 'Config::Zilla::Rule';
 
 has 'packages'      => (is => 'ro', isa => 'ArrayRef[Str]', required => 1);
 
-override validate => sub {
-    my ($self) = @_;
-
-    super();
+sub BUILD {
+    my ($self, $args) = @_;
 
     my @pkgNames = @{ $self->packages };
     for my $name (@pkgNames) {
-        confess 'Package name must match /^[\w\.\-\~\+]+$/' if $name !~ /^[\w\.\-\~\+]+$/;
+        confess 'Invalid package name' if $name !~ /^[\w\.\-\~\+]+$/;
     }
 };
 

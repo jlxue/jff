@@ -1,14 +1,16 @@
 package Config::Zilla::Rule;
 use strict;
 use warnings;
+use utf8;
 use Any::Moose;
+use constant RULE_NAME_REGEXP   => qr/^[[:alnum:]][[:alnum:]_-]*$/;
 
 has 'name'      => (is => 'ro', isa => 'Str', required => 1);
 has 'shortdesc' => (is => 'ro', isa => 'Str', required => 1);
 has 'longdesc'  => (is => 'ro', isa => 'Str', default => '');
 
 # Depends on which rules
-has 'depend'    => (is => 'ro', isa => 'ArrayRef[Str]');
+has 'depends'   => (is => 'ro', isa => 'ArrayRef[Str]');
 
 # Only execute this rule after 'ifelapsed' seconds
 has 'ifelapsed' => (is => 'ro', isa => 'Int', default => 0);
@@ -17,14 +19,14 @@ has 'maxtime'   => (is => 'ro', isa => 'Int', default => 0);
 
 has 'executor'  => (is => 'ro', isa => 'Str');
 
-sub validate {
-    my ($self) = @_;
+sub BUILD {
+    my ($self, $args) = @_;
+    confess 'Use "depends" not "depend"' if defined $args && exists $args->{depend};
+    confess 'Invalid rule name' if $self->name !~ RULE_NAME_REGEXP;
 
-    confess 'Rule name must match /^\w+$/' if $self->name !~ /^\w+$/;
-
-    my @deps = @{ $self->depend };
+    my @deps = @{ $self->depends };
     for my $dep (@deps) {
-        confess 'Dependent must match /^\w+$/' if $dep !~ /^\w+$/;
+        confess 'Invalid dependent name' if $dep !~ RULE_NAME_REGEXP;
     }
 }
 
