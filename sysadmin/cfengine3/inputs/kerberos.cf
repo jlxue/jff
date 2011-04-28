@@ -11,12 +11,17 @@ bundle agent kerberos
 {
 vars:
 
-    "match_package" slist  => {
-                                "gnutls-bin",
+    "match_package" slist   => {
                                 "krb5-admin-server",
                                 "krb5-kdc",
-                                "krb5-user"
+                                "krb5-user",
                                 "krb5-clients",
+                                "libpam-krb5"
+                               };
+
+    "krb_addresses" slist   => {
+                                "127.0.0.1  krb.corp.example.com krb",
+                                "::1        krb.corp.example.com krb"
                                };
 
 packages:
@@ -26,6 +31,10 @@ packages:
         package_policy  => "add";
 
 files:
+
+    "/etc/hosts"
+        comment     => "Add host names for Kerberos V5 admin server and key server",
+        edit_line   => insert_lines("@(krb_addresses)");
 
     "/etc/krb5.conf"
         comment     => "Kerberos 5 configuration file",
