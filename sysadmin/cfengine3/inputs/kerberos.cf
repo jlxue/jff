@@ -51,7 +51,7 @@ packages:
 commands:
 
     realm_not_created::
-    "pw=`/usr/bin/pwgen -cnys 24 1`; echo \$pw >> $(kdc_db_pw); chmod 600 $(kdc_db_pw); (echo \$pw; echo \$pw) | /usr/sbin/kdb5_util -r $(krb_realm) -d $(krb5kdc_db) create -s"
+    "/bin/sh -c 'pw=`/usr/bin/pwgen -cnys 24 1`; echo `date` $pw >> $(kdc_db_pw); chmod 600 $(kdc_db_pw); (echo $pw; echo $pw) | /usr/sbin/kdb5_util -r $(krb_realm) -d $(krb5kdc_db) create -s'"
         comment => "Create the new realm";
 
     realm_not_created|krb5_conf_changed|kdc_conf_changed::
