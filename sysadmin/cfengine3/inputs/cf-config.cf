@@ -20,8 +20,14 @@ vars:
 
 body agent control
 {
-    # if default runtime is 5 mins we need this for long jobs
-    ifelapsed => "15";
+    environment => {
+                    "APT_LISTBUGS_FRONTEND=none",
+                    "APT_LISTCHANGES_FRONTEND=none",
+                    "DEBIAN_FRONTEND=noninteractive",
+                    "LANG=en_US.UTF-8",
+                    "LC_ALL=en_US.UTF-8"
+                   };
+    ifelapsed   => "15";
 }
 
 ######################################################################
