@@ -24,11 +24,37 @@ vars:
                                 "::1        krb.corp.example.com krb"
                                };
 
+    "krb_log_file" slist    => {
+                                "/var/log/krb5kdc.log",
+                                "/var/log/kadmin.log",
+                                "/var/log/krb5lib.log"
+                               };
+
+    "krb_realm" string      => "CORP.EXAMPLE.COM";
+
+    "krb5kdc_db" string     => "/var/lib/krb5kdc/principal";
+
+    "realm_not_created" not => fileexists("$(krb5kdc_db)");
+
 packages:
 
     "$(match_package)"
         package_method  => apt,
         package_policy  => "add";
+
+commands:
+
+    realm_not_created::
+    "/usr/sbin/kdb5_util -r $(krb_realm) -d $(krb5kdc_db) create -s"
+        comment => "Create the new realm";
+
+    krb5_conf_changed|kdc_conf_changed::
+    "/usr/sbin/invoke-rc.d krb5-kdc restart"
+        comment => "Restart Kerberos v5 key server";
+
+    krb5_conf_changed::
+    "/usr/sbin/invoke-rc.d krb5-admin-server restart"
+        comment => "Restart Kerberos v5 admin server";
 
 files:
 
@@ -54,14 +80,12 @@ files:
         comment     => "Kerberos v5 key server configuration directory",
         perms       => mog("0600", "root", "root");
 
-commands:
+    "/var/lib/krb5kdc"
+        comment     => "Kerberos v5 key server's database",
+        perms       => mog("0600", "root", "root");
 
-    krb5_conf_changed|kdc_conf_changed::
-    "/usr/sbin/invoke-rc.d krb5-kdc restart"
-        comment => "Restart Kerberos v5 key server";
-
-    krb5_conf_changed::
-    "/usr/sbin/invoke-rc.d krb5-admin-server restart"
-        comment => "Restart Kerberos v5 admin server";
+    "$(krb_log_file)"
+        comment     => "Kerberos v5 log files",
+        perms       => mog("0640", "root", "root");
 }
 
