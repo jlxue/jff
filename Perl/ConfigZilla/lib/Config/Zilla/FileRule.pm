@@ -13,7 +13,7 @@ sub validate {
 
     $self->SUPER::validate();
 
-    die 'Path must be absolute' if ! File::Spec->file_name_is_absolute($self->path);
+    confess 'Path must be absolute' if ! File::Spec->file_name_is_absolute($self->path);
 }
 
 no Any::Moose;

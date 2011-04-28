@@ -14,7 +14,7 @@ sub validate {
 
     my @pkgNames = @{ $self->packages };
     for my $name (@pkgNames) {
-        die 'Package name must match /^[\w\.\-\~\+]+$/' if $name !~ /^[\w\.\-\~\+]+$/;
+        confess 'Package name must match /^[\w\.\-\~\+]+$/' if $name !~ /^[\w\.\-\~\+]+$/;
     }
 }
 

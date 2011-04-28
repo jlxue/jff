@@ -26,26 +26,26 @@ has 'maxtime'   => (is => 'ro', isa => 'Int', default => 0);
 sub validate {
     my ($self) = @_;
 
-    die 'Rule name must match /^\w+$/' if $self->name !~ /^\w+$/;
+    confess 'Rule name must match /^\w+$/' if $self->name !~ /^\w+$/;
 
     my @deps = @{ $self->depend };
     for my $dep (@deps) {
-        die 'Dependent must match /^\w+$/' if $dep !~ /^\w+$/;
+        confess 'Dependent must match /^\w+$/' if $dep !~ /^\w+$/;
     }
 
     my @eventNames = keys %{ $self->notify };
     for my $name (@eventNames) {
-        die 'Event name must match /repaired|failed|kept/' if
+        confess 'Event name must match /repaired|failed|kept/' if
             $name !~ /^\w+$/;
     }
 
     my %listeners = %{ $self->listen };
     while (my ($ruleName, $events) = each %listeners) {
-        die 'Rule name must match /^\w+$/' if $ruleName !~ /^\w+$/;
+        confess 'Rule name must match /^\w+$/' if $ruleName !~ /^\w+$/;
 
         my @eventNames = keys %$events;
         for my $name (@eventNames) {
-            die 'Event name must match /repaired|failed|kept/' if
+            confess 'Event name must match /repaired|failed|kept/' if
                 $name !~ /^\w+$/;
         }
     }
