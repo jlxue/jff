@@ -50,7 +50,7 @@ packages:
 
 commands:
 
-    realm_not_created::
+    realm_not_created.krb5_conf_changed.kdc_conf_changed::
     "/bin/sh $(sys.workdir)/inputs/scripts/krb5_newrealm.sh $(kdc_db_pw) $(krb_realm) $(krb5kdc_db)"
         comment => "Create the new realm and default policies";
 
