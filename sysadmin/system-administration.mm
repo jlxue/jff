@@ -204,6 +204,10 @@
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
 </node>
+<node COLOR="#00b439" CREATED="1301326713676" ID="ID_774078420" LINK="http://ganglia.info/" MODIFIED="1301326727249" TEXT="ganglia">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
 <node COLOR="#00b439" CREATED="1249400387550" ID="ID_482854951" LINK="http://www.zabbix.com/" MODIFIED="1249400406068" TEXT="zabbix">
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
