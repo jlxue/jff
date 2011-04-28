@@ -1,0 +1,12 @@
+#
+# audit.cf
+#
+
+bundle agent audit
+{
+reports:
+
+  cfengine_3::
+    "Hello from auditd and acct!";
+}
+

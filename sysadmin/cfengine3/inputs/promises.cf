@@ -9,6 +9,7 @@ body common control
 
                         "cfengine", #"anomalies",
                         "apt",
+                        "audit",
                         "etckeeper",
                         "firewall",
                         "ntp",
@@ -29,6 +30,7 @@ body common control
 
                         "cfengine.cf",
                         "apt.cf",
+                        "audit.cf",
                         "etckeeper.cf",
                         "firewall.cf",
                         "ntp.cf",
