@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -e
-set -x
 
 if [ -z "$1" ] || [ -e "$1" -a ! -d "$1" ]; then
     echo "Usage: $0 path/to/directory" >&2
