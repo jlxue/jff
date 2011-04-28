@@ -1,4 +1,4 @@
-package Config::Zilla::RuleEngine;
+package Config::Zilla::Engine;
 use strict;
 use warnings;
 use Carp;
