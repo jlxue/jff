@@ -16,7 +16,8 @@ vars:
                                 "krb5-kdc",
                                 "krb5-user",
                                 "krb5-clients",
-                                "libpam-krb5"
+                                "libpam-krb5",
+                                "pwgen"
                                };
 
     "krb_addresses" slist   => {
@@ -34,7 +35,12 @@ vars:
 
     "krb5kdc_db" string     => "/var/lib/krb5kdc/principal";
 
+    "kdc_db_pw" string      => "/etc/krb5kdc/kdc_master_db_pw";
+
+classes:
+
     "realm_not_created" not => fileexists("$(krb5kdc_db)");
+
 
 packages:
 
@@ -45,14 +51,14 @@ packages:
 commands:
 
     realm_not_created::
-    "/usr/sbin/kdb5_util -r $(krb_realm) -d $(krb5kdc_db) create -s"
+    "pw=`/usr/bin/pwgen -cnys 24 1`; echo \$pw >> $(kdc_db_pw); chmod 600 $(kdc_db_pw); (echo \$pw; echo \$pw) | /usr/sbin/kdb5_util -r $(krb_realm) -d $(krb5kdc_db) create -s"
         comment => "Create the new realm";
 
-    krb5_conf_changed|kdc_conf_changed::
+    realm_not_created|krb5_conf_changed|kdc_conf_changed::
     "/usr/sbin/invoke-rc.d krb5-kdc restart"
         comment => "Restart Kerberos v5 key server";
 
-    krb5_conf_changed::
+    realm_not_created|krb5_conf_changed::
     "/usr/sbin/invoke-rc.d krb5-admin-server restart"
         comment => "Restart Kerberos v5 admin server";
 
@@ -87,5 +93,9 @@ files:
     "$(krb_log_file)"
         comment     => "Kerberos v5 log files",
         perms       => mog("0640", "root", "root");
+
+    "$(kdc_db_pw)"
+        comment     => "Kerberos v5 key server's master database password",
+        perms       => mog("0600", "root", "root");
 }
 
