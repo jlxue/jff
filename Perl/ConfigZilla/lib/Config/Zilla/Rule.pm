@@ -21,6 +21,8 @@ has 'expect'    => (is => 'ro', isa => 'HashRef');
 # Only execute this rule after 'ifelapsed' seconds
 has 'ifelapsed' => (is => 'ro', isa => 'Int', default => 0);
 
+has 'maxtime'   => (is => 'ro', isa => 'Int', default => 0);
+
 sub validate {
     my ($self) = @_;
 
