@@ -23,6 +23,8 @@ has 'ifelapsed' => (is => 'ro', isa => 'Int', default => 0);
 
 has 'maxtime'   => (is => 'ro', isa => 'Int', default => 0);
 
+has 'executor'  => (is => 'ro', isa => 'Str');
+
 sub validate {
     my ($self) = @_;
 
