@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Any::Moose;
 
-has ruleset     => (is => 'ro', isa => 'HashRef[Config::Zilla::Rule]');
+has 'ruleset'   => (is => 'ro', isa => 'HashRef[Config::Zilla::Rule]');
 
 sub addRule {
     my ($self, $rule) = @_;
@@ -26,6 +26,22 @@ sub validate {
     my ($self) = @_;
     my $rules = $self->ruleset;
 
+    return unless defined $rules;
+
+    while (my ($name, $rule) = each %$rules) {
+        $rule->validate();
+
+        my $depends = $rule->depend();
+        next unless defined $depends;
+
+        for my $dep (@$depends) {
+            confess "Rule \"$name\" depends non-exist rule \"$dep\"" unless
+                    exists $rules->{$dep};
+        }
+    }
+}
+
+sub run {
 }
 
 no Any::Moose;
