@@ -4,9 +4,18 @@
 
 bundle agent kerberos
 {
-reports:
+vars:
+    "match_package" slist  => {
+                                "gnutls-bin",
+                                "krb5-admin-server",
+                                "krb5-clients",
+                                "krb5-kdc",
+                                "krb5-user"
+                               };
 
-    cfengine_3::
-    "Hello from kerberos!";
+packages:
+    "${match_package}"
+        package_method  => apt,
+        package_policy  => "add";
 }
 

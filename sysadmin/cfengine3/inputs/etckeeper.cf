@@ -4,9 +4,15 @@
 
 bundle agent etckeeper
 {
-reports:
+vars:
+    "match_package" slist   => {
+                                "git",
+                                "etckeeper"
+                               };
 
-    cfengine_3::
-    "Hello from etckeeper!";
+packages:
+    "${match_package}"
+        package_method  => apt,
+        package_policy  => "add";
 }
 

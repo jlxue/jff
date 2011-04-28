@@ -15,9 +15,8 @@ if [ ! -L "/etc/cfengine3" ]; then
     ln -s /var/lib/cfengine3/inputs /etc/cfengine3
 fi
 
-# http://www.cfengine.org/pages/getting_started
 cf-key
-#cp -a /usr/sbin/cf-* /var/lib/cfengine3/bin
+rm -rf /var/lib/cfengine3/inputs/*
 cp -a `dirname "$0"`/inputs/* /var/lib/cfengine3/inputs
 chmod 600 /var/lib/cfengine3/inputs/*.cf
 cf-agent --bootstrap
