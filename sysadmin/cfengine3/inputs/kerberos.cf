@@ -70,7 +70,7 @@ files:
 
     "/etc/hosts"
         comment     => "Add host names for Kerberos V5 admin server and key server",
-        edit_line   => insert_lines("@(krb_addresses)");
+        edit_line   => insert_lines("@(kerberos.krb_addresses)");
 
     "/etc/krb5.conf"
         comment     => "Kerberos 5 configuration file",
