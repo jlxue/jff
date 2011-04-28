@@ -10,7 +10,6 @@ files:
         comment         => "Set APT sources list",
         classes         => if_repaired("apt_sources_list_changed"),
         copy_from       => local_cp("$(sys.workdir)/inputs/etc/apt/sources.list.d"),
-        create          => "true",
         depth_search    => recurse("1"),
         file_select     => by_name('.*\.list'),
         perms           => mog("0644", "root", "root");

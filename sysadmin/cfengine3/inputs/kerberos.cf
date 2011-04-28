@@ -76,21 +76,18 @@ files:
         comment     => "Kerberos 5 configuration file",
         classes     => if_repaired("krb5_conf_changed"),
         copy_from   => local_cp("$(sys.workdir)/inputs/etc/krb5.conf"),
-        create      => "true",
         perms       => mog("0644", "root", "root");
 
     "/etc/krb5kdc/kdc.conf"
         comment     => "Kerberos v5 key server configuration file",
         classes     => if_repaired("kdc_conf_changed"),
         copy_from   => local_cp("$(sys.workdir)/inputs/etc/krb5kdc/kdc.conf"),
-        create      => "true",
         perms       => mog("0644", "root", "root");
 
     "/etc/krb5kdc/kadm5.acl"
         comment     => "Kerberos v5 admin server ACL",
         classes     => if_repaired("kadm5_acl_changed"),
         copy_from   => local_cp("$(sys.workdir)/inputs/etc/krb5kdc/kadm5.acl"),
-        create      => "true",
         perms       => mog("0644", "root", "root");
 
     "/etc/krb5kdc"
