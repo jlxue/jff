@@ -5,7 +5,7 @@ use Any::Moose;
 
 has 'name'      => (is => 'ro', isa => 'Str', required => 1);
 has 'shortdesc' => (is => 'ro', isa => 'Str', required => 1);
-has 'longdesc'  => (is => 'ro', isa => 'Str');
+has 'longdesc'  => (is => 'ro', isa => 'Str', default => '');
 
 # Depends on which rules
 has 'depend'    => (is => 'ro', isa => 'ArrayRef[Str]');
@@ -19,7 +19,7 @@ has 'listen'    => (is => 'ro', isa => 'HashRef');
 has 'expect'    => (is => 'ro', isa => 'HashRef');
 
 # Only execute this rule after 'ifelapsed' seconds
-has 'ifelapsed' => (is => 'ro', isa => 'Int');
+has 'ifelapsed' => (is => 'ro', isa => 'Int', default => 0);
 
 no Any::Moose;
 __PACKAGE__->meta->make_immutable();
