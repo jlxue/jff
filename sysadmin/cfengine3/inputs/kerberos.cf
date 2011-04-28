@@ -17,5 +17,21 @@ packages:
     "${match_package}"
         package_method  => apt,
         package_policy  => "add";
+
+files:
+
+    "/etc/krb5.conf"
+        comment     => "Kerberos 5 configuration file",
+        classes     => if_repaired("krb5_conf_changed"),
+        copy_from   => local_cp("$(sys.workdir)/inputs/etc/krb5.conf"),
+        create      => "true",
+        perms       => mog("0644", "root", "root");
+
+    "etc/krb5kdc/kdc.conf"
+        comment     => "Kerberos 5 key server configuration file",
+        classes     => if_repaired("kdc_conf_changed"),
+        copy_from   => local_cp("$(sys.workdir)/inputs/etc/krb5kdc/kdc.conf"),
+        create      => "true",
+        perms       => mog("0644", "root", "root");
 }
 

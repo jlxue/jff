@@ -22,21 +22,23 @@ files:
         action          => u_immediate,
         copy_from       => u_cp("$(g_update.master_location)", "@(g_update.policy_servers)"),
         depth_search    => u_recurse("inf"),
-        perms           => u_m("600");
+        perms           => u_mog("600", "root", "root");
 
     "$(sys.workdir)/bin"
         comment         => "Update the cached binaries from installation",
         copy_from       => u_cp("$(g_update.cf_bin_dir)", "@(g_update.policy_servers)"),
         depth_search    => u_recurse("1"),
         file_select     => u_select_cf_binaries,
-        perms           => u_m("700");
+        perms           => u_mog("700", "root", "root");
 }
 
 ######################################################################
 
-body perms u_m(p)
+body perms u_mog(mode, user, group)
 {
-    mode    => "$(p)";
+    owners  => { "$(user)" };
+    groups  => { "$(group)" };
+    mode    => "$(mode)";
 }
 
 ######################################################################

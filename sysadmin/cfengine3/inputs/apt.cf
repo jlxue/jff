@@ -8,10 +8,21 @@ files:
 
     "/etc/apt/sources.list.d"
         comment         => "Set APT sources list",
+        classes         => if_repaired("apt_sources_list_changed"),
         copy_from       => local_cp("$(sys.workdir)/inputs/etc/apt/sources.list.d"),
         create          => "true",
         depth_search    => recurse("1"),
         file_select     => by_name('.*\.list'),
-        perms           => m("0644");
+        perms           => mog("0644", "root", "root");
+
+commands:
+
+    apt_sources_list_changed.have_aptitude::
+    "/usr/bin/aptutide update"
+        comment => "Update apt sources list with aptitude";
+
+    apt_sources_list_changed.!have_aptitude::
+    "/usr/bin/apt-get update"
+        comment => "Update apt sources list with apt-get";
 }
 
