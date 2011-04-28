@@ -40,7 +40,7 @@ body executor control
     mailmaxlines    => "30";
     mailto          => "cfengine_mail@corp.example.org";
     smtpserver      => "localhost";
-    splaytime       => "10";
+    splaytime       => "1";
 }
 
 ######################################################################
