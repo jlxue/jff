@@ -54,11 +54,15 @@ commands:
     "/bin/sh -c 'pw=`/usr/bin/pwgen -cnys 24 1`; echo `date` $pw >> $(kdc_db_pw); chmod 600 $(kdc_db_pw); (echo $pw; echo $pw) | /usr/sbin/kdb5_util -r $(krb_realm) -d $(krb5kdc_db) create -s'"
         comment => "Create the new realm";
 
+    realm_not_created::
+    "/bin/sh -c \"( echo 'add_policy -minlength 8 -minclasses 3 admin'; echo 'add_policy -minlength 8 -minclasses 4 host'; echo 'add_policy -minlength 8 -minclasses 4 service'; echo 'add_policy -minlength 8 -minclasses 2 user'; ) | /usr/sbin/kadmin.local\""
+        comment => "Create default policies";
+
     realm_not_created|krb5_conf_changed|kdc_conf_changed::
     "/usr/sbin/invoke-rc.d krb5-kdc restart"
         comment => "Restart Kerberos v5 key server";
 
-    realm_not_created|krb5_conf_changed::
+    realm_not_created|krb5_conf_changed|kadm5_acl_changed::
     "/usr/sbin/invoke-rc.d krb5-admin-server restart"
         comment => "Restart Kerberos v5 admin server";
 
@@ -79,6 +83,13 @@ files:
         comment     => "Kerberos v5 key server configuration file",
         classes     => if_repaired("kdc_conf_changed"),
         copy_from   => local_cp("$(sys.workdir)/inputs/etc/krb5kdc/kdc.conf"),
+        create      => "true",
+        perms       => mog("0644", "root", "root");
+
+    "/etc/krb5kdc/kadm5.acl"
+        comment     => "Kerberos v5 admin server ACL",
+        classes     => if_repaired("kadm5_acl_changed"),
+        copy_from   => local_cp("$(sys.workdir)/inputs/etc/krb5kdc/kadm5.acl"),
         create      => "true",
         perms       => mog("0644", "root", "root");
 

@@ -6,21 +6,6 @@ PACKAGES="isc-dhcp-server-ldap \
  pdns-backend-ldap \
  gnutls-bin"
 
-#### Kerberos:
-#   Default kerberos version 5 realm?       CORP.EXAMPLE.COM
-#   Kerberos servers for your realm:        krb.corp.example.com
-#   Administrative server for your Kerberos realm:      krb.corp.example.com
-if [ ! -e /var/lib/krb5kdc/principal ]; then
-    krb5_newrealm
-    invoke-rc.d krb5-admin-server restart
-    invoke-rc.d krb5-kdc restart
-    (echo "add_policy -minlength 8 -minclasses 3 admin";
-     echo "add_policy -minlength 8 -minclasses 4 host";
-     echo "add_policy -minlength 8 -minclasses 4 service";
-     echo "add_policy -minlength 8 -minclasses 2 user";) | kadmin.local
-fi
-
-
 #### OpenLDAP:
 
 certtool --generate-privkey --outfile /etc/ldap/self-ca-key.pem
