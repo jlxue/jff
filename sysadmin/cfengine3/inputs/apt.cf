@@ -18,7 +18,7 @@ files:
 commands:
 
     apt_sources_list_changed.have_aptitude::
-    "/usr/bin/aptutide update"
+    "/usr/bin/aptitude update"
         comment => "Update apt sources list with aptitude";
 
     apt_sources_list_changed.!have_aptitude::
