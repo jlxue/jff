@@ -10,7 +10,7 @@ use File::Temp;
 use File::stat;
 use FindBin;
 use Getopt::Long;
-use if ! exists $ENV{PCM_INSTALLING}, lib => File::Spec->catdir("$FindBin::Bin", "inputs", "lib");
+use if ! exists $ENV{CZIL_INSTALLING}, lib => File::Spec->catdir("$FindBin::Bin", "inputs", "lib");
 
 my ($g_work_dir, $g_lock_dir);
 
