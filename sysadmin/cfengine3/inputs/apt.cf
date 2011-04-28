@@ -4,9 +4,14 @@
 
 bundle agent apt
 {
-reports:
+files:
 
-    cfengine_3::
-    "Hello from apt!";
+    "/etc/apt/sources.list.d"
+        comment         => "Set APT sources list",
+        copy_from       => local_cp("$(sys.workdir)/inputs/etc/apt/sources.list.d"),
+        create          => "true",
+        depth_search    => recurse("1"),
+        file_select     => by_name('.*\.list'),
+        perms           => m("0644");
 }
 
