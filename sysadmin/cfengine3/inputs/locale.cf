@@ -11,6 +11,7 @@ vars:
     "LC_CTYPE" string       => "zh_CN.UTF-8";
     "default_locale" string => "/etc/default/locale";
     "locale_gen" string     => "/etc/locale.gen";
+    "locale" slist          => { "en_US.UTF-8\s+UTF-8", "zh_CN.UTF-8\s+UTF-8" };
 
 classes:
 
@@ -21,9 +22,27 @@ classes:
                                };
 
 
+files:
+
+    "$(locale_gen)"
+        comment     => "Specify what locale data is to be generated",
+        classes     => locale_gen_changed,
+        edit_line   => uncomment_lines_matching("$(locale)", "#");
+
 commands:
 
     !dont_fix_locale::
-    "update-locale LANG=$(LANG) LANGUAGE=$(LANGUAGE) LC_CTYPE=$(LC_CTYPE)"
+    "/usr/sbin/update-locale LANG=$(LANG) LANGUAGE=$(LANGUAGE) LC_CTYPE=$(LC_CTYPE)"
+        comment => "Set default locale";
+
+    locale_gen_changed::
+    "/usr/sbin/locale-gen"
+        comment => "Generate locale data";
+}
+
+
+body classes locale_gen_changed
+{
+    promise_repaired    => { "locale_gen_changed" };
 }
 

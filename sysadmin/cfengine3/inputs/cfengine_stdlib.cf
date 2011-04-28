@@ -84,7 +84,7 @@ bundle edit_line uncomment_lines_matching(regex,comment)
 {
 replace_patterns:
  
- "^$(comment)\s?($(regex))$" 
+ "^\s*$(comment)\s*($(regex))\s*$"
 
        replace_with => uncomment,
             comment => "Uncomment lines matching a regular expression";
