@@ -53,7 +53,7 @@ sub _foreach_lines_with_index {
     my $offset = 0;
     my $pos;
     while (($pos = index($lines, NL, $offset)) >= 0) {
-        print $out_fh substr($lines, $offset, $pos - $offset), "\n";
+        print $out_fh "$name($pid): ", substr($lines, $offset, $pos - $offset), "\n";
         $offset = $pos + length(NL);
     }
 
