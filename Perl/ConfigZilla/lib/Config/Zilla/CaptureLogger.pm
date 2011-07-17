@@ -10,7 +10,20 @@ use constant {
     T_STDOUT    => 1,
     T_STDERR    => 2,
 
-    BUF_LEN     => 8192,
+    BUF_LEN     => 2 * 1024,
+};
+
+use constant NL => eval {
+    local $\;
+    pipe my $r, my $w or die "Can't create pipe: $!";
+    open my $fh, '>&=', fileno($w) or die "Can't fdopen: $!";
+    select((select($fh), $| = 1)[0]);
+    print $fh "\n";
+    sysread $r, my $buf, 8;
+    close $fh;
+    close $w;
+    close $r;
+    $buf;
 };
 
 
