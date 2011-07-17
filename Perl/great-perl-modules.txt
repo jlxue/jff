@@ -183,6 +183,8 @@ Email 处理
     Mail::IMAPTalk
     Net::IMAP::Client
 
+    Mail::Box
+
 进程管理
 =======
     Parallel::Prefork
