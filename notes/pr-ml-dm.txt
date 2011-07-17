@@ -1,7 +1,0 @@
-Pattern Classification
-Pattern Recognition
-Machine Learning
-Data Mining
-
-Pattern Recognition and Machine Learning, Christopher M. Bishop
-

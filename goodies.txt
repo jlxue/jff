@@ -250,22 +250,6 @@ Qt, ACE, ASIO, Boost, Crypto++, ICU, Poco, Protocol Buffers, safe_iop
    修改代码的艺术
    Michael C.  Feathers
 
- - Code Complete 2
-   代码大全 (第 2 版)
-   Steve McConnell
-
- - The Pragmatic Programmer: From Journeyman to master
-   程序员修炼之道: 从小工到专家
-   Andrew Hunt, David Thomas
-
- - Practices of an Agile Developer
-   高效程序员的 45 个习惯: 敏捷开发修炼之道
-   Venkat Subramaniam, Andy Hunt
-
- - Programming Pearls 2ed
-   编程珠玑 (第 2 版)
-   Jon Bentley
-
  - The Productive Programmer
    卓有成效的程序员
    Neal Ford
@@ -290,13 +274,8 @@ Qt, ACE, ASIO, Boost, Crypto++, ICU, Poco, Protocol Buffers, safe_iop
    架构之美
    Diomidis Spinellis, Georgios Gousios
 
- - 编程之美 -- 微软技术面试心得
-
  - Clean Code: A Handbook of Agile Software
    Robert C. Martin
-
- - Coders At Work
-   Peter Seibel
 
  - Apache 源代码全景分析
 
@@ -307,4 +286,31 @@ Qt, ACE, ASIO, Boost, Crypto++, ICU, Poco, Protocol Buffers, safe_iop
  - Programming Collective Intelligence
    集体智慧编程
    Toby Segaran
+
+ - Image Processing, Analysis, And Machine Vision
+   图像处理、分析与机器视觉（第3版）
+   Milan Sonka, Vaclav Hlavac, Roger Boyle
+   
+ - Artificial Intelligence: A Modern Approach
+   http://aima.cs.berkeley.edu/
+   Stuart Russell, Peter Norvig
+
+ - Data Mining - Concepts and Techniques
+   数据挖掘概念与技术
+   Jiawei Han, Mcheline Kamber
+
+ - Paradigms of Artificial Intelligence Programming: Case Studies in Common Lisp
+   Peter Norvig
+
+ - Let Over Lambda - 50 Years of Lisp
+   Doug Hoyte
+
+
+
+Pattern Classification
+Pattern Recognition
+Machine Learning
+Data Mining
+
+Pattern Recognition and Machine Learning, Christopher M. Bishop
 

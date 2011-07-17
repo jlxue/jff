@@ -48,7 +48,7 @@ uIP, lwIP
 Apache Lucene
 LLVM, Parrot, PyPy, Psyco, IronPython
 Ikarus Scheme, Chicken, Gambit, Bigloo, Stalin, Chez Scheme, Larceny, MIT/GNU Scheme
-apache, lighttpd, nginx, shttpd, squid, haproxy, lighty, tomcat
+apache, lighttpd, nginx, shttpd, squid, haproxy, lighty, tomcat, Yahoo Traffic Server, Varnish
 exim4/postfix
 Java NIO framework: Cindy, Grazzy, Apache Mina, www.quickserver.org, grizzly.dev.java.net
 Linux, OpenSolaris, NetBSD, FreeBSD, OpenBSD, DragonFlyBSD
