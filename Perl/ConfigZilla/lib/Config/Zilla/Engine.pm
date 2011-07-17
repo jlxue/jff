@@ -5,13 +5,14 @@ use utf8;
 use Any::Moose;
 use Carp qw/cluck/;
 use Data::Dumper;
+use File::Spec;
+use IO::File;
 use List::Util qw/max sum/;
 use Module::Load;
-use POSIX qw/:sys_wait_h/;
+use POE qw/Wheel::Run/;
+use POSIX ();
 use Try::Tiny;
 
-use Config::Zilla::Capture qw/capture/;
-use Config::Zilla::CaptureLogger;
 use Config::Zilla::Constants qw/:EXIT_CODE/;
 use Config::Zilla::ExecutorState;
 use Config::Zilla::Rule;
@@ -57,6 +58,22 @@ sub run {
     return if exists $options{VALIDATE_ONLY} && $options{VALIDATE_ONLY};
 
     _run_loop($ruleset, $executors, %options);
+
+    POE::Session->create(
+        inline_states => {
+            _start  => &_on_start,
+            _stop   => &_on_stop,
+            timeout => &_on_timeout,
+
+            child_stdout    => \&_on_child_stdout,
+            child_stderr    => \&_on_child_stderr,
+            child_exit      => \&_on_child_exit,
+        },
+
+        args => [$ruleset, $executors, \%options],
+    );
+
+    POE::Kernel->run();
 }
 
 
@@ -145,103 +162,126 @@ sub _resolve_executors {
 }
 
 
-sub _run_loop {
-    my ($ruleset, $executors, %options) = @_;
+sub _on_start {
+    my ($kernel, $heap, $ruleset, $executors, $options) = @_[KERNEL, HEAP, ARG0, ARG1, ARG2];
 
-    my $rulegraph = _construct_rule_graph($ruleset);
-    my $logger = Config::Zilla::CaptureLogger->new();
-    my $start_time = time();
-    my $left_time;
-    my %states;
+    $heap->{states} = {};
+    $heap->{rulegraph} = _construct_rule_graph($ruleset);
+    $heap->{executors} = $executors;
+    $heap->{options} = $options;
+    $heap->{child_count} = 0;
 
-    ## sanity check on options
 
-    $options{MAX_CONCURRENT} = DEFAULT_MAX_CONCURRENT unless
-            exists $options{MAX_CONCURRENT} && $options{MAX_CONCURRENT} > 0;
+    $options->{MAX_CONCURRENT} = DEFAULT_MAX_CONCURRENT unless
+            exists $options->{MAX_CONCURRENT} && $options->{MAX_CONCURRENT} > 0;
 
-    unless (exists $options{MAX_TIME} && $options{MAX_TIME} > 0) {
+    unless (exists $options->{MAX_TIME} && $options->{MAX_TIME} > 0) {
         # pass 0 to sum() to avoid returning undef when no rule is specified
-        $options{MAX_TIME} = max(DEFAULT_MAX_TIME,
+        $options->{MAX_TIME} = max(DEFAULT_MAX_TIME,
                                 sum(0, map { $_->maxtime() } values %$ruleset));
     }
 
 
-    ## run rule executors by topological order
+    $kernel->delay("timeout", $options->{MAX_TIME});
 
-    while (keys(%$rulegraph) > 0) {
+
+    _run_executors($kernel, $heap);
+}
+
+
+sub _on_stop {
+}
+
+
+sub _on_timeout {
+}
+
+
+sub _on_child_stdout {
+    my ($heap, $line, $wheel_id) = @_[HEAP, ARG0, ARG1];
+    my $child = $heap->{children_by_wid}{$wheel_id};
+    my $pid = $child->PID;
+    my $name = $heap->{pid_to_name}{$pid};
+
+    print "$name($pid): $line\n";
+}
+
+
+sub _on_child_stderr {
+    my ($heap, $line, $wheel_id) = @_[HEAP, ARG0, ARG1];
+    my $child = $heap->{children_by_wid}{$wheel_id};
+    my $pid = $child->PID;
+    my $name = $heap->{pid_to_name}{$pid};
+
+    print STDERR "$name($pid): $line\n";
+}
+
+
+sub _on_child_exit {
+    my ($kernel, $heap, $sig, $pid, $exit_code) = @_[KERNEL, HEAP, ARG0, ARG1, ARG2];
+    my $child = $heap->{children_by_pid}{$pid};
+    my $name = $heap->{pid_to_name}{$pid};
+    my $state = $heap->{states}{$name};
+
+    delete $heap->{children_by_wid}{$child->ID};
+    delete $heap->{children_by_pid}{$pid};
+    delete $heap->{pid_to_name}{$pid};
+
+    $state->end_time(time());
+    $state->exit_code($exit_code);
+
+    _remove_rule_from_graph($name, $heap->{rulegraph});
+
+    _run_executors($kernel, $heap);
+}
+
+
+sub _run_executors {
+    my ($kernel, $heap) = @_;
+
+    my $max_count = $heap->{options}{MAX_CONCURRENT} - $heap->{child_count};
+    my $child_count = 0;
+    my $states = $heap->{states};
+    my $rulegraph = $heap->{rulegraph};
+    my $executors = $heap->{executors};
+
+    while ($child_count < $max_count && keys(%$rulegraph) > 0) {
         for my $name (keys %$rulegraph) {
-
             ## topological sort, whether this node has no predecessor
             next unless keys %{ $rulegraph->{$name} } == 0;
 
-
-            $left_time = $options{MAX_TIME} - (time() - $start_time);   # XXX: overflow?
-            if ($left_time <= 0) {
-                last TIMEOUT;
-            }
-
-
-            $states{$name} = Config::Zilla::ExecutorState->new(
+            $states->{$name} = Config::Zilla::ExecutorState->new(
                     exit_code => EC_FAIL_UNKNOWN);
 
+            my $child = POE::Wheel::Run->new(
+                Program     => \&_run_executor_in_child_process,
+                ProgramArgs => [ $executors->{$name} ],
+                StdoutEvent => "child_stdout",
+                StderrEvent => "child_stderr",
+            );
 
-            my ($pid, $child_stdout, $child_stderr);
+            $kernel->sig_child($child->PID, "child_exit");
+            $heap->{children_by_wid}{$child->ID} = $child;
+            $heap->{children_by_pid}{$child->PID} = $child;
+            $heap->{pid_to_name}{$child->PID} = $name;
 
-            try {
-                ($pid, $child_stdout, $child_stderr) = capture {
-                    # run the executor in child process
-                    $executors->{$name}->execute();
-                };
-            } catch {
-                cluck "Catch exception during start of rule $name: $_";
-            };
-
-
-            if (defined $pid) {     # create child process successfully
-                try {
-                    $logger->addCapturer($name, $pid, $child_stdout, $child_stderr);
-
-                    if ($logger->count() >= $options{MAX_CONCURRENT}) {
-                        my @name_pids = $logger->run($left_time);
-                        last TIMEOUT unless @name_pids;
-
-                        _reap_children(\%states, @name_pids);
-
-                        for (my $i = 0; $i < @name_pids; $i += 2) {
-                            _remove_rule_from_graph($name_pids[$i], $rulegraph);
-                        }
-                    }
-                } catch {
-                    cluck "Catch exception during capture of rule $name: $_";
-                };
-            } else {
-                $states{$name}->endtime(time());
-                $states{$name}->exit_code(EC_FAIL_START);
-
-                _remove_rule_from_graph($name, $rulegraph);
-            }
-
-        } # end for
-    } # end while
-
-    return 0;
-
-TIMEOUT:
-    cluck "Engine exceeds total max time $options{MAX_TIME} seconds," .
-            "started at " . scalar(localtime($start_time));
-
-    if ($logger->count() > 0) {
-        $logger->run(1);    # last chance to flush children's output
-
-        my @name_pids = $logger->name_pids();
-        for (my $i = 0; $i < @name_pids; $i += 2) {
-            _remove_rule_from_graph($name_pids[$i], $rulegraph);
+            last if ++$child_count >= $max_count;
         }
-
-        $logger->clear();
-        _reap_children(\%states, @name_pids);
     }
-    return;
+
+    return $child_count;
+}
+
+
+sub _run_executor_in_child_process {
+    my ($executor) = @_;
+
+    untie *STDIN;
+
+    my $nullfh = IO::File->new(File::Spec->devnull);
+    open STDIN, '<&', $nullfh->fileno() or confess "Can't redirect stdin($$): $!";
+    
+    POSIX::_exit($executor->execute());
 }
 
 
@@ -253,44 +293,5 @@ sub _remove_rule_from_graph {
 }
 
 
-sub _reap_children {
-    my ($states, @name_pids) = @_;
-
-    for (my $i = 0; $i < @name_pids; $i += 2) {
-        my ($name, $pid) = @name_pids[$i .. ($i+1)];
-        my ($n, $ret);
-
-        $n = 10;
-        do {
-            $ret = waitpid($pid, WNOHANG);
-            sleep 1;
-        } while ($ret != $pid && --$n > 0);
-
-
-        if ($ret != $pid) {
-            $n = 5;
-            do {
-                if ($n > 3) {
-                    kill 2, $pid;   # INT
-                } elsif ($n > 1) {
-                    kill 15, $pid;  # TERM
-                } else {
-                    kill 9, $pid;   # KILL
-                }
-                sleep 1;
-                $ret = waitpid($pid, WNOHANG);
-            } while ($ret != $pid && --$n > 0);
-
-            $states->{$name}->exit_code(EC_FAIL_UNKNOWN);
-        } else {
-            $states->{$name}->exit_code($? >> 8);
-        }
-
-        $states->{$name}->endtime(time());
-    }
-}
-
-
 no Any::Moose;
 __PACKAGE__->meta->make_immutable();
-
