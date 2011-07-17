@@ -10,7 +10,7 @@ has 'shortdesc' => (is => 'ro', isa => 'Str', required => 1);
 has 'longdesc'  => (is => 'ro', isa => 'Str', default => '');
 
 # Depends on which rules
-has 'depends'   => (is => 'ro', isa => 'ArrayRef[Str]');
+has 'depends'   => (is => 'ro', isa => 'ArrayRef[Str]', default => sub { [] });
 
 # Only execute this rule after 'ifelapsed' seconds
 has 'ifelapsed' => (is => 'ro', isa => 'Int', default => 0);

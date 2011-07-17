@@ -4,6 +4,8 @@ use warnings;
 use utf8;
 use Any::Moose;
 use Data::Dumper;
+use Module::Load;
+use Try::Tiny;
 
 has 'ruleset'       => (is => 'ro', isa => 'HashRef[Config::Zilla::Rule]',
                         default => sub { {} });
@@ -13,91 +15,128 @@ sub addRule {
 
     confess "Invalid argument" unless blessed $rule && $rule->isa('Config::Zilla::Rule');
 
-    my $rules = $self->ruleset;
+    my $ruleset = $self->ruleset;
     my $name = $rule->name;
 
-    if (exists $rules->{$name}) {
-        my $rule2 = $rules->{$name};
+    if (exists $ruleset->{$name}) {
+        my $r = $ruleset->{$name};
 
-        confess "Conflict rule names: $name (" . $rule2->shortdesc .  ")";
+        confess "Conflict rule names: $name ($r->shortdesc)";
     }
 
-    $rules->{$name} = $rules;
+    $ruleset->{$name} = $rule;
 }
 
 
 sub run {
-    my ($self) = @_;
+    my ($self, %options) = @_;
+    my $ruleset = $self->ruleset;
 
-    $self->_validate();
+    _validate($ruleset);
 
-    $self->_resolve_executors();
+    my $executors = _resolve_executors($ruleset);
+
+    return if exists $options{VALIDATE_ONLY} && $options{VALIDATE_ONLY};
+
+    my $rulegraph = _construct_rule_graph($ruleset);
+    my %rulestate;
+
+    while (keys(%$rulegraph) > 0) {
+        for my $name (keys %$rulegraph) {
+            if (keys %{ $rulegraph->{$name} } == 0) {
+
+                # run one rule
+
+                delete $rulegraph->{$name};
+                map { delete $_->{$name} } values %$rulegraph;
+            }
+        }
+    }
 }
 
 
 sub _validate {
-    my ($self) = @_;
-    my $rules = $self->ruleset;
+    my ($ruleset) = @_;
 
-    _validate_dependent_rules_exist($rules);
+    _validate_dependent_rules_exist($ruleset);
 
-    _validate_circular_dependency($rules);
+    _validate_circular_dependency($ruleset);
 }
 
 
 # check all dependent rules whether exist
 sub _validate_dependent_rules_exist {
-    my ($rules) = @_;
+    my ($ruleset) = @_;
 
-    while (my ($name, $rule) = each %$rules) {
-        my $depends = $rule->depends();
-        next unless defined $depends;
+    while (my ($name, $rule) = each %$ruleset) {
+        my $depends = $rule->depends;
 
         for my $dep (@$depends) {
             confess "Rule \"$name\" depends non-exist rule \"$dep\"" unless
-                    exists $rules->{$dep};
+                    exists $ruleset->{$dep};
         }
     }
 }
 
 
 sub _validate_circular_dependency {
-    my ($rules) = @_;
-    my %h;
-    my $got;
+    my ($ruleset) = @_;
+    my ($rulegraph, $got);
 
-    while (my ($name, $rule) = each %$rules) {
-        $h{$name} = {};
+    $rulegraph = _construct_rule_graph($ruleset);
 
-        my $depends = $rule->depends();
-        next unless defined $depends;
-
-        for my $dep (@$depends) {
-            $h{$name}->{$dep} = 1;
-        }
-    }
-
-    while (keys %h > 0) {
+    while (keys(%$rulegraph) > 0) {
         $got = 0;
 
-        for my $name (keys %h) {
-            if (keys %{ $h{$name} } == 0) {
+        for my $name (keys %$rulegraph) {
+            if (keys %{ $rulegraph->{$name} } == 0) {
                 $got = 1;
 
-                delete $h{$name};
+                delete $rulegraph->{$name};
 
-                map { delete $_->{$name} } values %h;
+                map { delete $_->{$name} } values %$rulegraph;
             }
         }
 
-        if (! $got && keys %h > 0) {
-            confess "Found circular dependency:\n" . Dumper(\%h);
+        if (! $got && keys(%$rulegraph) > 0) {
+            confess "Found circular dependency:\n" . Dumper($rulegraph);
         }
     }
 }
 
 
+sub _construct_rule_graph {
+    my ($ruleset) = @_;
+    my %g;
+
+    while (my ($name, $rule) = each %$ruleset) {
+        $g{$name} = {};
+
+        my $depends = $rule->depends;
+
+        for my $dep (@$depends) {
+            $g{$name}->{$dep} = 1;
+        }
+    }
+
+    return \%g;
+}
+
+
 sub _resolve_executors {
+    my ($ruleset) = @_;
+    my %executors;
+
+    while (my ($name, $rule) = each %$ruleset) {
+        my $executor = $rule->executor;
+        # XXX: is it better to call ref() to get the class name?
+        $executor = $rule->meta->name . "Executor" unless defined $executor;
+
+        load $executor;
+        $executors{$name} = $executor->new($rule);
+    }
+
+    return \%executors;
 }
 
 
