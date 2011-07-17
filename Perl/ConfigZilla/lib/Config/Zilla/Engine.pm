@@ -5,7 +5,8 @@ use utf8;
 use Any::Moose;
 use Data::Dumper;
 
-has 'ruleset'       => (is => 'ro', isa => 'HashRef[Config::Zilla::Rule]');
+has 'ruleset'       => (is => 'ro', isa => 'HashRef[Config::Zilla::Rule]',
+                        default => sub { {} });
 
 sub addRule {
     my ($self, $rule) = @_;
@@ -24,13 +25,28 @@ sub addRule {
     $rules->{$name} = $rules;
 }
 
-sub validate {
-    my ($self) = @_;
-    my $rules = $self->ruleset;
 
+# check all dependent rules whether exist
+sub _validate_dependent_rules_exist {
+    my ($rules) = @_;
+
+    while (my ($name, $rule) = each %$rules) {
+        my $depends = $rule->depends();
+        next unless defined $depends;
+
+        for my $dep (@$depends) {
+            confess "Rule \"$name\" depends non-exist rule \"$dep\"" unless
+                    exists $rules->{$dep};
+        }
+    }
+}
+
+
+sub _validate_circular_dependency {
+    my ($rules) = @_;
     my %h;
+    my $got;
 
-    # check all dependent rules whether exist
     while (my ($name, $rule) = each %$rules) {
         $h{$name} = {};
 
@@ -38,15 +54,10 @@ sub validate {
         next unless defined $depends;
 
         for my $dep (@$depends) {
-            confess "Rule \"$name\" depends non-exist rule \"$dep\"" unless
-                    exists $rules->{$dep};
-
             $h{$name}->{$dep} = 1;
         }
     }
 
-    # check circular dependency
-    my $got;
     while (keys %h > 0) {
         $got = 0;
 
@@ -67,8 +78,21 @@ sub validate {
 }
 
 
+sub validate {
+    my ($self) = @_;
+    my $rules = $self->ruleset;
+
+    my %h;
+
+    _validate_dependent_rules_exist($rules);
+
+    _validate_circular_dependency($rules);
+}
+
+
 sub run {
 }
 
 no Any::Moose;
 __PACKAGE__->meta->make_immutable();
+
