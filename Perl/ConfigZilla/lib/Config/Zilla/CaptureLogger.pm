@@ -4,6 +4,7 @@ use warnings;
 use utf8;
 use Any::Moose;
 use IO::Select;
+use POSIX qw(:errno_h);
 
 use constant {
     T_STDOUT    => 1,
@@ -93,6 +94,11 @@ sub run {
             }
 
             if (!defined $len) {    # read nothing
+                if ($! == EAGAIN) { # See "Perl Cookbook" Ch 7.14 "Doing Non-Blocking I/O"
+                    # would blocked
+                } else {
+                    # XXX: what to do ?
+                }
                 if (length($buf) > 0) {
                     $cached_bufs->{$fileno} = $buf;
                 }
