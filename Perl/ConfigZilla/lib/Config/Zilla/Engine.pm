@@ -68,6 +68,7 @@ sub run {
             child_stdout    => \&_on_child_stdout,
             child_stderr    => \&_on_child_stderr,
             child_exit      => \&_on_child_exit,
+            child_timeout   => \&_on_child_timeout,
         },
 
         args => [$ruleset, $executors, \%options],
@@ -191,6 +192,10 @@ sub _on_start {
 
 
 sub _on_stop {
+    my ($kernel, $heap) = @_[KERNEL, HEAP];
+
+    $kernel->delay("timeout");
+    $kernel->alarm_remove_all();
 }
 
 
@@ -218,6 +223,11 @@ sub _on_child_stderr {
 }
 
 
+sub _on_child_timeout {
+    # TODO
+}
+
+
 sub _on_child_exit {
     my ($kernel, $heap, $sig, $pid, $exit_code) = @_[KERNEL, HEAP, ARG0, ARG1, ARG2];
     my $child = $heap->{children_by_pid}{$pid};
@@ -227,6 +237,9 @@ sub _on_child_exit {
     delete $heap->{children_by_wid}{$child->ID};
     delete $heap->{children_by_pid}{$pid};
     delete $heap->{pid_to_name}{$pid};
+
+    $kernel->alarm_remove($heap->{pid_to_timer}{$pid});
+    delete $heap->{pid_to_timer}{$pid};
 
     --$heap->{child_count};
 
@@ -258,8 +271,9 @@ sub _run_executors {
             $states->{$name} = Config::Zilla::ExecutorState->new(
                     exit_code => EC_FAIL_UNKNOWN);
 
+            my $rule = $ruleset->{$name};
             my %exit_codes;
-            for my $dep (@{ $ruleset->{$name}->depends() }) {
+            for my $dep (@{ $rule->depends() }) {
                 $exit_codes{$dep} = $states->{$dep}->exit_code();
             }
 
@@ -274,6 +288,13 @@ sub _run_executors {
             $heap->{children_by_wid}{$child->ID} = $child;
             $heap->{children_by_pid}{$child->PID} = $child;
             $heap->{pid_to_name}{$child->PID} = $name;
+
+            if ($rule->maxtime() > 0) {
+                $heap->{pid_to_timer}{$child->PID} =
+                    $kernel->delay_set("child_timeout",
+                                       $rule->maxtime,
+                                       $child->ID);
+            }
 
             last if ++$child_count >= $max_count;
         }
