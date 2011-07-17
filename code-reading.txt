@@ -65,6 +65,8 @@ mpd/mpc, audacious, xmms2, bmpx
 glib, gtk
 git, mercurial
 WebKit
+https://github.com/facebook/scribe
+http://thrift.apache.org/
 
 ===========================
 good libs: libev, libevent, sglib, sqlite3
