@@ -222,6 +222,7 @@ IPC
     PAR::Packer
     shipwright-generate (CPAN Shipwright)
     App::cpanminus
+    App::pmuninstall
     Perlbrew: http://www.perlbrew.pl/
 
     Devel::Cover
