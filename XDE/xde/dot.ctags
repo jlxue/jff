@@ -1,4 +1,4 @@
 --fields=+ainS
---extra=+fq
+--extra=+f
 --c-kinds=+px
 --c++-kinds=+px
