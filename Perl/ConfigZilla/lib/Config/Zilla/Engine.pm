@@ -26,6 +26,23 @@ sub addRule {
 }
 
 
+sub run {
+    my ($self) = @_;
+
+    $self->_validate();
+}
+
+
+sub _validate {
+    my ($self) = @_;
+    my $rules = $self->ruleset;
+
+    _validate_dependent_rules_exist($rules);
+
+    _validate_circular_dependency($rules);
+}
+
+
 # check all dependent rules whether exist
 sub _validate_dependent_rules_exist {
     my ($rules) = @_;
@@ -77,21 +94,6 @@ sub _validate_circular_dependency {
     }
 }
 
-
-sub validate {
-    my ($self) = @_;
-    my $rules = $self->ruleset;
-
-    my %h;
-
-    _validate_dependent_rules_exist($rules);
-
-    _validate_circular_dependency($rules);
-}
-
-
-sub run {
-}
 
 no Any::Moose;
 __PACKAGE__->meta->make_immutable();
