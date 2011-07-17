@@ -150,7 +150,11 @@ sub _run_loop {
 
     my $rulegraph = _construct_rule_graph($ruleset);
     my $logger = Config::Zilla::CaptureLogger->new();
+    my $start_time = time();
+    my $left_time;
     my %states;
+
+    ## sanity check on options
 
     $options{MAX_CONCURRENT} = DEFAULT_MAX_CONCURRENT unless
             exists $options{MAX_CONCURRENT} && $options{MAX_CONCURRENT} > 0;
@@ -161,58 +165,62 @@ sub _run_loop {
                                 sum(0, map { $_->maxtime() } values %$ruleset));
     }
 
-    my $start_time = time();
-    my $left_time;
 
-    # run rule executors by topological order
+    ## run rule executors by topological order
+
     while (keys(%$rulegraph) > 0) {
         for my $name (keys %$rulegraph) {
 
-            # has no predecessor
-            if (keys %{ $rulegraph->{$name} } == 0) {
-                $left_time = $options{MAX_TIME} - (time() - $start_time);
-                if ($left_time <= 0) {
-                    last TIMEOUT;
-                }
+            ## topological sort, whether this node has no predecessor
+            next unless keys %{ $rulegraph->{$name} } == 0;
 
-                $states{$name} = Config::Zilla::ExecutorState->new(
-                        exit_code => EC_FAIL_UNKNOWN);
 
-                my ($pid, $child_stdout, $child_stderr);
+            $left_time = $options{MAX_TIME} - (time() - $start_time);   # XXX: overflow?
+            if ($left_time <= 0) {
+                last TIMEOUT;
+            }
 
-                try {
-                    ($pid, $child_stdout, $child_stderr) = capture {
-                        # run the executor in child process
-                        $executors->{$name}->execute();
-                    };
-                } catch {
-                    cluck "Catch exception during start of rule $name: $_";
+
+            $states{$name} = Config::Zilla::ExecutorState->new(
+                    exit_code => EC_FAIL_UNKNOWN);
+
+
+            my ($pid, $child_stdout, $child_stderr);
+
+            try {
+                ($pid, $child_stdout, $child_stderr) = capture {
+                    # run the executor in child process
+                    $executors->{$name}->execute();
                 };
+            } catch {
+                cluck "Catch exception during start of rule $name: $_";
+            };
 
-                if (defined $pid) {
-                    try {
-                        $logger->addCapturer($name, $pid, $child_stdout, $child_stderr);
 
-                        if ($logger->count() >= $options{MAX_CONCURRENT}) {
-                            my @name_pids = $logger->run($left_time);
-                            last TIMEOUT unless @name_pids;
+            if (defined $pid) {     # create child process successfully
+                try {
+                    $logger->addCapturer($name, $pid, $child_stdout, $child_stderr);
 
-                            _reap_children(\%states, @name_pids);
+                    if ($logger->count() >= $options{MAX_CONCURRENT}) {
+                        my @name_pids = $logger->run($left_time);
+                        last TIMEOUT unless @name_pids;
 
-                            for (my $i = 0; $i < @name_pids; $i += 2) {
-                                _remove_rule_from_graph($name_pids[$i], $rulegraph);
-                            }
+                        _reap_children(\%states, @name_pids);
+
+                        for (my $i = 0; $i < @name_pids; $i += 2) {
+                            _remove_rule_from_graph($name_pids[$i], $rulegraph);
                         }
-                    } catch {
-                        cluck "Catch exception during capture of rule $name: $_";
-                    };
-                } else {
-                    $states{$name}->endtime(time());
-                    $states{$name}->exit_code(EC_FAIL_START);
+                    }
+                } catch {
+                    cluck "Catch exception during capture of rule $name: $_";
+                };
+            } else {
+                $states{$name}->endtime(time());
+                $states{$name}->exit_code(EC_FAIL_START);
 
-                    _remove_rule_from_graph($name, $rulegraph);
-                }
-            } # end if
+                _remove_rule_from_graph($name, $rulegraph);
+            }
+
         } # end for
     } # end while
 
@@ -222,8 +230,18 @@ TIMEOUT:
     cluck "Engine exceeds total max time $options{MAX_TIME} seconds," .
             "started at " . scalar(localtime($start_time));
 
-    # TODO: _kill_children();
-    return 1;
+    if ($logger->count() > 0) {
+        $logger->run(1);    # last chance to flush children's output
+
+        my @name_pids = $logger->name_pids();
+        for (my $i = 0; $i < @name_pids; $i += 2) {
+            _remove_rule_from_graph($name_pids[$i], $rulegraph);
+        }
+
+        $logger->clear();
+        _reap_children(\%states, @name_pids);
+    }
+    return;
 }
 
 
