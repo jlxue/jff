@@ -30,6 +30,8 @@ sub run {
     my ($self) = @_;
 
     $self->_validate();
+
+    $self->_resolve_executors();
 }
 
 
@@ -92,6 +94,10 @@ sub _validate_circular_dependency {
             confess "Found circular dependency:\n" . Dumper(\%h);
         }
     }
+}
+
+
+sub _resolve_executors {
 }
 
 
