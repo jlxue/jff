@@ -224,7 +224,13 @@ sub _on_child_stderr {
 
 
 sub _on_child_timeout {
-    # TODO
+    my ($kernel, $heap, $child) = @_[KERNEL, HEAP, ARG0];
+
+    if ($child->kill()) {
+        # TODO:
+    }
+
+    delete $heap->{pid_to_timer}{$child->PID};
 }
 
 
@@ -238,8 +244,10 @@ sub _on_child_exit {
     delete $heap->{children_by_pid}{$pid};
     delete $heap->{pid_to_name}{$pid};
 
-    $kernel->alarm_remove($heap->{pid_to_timer}{$pid});
-    delete $heap->{pid_to_timer}{$pid};
+    if (exists $heap->{pid_to_timer}{$pid}) {
+        $kernel->alarm_remove($heap->{pid_to_timer}{$pid});
+        delete $heap->{pid_to_timer}{$pid};
+    }
 
     --$heap->{child_count};
 
@@ -293,7 +301,7 @@ sub _run_executors {
                 $heap->{pid_to_timer}{$child->PID} =
                     $kernel->delay_set("child_timeout",
                                        $rule->maxtime,
-                                       $child->ID);
+                                       $child);
             }
 
             last if ++$child_count >= $max_count;
