@@ -6,7 +6,6 @@ use Exporter 'import';
 use File::Spec;
 use IO::File;
 use IO::Pipe;
-use POSIX qw/EXIT_FAILURE/;
 
 our $VERSION = 0.1;
 our @EXPORT_OK = qw/capture/;
@@ -38,11 +37,7 @@ sub capture(&) {
         open STDERR, '>&', $stderrpipe->fileno() or confess "Can't redirect stdout($$): $!";
 
         $code->();
-
-        exit(EXIT_FAILURE);
     }
 }
 
-
 1;
-
