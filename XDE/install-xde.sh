@@ -133,7 +133,7 @@ i file-roller
 i pidgin pidgin-encryption pidgin-hotkeys msn-pecan pidgin-guifications
 
 ### movie player
-i mplayer
+i mplayer smplayer
 
 ### music player
 # Or: quodlibet listen exaile
