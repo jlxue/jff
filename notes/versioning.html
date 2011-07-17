@@ -1,0 +1,566 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+       <meta name="author" content="APR Developers" /><meta name="email" content="dev@apr.apache.org" />
+    <title>Versioning Numbering Concepts - The Apache Portable Runtime Project</title>
+ </head>
+ <body bgcolor="#ffffff" text="#000000" link="#525D76">
+<p><a href="/"><img src="./images/apr_logo_wide.png" alt="The Apache Portable Runtime Project" border="0"/></a></p>
+ <table border="0" width="100%" cellspacing="4">
+   <tr>
+    <!-- LEFT SIDE NAVIGATION -->
+    <td valign="top" nowrap="nowrap">
+     <!--
+<span style="border:0; margin:0; padding:0;"
+><a href="http://apache.org/foundation/conferences.html"
+  ><img src="http://www.ossummit.com/ads/ossummit_button_3.jpg"
+        alt="OS Summit Asia" width="125" height="125" border="0"></a></span>
+-->
+      <p><b>Get Involved</b></p>
+    <menu compact="compact">
+          <li><a href="anonsvn.html">Subversion</a></li>
+          <li><a href="mailing-lists.html">Mailing Lists</a></li>
+          <li><a href="http://svn.apache.org/snapshots/apr/">Snapshots</a></li>
+          <li><a href="compiling_win32.html">Build on Win32</a></li>
+          <li><a href="compiling_unix.html">Build on Unix</a></li>
+        </menu>
+      <p><b>Download!</b></p>
+    <menu compact="compact">
+          <li><a href="download.cgi">from a mirror</a></li>
+        </menu>
+      <p><b>APR Docs</b></p>
+    <menu compact="compact">
+          <li><a href="docs/apr/1.4/">Version 1.4</a></li>
+          <li><a href="docs/apr/0.9/">Version 0.9</a></li>
+          <li><a href="docs/apr/trunk/">Trunk</a> (dev)</li>
+        </menu>
+      <p><b>APR-util Docs</b></p>
+    <menu compact="compact">
+          <li><a href="docs/apr-util/1.3/">Version 1.3</a></li>
+          <li><a href="docs/apr-util/0.9/">Version 0.9</a></li>
+          <li><a href="docs/apr-util/trunk/">Trunk</a> (dev)</li>
+        </menu>
+      <p><b>APR-iconv Docs</b></p>
+    <menu compact="compact">
+          <li><a href="docs/apr-iconv/1.2/">Version 1.2</a></li>
+          <li><a href="docs/apr-iconv/0.9/">Version 0.9</a></li>
+          <li><a href="docs/apr-iconv/trunk/">Trunk</a> (dev)</li>
+        </menu>
+      <p><b>Guidelines</b></p>
+    <menu compact="compact">
+          <li><a href="guidelines.html">Project Guidelines</a></li>
+          <li><a href="patches.html">Contributing</a></li>
+          <li><a href="versioning.html">Version Numbers</a></li>
+        </menu>
+      <p><b>Miscellaneous</b></p>
+    <menu compact="compact">
+          <li><a href="http://www.apache.org/LICENSE.txt">License</a></li>
+          <li><a href="security_report.html">Security Reports</a></li>
+          <li><a href="projects.html">Projects using APR</a></li>
+          <li><a href="http://www.apache.org/foundation/thanks.html">Sponsors</a></li>
+          <li><a href="http://www.apache.org/foundation/sponsorship.html">Sponsorship</a></li>
+        </menu>
+    </td>
+    <!-- RIGHT SIDE INFORMATION -->
+    <td align="left" valign="top">
+                <table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#525D76">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <strong>APR's Version Numbering</strong>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p>This document covers how the APR projects are versioned. Since the APR
+projects are libraries, it is very important to define a stable API for users
+of the libraries. However, we also need to move the libraries forward,
+technologically. To balance these two needs, a strict policy of versioning is
+required, which users can rely upon to understand the limitations,
+restrictions, and the changes that can occur from one release of APR to the
+next.</p>
+<ul>
+  <li><a href="#basics">The Basics</a></li>
+  <li><a href="#source">Source Compatibility</a></li>
+  <li><a href="#binary">Binary Compatibility</a></li>
+  <li><a href="#examples">Examples</a></li>
+  <li><a href="#strategy">Strategy</a></li>
+  <li><a href="#vsncheck">Version Checking</a></li>
+  <li><a href="#parallel">Parallel Installation</a></li>
+  <li><a href="#notes">Other Notes</a></li>
+</ul>
+  </blockquote>
+ </td></tr>
+</table>
+           <table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#525D76">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <a name="basics"><strong>The Basics</strong></a>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p> Versions are denoted using a standard triplet of integers:
+<tt><strong>MAJOR.MINOR.PATCH</strong></tt>. The basic intent is that
+<tt><strong>MAJOR</strong></tt> versions are incompatible, large-scale upgrades
+of the API. <tt><strong>MINOR</strong></tt> versions retain source and binary
+compatibility with older minor versions, and changes in the
+<tt><strong>PATCH</strong></tt> level are perfectly compatible, forwards and
+backwards.</p>
+<p> It is important to note that a library that has not reached 1.0.0 is
+<strong>not</strong> subject to the guidelines described in this document.
+Before a 1.0 release (version 0.x.y), the API <em>can</em> and <em>will</em> be
+changing freely, without regard to the restrictions detailed below.</p>
+  </blockquote>
+ </td></tr>
+</table>
+           <table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#525D76">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <a name="source"><strong>Source Compatibility</strong></a>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p>We define "source compatible" to mean that an application will continue
+to build without error, and that the semantics will remain unchanged.</p>
+<p>Applications that write against a particular version will remain
+source-compatible against later versions, until the major number changes.
+However, if an application uses an API which has become available in a
+particular minor version, it (obviously) will no longer build or operate
+against previous minor versions.</p>
+  </blockquote>
+ </td></tr>
+</table>
+           <table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#525D76">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <a name="binary"><strong>Binary Compatibility</strong></a>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p> We define "binary compatible" to mean that a compiled application can
+be linked (possibly dynamically) against the library and continue to function
+properly.</p>
+<p>Similar to source compatibility, an application that has been compiled
+against a particular version will continue to be linkable against later
+versions (unless the major number changes). It is possible that an application
+will not be able to successfully link against a previous minor version.</p>
+  </blockquote>
+ </td></tr>
+</table>
+           <table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#525D76">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <a name="examples"><strong>Examples</strong></a>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p>Here are some examples to demonstrate the compatibility:</p>
+<font color="#000000" size="-1" face="arial,helvetica,sanserif">
+<table width="100%">
+  <tr>
+    <th bgcolor="#039acc">Original Version</th>
+    <th bgcolor="#039acc">New Version</th>
+    <th bgcolor="#039acc">Compatible?</th>
+  </tr>
+  <tr valign="top" bgcolor="#e0e0e0">
+    <td bgcolor="#a0ddf0">2.2.3</td>
+    <td bgcolor="#a0ddf0">2.2.4</td>
+    <td bgcolor="#a0ddf0">Yes<br /><font size="-1">Compatibility across patch versions is guaranteed.</font>
+    </td>
+  </tr>
+  <tr valign="top">
+    <td bgcolor="#a0ddf0">2.2.3</td>
+    <td bgcolor="#a0ddf0">2.2.1</td>
+    <td bgcolor="#a0ddf0">Yes<br /><font size="-1">Compatibility across patch versions is guaranteed.</font>
+    </td>
+  </tr>
+  <tr valign="top" bgcolor="#e0e0e0">
+    <td bgcolor="#a0ddf0">2.2.3</td>
+    <td bgcolor="#a0ddf0">2.3.1</td>
+    <td bgcolor="#a0ddf0">Yes<br /><font size="-1">Compatibility with later minor versions is guaranteed.</font>
+    </td>
+  </tr>
+  <tr valign="top">
+    <td bgcolor="#a0ddf0">2.2.3</td>
+    <td bgcolor="#a0ddf0">2.1.7</td>
+    <td bgcolor="#a0ddf0">No<br /><font size="-1">Compatibility with prior minor versions is not guaranteed.</font>
+    </td>
+  </tr>
+  <tr valign="top" bgcolor="#e0e0e0">
+    <td bgcolor="#a0ddf0">2.2.3</td>
+    <td bgcolor="#a0ddf0">3.0.0</td>
+    <td bgcolor="#a0ddf0">No<br /><font size="-1">Compatibility with different major versions is not guaranteed.</font>
+    </td>
+  </tr>
+  <tr valign="top">
+    <td bgcolor="#a0ddf0">2.2.3</td>
+    <td bgcolor="#a0ddf0">1.4.7</td>
+    <td bgcolor="#a0ddf0">No<br /><font size="-1">Compatibility with different major versions is not guaranteed.</font>
+    </td>
+  </tr>
+</table>
+</font>
+<p>Note: while some of the cells say "no", it is <em>possible</em> that
+the versions may be compatible, depending very precisely upon the particular
+APIs used by the application.</p>
+  </blockquote>
+ </td></tr>
+</table>
+           <table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#525D76">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <a name="strategy"><strong>Strategy</strong></a>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p>This section details how we will build the code to meet the above
+requirements and guidelines.</p>
+<table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#828DA6">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <strong>Patch Version</strong>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p>To retain perfect source and binary compatibility, a patch release can only
+change function implementations. Changes to the API, to the signatures of
+public functions, or to the interpretation of function parameters is
+<strong>not allowed</strong>. Effectively, these releases are pure bug fix
+releases.</p>
+  </blockquote>
+ </td></tr>
+</table>
+<table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#828DA6">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <strong>Minor Versions</strong>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p>Minor releases can introduce new functions, new symbolic and enumerated
+constants, and deprecate existing functions.</p>
+<dl>
+      <dt>New functions</dt>
+
+      <dd><p>An application coded against an older minor release will still have
+          all of its functions available with their original signatures. 
+          Once an application begins to use a new function, however, they
+          will be unable to work against older minor versions.</p>
+
+          <p>It is tempting to say that introducing new functions might
+          create incompatibility across minor releases. If an
+          application takes advantage of an API that was introduced in
+          version 2.3 of a library, then it is not going to work
+          against version 2.2. However, we have stated that an any
+          application built against version 2.2 will continue to work
+          for all 2.x releases. Thus, an application that states
+          "requires 2.3 or later" is perfectly acceptable -- the user
+          or administrator simply upgrades the installed library to
+          2.3. This is a safe operation and will not break any other
+          application that was using the 2.2 library.</p>
+
+          <p>In other words, yes an incompatibility arises by mandating
+          that a specific version needs to be installed. But in
+          practice, this will not be a problem since upgrading to
+          newer versions is always safe.</p>
+        </dd>
+
+      <dt>New constants</dt>
+      <dd>Similar to functions, all of the original (old) constants will be
+          available to an application. An application can then choose to use
+          new constants to pick up new semantics and features.</dd>
+
+      <dt>Replacing functions</dt>
+      <dd>This gets a bit trickier. The original function
+          <strong>must</strong> remain available at the link-level so that an
+          application compiled against a minor version will continue to work
+          with later minor versions. Further, if an application is
+          <em>designed</em> to work with an earlier minor version, then we
+          don't want to suddenly change the requirements for that application.
+          This means that the headers cannot silently map an old function
+          into a newer function, as that would turn an application, say,
+          based on 1.2 into an application requiring the 1.4 or later release.
+
+          <p>This means that functions cannot truly be replaced. The new,
+          alternate function can be made available in the header and
+          applications can choose to use it (and become dependent upon
+          the minor release where the function appears).</p>
+
+          <p>It is possible to design a set of headers where a macro will
+          always refer to the "latest" function available. Of course, if an
+          application chooses to use this macro, then the resulting
+          compiled-binary will be dependent upon whatever version it was
+          compiled against.  This strategy adds the new functionality for
+          applications, yet retains the necessary source and binary
+          compatibility for applications designed or built against previous
+          minor releases.</p>
+
+          <p>Constants (enumerated values and preprocessor macros) are
+          <strong>not</strong> allowed to change since an older application
+          will still be using them. Similarly, function signatures at the
+          link-level may not change, so that support for older, compiled
+          applications is maintained.</p>
+      </dd>
+
+      <dt>Deprecating functions</dt>
+      <dd>Since a function must remain available for applications coded
+          against a previous minor release, it is only possible to
+          "<em>deprecate</em>" a function. It <strong>cannot</strong> be
+          removed from the headers (so that source compatibility is retained)
+          and it cannot be removed from the library (so that binary
+          compatibility is retained).
+
+          <p>If you deprecate a function in APR, please mark it as such in the
+          function documentation, using the doxygen "<code>\deprecated</code>"
+          tag.  Deprecated functions can only be removed in major releases.</p>
+
+          <p>A deprecated function should remain available <em>through</em>
+          the original header. The function prototype should remain in the
+          same header, or if moved to a "deprecated functions" header, then
+          the alternate header should be included by the original header. This
+          requirement is to ensure that source compatibility is retained.</p>
+
+          <p>Finally, if you are deprecating a function so that you can change
+          the name of the function, please use the method described above
+          under "Replacing functions", so that projects which use APR can
+          retain binary compatibility.</p>
+
+          <p>Note that all deprecated functions will be removed at the next 
+          major version bump.</p>
+
+      </dd></dl>
+  </blockquote>
+ </td></tr>
+</table>
+<table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#828DA6">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <strong>Major Versions</strong>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p>Any kind of change can be made during a major version release.  Particular
+types of changes that might occur:</p>
+<ul>
+  <li>remove or change constants</li>
+  <li>remove (deprecated) functions</li>
+  <li>fold together macro-ized function replacements</li>
+</ul>
+  </blockquote>
+ </td></tr>
+</table>
+  </blockquote>
+ </td></tr>
+</table>
+           <table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#525D76">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <a name="vsncheck"><strong>Version Checking</strong></a>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p>In many cases, the user of a library will need to check the version that
+they are compiling against, or that is being used at runtime. Because of the
+strict rules of source and binary compatibility, these checks can be simpler
+and more complicated depending on what is needed.</p>
+<table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#828DA6">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <strong>Compile-time Checks</strong>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p>Libraries should make their version number available as compile-time
+constants. For example:</p>
+<blockquote>
+  <tt>
+    #define FOO_MAJOR_VERSION 1
+    <br />
+    #define FOO_MINOR_VERSION 4
+    <br />
+    #define FOO_PATCH_VERSION 0
+  </tt>
+</blockquote>
+<p>The above symbols are the minimum required for this specification.</p>
+<p>An application that desires, at compile-time, to decide on whether and how
+to use a particular library feature needs to only check two values: the major
+and the minor version. Since, by definition, there are no API changes across
+patch versions, that symbol can be safely ignored. Note that any kind of a
+check for a minimum version will then pin that application to at least that
+version. The application's installation mechanism should then ensure that that
+minimal version has been installed (for example, using RPM dependency checks).
+</p>
+<p>If the feature changes across minor versions are source compatible, but
+are (say) simply different choices of values to pass into the library, then an
+application can support a wider variety of installed libraries if it avoids
+compile-time checks.</p>
+  </blockquote>
+ </td></tr>
+</table>
+<table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#828DA6">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <strong>Run-time Checks</strong>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p>A library meeting this specification should support a way for an
+application to determine the library's version at <em>run-time</em>. This will
+usually be emboded as a simple function which returns the <tt>MAJOR</tt>,
+<tt>MINOR</tt>, and <tt>PATCH</tt> triplet in some form.</p>
+<p>Run-time checks are preferable in all cases. This type of check enables an
+application to run against a wider variety of minor releases of a library (the
+application is "<em>less coupled</em>" to a particular library release). Of
+course, if an application requires a function that was introduced in a later,
+minor release, then the application will require that, at least, that release
+is installed on the target system.</p>
+<p>Run-time checks are particurly important if the application is trying to
+determine if the library has a particular bug that may need to be worked
+around, but has been fixed in a later release. If the bug is fixed in a patch
+release, then the only avenue for an application is to perform a runtime check.
+This is because an application cannot require a specific patch level of the
+library to be installed -- those libraries are perfectly forward and backwards
+compatible, and the administrator is free to choose any patch release, knowing
+that all applications will continue to function properly. If the bug was fixed
+in a minor release, then it is possible to use a compile-time check, but that
+would create a tighter coupling to the library. </p>
+  </blockquote>
+ </td></tr>
+</table>
+  </blockquote>
+ </td></tr>
+</table>
+           <table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#525D76">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <a name="parallel"><strong>Parallel Installation</strong></a>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p><em>Parallel installation</em> refers to the ability to install multiple
+versions of a library simultaneously -- they exist in parallel. This document
+will not discuss the full rationale for why this is important, but will instead
+detail how this versioning specification maps onto those concepts. Please refer
+to <a href="http://www106.pair.com/rhp/parallel.html">Havoc Pennington's
+document</a> for futher details and the rationale behind this form of parallel
+installation.</p>
+<table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#828DA6">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <strong>Library Naming</strong>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p>On Unix-ish platforms, the library name should include the <tt>MAJOR</tt>
+version number: </p>
+<blockquote><tt>libFOO-MAJOR.so</tt></blockquote>
+<p>This strategy allows an application to explicitly state which version
+of the library that it wants to link against. If the application was built for
+version 2 of the API, then it can link against <tt>libFOO-2.so</tt>. If another
+application was built against version 3 of the API, then it links against
+<tt>libFOO-3.so</tt>. Since both libraries can reside on the system at the same
+time, both applications' needs can be satisfied.</p>
+<p>Typically, shared libraries on Unix-ish platforms will set up symlinks from
+the <tt>.so</tt> library to specific versions of that library. For example:
+</p>
+<blockquote>
+  <tt>libFOO-MAJOR.so -&gt; libFOO-MAJOR.so.0<br />
+      libFOO-MAJOR.so.0 -&gt; libFOO-MAJOR.so.0.MINOR.PATCH</tt>
+</blockquote>
+<p>In this configuration, applications will be bound to the <tt>.so.0</tt>
+library. The minor version does not come into play here because we want
+applications to dynamically load and link to the new library when a new minor
+version is installed. Thus, the <tt>MINOR</tt> and the <tt>PATCH</tt> values
+are relegated to the library name after the <tt>.so.0</tt> portion.</p>
+<p>The implication here is that build systems for libraries should arrange
+to generate <tt>.so</tt> libraries matching the above pattern.  </p>
+  </blockquote>
+ </td></tr>
+</table>
+<table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#828DA6">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <strong>Include Directories</strong>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p>The default installation directory for a library's include files should
+specify the <tt>MAJOR</tt> version number, and should normally be installed as
+a subdirectory in some standard location. For example:</p>
+<blockquote>
+  <!-- stupid xemacs mode getting confused by forward slashes... -->
+  <tt>/usr/include/FOO-MAJOR/</tt>
+</blockquote>
+<p>An application can place the <tt>FOO-MAJOR</tt> directory on its
+include path and include the files normally:</p>
+<blockquote>
+  <tt>#include &lt;FOO-stuff.h&gt;<br />
+      #include &lt;FOO-more.h&gt;</tt>
+</blockquote>
+<p>Depending upon the API that the application is designed to work against, it
+can simply include different versions of the include directory.</p>
+  </blockquote>
+ </td></tr>
+</table>
+<table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#828DA6">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <strong>Other Files</strong>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p><strong>NOTE:</strong> There is no recommendation at this time for the
+best and proper handling of, say, <tt>FOO-config</tt> types of files. Or
+non-code types of files (e.g. things that typically get installed into areas
+like <tt>/usr/shared</tt>).</p>
+<p>Further thought and exploration is needed here.</p>
+  </blockquote>
+ </td></tr>
+</table>
+  </blockquote>
+ </td></tr>
+</table>
+           <table border="0" cellspacing="0" cellpadding="2" width="100%">
+ <tr><td bgcolor="#525D76">
+  <font color="#ffffff" face="arial,helvetica,sanserif">
+   <a name="notes"><strong>Other Notes</strong></a>
+  </font>
+ </td></tr>
+ <tr><td>
+  <blockquote>
+<p>It is expected that other libraries, besides those in the APR project, will
+want to use the above definitions of versioning. This is quite fine, and those
+libraries can simply reference this document. Its canonical location is: </p>
+<blockquote>http://apr.apache.org/versioning.html</blockquote>
+  </blockquote>
+ </td></tr>
+</table>
+         </td>
+   </tr>
+   <!-- FOOTER -->
+   <tr><td colspan="2"><hr noshade="noshade" size="1"/></td></tr>
+   <tr><td colspan="2" align="center">
+        <font size="-1">
+         <em>Copyright &#169; 2008, The Apache Software Foundation</em>
+        </font>
+       </td>
+   </tr>
+  </table>
+ </body>
+</html>

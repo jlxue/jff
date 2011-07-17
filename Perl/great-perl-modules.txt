@@ -191,6 +191,17 @@ Email 处理
     Parallel::ForkManager
     Proc::ProcessTable
 
+IPC
+===
+    IPC::Run3
+    IPC::Cmd
+    IPC::Run
+    IPC::Open3
+    Capture::Tiny
+    IO::Capture
+    IPC::Capture
+    Sys::RunAlone
+
 多线程
 ======
     http://migo.sixbit.org/papers/Perl_Threads/slide-index.html
@@ -210,6 +221,8 @@ Email 处理
     local::lib
     PAR::Packer
     shipwright-generate (CPAN Shipwright)
+    App::cpanminus
+    Perlbrew: http://www.perlbrew.pl/
 
     Devel::Cover
     Devel::DProf
@@ -254,6 +267,7 @@ Email 处理
     Test::Without::Module
     Test::WWW::Declare
     Test::WWW::Mechanize
+    Test::WWW::Selenium
 
     Perl::Critic
     Perl::Tidy
@@ -286,7 +300,6 @@ Apache::DProf
 App::Ack
 App::Config
 App::CPAN::Fresh
-App::cpanminus
 BerkeleyDB (比 DB_File 的接口更全面)
 Bundle::Test
 CGI
@@ -337,7 +350,6 @@ Imager
 Inline
 IO::AtomicFile
 IO::CaptureOutput
-IPC::Run3
 JSON::XS
 libgd-securityimage-perl (generate CAPTCHA)
 List::AllUtils
