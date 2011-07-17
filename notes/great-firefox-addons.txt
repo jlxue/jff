@@ -21,3 +21,14 @@ Autofill Forms
 
 http://code.google.com/speed/page-speed/docs/overview.html
 
+
+Prevent tab pages from reloading on startup:
+    Firefox 4.x:  browser.sessionstore.max_concurrent_tabs = 0
+    Firefox 3.x:  BarTab addon
+    Or switch to offline mode (File -> Offline) on quit.
+
+        https://addons.mozilla.org/en-US/firefox/addon/load-control/
+        http://www.ghacks.net/2010/09/19/firefox-4-development-update/
+
+        http://getsatisfaction.com/mozilla/topics/why_does_firefox_have_to_reload_all_my_tabs_every_time_it_restores_a_session
+
