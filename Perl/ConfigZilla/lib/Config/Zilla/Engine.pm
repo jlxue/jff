@@ -228,6 +228,8 @@ sub _on_child_exit {
     delete $heap->{children_by_pid}{$pid};
     delete $heap->{pid_to_name}{$pid};
 
+    --$heap->{child_count};
+
     $state->end_time(time());
     $state->exit_code($exit_code);
 
@@ -276,6 +278,8 @@ sub _run_executors {
             last if ++$child_count >= $max_count;
         }
     }
+
+    $heap->{child_count} += $child_count;
 
     return $child_count;
 }
