@@ -1,0 +1,9 @@
+Debian Squeeze:
+
+    wesnoth-all
+    boswars
+    freeciv freeciv-server
+    zsnes
+    snes9x-x
+    visualboyadvance-gtk
+

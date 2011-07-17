@@ -1,0 +1,361 @@
+\documentclass{beamer}
+
+\mode<presentation>
+{
+  \setbeamertemplate{background canvas}[vertical shading][bottom=red!10,top=blue!10]
+  \setbeamertemplate{blocks}[rounded][shadow=true]
+  \usetheme{Warsaw}
+  \setbeamercovered{transparent}
+  \usefonttheme[onlysmall]{structurebold}
+}
+
+
+\usepackage[english]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+\lstloadlanguages{Perl,bash}
+\lstset{language=Perl,numbers=left, numberstyle=\tiny, stepnumber=1, numbersep=5pt,
+        frame=lines, captionpos=b, basicstyle=\scriptsize}
+
+
+\title{Perl Tutorial}
+\author{Yubao Liu \\ \texttt{liuyb@yahoo-inc.com}}
+\institute{Yahoo! Global R \& D Center, Beijing}
+\date{2011-02-26}
+
+
+\hypersetup{pdfpagemode=FullScreen}
+\subject{Perl Tutorial}
+
+%\pgfdeclareimage[height=0.5cm]{yahoo-logo}{yahoo-logo.jpg}
+%\logo{\pgfuseimage{yahoo-logo}}
+
+\AtBeginSection[]
+{
+  \begin{frame}<beamer>{Outline}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+  % You might wish to add the option [pausesections]
+\end{frame}
+
+\section{Preface}
+
+\begin{frame}{How to get help}
+  \begin{itemize}
+    \item perldoc perl
+    \item perldoc perlfunc, perldoc perlvar, perldoc perlre
+    \item perldoc -f open
+    \item perldoc File::Find, perldoc Carp
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Books}
+  \begin{itemize}
+    \item  Learning Perl, Learning Perl on Win32 System
+    \item  Advanced Perl Programming
+    \item  Programming Perl
+    \item  Intermediate Perl, Mastering Perl
+    \item  Perl Best Practices
+    \item  Modern Perl
+  \end{itemize}
+\end{frame}
+
+\section{Basic Syntax}
+
+\begin{frame}[containsverbatim]{Hello World!}
+\begin{lstlisting}[caption=Greeting from Perl]
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+my $name = <STDIN>;
+chomp($name);
+greet($name);
+
+sub greet {
+    print "Hello $_[0]!\n";
+}
+\end{lstlisting}
+
+Running: \texttt{perl hello.pl}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Variable}
+  \begin{description}
+    \item[Scalar]   \lstinline!$num = 3.3; $name = "Jack"!
+    \item[Array]    \lstinline!@array = (1, 3, "Jack")!, \lstinline!$var[0]!
+    \item[Hash]     \lstinline!%hash = ("k1" => "v1", "k2" => "v2")!, \lstinline!$hash{"k1"}!,
+                    key must be number or string, value must be number, string or reference
+  \end{description}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Useful Operators and subroutines}
+  \begin{itemize}
+    \item  \$s x 3, \$a . \$b, chomp(), split(), defined(), undef()
+    \item  scalar(@array), \$\#array, grep(), map(), reverse(), sort(), join(),
+           shift(), unshift(), pop(), push()
+    \item  keys(\%hash), values(\%hash), each(\%hash), exists(), delete()
+    \item  \lstinline!@array[@indices]!, \lstinline!@hash{@keys}!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Conversion among variables}
+  \begin{itemize}
+    \item \lstinline!my @array = ($a, $b); my ($c, $d) = @array;!
+    \item \lstinline!($a, $b) = ($b, $a); @a = (@b, @c); ($a, @a) = @c!
+    \item \lstinline!%hash = @a;!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Contexts}
+  \begin{itemize}
+    \item Void context, \texttt{print "...."}
+    \item Scalar context, \texttt{\$i < @a; \$i < scalar(@a);}
+    \item Array context, \texttt{(stat \$f)[7]}
+    \item Numeric context, \texttt{\$a + \$b}
+    \item String context, \texttt{\$a\ .\ \$b}
+    \item Dual var, \texttt{\$!, Scalar::Util::dualvar()}
+    \item wantarray()
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Clause}
+ \begin{itemize}
+  \item \lstinline!if (...) {...} elsif (...) {...} else {....}!
+  \item \lstinline!while (...) {...}!
+  \item \lstinline!for my $a (@a) {...}; for (my $i = 0; $i < @a; ++$i) {...}!
+  \item \lstinline!... if ...; ... while ...;!
+  \item \lstinline!next!, \lstinline!last!
+  \item \lstinline!BEGIN {...}!, \lstinline!END {...}!
+ \end{itemize}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Subroutine}
+  \begin{itemize}
+    \item \lstinline!$_!, \lstinline!@_!
+    \item \lstinline!sub foo {my @args = @_; ...}!
+    \item \lstinline!my $i = 0; my $f = sub {print "Now ", ++$i, "\n"}; $f->(); &$f()!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[containsverbatim]{I/O}
+  \begin{itemize}
+    \item  STDIN, STDOUT, STDERR
+    \item  \lstinline{print STDERR "Can't find command!\n";}
+    \item  \lstinline{my $fh = \*STDIN; print $fh "hello\n";}
+    \item  \lstinline{open my $fh, "/etc/passwd" or die "Can't open: $!\n";}
+    \item  \lstinline!while (<$fh>) { chomp; print "$_\n"; }!
+    \item  \lstinline!close($fh)!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[containsverbatim]{I/O (cont.)}
+  \begin{itemize}
+    \item  Buffered IO: open, <>, print, printf, seek, tell
+    \item  Unbuffered IO: sysopen, sysread, syswrite, sysseek
+    \item  opendir(), readdir(), closedir(), glob()
+    \item  IO::File, IO::Dir
+  \end{itemize}
+\end{frame}
+
+\section{Intermediate Syntax}
+
+\begin{frame}[containsverbatim]{Reference}
+  \begin{itemize}
+    \item \lstinline{$a_ref = \$a; $$a_ref = 3;}
+    \item \lstinline{$a_ref = \@a; @$a_ref = (1, 2); $a_ref->[0] = 2;}
+    \item \lstinline!$a_ref = \%h; %$a_ref = (1 => 2); $a_ref->{1} = 3;!
+    \item \lstinline!$a_ref = \&func_foo; &$a_ref(); $a_ref->();!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Reference (cont.)}
+  \begin{itemize}
+    \item \lstinline{$a_ref = [1, 2, 3]; $a_ref->[0] *= 2;}
+    \item \lstinline!$a_ref = {1 => 2}; $a_ref->{1} = 3;!
+    \item Autovivification: \lstinline!my $a_ref; $a_ref->[1]{name} = "Jack";!
+    \item \lstinline!${$a[0]}, @{$a[0]}, %{$a[0]}!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Calling External Program}
+  \begin{itemize}
+    \item \lstinline{my $content = `ls`; $content = qx/ls/}
+    \item \lstinline{system()}
+    \item \lstinline{open()}
+    \item \lstinline{fork() + exec() + pipe()}
+    \item IPC::Open2, IPC::Open3, IPC::Cmd, IPC::Run
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Exception}
+\begin{lstlisting}[caption=Vanilla exception processing]
+eval {
+  open my $fh, "some_file" or die "Can't open";
+  die "Empty!" if -z $fh;
+  close $fh;
+};
+
+if ($@) {
+  if ($@ =~ /Can't open/) {
+  } elsif ($@ =~ /Empty!/) {
+  } else {
+  }
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Exception (cont.)}
+  \begin{itemize}
+    \item Try::Tiny, better than vanilla exception processing
+    \item Exception::Class
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Error Indicators}
+  \begin{description}
+    \item[\$@] Errors detected by Perl interpreter
+    \item[\$!] Errors reported by C library, like "errno"
+    \item[\$?] 16-bit status code of external program
+  \end{description}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Installing Modules}
+  \begin{itemize}
+    \item local::lib
+    \item cpan, cpanp
+    \item cpanm, App::cpanminus
+    \item \url{http://search.cpan.org}
+    \item \url{http://search.metacpan.org}
+    \item \url{http://deps.cpantesters.org}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Using Modules}
+  \begin{itemize}
+    \item \texttt{perldoc -q @INC}
+    \item use Carp qw/cluck/;
+    \item use CGI ();
+    \item use Fcntl qw(:DEFAULT :flock);
+    \item require, do
+    \item \%INC
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Writing Modules}
+\begin{lstlisting}[caption=Some/Module.pm]
+package Some::Module;
+use strict;
+use warnings;
+use Exporter 'import';
+
+our $VERSION = 1.00;
+our @EXPORT  = qw/&subA &subB $varA @varB/;
+our @EXPORT_OK = qw/&subC &subD/;
+our %EXPORT_TAGS = (tag1 => [ qw/..../ ], tag2 => [ qw/..../ ]);
+
+our ($varA, @varB);
+
+sub subA {
+}
+
+1;
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Object Oriented Perl}
+  \begin{itemize}
+    \item Class in Perl is represented by package
+    \item A subroutine usually named \texttt{new} returns blessed reference
+    \item Method is just subroutine whose first argument is object
+    \item Special \texttt{DESTROY} subroutine
+    \item class \emph{UNIVERSAL}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Object Oriented Perl (cont.)}
+\begin{lstlisting}[caption=Define a class]
+package Some::Class;
+use strict;
+use warnings;
+
+our $VERSION = 1.0;
+our @ISA = qw/BaseA BaseB/;  # or "use parent ...;" or "use base ...;"
+
+sub new {
+  my ($class, @args) = @_;
+  bless {}, $class;
+}
+
+sub methodA {
+  my ($self, @args) = @_;
+}
+
+1;
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Object Oriented Perl (cont.)}
+\begin{lstlisting}[caption=Use a class]
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Some::Class;
+
+my $obj = Some::Class->new();
+$obj->methodA();
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Others}
+  \begin{itemize}
+    \item Regular Expression, perldoc perlrequick/perlretut/
+          perlre/perlreref/perlrebackslash/perlrecharclass
+    \item Thread support, perldoc threads, Thread::Queue, Thread::Semaphore
+    \item Unicode support, byte string vs. text string, \lstinline{use utf8; use Encode;}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Recommended Modules}
+  \begin{itemize}
+    \item Data::Dumper, Carp, CGI::Carp
+    \item Devel::Cover, Devel::NYTProf, Devel::Size
+    \item Config::Any, Config::General, Config::MVP
+    \item Log::Any, Log::Dispatch, Log::Log4Perl
+    \item HTTP::Tiny, LWP, WWW::Mechanize
+    \item HTML::TreeBuilder, HTML::TreeBuilder::XPath, XML::Simple, XML::LibXML
+    \item Template::Toolkit, HTML::Template::Pro, HTML::Template::Compiled
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[containsverbatim]{Recommended Modules (cont.)}
+  \begin{itemize}
+    \item AnyDBM\_File, BerkeleyDB
+    \item DBI, DBIx::Class, DBIx::Simple
+    \item Class::Struct, Moose, Mouse, Any::Moose
+    \item Parallel::Prefork
+    \item Cache::Cache, CHI
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{center}
+    \_\_END\_\_
+  \end{center}
+\end{frame}
+
+\end{document}
+
