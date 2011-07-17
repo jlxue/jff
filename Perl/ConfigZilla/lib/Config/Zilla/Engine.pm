@@ -182,6 +182,9 @@ sub _run_loop {
                     };
 
                     if (defined $pid) {
+                        $child_stdout->blocking(0);
+                        $child_stderr->blocking(0);
+
                         $states{$name}->pid($pid);
                         $states{$name}->stdout($child_stdout);
                         $states{$name}->stderr($child_stderr);
