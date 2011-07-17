@@ -3,6 +3,9 @@ use strict;
 use warnings;
 use utf8;
 use Any::Moose;
+
+use Config::Zilla::Types;
+
 use constant RULE_NAME_REGEXP   => qr/^[[:alnum:]][[:alnum:]_-]*$/;
 
 has 'name'      => (is => 'ro', isa => 'Str', required => 1);
@@ -13,9 +16,9 @@ has 'longdesc'  => (is => 'ro', isa => 'Str', default => '');
 has 'depends'   => (is => 'ro', isa => 'ArrayRef[Str]', default => sub { [] });
 
 # Only execute this rule after 'ifelapsed' seconds
-has 'ifelapsed' => (is => 'ro', isa => 'Int', default => 0);
+has 'ifelapsed' => (is => 'ro', isa => 'NonNegativeInt', default => 0);
 
-has 'maxtime'   => (is => 'ro', isa => 'Int', default => 0);
+has 'maxtime'   => (is => 'ro', isa => 'NonNegativeInt', default => 0);
 
 has 'executor'  => (is => 'ro', isa => 'Str');
 
