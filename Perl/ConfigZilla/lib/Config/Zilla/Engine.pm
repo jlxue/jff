@@ -7,6 +7,9 @@ use Data::Dumper;
 use Module::Load;
 use Try::Tiny;
 
+our $VERSION = 0.1;
+
+
 has 'ruleset'       => (is => 'ro', isa => 'HashRef[Config::Zilla::Rule]',
                         default => sub { {} });
 
