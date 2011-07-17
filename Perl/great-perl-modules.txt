@@ -288,6 +288,28 @@ Cache
 =====
     CHI
     Cache::Cache
+
+IP, INET
+=======
+    NetAddr::IP
+    Net::IP
+    Net::IP::XS
+
+    Net::IPv4Addr
+    Net::IPv6Addr
+
+    Net::IP::AddrRanges
+    Net::IP::Match::Bin
+    Net::IP::Match::Regexp
+    Net::IP::CMatch
+    Net::IP::Match
+    Net::IP::Match::Trie
+    Net::IP::Match::XS
+    Net::IP::Match::XS2
+
+    Data::Validate::IP
+    IO::Socket::IP
+
 #######################################################################
 
 
