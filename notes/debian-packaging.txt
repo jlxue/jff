@@ -1,0 +1,18 @@
+http://git.debian.org/?p=users/lucas/packaging-tutorial.git;a=blob_plain;f=packaging-tutorial.pdf;hb=refs/heads/pdf
+http://wiki.debian.org/DebianPackagingHandbook
+
+build-essential devscripts dh-make pbuilder lintian piuparts git-buildpackage
+reprepro
+
+dh-make-perl dh-make-php
+
+devscripts: debuild dget dput debi debcheckout dch
+dpkg-dev: dpkg-source -x foo.dsc
+          dpkg-buildpackage -us -uc
+
+cowdancer cowbuilder
+fl-cow
+fakechroot
+jailer
+jailtool
+schroot
