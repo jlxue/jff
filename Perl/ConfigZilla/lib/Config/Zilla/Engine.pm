@@ -57,8 +57,6 @@ sub run {
     # _resolve_executors() also contains necessary validation
     return if exists $options{VALIDATE_ONLY} && $options{VALIDATE_ONLY};
 
-    _run_loop($ruleset, $executors, %options);
-
     POE::Session->create(
         inline_states => {
             _start  => &_on_start,
@@ -87,7 +85,6 @@ sub _validate {
 }
 
 
-# check all dependent rules whether exist
 sub _validate_dependent_rules_exist {
     my ($ruleset) = @_;
 
@@ -200,6 +197,7 @@ sub _on_stop {
 
 
 sub _on_timeout {
+    my ($kernel, $heap) = @_[KERNEL, HEAP];
 }
 
 
