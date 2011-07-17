@@ -1,0 +1,4 @@
+Align.vba: call delete('/home/liuyb/.vim/plugin/AlignPlugin.vim')|call delete('/home/liuyb/.vim/plugin/AlignMapsPlugin.vim')|call delete('/home/liuyb/.vim/plugin/cecutil.vim')|call delete('/home/liuyb/.vim/doc/Align.txt')|call delete('/home/liuyb/.vim/autoload/Align.vim')|call delete('/home/liuyb/.vim/autoload/AlignMaps.vim')
+DrawIt.vba: call delete('/home/liuyb/.vim/plugin/DrawItPlugin.vim')|call delete('/home/liuyb/.vim/plugin/cecutil.vim')|call delete('/home/liuyb/.vim/autoload/DrawIt.vim')|call delete('/home/liuyb/.vim/doc/DrawIt.txt')
+getscript.vba: call delete('/home/liuyb/.vim/plugin/getscriptPlugin.vim')|call delete('/home/liuyb/.vim/autoload/getscript.vim')|call delete('/home/liuyb/.vim/GetLatest/GetLatestVimScripts.dist')|call delete('/home/liuyb/.vim/doc/pi_getscript.txt')
+LargeFile.vba: call delete('/home/liuyb/.vim/plugin/LargeFile.vim')|call delete('/home/liuyb/.vim/doc/LargeFile.txt')

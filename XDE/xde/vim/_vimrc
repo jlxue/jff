@@ -187,14 +187,18 @@ set sidescrolloff=10
 
 if has("gui_running")
     colorscheme peachpuff
-    set cursorline
-    hi CursorLine guibg=LightGreen
 else
 "   colorscheme murphy
 "   hi link String Comment
     colorscheme torte   "elflord murphy
-    set cursorline
     hi MatchParen ctermbg=Blue
+endif
+
+if version >= 700
+    set cursorline
+    if has("gui_running")
+        hi CursorLine guibg=LightGreen
+    endif
 endif
 
 set showmatch
@@ -240,7 +244,7 @@ set ambiwidth=double
 "     http://guoyoooping.blog.163.com/blog/static/13570518320101291442176/
 "
 " required: ghostscript, cmap-adobe-gb1
-if has("unix")
+if has("unix") && version >= 700
     set printencoding=utf-8
     set printmbcharset=ISO10646
     " see /var/lib/defoma/gs.d/dirs/fonts/cidfmap
@@ -273,7 +277,7 @@ set updatetime=2000
 if getcwd() =~ 'linux-2.6'
     set noet tabstop=8 shiftwidth=8
 endif
-if has("cscope")
+if has("cscope") && version >= 700
     if executable('mlcscope')
         set cscopeprg=mlcscope\ -d\ -k\ -q
     else
