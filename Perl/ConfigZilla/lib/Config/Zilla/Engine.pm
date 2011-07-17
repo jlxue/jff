@@ -166,6 +166,7 @@ sub _on_start {
     my ($kernel, $heap, $ruleset, $executors, $options) = @_[KERNEL, HEAP, ARG0, ARG1, ARG2];
 
     $heap->{states} = {};
+    $heap->{ruleset} = $ruleset;
     $heap->{rulegraph} = _construct_rule_graph($ruleset);
     $heap->{executors} = $executors;
     $heap->{options} = $options;
@@ -239,11 +240,13 @@ sub _on_child_exit {
 sub _run_executors {
     my ($kernel, $heap) = @_;
 
-    my $max_count = $heap->{options}{MAX_CONCURRENT} - $heap->{child_count};
+    my $options = $heap->{options};
+    my $max_count = $options->{MAX_CONCURRENT} - $heap->{child_count};
     my $child_count = 0;
     my $states = $heap->{states};
     my $rulegraph = $heap->{rulegraph};
     my $executors = $heap->{executors};
+    my $ruleset = $heap->{ruleset};
 
     while ($child_count < $max_count && keys(%$rulegraph) > 0) {
         for my $name (keys %$rulegraph) {
@@ -253,9 +256,14 @@ sub _run_executors {
             $states->{$name} = Config::Zilla::ExecutorState->new(
                     exit_code => EC_FAIL_UNKNOWN);
 
+            my %exit_codes;
+            for my $dep (@{ $ruleset->{$name}->depends() }) {
+                $exit_codes{$dep} = $states->{$dep}->exit_code();
+            }
+
             my $child = POE::Wheel::Run->new(
                 Program     => \&_run_executor_in_child_process,
-                ProgramArgs => [ $executors->{$name} ],
+                ProgramArgs => [ $executors->{$name}, $options, \%exit_codes ],
                 StdoutEvent => "child_stdout",
                 StderrEvent => "child_stderr",
             );
@@ -274,14 +282,14 @@ sub _run_executors {
 
 
 sub _run_executor_in_child_process {
-    my ($executor) = @_;
+    my ($executor, $options, $exit_codes) = @_;
 
     untie *STDIN;
 
     my $nullfh = IO::File->new(File::Spec->devnull);
     open STDIN, '<&', $nullfh->fileno() or confess "Can't redirect stdin($$): $!";
-    
-    POSIX::_exit($executor->execute());
+
+    POSIX::_exit($executor->execute($options, $exit_codes));
 }
 
 
