@@ -20,7 +20,7 @@ alias c=clear
 export ACK_PAGER="less -R"
 which ack-grep >/dev/null 2>&1 && alias ack=ack-grep
 
-alias locallib="eval \$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)"
+alias locallib="eval \`perl -I$HOME/perl5/lib/perl5 -Mlocal::lib\`"
 
 alias gb='git branch'
 alias gd='git diff'
