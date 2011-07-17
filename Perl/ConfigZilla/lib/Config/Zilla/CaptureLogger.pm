@@ -112,7 +112,7 @@ sub run {
     do {
         $start_time = time();
 
-        my @ready = $self->seletor->can_read($left_time);
+        my @ready = $self->selector->can_read($left_time);
 
         return if @ready == 0;  # timeout
 
@@ -153,7 +153,7 @@ sub run {
                 delete $self->fd_to_pid->{$fileno};
                 delete $self->fd_to_type->{$fileno};
                 delete $self->pid_to_name->{$pid};
-                $self->seletor->remove($fh);
+                $self->selector->remove($fh);
                 close($fh);
 
                 push @name_pids, $name, $pid;
