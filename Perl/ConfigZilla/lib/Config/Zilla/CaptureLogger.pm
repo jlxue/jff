@@ -23,6 +23,9 @@ has 'cached_bufs'   => (is => 'ro', isa => 'HashRef[Str]', default => sub { {} }
 sub addCapturer {
     my ($self, $name, $pid, $stdout, $stderr) = @_;
 
+    $stdout->blocking(0);
+    $stderr->blocking(0);
+
     $self->pid_to_name->{$pid} = $name;
     $self->fd_to_pid->{ fileno($stdout) } = $pid;
     $self->fd_to_pid->{ fileno($stderr) } = $pid;
@@ -71,11 +74,30 @@ sub run {
                 $buf = "";
             }
 
-            my $len = sysread $fh, $buf, BUF_LEN, length($buf);
+            my $len;
+            while ($len = sysread $fh, $buf, BUF_LEN, length($buf)) {
+                my $tmpbuf = $buf;
 
-            if (!defined($len) or $len == 0) {
+                open my $tmpfh, \$tmpbuf or die "$!\n";
+                $buf = "";
+
+                while (my $line = <$tmpfh>) {
+                    if (0 == chomp $line) {
+                        $buf = $line;
+                    } else {
+                        print $out "$name($pid): $line\n";
+                    }
+                }
+
+                close $tmpfh;
+            }
+
+            if (!defined $len) {    # read nothing
                 if (length($buf) > 0) {
-                    chomp $buf;
+                    $cached_bufs->{$fileno} = $buf;
+                }
+            } else  {               # $len is 0, pipe closed
+                if (length($buf) > 0) {
                     print $out "$name($pid): $buf\n";
                 }
 
@@ -86,19 +108,10 @@ sub run {
                 close($fh);
 
                 push @name_pids, $name, $pid;
-            } else {
-                open my $fh2, \$buf or die "$!\n";
-                while (my $line = <$fh2>) {
-                    if (0 == chomp $line) {
-                        $cached_bufs->{$fileno} = $line;
-                        last;
-                    } else {
-                        print $out "$name($pid): $buf\n";
-                    }
-                }
-                close $fh2;
             }
         }
+
+        $left_time -= time() - $start_time;
     } while ($left_time > 0);
 
     return @name_pids;
