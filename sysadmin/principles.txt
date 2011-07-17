@@ -27,7 +27,7 @@ Pkg repos   : 软件包仓库，所有机器的软件安装来源一致，可重
 
 Cfengine    : 配置管理，保证所有机器的配置、软件包版本符合预期
 Postfix     : 内部邮件服务，服务端的邮件分类 (imapd ?)
-Mailman     : 邮件列表，自由讨论
+Sympa       : 邮件列表，自由讨论(Mailman?)
 Samba       : 文件共享 (OpenAFS ?)
 OpenLDAP    : 地址簿，组织关系
 OpenFire    : 内部即时通讯 (ejabberd? IRC?)
