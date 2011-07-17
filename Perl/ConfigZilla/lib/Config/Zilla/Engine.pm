@@ -6,7 +6,6 @@ use Any::Moose;
 use Data::Dumper;
 
 has 'ruleset'       => (is => 'ro', isa => 'HashRef[Config::Zilla::Rule]');
-has 'sorted_rules'  => (is => 'ro', isa => 'ArrayRef[Str]');
 
 sub addRule {
     my ($self, $rule) = @_;
@@ -29,9 +28,9 @@ sub validate {
     my ($self) = @_;
     my $rules = $self->ruleset;
 
-    return unless defined $rules;
-
     my %h;
+
+    # check all dependent rules whether exist
     while (my ($name, $rule) = each %$rules) {
         $h{$name} = {};
 
@@ -46,7 +45,7 @@ sub validate {
         }
     }
 
-    my @sorted_rules;
+    # check circular dependency
     my $got;
     while (keys %h > 0) {
         $got = 0;
@@ -55,7 +54,6 @@ sub validate {
             if (keys %{ $h{$name} } == 0) {
                 $got = 1;
 
-                push @sorted_rules, $name;
                 delete $h{$name};
 
                 map { delete $_->{$name} } values %h;
@@ -66,8 +64,6 @@ sub validate {
             confess "Found circular dependency:\n" . Dumper(\%h);
         }
     }
-
-    $self->{sorted_rules} = \@sorted_rules;
 }
 
 
