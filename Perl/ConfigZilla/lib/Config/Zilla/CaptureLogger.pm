@@ -26,6 +26,49 @@ use constant NL => eval {
     $buf;
 };
 
+sub _foreach_lines_with_open {
+    my ($lines, $out_fh, $name, $pid) = @_;
+
+    open my $fh, "<", \$lines or die "$!";
+    my $buf = "";
+
+    while (my $line = <$fh>) {
+        if (0 == chomp $line) {
+            $buf = $line;
+        } else {
+            print $out_fh "$name($pid): $line\n";
+        }
+    }
+
+    close $fh;
+    return $buf;
+}
+
+sub _foreach_lines_with_index {
+    my ($lines, $out_fh, $name, $pid) = @_;
+
+    my $offset = 0;
+    my $pos;
+    while (($pos = index($lines, NL, $offset)) >= 0) {
+        print $out_fh substr($lines, $offset, $pos - $offset), "\n";
+        $offset = $pos + length(NL);
+    }
+
+    if ($offset < length($lines)) {
+        return substr($lines, $offset);
+    } else {
+        return "";
+    }
+}
+
+BEGIN {
+    if (NL) {
+        *_foreach_lines = \&_foreach_lines_with_index;
+    } else {
+        *_foreach_lines = \&_foreach_lines_with_open;
+    }
+}
+
 
 has 'pid_to_name'   => (is => 'ro', isa => 'HashRef[Str]', default => sub { {} });
 has 'fd_to_pid'     => (is => 'ro', isa => 'HashRef[Int]', default => sub { {} });
@@ -90,20 +133,7 @@ sub run {
 
             my $len;
             while ($len = sysread $fh, $buf, BUF_LEN, length($buf)) {
-                my $tmpbuf = $buf;
-
-                open my $tmpfh, \$tmpbuf or die "$!\n";
-                $buf = "";
-
-                while (my $line = <$tmpfh>) {
-                    if (0 == chomp $line) {
-                        $buf = $line;
-                    } else {
-                        print $out "$name($pid): $line\n";
-                    }
-                }
-
-                close $tmpfh;
+                $buf = _foreach_lines($buf, $out, $name, $pid);
             }
 
             if (!defined $len) {    # read nothing
