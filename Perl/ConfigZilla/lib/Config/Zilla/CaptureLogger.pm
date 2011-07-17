@@ -11,6 +11,9 @@ use constant {
     T_STDERR    => 2,
 
     BUF_LEN     => 2 * 1024,
+
+    IDX_NAME    => 0,
+    IDX_FDCOUNT => 1,
 };
 
 use constant NL => eval {
@@ -70,7 +73,7 @@ BEGIN {
 }
 
 
-has 'pid_to_name'   => (is => 'ro', isa => 'HashRef[Str]', default => sub { {} });
+has 'pid_to_info'   => (is => 'ro', isa => 'HashRef[ArrayRef]', default => sub { {} });
 has 'fd_to_pid'     => (is => 'ro', isa => 'HashRef[Int]', default => sub { {} });
 has 'fd_to_type'    => (is => 'ro', isa => 'HashRef[Int]', default => sub { {} });
 has 'selector'      => (is => 'ro', isa => 'IO::Select', default => sub { IO::Select->new() });
@@ -83,7 +86,7 @@ sub addCapturer {
     $stdout->blocking(0);
     $stderr->blocking(0);
 
-    $self->pid_to_name->{$pid} = $name;
+    $self->pid_to_info->{$pid} = [$name, 2];
     $self->fd_to_pid->{ fileno($stdout) } = $pid;
     $self->fd_to_pid->{ fileno($stderr) } = $pid;
     $self->fd_to_type->{ fileno($stdout) } = T_STDOUT;
@@ -96,7 +99,7 @@ sub addCapturer {
 sub count {
     my ($self) = @_;
 
-    return scalar(keys %{ $self->pid_to_name });
+    return scalar(keys %{ $self->pid_to_info });
 }
 
 sub run {
@@ -109,6 +112,7 @@ sub run {
     die "Bad usage!" if $self->count() == 0;
 
 
+    { # extra brace for "last", see `perldoc perlsyn':  Statement Modifiers
     do {
         $start_time = time();
 
@@ -120,7 +124,7 @@ sub run {
             my $fileno = fileno($fh);
             my $pid = $self->fd_to_pid->{$fileno};
             my $type = $self->fd_to_type->{$fileno};
-            my $name = $self->pid_to_name->{$pid};
+            my $name = $self->pid_to_info->{$pid}[IDX_NAME];
             my $out = $type == T_STDOUT ? \*STDOUT : \*STDERR;
 
             my $buf;
@@ -152,16 +156,21 @@ sub run {
 
                 delete $self->fd_to_pid->{$fileno};
                 delete $self->fd_to_type->{$fileno};
-                delete $self->pid_to_name->{$pid};
+                if (-- $self->pid_to_info->{$pid}[IDX_FDCOUNT] <= 0) {
+                    delete $self->pid_to_info->{$pid};
+                    push @name_pids, $name, $pid;
+                }
+
                 $self->selector->remove($fh);
                 close($fh);
-
-                push @name_pids, $name, $pid;
             }
         }
 
+        last if @name_pids;
+
         $left_time -= time() - $start_time;
     } while ($left_time > 0);
+    } # extra brace for "last", see `perldoc perlsyn':  Statement Modifiers
 
     return @name_pids;
 }
