@@ -7,6 +7,7 @@ use Carp qw/cluck/;
 use Data::Dumper;
 use List::Util qw/max sum/;
 use Module::Load;
+use POSIX qw/:sys_wait_h/;
 use Try::Tiny;
 
 use Config::Zilla::Capture qw/capture/;
@@ -193,7 +194,14 @@ sub _run_loop {
                         $logger->addCapturer($name, $pid, $child_stdout, $child_stderr);
 
                         if ($logger->count() >= $options{MAX_CONCURRENT}) {
-                            $logger->run($left_time);
+                            my @name_pids = $logger->run($left_time);
+                            last TIMEOUT unless @name_pids;
+
+                            _reap_children(\%states, @name_pids);
+
+                            for (my $i = 0; $i < @name_pids; $i += 2) {
+                                _remove_rule_from_graph($name_pids[$i], $rulegraph);
+                            }
                         }
                     } catch {
                         cluck "Catch exception during capture of rule $name: $_";
@@ -224,6 +232,44 @@ sub _remove_rule_from_graph {
 
     delete $rulegraph->{$name};
     map { delete $_->{$name} } values %$rulegraph;
+}
+
+
+sub _reap_children {
+    my ($states, @name_pids) = @_;
+
+    for (my $i = 0; $i < @name_pids; $i += 2) {
+        my ($name, $pid) = @name_pids[$i .. ($i+1)];
+        my ($n, $ret);
+
+        $n = 10;
+        do {
+            $ret = waitpid($pid, WNOHANG);
+            sleep 1;
+        } while ($ret != $pid && --$n > 0);
+
+
+        if ($ret != $pid) {
+            $n = 5;
+            do {
+                if ($n > 3) {
+                    kill 2, $pid;   # INT
+                } elsif ($n > 1) {
+                    kill 15, $pid;  # TERM
+                } else {
+                    kill 9, $pid;   # KILL
+                }
+                sleep 1;
+                $ret = waitpid($pid, WNOHANG);
+            } while ($ret != $pid && --$n > 0);
+
+            $states->{$name}->exit_code(EC_FAIL_UNKNOWN);
+        } else {
+            $states->{$name}->exit_code($? >> 8);
+        }
+
+        $states->{$name}->endtime(time());
+    }
 }
 
 
