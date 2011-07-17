@@ -178,6 +178,7 @@ aide_already_installed=$(is_installed aide)
 i debsums   #aide samhain fcheck
 
 
+i quicksynergy  # share screen/mouse/keyboard between computers
 
 ###########################################################
 ## install packages
