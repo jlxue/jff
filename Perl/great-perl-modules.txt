@@ -299,13 +299,16 @@ IP, INET
     Net::IPv6Addr
 
     Net::IP::AddrRanges
-    Net::IP::Match::Bin
-    Net::IP::Match::Regexp
-    Net::IP::CMatch
-    Net::IP::Match
-    Net::IP::Match::Trie
-    Net::IP::Match::XS
-    Net::IP::Match::XS2
+    Net::CIDR::Lite
+
+    Don't support IPv6:
+        Net::IP::Match::Regexp
+        Net::IP::Match::Bin
+        Net::IP::CMatch
+        Net::IP::Match
+        Net::IP::Match::Trie
+        Net::IP::Match::XS
+        Net::IP::Match::XS2
 
     Data::Validate::IP
     IO::Socket::IP

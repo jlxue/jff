@@ -1,0 +1,4 @@
+http://algebraicthunk.net/~dburrows/blog/entry/apt-system-diagram/
+http://algebraicthunk.net/~dburrows/blog/entry/a-map-of-apt-state-files/
+http://algebraicthunk.net/~dburrows/blog/entry/a-better-map-of-the-apt-state-files/
+
