@@ -313,6 +313,15 @@ IP, INET
     Data::Validate::IP
     IO::Socket::IP
 
+Inside-out class
+================
+    https://www.socialtext.net/perl5/inside_out_object
+
+    Hash::Util::FieldHash
+    Class::InsideOut
+    Object::InsideOut
+
+
 #######################################################################
 
 
