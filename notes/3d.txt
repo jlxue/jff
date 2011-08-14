@@ -26,3 +26,18 @@ modeling methods:
 silo, modo
 rhino, google sketchup, blender
 
+
+http://en.wikipedia.org/wiki/List_of_game_engines
+http://en.wikipedia.org/wiki/Physics_engine
+
+http://www.blender.org/education-help/tutorials/game-engine/
+
+http://www.panda3d.org/
+http://www.alice.org/
+http://www.ogre3d.org/
+http://www.crystalspace3d.org/main/Main_Page
+http://irrlicht.sourceforge.net/
+http://www.openscenegraph.org/projects/osg
+http://www.cafu.de/
+http://www.yake.org/
+
