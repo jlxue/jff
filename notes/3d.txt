@@ -34,9 +34,12 @@ http://www.blender.org/education-help/tutorials/game-engine/
 
 http://www.panda3d.org/
 http://www.ogre3d.org/
-http://www.crystalspace3d.org/main/Main_Page
+http://sourceforge.net/projects/nebuladevice/
 http://irrlicht.sourceforge.net/
+http://www.crystalspace3d.org/main/Main_Page
+http://www.delta3d.org/
 http://www.openscenegraph.org/projects/osg
 http://www.cafu.de/
 http://www.yake.org/
+http://www.visualizationlibrary.org/documentation/index.html
 
