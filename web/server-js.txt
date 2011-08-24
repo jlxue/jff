@@ -1,0 +1,13 @@
+http://nodejs.org/
+http://ringojs.org/
+http://narwhaljs.org/
+
+http://www.commonjs.org/impl/
+
+http://en.wikipedia.org/wiki/Document-oriented_database
+
+DB:
+CouchDB
+MongoDB
+Redis
+FleetDB

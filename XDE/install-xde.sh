@@ -114,7 +114,7 @@ i iceowl-extension xul-ext-dispmua icedove-quotecolors
 # Provider for Microsoft Exchange: https://addons.mozilla.org/en-US/thunderbird/addon/195279/
 
 ### Office
-i -R openoffice.org
+i -R libreoffice libreoffice-gtk
 
 ### MS Windows compatibility
 i wine cifs-utils
