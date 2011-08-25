@@ -9,7 +9,7 @@ ConsoleKit 笔记
 
 重启、休眠、挂起、挂载移动存储，都存在类似的问题。
 
-ConsoleKit 就是为了解决这个问题，一个用户登录进度，
+ConsoleKit 就是为了解决这个问题，一个用户登录进来，
 开始一个会话(session)，ConsoleKit 判断这个 session
 是否直接接触硬件，是的话给予这个 session 独特权限，
 普通用户通过 D-Bus 机制发一个请求，policykit 判断
