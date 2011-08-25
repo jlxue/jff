@@ -175,6 +175,7 @@ i shorewall-init    # it depends shorewall
 debsums_already_installed=$(is_installed debsums)
 aide_already_installed=$(is_installed aide)
 
+i debtags
 i debsums   #aide samhain fcheck
 
 
