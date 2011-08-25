@@ -1,0 +1,148 @@
+ConsoleKit 笔记
+
+用 Linux 作为桌面系统 OS 后，直接接触计算机的普通用户
+如何关闭计算机成了一个问题，su、sudo 不行，因为要输入
+密码，不符合普通用户使用习惯。suid 程序不行，因为不能
+限制远程登录的用户。把可以关机的用户名写入配置文件也
+不行，因为在那个配置文件里的用户也许当前没有物理接触
+这台机器。
+
+重启、休眠、挂起、挂载移动存储，都存在类似的问题。
+
+ConsoleKit 就是为了解决这个问题，一个用户登录进度，
+开始一个会话(session)，ConsoleKit 判断这个 session
+是否直接接触硬件，是的话给予这个 session 独特权限，
+普通用户通过 D-Bus 机制发一个请求，policykit 判断
+出这个请求来自特权 session，于是就执行特权操作。
+
+下面的讲解以 Debian 上软件包为准，consolekit-0.4.5-1,
+libpam-ck-connector-0.4.5-1, libck-connector0-0.4.5-1,
+这三个软件包来自同一个源代码包 consolekit-0.4.5-1.
+
+
+
+ConsoleKit 有三种机制建立 session：
+(1) /etc/pam.d/common-session
+session optional            pam_ck_connector.so nox11 debug
+
+用户通过 login, ssh 登录都会执行 pam_ck_connector.so，
+源码在 consolekit-0.4.5/pam-ck-connector/pam-ck-connector.c.
+这个 pam module 会以探测到的参数，比如 TTY，CKCON_TTY 等
+创建一个 session。 由于这个 pam 配置指定了 nox11，这个
+pam module 在 X11 环境下不会创建 session，X11 环境下
+用下面两种方式之一创建 session。
+
+此 pam module 的 log 会输出到 /var/log/auth.log.
+
+(2) 支持 consolekit 机制的 Display Manager 比如 GDM，它会
+调用 consolekit 的库去创建 session。
+
+(3) 不直接支持 consolekit 机制的 Display Manager 比如 slim，
+通过 /etc/X11/Xsession.d/90consolekit 调用 /usr/bin/ck-launch-session
+创建 session，它的源码在 consolekit-0.4.5/tools/ck-launch-session.c。
+
+这是在启动系统用 slim 登录入 X11 环境下的会话信息(这个会话信息是不正确的,
+active 和 is-local 都应该是 TRUE).
+
+$ ck-list-sessions 
+Session2:
+    unix-user = '1000'
+    realname = 'dieken'
+    seat = 'Seat3'
+    session-type = ''
+    active = FALSE
+    x11-display = ':0.0'
+    x11-display-device = '/dev/tty7'
+    display-device = ''
+    remote-host-name = ''
+    is-local = FALSE
+    on-since = '2011-08-24T12:58:42.150943Z'
+    login-session-id = ''
+
+字段的解释： 
+seat 是一个虚拟的座位号，能直接接触硬件的会话，比如在 Linux 控制台下登录
+文件界面，或者直接使用本地 X11 服务，座位号都是 Seat1 (上面的输出不正确
+，因为 slim 和 consolekit >= 0.4.2配合有问题)，其它情况下，每登录一次，
+座位号递增。
+
+session-type 意义不明。
+
+active 指当前使用的终端设备文件是否被使用中，比如正在使用本地图形界面，
+那么设备是 /dev/tty7，active 是 TRUE。
+
+display-device 指终端下的显式设备，如果在 x11 环境下，其值被赋值给
+x11-display-device，同时 display-device 被置空。
+
+remote-host-name 是远程登录时服务器的主机名，比如 ssh 登录。
+
+is-local，当 remote-host-name 为空时，is-local 会被 pam_ck_connector
+模块设置为 TRUE，这个特性依赖于远程登录的 pam 设置必需设置主机名，这样
+才能保证本地终端登录时 is-local 为 TRUE.
+
+
+
+session 的信息是保存在 /usr/sbin/console-kit-daemon 服务中的，这个服务
+是被 dbus-daemon 启动：
+/usr/share/dbus-1/system-services/org.freedesktop.ConsoleKit.service
+这个服务的日志在 /var/log/daemon.log 以及 /var/log/syslog 中。
+
+
+
+创建会话有两种方式，一个是带参数的，pam_ck_connector 模块用的这个方式，
+另一种是不带参数的，被 ck-launch-session 使用，具体到代码上，就是调用
+了不同的函数请求 console-kit-daemon 服务，这个进程间通讯是基于 D-Bus 的。
+这两个函数对应到服务端的两个函数：
+consolekit-0.4.5/src/ck-manager.c
+    ck_manager_open_session(.....)
+    ck_manager_open_session_with_parameters(....)
+两个函数会走到到同一个函数： create_session_for_sender().
+
+create_session_for_sender()  [ck-manager.c]
+  ck_session_leader_set_override_parameters()
+  保存额外传入的参数
+  generate_session_for_leader()
+    ck_session_leader_collect_parameters()
+    这个函数执行外部程序 /usr/lib/ConsoleKit/ck-collect-session-info
+    --uid xxx --pid yyy (pid 是发送 session 创建请求的客户端的 pid，比如
+    ck-launch-session, uid 是运行那个进程的 uid)，这个进程输出一些参数
+    信息到标准输出，这个信息被用于 collect_parameters_cb() 回调函数。
+
+
+ck-collect-session-info 的源码在consolekit-0.4.5/tools/ck-collect-session-info.c.
+main()
+  collect_session_info()
+    fill_session_info()
+    login_session_id 取自 /proc/$pid/sessionid.
+    print_session_info()
+    输出信息到标准输出。
+
+
+collect_parameters_cb()
+  verify_and_open_session_for_leader()
+  如果指定的参数不包含 is-local，那么根据 login_session_id 找已有的
+  session，取它的 is-local 设置。 所以上面的 bug 可以这么绕过去：
+  在终端下登录一下，再登录 X11 环境，因为这些进程有相同的
+  login_session_id。
+
+  open_session_for_leader()
+    ck_session_new_with_parameters()
+    find_seat_for_session()
+      如果 x11_display, x11_display_device 都非空，并且 remote_host_name
+      为空，is_local 为 TRUE，那么这是本地 x11 登录;
+
+      如果 x11_display, x11_display_device 都为空，并且 display_device
+      非空，remote_host_name 为空，is_local 为 TRUE，那么这是本地终端登录。
+
+      对于这两种本地登录，赋予静态座位号，Seat1，否则创建动态座位号, SeatN.
+
+    ck_seat_add_session()
+      g_signal_connect_object (session, "activate", G_CALLBACK (session_activate), seat, 0);
+      maybe_update_active_session()
+        对于静态 seat，检查其是否 active。
+
+
+增加删除会话时会触发事件，执行 /etc/ConsoleKit/*.d 以及
+/usr/lib/ConsoleKit/*.d 中的程序，并记录信息到 /var/log/ConsoleKit/history
+以及 /var/run/ConsoleKit/database.
+
+
