@@ -106,6 +106,7 @@ create_session_for_sender()  [ck-manager.c]
     --uid xxx --pid yyy (pid 是发送 session 创建请求的客户端的 pid，比如
     ck-launch-session, uid 是运行那个进程的 uid)，这个进程输出一些参数
     信息到标准输出，这个信息被用于 collect_parameters_cb() 回调函数。
+    在 consolekit-0.4.2, 这个外部程序中直接设置 is_local 的语句被去掉了。
 
 
 ck-collect-session-info 的源码在consolekit-0.4.5/tools/ck-collect-session-info.c.
@@ -137,8 +138,11 @@ collect_parameters_cb()
 
     ck_seat_add_session()
       g_signal_connect_object (session, "activate", G_CALLBACK (session_activate), seat, 0);
+        session_activate() 目前只支持 static seat.
       maybe_update_active_session()
-        对于静态 seat，检查其是否 active。
+        对于static seat，检查其是否 active。
+      这两个函数对 seat 的限制，导致 is_local 为 FALSE 时，active 始终为
+      FALSE，导致普通用户无法直接关机、重启休眠等。
 
 
 增加删除会话时会触发事件，执行 /etc/ConsoleKit/*.d 以及
