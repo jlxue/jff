@@ -114,6 +114,8 @@ main()
   collect_session_info()
     fill_session_info()
     login_session_id 取自 /proc/$pid/sessionid.
+        这个地方有 bug，Debian 上这个文件内容都是 32bit max_ulong(表示未设置)，代码将
+        它与 native max_ulong 比较，导致 64bit 机器上取到错误的 session id.
     print_session_info()
     输出信息到标准输出。
 
@@ -123,7 +125,7 @@ collect_parameters_cb()
   如果指定的参数不包含 is-local，那么根据 login_session_id 找已有的
   session，取它的 is-local 设置。 所以上面的 bug 可以这么绕过去：
   在终端下登录一下，再登录 X11 环境，因为这些进程有相同的
-  login_session_id。
+  login_session_id(这是 64bit 机器上的 bug，见上面)。
 
   open_session_for_leader()
     ck_session_new_with_parameters()
