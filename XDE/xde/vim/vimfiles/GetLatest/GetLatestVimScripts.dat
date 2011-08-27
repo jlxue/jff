@@ -15,7 +15,7 @@ ScriptID SourceID Filename
 1127 3890 vim2ansi
 1218 14455 The NERD Commenter
 1238 8603 Mark
-1344 4552 switchtags.vim
+#1344 4552 switchtags.vim
 1502 15362 Vimball
 1506 9277 LargeFile
 1708 15376 FencView.vim
