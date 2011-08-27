@@ -55,7 +55,7 @@ sub run {
     my $executors = _resolve_executors($ruleset);
 
     # _resolve_executors() also contains necessary validation
-    return if exists $options{VALIDATE_ONLY} && $options{VALIDATE_ONLY};
+    return if $options{VALIDATE_ONLY};
 
     POE::Session->create(
         inline_states => {
@@ -92,7 +92,7 @@ sub _validate_dependent_rules_exist {
         my $depends = $rule->depends;
 
         for my $dep (@$depends) {
-            confess "Rule \"$name\" depends non-exist rule \"$dep\"" unless
+            confess "Rule \"$name\" depends on non-exist rule \"$dep\"" unless
                     exists $ruleset->{$dep};
         }
     }
@@ -119,7 +119,8 @@ sub _validate_circular_dependency {
         }
 
         if (! $got && keys(%$rulegraph) > 0) {
-            confess "Found circular dependency:\n" . Dumper($rulegraph);
+            confess "Found circular dependency:\n" .
+                    Data::Dumper->Dump([$rulegraph], [qw/rulegraph/]);
         }
     }
 }
@@ -163,12 +164,15 @@ sub _resolve_executors {
 sub _on_start {
     my ($kernel, $heap, $ruleset, $executors, $options) = @_[KERNEL, HEAP, ARG0, ARG1, ARG2];
 
-    $heap->{states} = {};
     $heap->{ruleset} = $ruleset;
     $heap->{rulegraph} = _construct_rule_graph($ruleset);
     $heap->{executors} = $executors;
     $heap->{options} = $options;
-    $heap->{child_count} = 0;
+    $heap->{states} = {};
+    $heap->{children_by_wid} = {};
+    $heap->{children_by_pid} = {};
+    $heap->{pid_to_name} = {};
+    $heap->{pid_to_timer} = {};
 
 
     $options->{MAX_CONCURRENT} = DEFAULT_MAX_CONCURRENT unless
@@ -247,8 +251,6 @@ sub _on_child_exit {
         delete $heap->{pid_to_timer}{$pid};
     }
 
-    --$heap->{child_count};
-
     $state->end_time(time());
     $state->exit_code($exit_code);
 
@@ -262,14 +264,13 @@ sub _run_executors {
     my ($kernel, $heap) = @_;
 
     my $options = $heap->{options};
-    my $max_count = $options->{MAX_CONCURRENT} - $heap->{child_count};
-    my $child_count = 0;
+    my $max_count = $options->{MAX_CONCURRENT} - keys(%{ $heap->{children_by_pid} });
+    my $ruleset = $heap->{ruleset};
+    my $executors = $heap->{executors};
     my $states = $heap->{states};
     my $rulegraph = $heap->{rulegraph};
-    my $executors = $heap->{executors};
-    my $ruleset = $heap->{ruleset};
 
-    while ($child_count < $max_count && keys(%$rulegraph) > 0) {
+    while ($max_count > 0 && keys(%$rulegraph) > 0) {
         for my $name (keys %$rulegraph) {
             ## topological sort, whether this node has no predecessor
             next unless keys %{ $rulegraph->{$name} } == 0;
@@ -279,7 +280,7 @@ sub _run_executors {
 
             my $rule = $ruleset->{$name};
             my %exit_codes;
-            for my $dep (@{ $rule->depends() }) {
+            for my $dep (@{ $rule->depends }) {
                 $exit_codes{$dep} = $states->{$dep}->exit_code();
             }
 
@@ -295,20 +296,16 @@ sub _run_executors {
             $heap->{children_by_pid}{$child->PID} = $child;
             $heap->{pid_to_name}{$child->PID} = $name;
 
-            if ($rule->maxtime() > 0) {
+            if ($rule->maxtime > 0) {
                 $heap->{pid_to_timer}{$child->PID} =
                     $kernel->delay_set("child_timeout",
                                        $rule->maxtime,
                                        $child);
             }
 
-            last if ++$child_count >= $max_count;
+            last if --$max_count == 0;
         }
     }
-
-    $heap->{child_count} += $child_count;
-
-    return $child_count;
 }
 
 
