@@ -75,6 +75,10 @@ Server
     POE::XS::Queue::Array
     Mojo::Server::Hypnotoad
     Twiggy
+    IO::Async
+    EV
+    AnyEvent
+    Coro
 
 
 数据库访问
@@ -327,8 +331,6 @@ Inside-out class
 
 Task::Kensho    推荐模块
 
-AnyEvent
-Coro
 
 ========================================================
 Apache::DProf
@@ -383,6 +385,7 @@ Hash::Util
 HOP::Lexer
 Imager
 Inline
+IO::All
 IO::AtomicFile
 IO::CaptureOutput
 JSON::XS
