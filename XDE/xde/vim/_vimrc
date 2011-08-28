@@ -213,18 +213,17 @@ set backupcopy+=breakhardlink
 set wildmode=list:full
 set wildmenu
 
-" text auto formation mode.
-" r -> <ENTER> then add comment leader
-" o -> o/O then add comment leader
-set formatoptions+=tcrqvmMB
+set formatoptions+=tcroqvlmMB
+set autoindent smartindent
 
 set textwidth=72
+set colorcolumn=+1
 set expandtab
 set tabstop=4
 set shiftwidth=4
 set smarttab
-"set cinoptions=t0,:0,(0,g0,j1
-set cinoptions=t0,:0,g0,j1
+"set cinoptions=t0,:0,(0,g0,j1,J1
+set cinoptions=t0,:0,g0,j1,J1
 set linespace=2
 
 "set guifont=Bitstream\ Vera\ Sans\ Mono\ 10,Monospace\ 10,Courier\ New\ 11
