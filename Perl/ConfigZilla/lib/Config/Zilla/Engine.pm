@@ -12,8 +12,8 @@ use Module::Load;
 use POE qw/Wheel::Run/;
 use POSIX ();
 use Try::Tiny;
+use YAML::Tiny;
 
-use Config::Zilla::Constants qw/:EXIT_CODE/;
 use Config::Zilla::ExecutorState;
 use Config::Zilla::Rule;
 use Config::Zilla::RuleExecutor;
@@ -21,8 +21,6 @@ use constant {
     DEFAULT_MAX_TIME        => 30 * 60,     # 0.5 hour
     DEFAULT_MAX_CONCURRENT  => 5,           # max child processes
 };
-
-our $VERSION = 0.1;
 
 
 has 'ruleset'       => (is => 'ro', isa => 'HashRef[Config::Zilla::Rule]',
@@ -275,8 +273,7 @@ sub _run_executors {
             ## topological sort, whether this node has no predecessor
             next unless keys %{ $rulegraph->{$name} } == 0;
 
-            $states->{$name} = Config::Zilla::ExecutorState->new(
-                    exit_code => EC_FAIL_UNKNOWN);
+            $states->{$name} = Config::Zilla::ExecutorState->new();
 
             my $rule = $ruleset->{$name};
             my %exit_codes;

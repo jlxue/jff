@@ -1,0 +1,9 @@
+libdist-zilla-perl
+libdist-zilla-plugin-podspellingtests-perl
+libdist-zilla-plugin-podweaver-perl
+libdist-zilla-plugin-prepender-perl
+
+libany-moose-perl
+libpoe-perl
+libtry-tiny-perl
+libyaml-tiny-perl
