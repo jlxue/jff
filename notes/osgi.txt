@@ -1,0 +1,6 @@
+OSGi containers:
+
+http://felix.apache.org/site/index.html
+http://www.eclipse.org/equinox/
+http://www.knopflerfish.org/
+
