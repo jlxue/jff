@@ -4,6 +4,7 @@ libdist-zilla-plugin-podweaver-perl
 libdist-zilla-plugin-prepender-perl
 
 libany-moose-perl
+liblog-log4perl-perl
 libpoe-perl
 libtry-tiny-perl
 libyaml-tiny-perl

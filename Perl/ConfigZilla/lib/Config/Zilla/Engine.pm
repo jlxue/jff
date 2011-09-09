@@ -8,6 +8,7 @@ use Data::Dumper;
 use File::Spec;
 use IO::File;
 use List::Util qw/max sum/;
+use Log::Log4perl qw(:easy);
 use Module::Load;
 use POE qw/Wheel::Run/;
 use POSIX ();
@@ -29,7 +30,7 @@ has 'ruleset'       => (is => 'ro', isa => 'HashRef[Config::Zilla::Rule]',
 sub addRule {
     my ($self, $rule) = @_;
 
-    confess "Invalid argument" unless blessed $rule && $rule->isa('Config::Zilla::Rule');
+    LOGCONFESS "Invalid argument" unless blessed $rule && $rule->isa('Config::Zilla::Rule');
 
     my $ruleset = $self->ruleset;
     my $name = $rule->name;
@@ -37,10 +38,12 @@ sub addRule {
     if (exists $ruleset->{$name}) {
         my $r = $ruleset->{$name};
 
-        confess "Conflict rule names: $name ($r->shortdesc)";
+        LOGCONFESS "Conflict rule names: $name ($r->shortdesc)";
     }
 
     $ruleset->{$name} = $rule;
+
+    DEBUG "Added rule $name";
 }
 
 
@@ -53,7 +56,10 @@ sub run {
     my $executors = _resolve_executors($ruleset);
 
     # _resolve_executors() also contains necessary validation
-    return if $options{VALIDATE_ONLY};
+    if ($options{VALIDATE_ONLY}) {
+        INFO "Validate only, not really run engine";
+        return 1;
+    }
 
     POE::Session->create(
         inline_states => {
@@ -71,11 +77,15 @@ sub run {
     );
 
     POE::Kernel->run();
+
+    return 1;
 }
 
 
 sub _validate {
     my ($ruleset) = @_;
+
+    DEBUG "Validating rules...";
 
     _validate_dependent_rules_exist($ruleset);
 
@@ -90,7 +100,7 @@ sub _validate_dependent_rules_exist {
         my $depends = $rule->depends;
 
         for my $dep (@$depends) {
-            confess "Rule \"$name\" depends on non-exist rule \"$dep\"" unless
+            LOGCONFESS "Rule \"$name\" depends on non-exist rule \"$dep\"" unless
                     exists $ruleset->{$dep};
         }
     }
@@ -117,7 +127,7 @@ sub _validate_circular_dependency {
         }
 
         if (! $got && keys(%$rulegraph) > 0) {
-            confess "Found circular dependency:\n" .
+            LOGCONFESS "Found circular dependency:\n" .
                     Data::Dumper->Dump([$rulegraph], [qw/rulegraph/]);
         }
     }
@@ -146,6 +156,8 @@ sub _resolve_executors {
     my ($ruleset) = @_;
     my %executors;
 
+    DEBUG "Resolving executors...";
+
     while (my ($name, $rule) = each %$ruleset) {
         my $executor = $rule->executor;
         # XXX: is it better to call ref() to get the class name?
@@ -161,6 +173,8 @@ sub _resolve_executors {
 
 sub _on_start {
     my ($kernel, $heap, $ruleset, $executors, $options) = @_[KERNEL, HEAP, ARG0, ARG1, ARG2];
+
+    INFO "On engine start";
 
     $heap->{ruleset} = $ruleset;
     $heap->{rulegraph} = _construct_rule_graph($ruleset);
@@ -193,6 +207,8 @@ sub _on_start {
 sub _on_stop {
     my ($kernel, $heap) = @_[KERNEL, HEAP];
 
+    INFO "On engine stop";
+
     $kernel->delay("timeout");
     $kernel->alarm_remove_all();
 }
@@ -200,6 +216,8 @@ sub _on_stop {
 
 sub _on_timeout {
     my ($kernel, $heap) = @_[KERNEL, HEAP];
+
+    WARN "On engine timeout";
 }
 
 
@@ -209,7 +227,7 @@ sub _on_child_stdout {
     my $pid = $child->PID;
     my $name = $heap->{pid_to_name}{$pid};
 
-    print "$name($pid): $line\n";
+    INFO "$name($pid): $line\n";
 }
 
 
@@ -219,12 +237,16 @@ sub _on_child_stderr {
     my $pid = $child->PID;
     my $name = $heap->{pid_to_name}{$pid};
 
-    print STDERR "$name($pid): $line\n";
+    ERROR "$name($pid): $line\n";
 }
 
 
 sub _on_child_timeout {
     my ($kernel, $heap, $child) = @_[KERNEL, HEAP, ARG0];
+    my $pid = $child->PID;
+    my $name = $heap->{pid_to_name}{$pid};
+
+    WARN "On child timeout: $name($pid)";
 
     if ($child->kill()) {
         # TODO:
@@ -239,6 +261,8 @@ sub _on_child_exit {
     my $child = $heap->{children_by_pid}{$pid};
     my $name = $heap->{pid_to_name}{$pid};
     my $state = $heap->{states}{$name};
+
+    INFO "On child exit: $name($pid)";
 
     delete $heap->{children_by_wid}{$child->ID};
     delete $heap->{children_by_pid}{$pid};
@@ -267,6 +291,8 @@ sub _run_executors {
     my $executors = $heap->{executors};
     my $states = $heap->{states};
     my $rulegraph = $heap->{rulegraph};
+
+    INFO "$max_count executors to be run, ", keys(%$rulegraph), " unfinished jobs";
 
     while ($max_count > 0 && keys(%$rulegraph) > 0) {
         for my $name (keys %$rulegraph) {
@@ -312,7 +338,7 @@ sub _run_executor_in_child_process {
     untie *STDIN;
 
     my $nullfh = IO::File->new(File::Spec->devnull);
-    open STDIN, '<&', $nullfh->fileno() or confess "Can't redirect stdin($$): $!";
+    open STDIN, '<&', $nullfh->fileno() or LOGCONFESS "Can't redirect stdin($$): $!";
 
     POSIX::_exit($executor->execute($options, $exit_codes));
 }
