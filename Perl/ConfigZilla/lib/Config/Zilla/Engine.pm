@@ -16,12 +16,9 @@ use Try::Tiny;
 use YAML::Tiny;
 
 use Config::Zilla::ExecutorState;
+use Config::Zilla::Options;
 use Config::Zilla::Rule;
 use Config::Zilla::RuleExecutor;
-use constant {
-    DEFAULT_MAX_TIME        => 30 * 60,     # 0.5 hour
-    DEFAULT_MAX_CONCURRENT  => 5,           # max child processes
-};
 
 
 has 'ruleset'       => (is => 'ro', isa => 'HashRef[Config::Zilla::Rule]',
@@ -30,7 +27,8 @@ has 'ruleset'       => (is => 'ro', isa => 'HashRef[Config::Zilla::Rule]',
 sub addRule {
     my ($self, $rule) = @_;
 
-    LOGCONFESS "Invalid argument" unless blessed $rule && $rule->isa('Config::Zilla::Rule');
+    LOGCONFESS "Invalid argument" unless blessed $rule &&
+        $rule->isa('Config::Zilla::Rule');
 
     my $ruleset = $self->ruleset;
     my $name = $rule->name;
@@ -44,21 +42,26 @@ sub addRule {
     $ruleset->{$name} = $rule;
 
     if (get_logger()->is_debug) {
-        DEBUG "Added rule $name, depends=", @{$rule->depends}, ", maxtime=", $rule->maxtime;
+        DEBUG "Added rule $name, depends=",
+            @{$rule->depends}, ", maxtime=", $rule->maxtime;
     }
 }
 
 
 sub run {
-    my ($self, %options) = @_;
+    my ($self, $options) = @_;
     my $ruleset = $self->ruleset;
+
+    $options = Config::Zilla::Options->new unless defined $options;
+    LOGCONFESS "Invalid argument" unless blessed $options &&
+        $options->isa('Config::Zilla::Options');
 
     _validate($ruleset);
 
     my $executors = _resolve_executors($ruleset);
 
     # _resolve_executors() also contains necessary validation
-    if ($options{VALIDATE_ONLY}) {
+    if ($options->validate_mode) {
         INFO "Validate only, not really run engine";
         return 1;
     }
@@ -75,10 +78,10 @@ sub run {
             child_timeout   => \&_on_child_timeout,
         },
 
-        args => [$ruleset, $executors, \%options],
+        args => [$ruleset, $executors, $options],
     );
 
-    POE::Kernel->run();
+    POE::Kernel->run;
 
     return 1;
 }
@@ -102,8 +105,8 @@ sub _validate_dependent_rules_exist {
         my $depends = $rule->depends;
 
         for my $dep (@$depends) {
-            LOGCONFESS "Rule \"$name\" depends on non-exist rule \"$dep\"" unless
-                    exists $ruleset->{$dep};
+            LOGCONFESS "Rule \"$name\" depends on non-exist rule \"$dep\""
+                unless exists $ruleset->{$dep};
         }
     }
 }
@@ -174,7 +177,8 @@ sub _resolve_executors {
 
 
 sub _on_start {
-    my ($kernel, $heap, $ruleset, $executors, $options) = @_[KERNEL, HEAP, ARG0, ARG1, ARG2];
+    my ($kernel, $heap, $ruleset, $executors, $options) =
+        @_[KERNEL, HEAP, ARG0, ARG1, ARG2];
 
     INFO "On engine start, ", scalar(keys %$ruleset), " rules to execute";
 
@@ -189,19 +193,21 @@ sub _on_start {
     $heap->{pid_to_timer} = {};
 
 
-    $options->{MAX_CONCURRENT} = DEFAULT_MAX_CONCURRENT unless
-            exists $options->{MAX_CONCURRENT} && $options->{MAX_CONCURRENT} > 0;
-    INFO "Allow at most $options->{MAX_CONCURRENT} concurrent executors";
-
-    unless (exists $options->{MAX_TIME} && $options->{MAX_TIME} > 0) {
-        # pass 0 to sum() to avoid returning undef when no rule is specified
-        $options->{MAX_TIME} = max(DEFAULT_MAX_TIME,
-                                sum(0, map { $_->maxtime() } values %$ruleset));
+    if ($options->concurrent > 0) {
+        INFO "Allow at most ", $options->concurrent, " concurrent executors";
+    } else {
+        INFO "Allow unlimited concurrent executors";
     }
 
+    # pass 0 to sum() to avoid returning undef when no rule is specified
+    $options->maxtime(max($options->maxtime,
+                          sum(0, map { $_->maxtime } values %$ruleset)));
 
-    INFO "Schedule engine timeout timer to $options->{MAX_TIME} seconds later";
-    $kernel->delay("timeout", $options->{MAX_TIME});
+
+    if ($options->maxtime > 0) {
+        INFO "Schedule engine timeout timer to ", $options->maxtime, " seconds later";
+        $kernel->delay("timeout", $options->maxtime);
+    }
 
 
     _run_executors($kernel, $heap);
@@ -220,7 +226,7 @@ sub _on_timeout {
 
     WARN "On engine timeout";
 
-    $kernel->alarm_remove_all();
+    $kernel->alarm_remove_all;
 }
 
 
@@ -251,7 +257,7 @@ sub _on_child_timeout {
 
     WARN "On child timeout: $name($pid)";
 
-    if ($child->kill()) {
+    if ($child->kill) {
         # TODO:
     }
 
@@ -260,7 +266,8 @@ sub _on_child_timeout {
 
 
 sub _on_child_exit {
-    my ($kernel, $heap, $sig, $pid, $exit_code) = @_[KERNEL, HEAP, ARG0, ARG1, ARG2];
+    my ($kernel, $heap, $sig, $pid, $exit_code) =
+        @_[KERNEL, HEAP, ARG0, ARG1, ARG2];
     my $child = $heap->{children_by_pid}{$pid};
     my $name = $heap->{pid_to_name}{$pid};
     my $state = $heap->{states}{$name};
@@ -293,24 +300,35 @@ sub _run_executors {
     my $executors = $heap->{executors};
     my $states = $heap->{states};
     my $rulegraph = $heap->{rulegraph};
-    my $max_count = min($options->{MAX_CONCURRENT} - keys(%{ $heap->{children_by_pid} }),
-                        scalar(keys(%$rulegraph)));
+
+    my $unapplied_count = keys %$rulegraph;
+    my $max_count = $unapplied_count;
+    my $running_count = keys %{ $heap->{children_by_pid} };
+    my $newly_count = 0;
+
+    if ($options->concurrent > 0) {
+        $max_count = min($options->concurrent - $running_count, $max_count);
+    }
 
     INFO "$max_count executors to be run, ",
-        scalar(keys(%{ $heap->{children_by_pid} })), " running executors, ",
-        scalar(keys(%$rulegraph)), " unapplied rules";
+        "$running_count running executors, ",
+        "$unapplied_count unapplied rules";
 
     while ($max_count > 0 && keys(%$rulegraph) > 0) {
+        my $got = 0;
+
         for my $name (keys %$rulegraph) {
             ## topological sort, whether this node has no predecessor
             next unless keys %{ $rulegraph->{$name} } == 0;
+            ++$got;
+            ++$newly_count;
 
-            $states->{$name} = Config::Zilla::ExecutorState->new();
+            $states->{$name} = Config::Zilla::ExecutorState->new;
 
             my $rule = $ruleset->{$name};
             my %exit_codes;
             for my $dep (@{ $rule->depends }) {
-                $exit_codes{$dep} = $states->{$dep}->exit_code();
+                $exit_codes{$dep} = $states->{$dep}->exit_code;
             }
 
             my $child = POE::Wheel::Run->new(
@@ -339,12 +357,16 @@ sub _run_executors {
 
             last if --$max_count == 0;
         }
+
+        last if $got == 0;
     }
 
     if (keys(%$rulegraph) == 0 && keys(%{ $heap->{children_by_pid} }) == 0) {
         INFO "No job left, clear engine timeout";
         $kernel->delay("timeout");
     }
+
+    return $newly_count;
 }
 
 
@@ -354,7 +376,7 @@ sub _run_executor_in_child_process {
     untie *STDIN;
 
     my $nullfh = IO::File->new(File::Spec->devnull);
-    open STDIN, '<&', $nullfh->fileno() or LOGCONFESS "Can't redirect stdin($$): $!";
+    open STDIN, '<&', $nullfh->fileno or LOGCONFESS "Can't redirect stdin($$): $!";
 
     my $exit_code = 0;
 
@@ -372,7 +394,7 @@ sub _run_executor_in_child_process {
     if ($exit_code == 0) {
         try {
             INFO "Child executing....";
-            if (! $executor->execute()) {
+            if (! $executor->execute) {
                 ERROR "Failed to execute rule";
                 $exit_code = 2;
             }
