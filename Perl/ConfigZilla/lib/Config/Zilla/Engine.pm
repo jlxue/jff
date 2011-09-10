@@ -197,6 +197,7 @@ sub _on_start {
     }
 
 
+    INFO "Schedule engine timeout timer to $options->{MAX_TIME} seconds later";
     $kernel->delay("timeout", $options->{MAX_TIME});
 
 
@@ -208,9 +209,6 @@ sub _on_stop {
     my ($kernel, $heap) = @_[KERNEL, HEAP];
 
     INFO "On engine stop";
-
-    $kernel->delay("timeout");
-    $kernel->alarm_remove_all();
 }
 
 
@@ -218,6 +216,8 @@ sub _on_timeout {
     my ($kernel, $heap) = @_[KERNEL, HEAP];
 
     WARN "On engine timeout";
+
+    $kernel->alarm_remove_all();
 }
 
 
@@ -321,6 +321,8 @@ sub _run_executors {
             $heap->{pid_to_name}{$child->PID} = $name;
 
             if ($rule->maxtime > 0) {
+                INFO "Set child timeout $rule->maxtime seconds for $name($child->PID)";
+
                 $heap->{pid_to_timer}{$child->PID} =
                     $kernel->delay_set("child_timeout",
                                        $rule->maxtime,
@@ -329,6 +331,11 @@ sub _run_executors {
 
             last if --$max_count == 0;
         }
+    }
+
+    if (keys(%$rulegraph) == 0 && keys(%{ $heap->{children_by_pid} }) == 0) {
+        INFO "No jobs left, clear engine timeout";
+        $kernel->delay("timeout");
     }
 }
 
