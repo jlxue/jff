@@ -43,7 +43,9 @@ sub addRule {
 
     $ruleset->{$name} = $rule;
 
-    DEBUG "Added rule $name";
+    if (get_logger()->is_debug) {
+        DEBUG "Added rule $name, depends=", @{$rule->depends}, ", maxtime=", $rule->maxtime;
+    }
 }
 
 
