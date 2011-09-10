@@ -7,7 +7,7 @@ use Carp qw/cluck/;
 use Data::Dumper;
 use File::Spec;
 use IO::File;
-use List::Util qw/max sum/;
+use List::Util qw/max min sum/;
 use Log::Log4perl qw(:easy);
 use Module::Load;
 use POE qw/Wheel::Run/;
@@ -63,9 +63,9 @@ sub run {
 
     POE::Session->create(
         inline_states => {
-            _start  => &_on_start,
-            _stop   => &_on_stop,
-            timeout => &_on_timeout,
+            _start  => \&_on_start,
+            _stop   => \&_on_stop,
+            timeout => \&_on_timeout,
 
             child_stdout    => \&_on_child_stdout,
             child_stderr    => \&_on_child_stderr,
@@ -286,13 +286,14 @@ sub _run_executors {
     my ($kernel, $heap) = @_;
 
     my $options = $heap->{options};
-    my $max_count = $options->{MAX_CONCURRENT} - keys(%{ $heap->{children_by_pid} });
     my $ruleset = $heap->{ruleset};
     my $executors = $heap->{executors};
     my $states = $heap->{states};
     my $rulegraph = $heap->{rulegraph};
+    my $max_count = min($options->{MAX_CONCURRENT} - keys(%{ $heap->{children_by_pid} }),
+                        scalar(keys(%$rulegraph)));
 
-    INFO "$max_count executors to be run, ", keys(%$rulegraph), " unfinished jobs";
+    INFO "$max_count executors to be run, ", scalar(keys(%$rulegraph)), " unfinished jobs";
 
     while ($max_count > 0 && keys(%$rulegraph) > 0) {
         for my $name (keys %$rulegraph) {
