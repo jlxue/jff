@@ -17,5 +17,20 @@ has 'lock_dir'      => (is => 'rw', isa => 'Str', default => CUR_DIR);
 has 'state_dir'     => (is => 'rw', isa => 'Str', default => CUR_DIR);
 has 'backup_dir'    => (is => 'rw', isa => 'Str', default => CUR_DIR);
 
+sub build_lock_file {
+    confess "Bad argument!" unless @_ == 2;
+    File::Spec->catfile($_[0]->lock_dir, $_[1]);
+}
+
+sub build_state_file {
+    confess "Bad argument!" unless @_ == 2;
+    File::Spec->catfile($_[0]->state_dir, $_[1]);
+}
+
+sub build_backup_file {
+    confess "Bad argument!" unless @_ == 2;
+    File::Spec->catfile($_[0]->backup_dir, $_[1]);
+}
+
 no Any::Moose;
 __PACKAGE__->meta->make_immutable();

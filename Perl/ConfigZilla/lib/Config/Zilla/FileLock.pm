@@ -31,7 +31,7 @@ sub new {
         POSIX::write($fd, $s, length($s));
         POSIX::close($fd);
     } else {
-        LOGCLUCK("Can't lock $path: $!");
+        WARN("Can't exclusively create file \"$path\": $!");
     }
 
     bless $self, $class;
