@@ -85,7 +85,7 @@ sub run {
 sub _validate {
     my ($ruleset) = @_;
 
-    DEBUG "Validating rules...";
+    INFO "Validating rules...";
 
     _validate_dependent_rules_exist($ruleset);
 
@@ -174,7 +174,7 @@ sub _resolve_executors {
 sub _on_start {
     my ($kernel, $heap, $ruleset, $executors, $options) = @_[KERNEL, HEAP, ARG0, ARG1, ARG2];
 
-    INFO "On engine start";
+    INFO "On engine start, ", scalar(keys %$ruleset), " rules to execute";
 
     $heap->{ruleset} = $ruleset;
     $heap->{rulegraph} = _construct_rule_graph($ruleset);
@@ -189,6 +189,7 @@ sub _on_start {
 
     $options->{MAX_CONCURRENT} = DEFAULT_MAX_CONCURRENT unless
             exists $options->{MAX_CONCURRENT} && $options->{MAX_CONCURRENT} > 0;
+    INFO "Allow $options->{MAX_CONCURRENT} maximum concurrent executors";
 
     unless (exists $options->{MAX_TIME} && $options->{MAX_TIME} > 0) {
         # pass 0 to sum() to avoid returning undef when no rule is specified
@@ -293,7 +294,9 @@ sub _run_executors {
     my $max_count = min($options->{MAX_CONCURRENT} - keys(%{ $heap->{children_by_pid} }),
                         scalar(keys(%$rulegraph)));
 
-    INFO "$max_count executors to be run, ", scalar(keys(%$rulegraph)), " unfinished jobs";
+    INFO "$max_count executors to be run, ",
+        scalar(keys(%{ $heap->{children_by_pid} })), " running executors, ",
+        scalar(keys(%$rulegraph)), " unapplied rules";
 
     while ($max_count > 0 && keys(%$rulegraph) > 0) {
         for my $name (keys %$rulegraph) {
@@ -320,10 +323,11 @@ sub _run_executors {
             $heap->{children_by_pid}{$child->PID} = $child;
             $heap->{pid_to_name}{$child->PID} = $name;
 
-            INFO "Created child $child->PID for rule $name";
+            INFO "Created child ", $child->PID, " for rule $name";
 
             if ($rule->maxtime > 0) {
-                INFO "Set child timeout $rule->maxtime seconds for $name($child->PID)";
+                INFO "Set child timeout ", $rule->maxtime,
+                    " seconds for $name(", $child->PID, ")";
 
                 $heap->{pid_to_timer}{$child->PID} =
                     $kernel->delay_set("child_timeout",
