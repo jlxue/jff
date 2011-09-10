@@ -191,7 +191,7 @@ sub _on_start {
 
     $options->{MAX_CONCURRENT} = DEFAULT_MAX_CONCURRENT unless
             exists $options->{MAX_CONCURRENT} && $options->{MAX_CONCURRENT} > 0;
-    INFO "Allow $options->{MAX_CONCURRENT} maximum concurrent executors";
+    INFO "Allow at most $options->{MAX_CONCURRENT} concurrent executors";
 
     unless (exists $options->{MAX_TIME} && $options->{MAX_TIME} > 0) {
         # pass 0 to sum() to avoid returning undef when no rule is specified
