@@ -1,9 +1,18 @@
-package Config::Zilla::Executor;
+package Config::Zilla::RuleExecutor;
 use strict;
 use warnings;
-use Any::Moose qw/Role/;
+use utf8;
+use Any::Moose;
 
-requires qw/check execute rollback/;
 
-1;
+sub prepare {
+}
 
+sub execute {
+}
+
+sub rollback {
+}
+
+no Any::Moose;
+__PACKAGE__->meta->make_immutable();

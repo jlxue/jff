@@ -1,6 +1,7 @@
 package Config::Zilla::Types;
 use strict;
 use warnings;
+use utf8;
 use Any::Moose qw/::Util::TypeConstraints/;
 
 

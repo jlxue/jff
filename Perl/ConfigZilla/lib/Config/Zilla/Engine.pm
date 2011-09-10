@@ -156,7 +156,7 @@ sub _resolve_executors {
     my ($ruleset) = @_;
     my %executors;
 
-    DEBUG "Resolving executors...";
+    INFO "Resolving executors...";
 
     while (my ($name, $rule) = each %$ruleset) {
         my $executor = $rule->executor;
@@ -164,7 +164,7 @@ sub _resolve_executors {
         $executor = $rule->meta->name . "Executor" unless defined $executor;
 
         load $executor;
-        $executors{$name} = $executor->new($rule);
+        $executors{$name} = $executor->new(rule => $rule);
     }
 
     return \%executors;
@@ -262,7 +262,7 @@ sub _on_child_exit {
     my $name = $heap->{pid_to_name}{$pid};
     my $state = $heap->{states}{$name};
 
-    INFO "On child exit: $name($pid)";
+    INFO "On child exit: $name($pid) exit_code=$exit_code";
 
     delete $heap->{children_by_wid}{$child->ID};
     delete $heap->{children_by_pid}{$pid};
@@ -320,6 +320,8 @@ sub _run_executors {
             $heap->{children_by_pid}{$child->PID} = $child;
             $heap->{pid_to_name}{$child->PID} = $name;
 
+            INFO "Created child $child->PID for rule $name";
+
             if ($rule->maxtime > 0) {
                 INFO "Set child timeout $rule->maxtime seconds for $name($child->PID)";
 
@@ -334,7 +336,7 @@ sub _run_executors {
     }
 
     if (keys(%$rulegraph) == 0 && keys(%{ $heap->{children_by_pid} }) == 0) {
-        INFO "No jobs left, clear engine timeout";
+        INFO "No job left, clear engine timeout";
         $kernel->delay("timeout");
     }
 }
@@ -348,7 +350,33 @@ sub _run_executor_in_child_process {
     my $nullfh = IO::File->new(File::Spec->devnull);
     open STDIN, '<&', $nullfh->fileno() or LOGCONFESS "Can't redirect stdin($$): $!";
 
-    POSIX::_exit($executor->execute($options, $exit_codes));
+    my $exit_code = 0;
+
+    try {
+        INFO "Child preparing....";
+        if (! $executor->prepare($options, $exit_code)) {
+            ERROR "Failed to prepare rule";
+            $exit_code = 1;
+        }
+    } catch {
+        ERROR "Caught exception when prepare rule: $_";
+        $exit_code = 255;
+    };
+
+    if ($exit_code == 0) {
+        try {
+            INFO "Child executing....";
+            if (! $executor->execute()) {
+                ERROR "Failed to execute rule";
+                $exit_code = 2;
+            }
+        } catch {
+            ERROR "Caught exception when execute rule: $_";
+            $exit_code = 255;
+        };
+    }
+
+    POSIX::_exit($exit_code);
 }
 
 
