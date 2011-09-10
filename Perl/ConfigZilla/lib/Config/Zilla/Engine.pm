@@ -522,6 +522,9 @@ sub _run_executor_in_child_process {
         };
     }
 
+    # _exit() won't call destructors and END blocks...
+    $mutex->DESTROY if defined $mutex;
+
     POSIX::_exit($exit_code);
 }
 

@@ -55,6 +55,7 @@ sub DESTROY {
     my ($self) = @_;
 
     if ($self->locked) {
+        $self->{opened} = 0;
         unlink $self->{path};
     }
 }
