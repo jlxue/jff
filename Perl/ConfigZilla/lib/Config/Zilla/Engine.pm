@@ -380,150 +380,153 @@ sub _run_executor_in_child_process {
     my $rule = $executor->rule;
     my $name = $rule->name;
 
+    #
+    # redirect stdin to /dev/null
+    #
     untie *STDIN;
-
     my $nullfh = IO::File->new(File::Spec->devnull);
     open STDIN, '<&', $nullfh->fileno or LOGCONFESS "Can't redirect stdin($$): $!";
 
-    my $mutex;
     my $exit_code = 0;
 
-    #
-    # exclusively lock
-    #
-    if (! $options->dryrun_mode) {
-        try {
-            INFO "Locking for rule $name($$)...";
+    {   # create a scope to allow "$mutex" being released automatically
+        my $mutex;
 
-            my $lock_file = $options->build_lock_file("$name.lck");
-
-            my $lock = Config::Zilla::FileLock->new($lock_file,
-                "Exclusive file lock for Config-Zilla to " .
-                    "avoid multiple instances applying " .
-                    "same rule concurrently.");
-
-            if ($lock->locked) {
-                $mutex = $lock;
-            } else {
-                if ($!{EEXIST}) {
-                    WARN "Another czil instance is applying rule ",
-                        "$name($$) or $lock_file is stale";
-                }
-
-                $exit_code = 1;
-            }
-        } catch {
-            ERROR "Caught exception when lock rule $name($$): $_";
-            $exit_code = 1;
-        };
-    }
-
-
-    #
-    # rollback if necessary, maybe last time we were interruptted
-    #
-    my $state_file = $options->build_state_file("$name.yml");
-    if (! $options->dryrun_mode && $exit_code == 0) {
-        if (-e $state_file) {
-            WARN "Find state file $state_file, rollback for rule $name($$)...";
-
+        #
+        # exclusively lock
+        #
+        if (! $options->dryrun_mode) {
             try {
-                my $content;
+                INFO "Locking for rule $name($$)...";
 
-                {
-                    open my $fh, $state_file or die "Can't read $state_file: $!";
-                    binmode $fh;
-                    local $/;
-                    $content = <$fh>;
-                    close $fh;
-                }
+                my $lock_file = $options->build_lock_file("$name.lck");
 
-                my ($len, $md5) = $content =~ /^# len=(\d+) md5=(\S+)/;
-                die "Bad state file $state_file!" unless defined $md5;
-                $content = substr($content, index($content, "\n---\n") + 1);
-                die "Mismatch length in state file $state_file!" unless $len == length($content);
-                die "Mismatch md5sum in state file $state_file!" unless $md5 eq md5_hex($content);
+                my $lock = Config::Zilla::FileLock->new($lock_file,
+                    "Exclusive file lock for Config-Zilla to " .
+                        "avoid multiple instances applying " .
+                        "same rule concurrently.");
 
-                my $state = YAML::Tiny::Load($content);
-                die "Invalid state file $state_file!" unless defined $state;
-
-                $executor->state($state);
-                if (! $executor->rollback()) {
-                    ERROR "Failed to rollback for rule $name($$)";
-                    $exit_code = 2;
+                if ($lock->locked) {
+                    $mutex = $lock;
                 } else {
-                    $executor->state(undef);
-                    unlink $state_file or die "Can't delete $state_file: $!";
+                    if ($!{EEXIST}) {
+                        WARN "Another czil instance is applying rule ",
+                            "$name($$) or $lock_file is stale";
+                    }
+
+                    $exit_code = 1;
                 }
             } catch {
-                ERROR "Caught exception when rollback rule $name($$): $_";
-                $exit_code = 2;
+                ERROR "Caught exception when lock rule $name($$): $_";
+                $exit_code = 1;
             };
         }
-    }
 
 
-    #
-    # prepare
-    #
-    if ($exit_code == 0) {
-        try {
-            INFO "Preparing for rule $name($$)...";
-            if (! $executor->prepare($options, $exit_codes)) {
-                ERROR "Failed to prepare for rule $name($$)";
-                $exit_code = 3;
-            } else {
-                if (! $options->dryrun_mode && defined $executor->state) {
-                    my $content = YAML::Tiny::Dump($executor->state);
-                    my $len = length($content);
-                    my $md5sum = md5_hex($content);
-
-                    open my $fh, ">", $state_file or die "Can't write $state_file: $!";
-                    binmode $fh;
-                    defined(syswrite $fh, "# len=$len md5=$md5sum\n") or
-                        die "Error occurred when write $state_file: $!";
-                    defined(syswrite $fh, $content) or
-                        die "Error occurred when write $state_file: $!";
-                    close $fh;
-                }
-            }
-        } catch {
-            ERROR "Caught exception when prepare rule $name($$): $_";
+        #
+        # rollback if necessary, maybe last time we were interruptted
+        #
+        my $state_file = $options->build_state_file("$name.yml");
+        if (! $options->dryrun_mode && $exit_code == 0) {
             if (-e $state_file) {
-                unlink $state_file or ERROR "Can't delete $state_file: $!";
+                WARN "Find state file $state_file, rollback for rule $name($$)...";
+
+                try {
+                    my $content;
+
+                    {
+                        open my $fh, $state_file or die "Can't read $state_file: $!";
+                        binmode $fh;
+                        local $/;
+                        $content = <$fh>;
+                        close $fh;
+                    }
+
+                    my ($len, $md5) = $content =~ /^# len=(\d+) md5=(\S+)/;
+                    die "Bad state file $state_file!" unless defined $md5;
+                    $content = substr($content, index($content, "\n---\n") + 1);
+                    die "Mismatch length in state file $state_file!" unless $len == length($content);
+                    die "Mismatch md5sum in state file $state_file!" unless $md5 eq md5_hex($content);
+
+                    my $state = YAML::Tiny::Load($content);
+                    die "Invalid state file $state_file!" unless defined $state;
+
+                    $executor->state($state);
+                    if (! $executor->rollback()) {
+                        ERROR "Failed to rollback for rule $name($$)";
+                        $exit_code = 2;
+                    } else {
+                        $executor->state(undef);
+                        unlink $state_file or die "Can't delete $state_file: $!";
+                    }
+                } catch {
+                    ERROR "Caught exception when rollback rule $name($$): $_";
+                    $exit_code = 2;
+                };
             }
-            $exit_code = 3;
-        };
-    }
+        }
 
 
-    #
-    # execute
-    #
-    if ($exit_code == 0) {
-        try {
-            INFO "Executing for rule $name($$)...";
-            if (! $executor->execute($options)) {
-                ERROR "Failed to execute rule $name($$)";
+        #
+        # prepare
+        #
+        if ($exit_code == 0) {
+            try {
+                INFO "Preparing for rule $name($$)...";
+                if (! $executor->prepare($options, $exit_codes)) {
+                    ERROR "Failed to prepare for rule $name($$)";
+                    $exit_code = 3;
+                } else {
+                    if (! $options->dryrun_mode && defined $executor->state) {
+                        my $content = YAML::Tiny::Dump($executor->state);
+                        my $len = length($content);
+                        my $md5sum = md5_hex($content);
+
+                        open my $fh, ">", $state_file or die "Can't write $state_file: $!";
+                        binmode $fh;
+                        defined(syswrite $fh, "# len=$len md5=$md5sum\n") or
+                            die "Error occurred when write $state_file: $!";
+                        defined(syswrite $fh, $content) or
+                            die "Error occurred when write $state_file: $!";
+                        close $fh;
+                    }
+                }
+            } catch {
+                ERROR "Caught exception when prepare rule $name($$): $_";
+                if (-e $state_file) {
+                    unlink $state_file or ERROR "Can't delete $state_file: $!";
+                }
+                $exit_code = 3;
+            };
+        }
+
+
+        #
+        # execute
+        #
+        if ($exit_code == 0) {
+            try {
+                INFO "Executing for rule $name($$)...";
+                if (! $executor->execute($options)) {
+                    ERROR "Failed to execute rule $name($$)";
+                    $exit_code = 4;
+                }
+            } catch {
+                ERROR "Caught exception when execute rule $name($$): $_";
                 $exit_code = 4;
-            }
-        } catch {
-            ERROR "Caught exception when execute rule $name($$): $_";
-            $exit_code = 4;
-        };
-    }
+            };
+        }
 
-    #
-    # rollback if necessary
-    #
-    if (! $options->dryrun_mode && $exit_code == 4) {
-        try {
-        } catch {
-        };
-    }
+        #
+        # rollback if necessary
+        #
+        if (! $options->dryrun_mode && $exit_code == 4) {
+            try {
+            } catch {
+            };
+        }
 
-    # _exit() won't call destructors and END blocks...
-    $mutex->DESTROY if defined $mutex;
+    }
 
     POSIX::_exit($exit_code);
 }
