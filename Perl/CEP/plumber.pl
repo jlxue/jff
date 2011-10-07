@@ -16,7 +16,6 @@ my $g_port = 9999;
 my %g_action_table = (
     run     => \&action_run,
     report  => \&action_report,
-    stop    => \&action_stop,
 );
 
 my %g_contexts;
@@ -28,11 +27,23 @@ die "Bad port $g_port!" if $g_port < 0 || $g_port >= 65535;
 
 my $g_guard = tcp_server undef, $g_port, \&on_accept, \&on_prepare;
 my $g_condvar = AE::cv;
+
+my $cleanup = sub {
+    AE::log info => "Got TERM or INT signal, quit...";
+    undef $g_guard;
+    $g_condvar->send;
+};
+
+my $w1 = AE::signal TERM => $cleanup;
+my $w2 = AE::signal INT  => $cleanup;
+
 $g_condvar->recv;
 
 ######################################################################
 sub on_accept {
     my ($fh, $host, $port) = @_;
+
+    AE::log info => "Connected from client $host, port $port";
 
     my $handle = AnyEvent::Handle->new(
         fh          => $fh,
@@ -119,10 +130,5 @@ sub action_report {
     my ($hd, @args) = @_;
 
     $hd->push_write(json => \@args);
-}
-
-sub action_stop {
-    undef $g_guard;
-    $g_condvar->send;
 }
 
