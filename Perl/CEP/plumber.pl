@@ -26,10 +26,9 @@ GetOptions('port=i'     => \$g_port);
 die "Bad port $g_port!" if $g_port < 0 || $g_port >= 65535;
 
 
-my $guard = tcp_server undef, $g_port, \&on_accept, \&on_prepare;
-
-AnyEvent::Loop::run();
-
+my $g_guard = tcp_server undef, $g_port, \&on_accept, \&on_prepare;
+my $g_condvar = AE::cv;
+$g_condvar->recv;
 
 ######################################################################
 sub on_accept {
@@ -123,6 +122,7 @@ sub action_report {
 }
 
 sub action_stop {
-    undef $guard;
+    undef $g_guard;
+    $g_condvar->send;
 }
 
