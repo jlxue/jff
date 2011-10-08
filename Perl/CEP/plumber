@@ -1,0 +1,138 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use Data::Dumper;
+use Getopt::Long;
+use HTTP::Response;
+use JSON;
+use Log::Log4perl qw(:easy);
+use POE qw(Component::Server::TCP Filter::HTTPD);
+use Try::Tiny;
+use constant DEFAULT_PORT   => 9999;
+
+
+my $g_port;
+my $g_conf_file;
+my $g_conf_timestamp = 0;
+my $g_conf = {};
+
+
+#
+# Initialize Log4perl
+#
+Log::Log4perl->easy_init({
+        level   => $DEBUG,
+        layout  => "[%d] %-5p (%P) %F{1}:%-4L - %m%n",
+        #file   => ">plumber.log",
+    });
+
+
+#
+# Process command line options
+#
+GetOptions("port=i"     => \$g_port,
+           "config=s"   => \$g_conf_file);
+reload_config_file();
+$g_port = $g_conf->{port} || DEFAULT_PORT unless defined $g_port;
+die "Bad port $g_port\n" if $g_port !~ /^\d+$/ || $g_port <= 0 || $g_port >= 65535;
+
+INFO "listen on port $g_port";
+
+#
+# Start server
+#
+POE::Component::Server::TCP->new(
+    Port                => $g_port,
+    ClientFilter        => 'POE::Filter::HTTPD',
+    ClientConnected     => \&on_client_connected,
+    ClientDisconnected  => \&on_client_disconnected,
+    ClientInput         => \&on_client_input,
+);
+
+POE::Kernel->run;
+exit;
+
+
+######################################################################
+sub on_client_connected {
+    my $heap = $_[HEAP];
+
+    INFO "client connected from $heap->{remote_ip} port $heap->{remote_port}";
+}
+
+
+sub on_client_disconnected {
+    my $heap = $_[HEAP];
+
+    INFO "client disconnected from $heap->{remote_ip} port $heap->{remote_port}";
+}
+
+
+sub on_client_input {
+    my ($heap, $kernel, $request) = @_[HEAP, KERNEL, ARG0];
+
+    # It's a response for the client if there was a problem
+    if ($request->isa("HTTP::Response")) {
+        my $response = $request;
+
+        $request = $response->request;
+        WARN "bad request: ", $request->message if $request;
+
+        $_[HEAP]{client}->put($response);
+        $_[KERNEL]->yield("shutdown");
+        return;
+    }
+
+    try {
+        my $response = handle_request($request);
+        $heap->{client}->put($response);
+    } catch {
+        ERROR "caught exception when handle request: $_";
+        $kernel->yield("shutdown");
+    };
+}
+
+
+sub reload_config_file {
+    return unless defined $g_conf_file;
+
+    my $file = $g_conf_file;
+
+    my $mtime = (stat $file)[9];
+    return unless defined $mtime && $g_conf_timestamp < $mtime;
+
+    try {
+        INFO "loading config file: $file";
+
+        local $/;
+
+        open my $fh, $file or die "can't open $file: $!\n";
+        my $content = <$fh>;
+        close $fh;
+
+        my $conf = decode_json($content);
+
+        if (ref($conf) eq 'HASH') {
+            INFO "successfully loaded config file: $file";
+
+            $g_conf = $conf;
+            $g_conf_timestamp = $mtime;
+        } else {
+            ERROR "failed to parse config file: $file";
+        }
+    } catch {
+        ERROR "caught exception when read config file: $_"
+    };
+}
+
+
+sub handle_request {
+    my ($request) = @_;
+
+    my $response = HTTP::Response->new(200);
+    $response->push_header("Content-type", "text/html");
+    $response->content(scalar(localtime));
+
+    return $response;
+}
+
