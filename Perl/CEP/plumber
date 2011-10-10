@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
+use File::Spec;
 use Getopt::Long;
 use HTTP::Response;
 use JSON;
@@ -11,6 +12,7 @@ use Try::Tiny;
 
 
 my $g_port = 9999;
+my $g_libexec_path = File::Spec->curdir;
 
 #
 # Initialize Log4perl
@@ -25,8 +27,10 @@ Log::Log4perl->easy_init({
 #
 # Process command line options
 #
-GetOptions("port=i"     => \$g_port);
+GetOptions("port=i"     => \$g_port,
+           "exec=s"     => \$g_libexec_path);
 die "Bad port $g_port\n" if $g_port <= 0 || $g_port > 65535;
+die "Bad directory \"$g_libexec_path\"\n" unless -d $g_libexec_path;
 
 INFO "listen on port $g_port";
 
@@ -36,7 +40,7 @@ INFO "listen on port $g_port";
 POE::Component::Server::TCP->new(
     Port                => $g_port,
     Started             => \&on_master_started,
-    ClientFilter        => 'POE::Filter::HTTPD',
+    ClientFilter        => "POE::Filter::HTTPD",
     ClientConnected     => \&on_client_connected,
     ClientDisconnected  => \&on_client_disconnected,
     ClientInput         => \&on_client_input,
@@ -83,6 +87,11 @@ sub on_client_input {
         $heap->{client}->put($response);
     } catch {
         ERROR "caught exception when handle request: $_";
+
+        my $response = compose_http_response(500,
+            "Caught exception when handle request!");
+        $heap->{client}->put($response);
+
         $kernel->yield("shutdown");
     };
 }
@@ -90,12 +99,23 @@ sub on_client_input {
 
 sub handle_request {
     my ($request) = @_;
+    my $response;
+    my $ref;
 
-    my $response = HTTP::Response->new(200);
-    my $content = scalar(localtime);
-    $response->push_header("Content-type", "text/plain");
-    $response->push_header("Content-length", length($content));
-    $response->content($content);
+    if ($request->content) {
+        $ref = decode_json $request->content;
+    } else {
+        return compose_http_response(200,
+            "Not a JSON message, current time: " .
+            scalar(localtime), "text/plain");
+    }
+
+    if (defined $ref && ref($ref) eq 'ARRAY' && @$ref > 0) {
+        # TODO
+    } else {
+        $response = compose_http_response(400,
+            "Invalid JSON message: " . $request->content);
+    }
 
     return $response;
 }
@@ -130,5 +150,25 @@ sub on_master_started {
     my $kernel = $_[KERNEL];
 
     register_HUP_INT_TERM_handler($kernel);
+}
+
+
+sub compose_http_response {
+    my ($code, $content, $type) = @_;
+    my $length;
+
+    $type ||= "application/json";
+    $content = encode_json {message => $content} if $code != 200;
+    {
+        use bytes;
+        $length = length($content);
+    }
+
+    my $response = HTTP::Response->new($code);
+    $response->push_header("Content-Type", $type);
+    $response->push_header("Content-Length", $length);
+    $response->content($content);
+
+    return $response;
 }
 
