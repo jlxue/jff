@@ -35,6 +35,7 @@ INFO "listen on port $g_port";
 #
 POE::Component::Server::TCP->new(
     Port                => $g_port,
+    Started             => \&on_master_started,
     ClientFilter        => 'POE::Filter::HTTPD',
     ClientConnected     => \&on_client_connected,
     ClientDisconnected  => \&on_client_disconnected,
@@ -47,9 +48,11 @@ exit;
 
 ######################################################################
 sub on_client_connected {
-    my $heap = $_[HEAP];
+    my ($kernel, $heap) = @_[KERNEL, HEAP];
 
     INFO "client connected from $heap->{remote_ip} port $heap->{remote_port}";
+
+    register_HUP_INT_TERM_handler($kernel);
 }
 
 
@@ -95,5 +98,37 @@ sub handle_request {
     $response->content($content);
 
     return $response;
+}
+
+
+sub sig_HUP_INT_TERM {
+    my ($kernel, $heap, $sig) = @_[KERNEL, HEAP, ARG0];
+
+    my $who = "listener";
+    if (! exists $heap->{listener}) {
+        $who = "client";
+    }
+
+    WARN "$who got signal $sig!";
+
+    $kernel->yield("shutdown");
+    $kernel->sig_handled();
+}
+
+
+sub register_HUP_INT_TERM_handler {
+    my ($kernel) = @_;
+
+    $kernel->state("sig_HUP_INT_TERM", \&sig_HUP_INT_TERM);
+    $kernel->sig(HUP    => "sig_HUP_INT_TERM");
+    $kernel->sig(INT    => "sig_HUP_INT_TERM");
+    $kernel->sig(TERM   => "sig_HUP_INT_TERM");
+}
+
+
+sub on_master_started {
+    my $kernel = $_[KERNEL];
+
+    register_HUP_INT_TERM_handler($kernel);
 }
 
