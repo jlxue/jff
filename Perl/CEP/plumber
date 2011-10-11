@@ -156,6 +156,8 @@ sub on_master_started {
     my $kernel = $_[KERNEL];
 
     register_HUP_INT_TERM_handler($kernel);
+
+    $ENV{PLUMBER_PORT} = $g_port;
 }
 
 
