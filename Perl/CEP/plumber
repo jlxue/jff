@@ -13,6 +13,9 @@ use Try::Tiny;
 
 my $g_port = 9999;
 my $g_libexec_path = File::Spec->curdir;
+my %g_action_table = (
+    exec    => \&action_exec,
+);
 
 #
 # Initialize Log4perl
@@ -112,10 +115,12 @@ sub handle_request {
     }
 
     if (defined $ref && ref($ref) eq 'ARRAY' && @$ref > 0) {
-        # TODO
+        my $json = dispatch_json_request(@$ref);
+        $response = compose_http_response(200, $json);
     } else {
         $response = compose_http_response(400,
-            "Invalid JSON array message: " . $request->content);
+            "Invalid JSON array message: " . $request->content,
+            "text/plain");
     }
 
     return $response;
@@ -170,5 +175,21 @@ sub compose_http_response {
     $response->content($content);
 
     return $response;
+}
+
+
+sub dispatch_json_request {
+    my ($action, @args) = @_;
+
+    if (exists $g_action_table{$action}) {
+        return encode_json( $g_action_table{$action}(@args) );
+    } else {
+        return encode_json(["bad", "Unknown action"]);
+    }
+}
+
+
+sub action_exec {
+    return ["bad", "Not implemented"];
 }
 
