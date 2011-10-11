@@ -89,7 +89,8 @@ sub on_client_input {
         ERROR "caught exception when handle request: $_";
 
         my $response = compose_http_response(500,
-            "Caught exception when handle request!");
+            "Caught exception when handle request!",
+            "text/plain");
         $heap->{client}->put($response);
 
         $kernel->yield("shutdown");
@@ -105,7 +106,7 @@ sub handle_request {
     if ($request->content) {
         $ref = decode_json $request->content;
     } else {
-        return compose_http_response(200,
+        return compose_http_response(302,
             "Not a JSON message, current time: " .
             scalar(localtime), "text/plain");
     }
@@ -114,7 +115,7 @@ sub handle_request {
         # TODO
     } else {
         $response = compose_http_response(400,
-            "Invalid JSON message: " . $request->content);
+            "Invalid JSON array message: " . $request->content);
     }
 
     return $response;
@@ -158,7 +159,6 @@ sub compose_http_response {
     my $length;
 
     $type ||= "application/json";
-    $content = encode_json {message => $content} if $code != 200;
     {
         use bytes;
         $length = length($content);
