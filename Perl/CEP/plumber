@@ -16,9 +16,12 @@ use constant APP_ENTRY_FILE     => "run";
 
 my $g_port = 9999;
 my $g_libexec_path = File::Spec->curdir;
+
 my %g_action_table = (
     exec    => \&action_exec,
 );
+
+my %g_cookie_to_session;
 
 #
 # Initialize Log4perl
@@ -210,7 +213,7 @@ sub action_exec {
         return ["bad", "Bad app name!"];
     }
 
-    my $session_id = $app . "-" . time() ."-$$-" . int(rand(9999));
+    my $cookie = $app . "-" . time() ."-$$-" . int(rand(9999));
 
     my $pid = fork();
     if (! defined $pid) {
@@ -219,6 +222,11 @@ sub action_exec {
 
     if ($pid) {
         INFO "created child process $pid";
+
+        $g_cookie_to_session{$cookie} = {
+            pid => $pid,
+            sid => $poe_kernel->get_action_session()->ID,
+        };
     } else {
         my $nullfh = IO::File->new(File::Spec->devnull);
         untie *STDIN;
@@ -228,7 +236,7 @@ sub action_exec {
         open STDIN, '<&', $nullfh->fileno() or
             die "Can't redirect stdin(pid=$$): $!";
 
-        $ENV{PLUMBER_SID} = $session_id;
+        $ENV{PLUMBER_COOKIE} = $cookie;
         exec { $path } $app or
             print STDERR "Can't execute $path: $!";
 
