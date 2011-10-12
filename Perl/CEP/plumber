@@ -5,10 +5,13 @@ use Data::Dumper;
 use File::Spec;
 use Getopt::Long;
 use HTTP::Response;
+use IO::File;
 use JSON;
 use Log::Log4perl qw(:easy);
 use POE qw(Component::Server::TCP Filter::HTTPD);
+use POSIX ();
 use Try::Tiny;
+use constant APP_ENTRY_FILE     => "run";
 
 
 my $g_port = 9999;
@@ -71,7 +74,7 @@ sub on_client_disconnected {
 
 
 sub on_client_input {
-    my ($heap, $kernel, $request) = @_[HEAP, KERNEL, ARG0];
+    my ($kernel, $heap, $request) = @_[KERNEL, HEAP, ARG0];
 
     # It's a response for the client if there was a problem
     if ($request->isa("HTTP::Response")) {
@@ -186,12 +189,50 @@ sub dispatch_json_request {
     if (exists $g_action_table{$action}) {
         return encode_json( $g_action_table{$action}(@args) );
     } else {
-        return encode_json(["bad", "Unknown action"]);
+        return encode_json(["bad", "Unknown action!"]);
     }
 }
 
 
 sub action_exec {
-    return ["bad", "Not implemented"];
+    my ($app, @args) = @_;
+
+    if (! defined $app) {
+        return ["bad", "app name missed!"];
+    }
+
+    if ($app  !~ /^[a-zA-Z0-9~_\+\-\.]+/) {
+        return ["bad", "Invalid app name!"];
+    }
+
+    my $path = File::Spec->catfile($app, APP_ENTRY_FILE);
+    if (! -f $path || ! -r $path || ! -x $path) {
+        return ["bad", "Bad app name!"];
+    }
+
+    my $session_id = $app . "-" . time() ."-$$-" . int(rand(9999));
+
+    my $pid = fork();
+    if (! defined $pid) {
+        return ["bad", "Failed to run app!"];
+    }
+
+    if ($pid) {
+        INFO "created child process $pid";
+    } else {
+        my $nullfh = IO::File->new(File::Spec->devnull);
+        untie *STDIN;
+        untie *STDOUT;
+        untie *STDERR;
+
+        open STDIN, '<&', $nullfh->fileno() or
+            die "Can't redirect stdin(pid=$$): $!";
+
+        $ENV{PLUMBER_SID} = $session_id;
+        exec { $path } $app or
+            print STDERR "Can't execute $path: $!";
+
+        POSIX::_exit(1);
+    }
 }
 
