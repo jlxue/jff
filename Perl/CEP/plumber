@@ -47,6 +47,7 @@ INFO "listen on port $g_port";
 # Start server
 #
 POE::Component::Server::TCP->new(
+    Alias               => "Master",
     Port                => $g_port,
     Started             => \&on_master_started,
     ClientFilter        => "POE::Filter::HTTPD",
@@ -63,7 +64,9 @@ exit;
 sub on_client_connected {
     my ($kernel, $heap) = @_[KERNEL, HEAP];
 
-    INFO "client connected from $heap->{remote_ip} port $heap->{remote_port}";
+    INFO "client connected from $heap->{remote_ip} " .
+        "port $heap->{remote_port}, " .
+        "session id " . $_[SESSION]->ID;
 
     register_HUP_INT_TERM_handler($kernel);
 }
@@ -72,7 +75,9 @@ sub on_client_connected {
 sub on_client_disconnected {
     my $heap = $_[HEAP];
 
-    INFO "client disconnected from $heap->{remote_ip} port $heap->{remote_port}";
+    INFO "client disconnected from $heap->{remote_ip} " .
+        "port $heap->{remote_port}, " .
+        "session id " . $_[SESSION]->ID;
 }
 
 
@@ -148,6 +153,32 @@ sub sig_HUP_INT_TERM {
 }
 
 
+sub reap_child {
+    my ($kernel, $session, $pid, $cookie) = @_[KERNEL, SESSION, ARG0, ARG1];
+
+    INFO "register SIGCHLD handler for pid $pid in session " . $session->ID;
+
+    $kernel->sig_child($pid, "sig_CHLD", $cookie);
+}
+
+
+sub sig_CHLD {
+    my ($kernel, $session, $pid, $code, $cookie) =
+        @_[KERNEL, SESSION, ARG1, ARG2, ARG3];
+
+    INFO "got SIGCHLD: pid $pid in session " . $session->ID;
+
+    if (exists $g_cookie_to_session{$cookie}) {
+        my $pid2 = $g_cookie_to_session{$cookie}{pid};
+
+        WARN "different pids: got $pid but recorded $pid2" if $pid != $pid2;
+
+        # TODO: notify the session
+        delete $g_cookie_to_session{$cookie};
+    }
+}
+
+
 sub register_HUP_INT_TERM_handler {
     my ($kernel) = @_;
 
@@ -162,6 +193,9 @@ sub on_master_started {
     my $kernel = $_[KERNEL];
 
     register_HUP_INT_TERM_handler($kernel);
+
+    $kernel->state("reap_child" => \&reap_child);
+    $kernel->state("sig_CHLD", \&sig_CHLD);
 
     $ENV{PLUMBER_PORT} = $g_port;
 }
@@ -225,8 +259,13 @@ sub action_exec {
 
         $g_cookie_to_session{$cookie} = {
             pid => $pid,
-            sid => $poe_kernel->get_action_session()->ID,
+            sid => $poe_kernel->get_active_session()->ID,
         };
+
+        # Register handler in "Master" session, so this child session
+        # can quits before the child process quits.
+        $poe_kernel->call("Master","reap_child", $pid, $cookie);
+
     } else {
         my $nullfh = IO::File->new(File::Spec->devnull);
         untie *STDIN;
@@ -242,5 +281,7 @@ sub action_exec {
 
         POSIX::_exit(1);
     }
+
+    return ["ok", "Spawned child process"];
 }
 
