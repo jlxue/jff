@@ -325,6 +325,7 @@ sub action_exec {
         $poe_kernel->call("Master","reap_child", $pid, $cookie);
 
         $poe_kernel->state("fail_exec_app", \&on_fail_exec_app);
+        $poe_kernel->state("done_exec_app", \&on_done_exec_app);
 
     } else {
         my $nullfh = IO::File->new(File::Spec->devnull);
@@ -353,6 +354,10 @@ sub on_fail_exec_app {
     my ($kernel, $session, $heap, $pid, $code, $cookie) = @_[KERNEL, SESSION, HEAP, ARG0, ARG1, ARG2];
     my $sid = $session->ID;
 
+    WARN "fail to exec app for session id $sid";
+
+    $poe_kernel->state("fail_exec_app");
+
     my $json = encode_json(["bad", "app exit immaturely: pid=$pid, code=$code"]);
     my $response = compose_http_response(200, $json);
 
@@ -369,5 +374,74 @@ sub on_fail_exec_app {
     }
 
     $heap->{client}->put($response);
+}
+
+
+# In child session who initiates "action_exec"
+#
+sub on_done_exec_app {
+    my ($kernel, $session, $heap, $cookie, @args) = @_[KERNEL, SESSION, HEAP, ARG0, ARG1 .. $#_];
+    my $sid = $session->ID;
+
+    $poe_kernel->state("done_exec_app");
+
+    my $json = encode_json(["ok", @args]);
+    my $response = compose_http_response(200, $json);
+
+    if (exists $g_cookie_to_appinfo{$cookie} && exists $g_cookie_to_appinfo{$cookie}{sid}) {
+        my $sid2 = $g_cookie_to_appinfo{$cookie}{sid};
+
+        WARN "different sids: got $sid but recorded $sid2" if $sid != $sid2;
+
+        # Not delete $g_cookie_to_appinfo{$cookie}, so that we can keep
+        # this booking information for the app process.
+        delete $g_cookie_to_appinfo{$cookie}{sid};
+    } else {
+        ERROR "can't find session info for sid=$sid, cookie=$cookie";
+    }
+
+    $heap->{client}->put($response);
+}
+
+
+# In child session, this session will obtain stored exec args which
+# stored by the child session who initiates "action_exec", the args
+# are send to app process.
+#
+sub action_establish {
+    my $cookie = $_[0];
+
+    if (! exists $g_cookie_to_appinfo{$cookie}) {
+        return ["bad", "non-existed app cookie"];
+    }
+
+    if (! exists $g_cookie_to_appinfo{$cookie}{sid}) {
+        return ["bad", "initiative session has exited."];
+    }
+
+    return ["ok", @{ $g_cookie_to_appinfo{$cookie}{arg} }];
+}
+
+
+# In child session, this session will generate response for the child
+# session who initiates "action_exec".
+#
+sub action_establish2 {
+    my ($cookie, @args) = @_;
+
+    if (! exists $g_cookie_to_appinfo{$cookie}) {
+        return ["bad", "non-existed app cookie"];
+    }
+
+    my $target_session;
+    if (exists $g_cookie_to_appinfo{$cookie}{sid}) {
+        $target_session = $poe_kernel->ID_id_to_session($g_cookie_to_appinfo{$cookie}{sid});
+    }
+
+    if (! defined $target_session) {
+        return ["bad", "initiative session has exited."];
+    }
+
+    $poe_kernel->post($target_session, "done_exec_app", $cookie, @args);
 }
 
