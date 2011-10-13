@@ -1,4 +1,36 @@
 #!/usr/bin/env perl
+#
+# Purpose:
+#   This script implements a service to run controlled executable
+#   upon request from trusted network.
+#
+# Protocol:
+#   (1) plumber listens on some port, such as 9999;
+#
+#   (2) clientA sends json data ["exec", "app_name", arg...] to plumber,
+#       the arguments can be arbitrary json data structures;
+#   (3) plumber forks and executes "LIBEXEC_PATH/$app_name/run", the child process(clientB)
+#       has extra environments PLUMBER_PORT and PLUMBER_COOKIE set;
+#
+#   (4) the child process(clientB) sends json data ["establish", $PLUMBER_COOKIE] to plumber;
+#   (5) plumber replies clientB with json data ["ok", arg1, arg2];
+#
+#   (6) clientB setups, then sends json data ["establish2", $PLUMBER_COOKIE, new_arg...]
+#       to plumber, the arguments can be arbitrary json data structures;
+#   (7) plumber replies clientB with json data ["ok", "done"];
+#
+#   (8) to continue 3), plumber replies clientA with json data ["ok", new_arg, ...];
+#
+# Authors:
+#   Yubao Liu <yubao.liu@gmail.com>
+#
+# Copyright:
+#   GPL v3
+#
+# ChangeLog:
+#   2011-10-13  Yubao Liu
+#       * initial version, implement the exec/establish/establish2 protocol
+
 use strict;
 use warnings;
 use Data::Dumper;
@@ -18,7 +50,9 @@ my $g_port = 9999;
 my $g_libexec_path = File::Spec->curdir;
 
 my %g_action_table = (
-    exec    => \&action_exec,
+    exec            => \&action_exec,
+    establish       => \&action_establish,
+    establish2      => \&action_establish2,
 );
 
 my %g_cookie_to_appinfo;
@@ -443,5 +477,7 @@ sub action_establish2 {
     }
 
     $poe_kernel->post($target_session, "done_exec_app", $cookie, @args);
+
+    return ["ok", "done"];
 }
 
