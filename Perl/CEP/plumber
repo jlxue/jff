@@ -192,7 +192,12 @@ sub on_client_input {
 
     try {
         my $response = handle_request($request);
-        $heap->{client}->put($response);
+        if (defined $response) {
+            $heap->{client}->put($response);
+        } else {
+            # This is an async call
+            return;
+        }
     } catch {
         ERROR "caught exception when handle request: $_";
 
@@ -223,7 +228,12 @@ sub handle_request {
 
     if (defined $ref && ref($ref) eq 'ARRAY' && @$ref > 0) {
         my $json = dispatch_json_request(@$ref);
-        $response = compose_http_response(200, $json);
+        if (defined $json) {
+            $response = compose_http_response(200, $json);
+        } else {
+            # This is an async call
+            return;
+        }
     } else {
         $response = compose_http_response(400,
             "Invalid JSON array message: " . $request->content,
@@ -261,7 +271,15 @@ sub dispatch_json_request {
     my ($action, @args) = @_;
 
     if (exists $g_action_table{$action}) {
-        return encode_json( $g_action_table{$action}(@args) );
+        my @values = $g_action_table{$action}(@args);
+        if (@values > 3) {
+            LOGDIE "action handler for \"$action\" doesn't return single array reference!";
+        } elsif (! defined($values[0])) {
+            # This is an async call
+            return;
+        } elsif (ref($values[0]) ne 'ARRAY') {
+            return encode_json($values[0]);
+        }
     } else {
         return encode_json(["bad", "Unknown action!"]);
     }
@@ -324,12 +342,32 @@ sub action_exec {
         POSIX::_exit(1);
     }
 
-    return ["ok", "Spawned child process"];
+    # This is an async call
+    return;
 }
 
 
 # In child session who initiates "action_exec"
 #
 sub on_fail_exec_app {
+    my ($kernel, $session, $heap, $pid, $code, $cookie) = @_[KERNEL, SESSION, HEAP, ARG0, ARG1, ARG2];
+    my $sid = $session->ID;
+
+    my $json = encode_json(["bad", "app exit immaturely: pid=$pid, code=$code"]);
+    my $response = compose_http_response(200, $json);
+
+    if (exists $g_cookie_to_appinfo{$cookie} && exists $g_cookie_to_appinfo{$cookie}{sid}) {
+        my $sid2 = $g_cookie_to_appinfo{$cookie}{sid};
+
+        WARN "different sids: got $sid but recorded $sid2" if $sid != $sid2;
+
+        # Not delete $g_cookie_to_appinfo{$cookie}, so that we can keep
+        # this booking information for the app process.
+        delete $g_cookie_to_appinfo{$cookie}{sid};
+    } else {
+        ERROR "can't find session info for pid $pid (sid=$sid, cookie=$cookie)";
+    }
+
+    $heap->{client}->put($response);
 }
 
