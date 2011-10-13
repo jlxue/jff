@@ -44,7 +44,7 @@ die "Bad directory \"$g_libexec_path\"\n" unless -d $g_libexec_path;
 INFO "listen on port $g_port";
 
 #
-# Start server
+# Start server, the master session listens for connection, the child sessions process requests.
 #
 POE::Component::Server::TCP->new(
     Alias               => "Master",
@@ -61,98 +61,23 @@ exit;
 
 
 ######################################################################
-sub on_client_connected {
-    my ($kernel, $heap) = @_[KERNEL, HEAP];
 
-    INFO "client connected from $heap->{remote_ip} " .
-        "port $heap->{remote_port}, " .
-        "session id " . $_[SESSION]->ID;
+# In master session
+#
+sub on_master_started {
+    my $kernel = $_[KERNEL];
 
     register_HUP_INT_TERM_handler($kernel);
+
+    $kernel->state("reap_child" => \&reap_child);
+    $kernel->state("sig_CHLD", \&sig_CHLD);
+
+    $ENV{PLUMBER_PORT} = $g_port;
 }
 
 
-sub on_client_disconnected {
-    my $heap = $_[HEAP];
-
-    INFO "client disconnected from $heap->{remote_ip} " .
-        "port $heap->{remote_port}, " .
-        "session id " . $_[SESSION]->ID;
-}
-
-
-sub on_client_input {
-    my ($kernel, $heap, $request) = @_[KERNEL, HEAP, ARG0];
-
-    # It's a response for the client if there was a problem
-    if ($request->isa("HTTP::Response")) {
-        my $response = $request;
-
-        $request = $response->request;
-        WARN "bad request: ", $request->message if $request;
-
-        $_[HEAP]{client}->put($response);
-        $_[KERNEL]->yield("shutdown");
-        return;
-    }
-
-    try {
-        my $response = handle_request($request);
-        $heap->{client}->put($response);
-    } catch {
-        ERROR "caught exception when handle request: $_";
-
-        my $response = compose_http_response(500,
-            "Caught exception when handle request!",
-            "text/plain");
-        $heap->{client}->put($response);
-
-        $kernel->yield("shutdown");
-    };
-}
-
-
-sub handle_request {
-    my ($request) = @_;
-    my $response;
-    my $ref;
-
-    if ($request->content) {
-        $ref = decode_json $request->content;
-    } else {
-        return compose_http_response(302,
-            "Not a JSON message, current time: " .
-            scalar(localtime), "text/plain");
-    }
-
-    if (defined $ref && ref($ref) eq 'ARRAY' && @$ref > 0) {
-        my $json = dispatch_json_request(@$ref);
-        $response = compose_http_response(200, $json);
-    } else {
-        $response = compose_http_response(400,
-            "Invalid JSON array message: " . $request->content,
-            "text/plain");
-    }
-
-    return $response;
-}
-
-
-sub sig_HUP_INT_TERM {
-    my ($kernel, $heap, $sig) = @_[KERNEL, HEAP, ARG0];
-
-    my $who = "listener";
-    if (! exists $heap->{listener}) {
-        $who = "client";
-    }
-
-    WARN "$who got signal $sig!";
-
-    $kernel->yield("shutdown");
-    $kernel->sig_handled();
-}
-
-
+# In master session
+#
 sub reap_child {
     my ($kernel, $session, $pid, $cookie) = @_[KERNEL, SESSION, ARG0, ARG1];
 
@@ -162,6 +87,8 @@ sub reap_child {
 }
 
 
+# In master session
+#
 sub sig_CHLD {
     my ($kernel, $session, $pid, $code, $cookie) =
         @_[KERNEL, SESSION, ARG1, ARG2, ARG3];
@@ -193,6 +120,8 @@ sub sig_CHLD {
 }
 
 
+# In master and child session
+#
 sub register_HUP_INT_TERM_handler {
     my ($kernel) = @_;
 
@@ -203,18 +132,110 @@ sub register_HUP_INT_TERM_handler {
 }
 
 
-sub on_master_started {
-    my $kernel = $_[KERNEL];
+# In master and child session
+#
+sub sig_HUP_INT_TERM {
+    my ($kernel, $heap, $sig) = @_[KERNEL, HEAP, ARG0];
 
-    register_HUP_INT_TERM_handler($kernel);
+    my $who = "listener";
+    if (! exists $heap->{listener}) {
+        $who = "client";
+    }
 
-    $kernel->state("reap_child" => \&reap_child);
-    $kernel->state("sig_CHLD", \&sig_CHLD);
+    WARN "$who got signal $sig!";
 
-    $ENV{PLUMBER_PORT} = $g_port;
+    $kernel->yield("shutdown");
+    $kernel->sig_handled();
 }
 
 
+# In child session
+#
+sub on_client_connected {
+    my ($kernel, $heap) = @_[KERNEL, HEAP];
+
+    INFO "client connected from $heap->{remote_ip} " .
+        "port $heap->{remote_port}, " .
+        "session id " . $_[SESSION]->ID;
+
+    register_HUP_INT_TERM_handler($kernel);
+}
+
+
+# In child session
+#
+sub on_client_disconnected {
+    my $heap = $_[HEAP];
+
+    INFO "client disconnected from $heap->{remote_ip} " .
+        "port $heap->{remote_port}, " .
+        "session id " . $_[SESSION]->ID;
+}
+
+
+# In child session
+#
+sub on_client_input {
+    my ($kernel, $heap, $request) = @_[KERNEL, HEAP, ARG0];
+
+    # It's a response for the client if there was a problem
+    if ($request->isa("HTTP::Response")) {
+        my $response = $request;
+
+        $request = $response->request;
+        WARN "bad request: ", $request->message if $request;
+
+        $_[HEAP]{client}->put($response);
+        $_[KERNEL]->yield("shutdown");
+        return;
+    }
+
+    try {
+        my $response = handle_request($request);
+        $heap->{client}->put($response);
+    } catch {
+        ERROR "caught exception when handle request: $_";
+
+        my $response = compose_http_response(500,
+            "Caught exception when handle request!",
+            "text/plain");
+        $heap->{client}->put($response);
+
+        $kernel->yield("shutdown");
+    };
+}
+
+
+# In child session
+#
+sub handle_request {
+    my ($request) = @_;
+    my $response;
+    my $ref;
+
+    if ($request->content) {
+        $ref = decode_json $request->content;
+    } else {
+        return compose_http_response(302,
+            "Not a JSON message, current time: " .
+            scalar(localtime), "text/plain");
+    }
+
+    if (defined $ref && ref($ref) eq 'ARRAY' && @$ref > 0) {
+        my $json = dispatch_json_request(@$ref);
+        $response = compose_http_response(200, $json);
+    } else {
+        $response = compose_http_response(400,
+            "Invalid JSON array message: " . $request->content,
+            "text/plain");
+    }
+
+    return $response;
+}
+
+
+# In child session
+#
 sub compose_http_response {
     my ($code, $content, $type) = @_;
     my $length;
@@ -234,6 +255,8 @@ sub compose_http_response {
 }
 
 
+# In child session
+#
 sub dispatch_json_request {
     my ($action, @args) = @_;
 
@@ -245,6 +268,8 @@ sub dispatch_json_request {
 }
 
 
+# In child session
+#
 sub action_exec {
     my ($app, @args) = @_;
 
@@ -303,6 +328,8 @@ sub action_exec {
 }
 
 
+# In child session who initiates "action_exec"
+#
 sub on_fail_exec_app {
 }
 
