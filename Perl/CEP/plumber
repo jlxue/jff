@@ -21,7 +21,7 @@ my %g_action_table = (
     exec    => \&action_exec,
 );
 
-my %g_cookie_to_session;
+my %g_cookie_to_appinfo;
 
 #
 # Initialize Log4perl
@@ -168,13 +168,27 @@ sub sig_CHLD {
 
     INFO "got SIGCHLD: pid $pid in session " . $session->ID;
 
-    if (exists $g_cookie_to_session{$cookie}) {
-        my $pid2 = $g_cookie_to_session{$cookie}{pid};
+    if (exists $g_cookie_to_appinfo{$cookie}) {
+        my $pid2 = $g_cookie_to_appinfo{$cookie}{pid};
 
         WARN "different pids: got $pid but recorded $pid2" if $pid != $pid2;
 
-        # TODO: notify the session
-        delete $g_cookie_to_session{$cookie};
+        my $target_session;
+        if (exists $g_cookie_to_appinfo{$cookie}{sid}) {
+            $target_session = $kernel->ID_id_to_session($g_cookie_to_appinfo{$cookie}{sid});
+        }
+
+        if (defined $target_session) {
+            # the request session hasn't got app launch acknowledgement from the app
+            $kernel->post($target_session, "fail_exec_app", $pid, $code, $cookie);
+        } else {
+            # It's OK the requester end the app launch request session
+            # before the app exits because app is often long running.
+        }
+
+        delete $g_cookie_to_appinfo{$cookie};
+    } else {
+        ERROR "app info not found for pid $pid(cookie=$cookie)";
     }
 }
 
@@ -257,14 +271,17 @@ sub action_exec {
     if ($pid) {
         INFO "created child process $pid";
 
-        $g_cookie_to_session{$cookie} = {
+        $g_cookie_to_appinfo{$cookie} = {
             pid => $pid,
             sid => $poe_kernel->get_active_session()->ID,
+            arg => \@args,
         };
 
         # Register handler in "Master" session, so this child session
         # can quits before the child process quits.
         $poe_kernel->call("Master","reap_child", $pid, $cookie);
+
+        $poe_kernel->state("fail_exec_app", \&on_fail_exec_app);
 
     } else {
         my $nullfh = IO::File->new(File::Spec->devnull);
@@ -283,5 +300,9 @@ sub action_exec {
     }
 
     return ["ok", "Spawned child process"];
+}
+
+
+sub on_fail_exec_app {
 }
 
