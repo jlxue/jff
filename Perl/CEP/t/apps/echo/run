@@ -1,0 +1,34 @@
+#!/bin/bash
+
+query_plumber() {
+    local data="$1"
+
+    #curl -4 -s --trace-ascii - -d "$data" http://localhost:$PLUMBER_PORT/json
+    curl -4 -s -v -d "$data" http://localhost:$PLUMBER_PORT/json
+}
+
+
+[ -z "$PLUMBER_PORT" -o -z "$PLUMBER_COOKIE" ] && {
+    echo "Must be called under Plumber!" >&2
+    exit 1
+}
+
+which curl >/dev/null || {
+    echo "No curl installed!" >&2
+    exit 1
+}
+
+
+echo "# show PLUMBER environment"
+env | grep ^PLUMBER
+
+
+json="[\"establish\", \"$PLUMBER_COOKIE\"]"
+json=`query_plumber "$json"`
+echo "Got args: $json"
+
+
+json="[\"establish2\", \"$PLUMBER_COOKIE\", $json]"
+json=`query_plumber "$json"`
+echo "Got response: $json"
+

@@ -309,14 +309,14 @@ sub dispatch_json_request {
     my ($action, @args) = @_;
 
     if (exists $g_action_table{$action}) {
-        my @values = $g_action_table{$action}(@args);
-        if (@values > 3) {
-            LOGDIE "action handler for \"$action\" doesn't return single array reference!";
-        } elsif (! defined($values[0])) {
+        my $ref = $g_action_table{$action}(@args);
+        if (! defined($ref)) {
             # This is an async call
             return;
-        } elsif (ref($values[0]) ne 'ARRAY') {
-            return encode_json($values[0]);
+        } elsif (ref($ref) ne 'ARRAY') {
+            LOGDIE "action handler for \"$action\" doesn't return single array reference!";
+        } else {
+            return encode_json($ref);
         }
     } else {
         return encode_json(["bad", "Unknown action!"]);
@@ -337,7 +337,7 @@ sub action_exec {
         return ["bad", "Invalid app name!"];
     }
 
-    my $path = File::Spec->catfile($app, APP_ENTRY_FILE);
+    my $path = File::Spec->catfile($g_libexec_path, $app, APP_ENTRY_FILE);
     if (! -f $path || ! -r $path || ! -x $path) {
         return ["bad", "Bad app name!"];
     }
