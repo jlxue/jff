@@ -1,0 +1,24 @@
+{
+    "schema"    : "scheduler/1.0",
+    "timeout"   : 60,
+
+    "nodes"     : [
+        {
+            "app"       : "01-app",
+            "inputs"    : [],
+            "outputs"   : ["a", "b"],
+            "args"      : []
+        },
+
+        {
+            "app"       : "01-app",
+            "inputs"    : ["b", "a"],
+            "outputs"   : [],
+            "args"      : []
+        }
+    ],
+
+    "machines"  : [
+        "localhost"
+    ]
+}
