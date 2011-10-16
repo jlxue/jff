@@ -153,6 +153,7 @@ sub schedule {
     my $machines = $spec->{machines};
     my $m = 0;
     my $t = time();
+    my %inputs;         # input_key => ["host:port", "secret"]
 
     die "Invalid machines spec!" unless ref($machines) eq 'ARRAY';
     die "No machine to schedule!" unless @$machines > 0;
@@ -170,8 +171,18 @@ sub schedule {
             $plumber = Event::Plumber->new(host => $host);
         }
 
+        # connect this node's outputs to child nodes' inputs
+        my @outputs;
+        for my $output (@{ $node->{outputs} }) {
+            die "No child node's input found for this output: $output" unless
+                exists $inputs{$output};
+
+            push @outputs, $inputs{$output};
+        }
+
         my $ua = LWP::UserAgent->new();
-        my $request = $plumber->createExecRequest($node->{app}, $node->{args});
+        my $request = $plumber->createExecRequest($node->{app},
+            $node->{inputs}, \@outputs, $node->{args});
         my $response = $plumber->parseResponse($ua->request($request));
 
         if ($response->[0] ne "ok") {
@@ -179,6 +190,13 @@ sub schedule {
 
             $m = 0 if ++$m == @$machines;
             redo;
+        } else {
+            die "Bad response from " . $node->{app} . " at $machines->[$m]\n" unless
+                ref($response->[1]) && @$response == 2;
+
+            for my $input (@{ $node->{inputs} }) {
+                $inputs{$input} = $response->[1];
+            }
         }
     }
 
