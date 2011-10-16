@@ -1,6 +1,9 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
+use FindBin;
+use lib "$FindBin::RealBin/../lib";
+
 use Data::Dumper;
 use Event::Plumber;
 use JSON;
@@ -155,13 +158,15 @@ sub schedule {
     my $machines = $spec->{machines};
     my $m = 0;
     my $t = time();
+    my $timeout = $spec->{timeout} || SCHEDULER_TIMEOUT;
     my %inputs;         # input_key => ["host:port", "secret"]
 
     die "Invalid machines spec!" unless ref($machines) eq 'ARRAY';
     die "No machine to schedule!" unless @$machines > 0;
 
     for (my $i = 0; $i < @$sorted_nodes; ++$i) {
-        die "Scheduler timeout!" if time() - $t >= SCHEDULER_TIMEOUT;
+        my $left_time = time() - $t;
+        die "Scheduler timeout!" if $left_time >= $timeout;
 
         my $node = $sorted_nodes->[$i];
 
@@ -182,7 +187,7 @@ sub schedule {
             push @outputs, $inputs{$output};
         }
 
-        my $ua = LWP::UserAgent->new();
+        my $ua = LWP::UserAgent->new(timeout => $left_time);
         my $request = $plumber->createExecRequest($node->{app},
             $node->{inputs}, \@outputs, $node->{args});
         my $response = $plumber->parseResponse($ua->request($request));

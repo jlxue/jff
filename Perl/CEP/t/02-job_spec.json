@@ -1,5 +1,6 @@
 {
     "schema"    : "scheduler/1.0",
+    "timeout"   : 60,
 
     "nodes"     : [
         {
