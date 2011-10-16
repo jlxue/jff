@@ -10,16 +10,20 @@
 #   (2) clientA sends json data ["exec", "app_name", arg...] to plumber,
 #       the arguments can be arbitrary json data structures;
 #   (3) plumber forks and executes "LIBEXEC_PATH/$app_name/run", the child process(clientB)
-#       has extra environments PLUMBER_PORT and PLUMBER_COOKIE set;
+#       has extra environments PLUMBER_PORT and PLUMBER_COOKIE been set;
 #
 #   (4) the child process(clientB) sends json data ["establish", $PLUMBER_COOKIE] to plumber;
-#   (5) plumber replies clientB with json data ["ok", arg1, arg2];
+#   (5) plumber replies clientB with json data ["ok", arg...];
 #
 #   (6) clientB setups, then sends json data ["establish2", $PLUMBER_COOKIE, new_arg...]
 #       to plumber, the arguments can be arbitrary json data structures;
 #   (7) plumber replies clientB with json data ["ok", "done"];
 #
-#   (8) to continue 3), plumber replies clientA with json data ["ok", new_arg, ...];
+#   (8) to continue 3), plumber replies clientA with json data ["ok", new_arg...];
+#
+#   Plumber doesn't communicate with clientB by stdio/stdout, because
+#   it's too easy to mess up these two standard streams by mistake,
+#   clientB can redirect those itself if necessary.
 #
 # Authors:
 #   Yubao Liu <yubao.liu@gmail.com>
