@@ -1,0 +1,16 @@
+{
+    "schema"    : "scheduler/1.0",
+
+    "nodes"     : [
+        {
+            "app"       : "01-app",
+            "inputs"    : [],
+            "outputs"   : [],
+            "args"      : []
+        }
+    ],
+
+    "machines"  : [
+        "localhost"
+    ]
+}

@@ -37,8 +37,8 @@ sub obtain_job_specification {
 
     die "Invalid job spec!" unless ref($job_spec) eq 'HASH';
 
-    my $nodes = $spec->{nodes};
-    my $machines = $spec->{machines};
+    my $nodes = $job_spec->{nodes};
+    my $machines = $job_spec->{machines};
 
     die "No nodes defined!" unless defined $nodes;
     die "No machines defined!" unless defined $machines;
@@ -111,6 +111,8 @@ sub topology_sort_nodes {
     # topology sort nodes by input/output dependency
     my %node_deps;
     for (my $i = 0; $i < @$nodes; ++$i) {
+        $node_deps{$i} = {};
+
         for my $output (@{ $nodes->[$i]{outputs} }) {
             # $nodes->[$i] outputs to $nodes->[ $inputs{$output} ]
             $node_deps{$i}{ $inputs{$output} } = 1;
