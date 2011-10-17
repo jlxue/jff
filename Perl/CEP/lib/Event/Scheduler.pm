@@ -159,6 +159,7 @@ sub schedule {
 
     die "Invalid machines spec!" unless ref($machines) eq 'ARRAY';
     die "No machine to schedule!" unless @$machines > 0;
+    $m = int(rand(@$machines));
 
     for (my $i = 0; $i < @$sorted_nodes; ++$i) {
         my $left_time = time() - $t;
