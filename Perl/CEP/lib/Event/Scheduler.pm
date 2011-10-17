@@ -5,6 +5,7 @@ use warnings;
 use Data::Dumper;
 use Event::Plumber;
 use Exporter "import";
+use JSON;
 use LWP::UserAgent;
 use constant SCHEDULER_SCHEMA   => 'scheduler/1.0';
 use constant SCHEDULER_TIMEOUT  => 2 * 60;  # 2 min
@@ -155,7 +156,7 @@ sub schedule {
     my $m = 0;
     my $t = time();
     my $timeout = $spec->{timeout} || SCHEDULER_TIMEOUT;
-    my %inputs;         # input_key => ["host:port", "secret"]
+    my %inputs;         # input_key => ["host", "port", "secret"]
 
     die "Invalid machines spec!" unless ref($machines) eq 'ARRAY';
     die "No machine to schedule!" unless @$machines > 0;
@@ -176,17 +177,17 @@ sub schedule {
         }
 
         # connect this node's outputs to child nodes' inputs
-        my @outputs;
+        my %outputs;
         for my $output (@{ $node->{outputs} }) {
             die "No child node's input found for this output: $output" unless
                 exists $inputs{$output};
 
-            push @outputs, $inputs{$output};
+            $outputs{$output} = $inputs{$output};
         }
 
         my $ua = LWP::UserAgent->new(timeout => $left_time);
         my $request = $plumber->createExecRequest($node->{app},
-            $node->{inputs}, \@outputs, $node->{args});
+            $node->{inputs}, \%outputs, $node->{args});
         my $response = $plumber->parseResponse($ua->request($request));
 
         if ($response->[0] ne "ok") {
@@ -195,11 +196,17 @@ sub schedule {
             $m = 0 if ++$m == @$machines;
             redo;
         } else {
+            # ["ok", port, "secret"]
             die "Bad response from " . $node->{app} . " at $machines->[$m]\n" unless
-                ref($response->[1]) && @$response == 2;
+                @$response == 3;
+            shift @$response;
+
+            print STDERR "Successfully scheduled $node->{app} to $machines->[$m]: @$response\n";
+
+            my $connection_info = [$host, @$response];
 
             for my $input (@{ $node->{inputs} }) {
-                $inputs{$input} = $response->[1];
+                $inputs{$input} = $connection_info;
             }
         }
     }

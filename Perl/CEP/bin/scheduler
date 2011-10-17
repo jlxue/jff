@@ -5,7 +5,6 @@ use FindBin;
 use lib "$FindBin::RealBin/../lib";
 
 use Event::Scheduler;
-use JSON;
 
 my $spec = obtain_job_specification();
 my $sorted_nodes = topology_sort_nodes($spec->{nodes});
