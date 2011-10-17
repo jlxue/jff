@@ -30,7 +30,7 @@ sub obtain_job_specification {
         my $ua = LWP::UserAgent->new();
         my $response = $plumber->parseResponse($ua->request($request));
 
-        die $response->[1] unless $response->[0] ne "ok";
+        die $response->[1] if $response->[0] ne "ok";
         $job_spec = $response->[1];
     }
 
@@ -43,6 +43,7 @@ sub obtain_job_specification {
     die "No nodes defined!" unless defined $nodes;
     die "No machines defined!" unless defined $machines;
 
+    print STDERR Dumper($job_spec);
     return $job_spec;
 }
 
@@ -201,7 +202,7 @@ sub schedule {
                 @$response == 3;
             shift @$response;
 
-            print STDERR "Successfully scheduled $node->{app} to $machines->[$m]: @$response\n";
+            print STDERR "Successfully scheduled $node->{app} to $machines->[$m]:@$response\n";
 
             my $connection_info = [$host, @$response];
 

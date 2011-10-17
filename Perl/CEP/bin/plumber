@@ -4,6 +4,9 @@
 #   This script implements a service to run controlled executable
 #   upon request from trusted network.
 #
+# Usage:
+#   $ ./plumber --port 9999 --exec-dir ./apps
+#
 # Protocol:
 #   (1) plumber listens on some port, such as 9999;
 #

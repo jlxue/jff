@@ -4,14 +4,14 @@
 
     "nodes"     : [
         {
-            "app"       : "01-app",
+            "app"       : "echo",
             "inputs"    : [],
             "outputs"   : ["a", "b"],
             "args"      : []
         },
 
         {
-            "app"       : "01-app",
+            "app"       : "echo",
             "inputs"    : ["b", "a"],
             "outputs"   : [],
             "args"      : []

@@ -19,14 +19,16 @@ my $response = $plumber->parseResponse($ua->request($request));
 
 die "Bad response: $response->[1]" if $response->[0] ne "ok";
 
-print STDERR "pid $$ got args: , ", Dumper($response->[1]);
+shift @$response;
+print STDERR "pid $$ got args: , ", Dumper($response);
 
 $request = $plumber->createEstablish2Request(int(rand(65536)), "secret-$$");
 $response = $plumber->parseResponse($ua->request($request));
 
 die "Bad response: $response->[1]" if $response->[0] ne "ok";
 
-print STDERR "pid $$ got response: $response->[1]\n";
+shift @$response;
+print STDERR "pid $$ got response: @$response\n";
 
 print STDERR "pid $$ go to sleep\n";
 sleep 9999999

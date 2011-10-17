@@ -1,4 +1,83 @@
 #!/usr/bin/env perl
+#
+# Purpose:
+#   This script is also a Plumber app, it requests remote plumbers
+#   to spawn apps and provides each apps necessary socket connection
+#   information.
+#
+#   When executed from command line, it reads job spec from stdin,
+#   checks its validity, outputs topologically sorted node list.
+#
+# Usage:
+#   run under shell:
+#   $ ./scheduler < job_spec.json   # run it from command line
+#
+#   run under Plumber:
+#   $ curl -4 -s -v -d "[\"exec\", \"scheduler\", `cat job_spec.json`]" \
+#       http://localhost:9999/json
+#
+# Protocol:
+#
+#   Bootstrap:
+#   (1) admin sends ["exec", "scheduler", {...job spec...}] to plumber;
+#
+#   (2) plumber runs app "scheduler", its argument is {...job spec...};
+#   (3) scheduler topologically sorts $spec->{nodes}, child first;
+#
+#   (4) scheduler assigns a machine to first leaf node;
+#   (5) scheduler requests plumber on that machine to spawn app for the
+#       leaf node, aka. sends
+#       ["exec", "some_app", [...inputs...], {...outputs...}, args]
+#       to plumber;
+#
+#   [...inputs...]:     $spec->{nodes}[0]{inputs}, for example:
+#       ["a", "b", "c"]
+#       Each name represents a in-edge of a node.
+#
+#   {...outputs...}:    connection info used to connect to children's inputs.
+#       for example:
+#           {
+#               "g" => ["host1", port1, "secret-string"],
+#               "h" => ["host2", port2, "secret-string2"],
+#           }
+#       Each output key represents a out-edge of a node, each value
+#       represents the address/port of a child node and the secret string
+#       used to verify connection.
+#
+#   (6) the app is spawned and receives the three data structures(inputs,
+#       outputs and args) by sending ["establish", $PLUMBER_COOKIE] to
+#       plumber.
+#
+#       If outputs isn't empty, it connects to those child nodes:
+#           socket connect()
+#           socket send("secret-string output_key\n")
+#           socket recv();
+#
+#           The child node checks the request line and feeds back "ok\n".
+#
+#       If inputs isn't empty, it generates a secret string and bind
+#       to a any port to listen for connections from parent nodes.
+#
+#       Before call socket accept(), the app sends ["establish2", $PLUMBER_COOKIE,
+#       port, "secret_string"] to Plumber.
+#
+#   (7) continue (5), scheduler receives [port, "secret_string"] for
+#       the child node, so scheduler knows the child node's all input
+#       information.
+#   (8) goto (4), repeat until all nodes are assigned real machine successfully.
+#
+#   (9) admin gets ["ok"].
+#
+# Authors:
+#   Yubao Liu <yubao.liu@gmail.com>
+#
+# Copyright:
+#   GPL v3
+#
+# ChangeLog:
+#   2011-10-17  Yubao Liu
+#       * initial version, implement the app bootstrap protocol
+
 use strict;
 use warnings;
 use FindBin;
@@ -15,4 +94,3 @@ if (exists $ENV{PLUMBER_PORT}) {
     print JSON->new->pretty->encode($sorted_nodes);
 }
 
-###################################################
