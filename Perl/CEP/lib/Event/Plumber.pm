@@ -12,7 +12,7 @@ sub new {
         $args{host} = "localhost";
     }
 
-    if (! exists $args{port}) {
+    if (! $args{port}) {
         if (exists $ENV{PLUMBER_PORT}) {
             $args{port} = $ENV{PLUMBER_PORT};
         } else {

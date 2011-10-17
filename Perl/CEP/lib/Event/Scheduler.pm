@@ -23,7 +23,7 @@ sub obtain_job_specification {
 
     if (! exists $ENV{PLUMBER_PORT}) {
         local $/;
-        $job_spec = decode_json(<STDIN>);
+        $job_spec = decode_json(<>);
     } else {
         my $plumber = Event::Plumber->new();
         my $request = $plumber->createEstablishRequest();

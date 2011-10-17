@@ -6,12 +6,15 @@
 #   information.
 #
 #   When executed from command line, it reads job spec from stdin,
-#   checks its validity, outputs topologically sorted node list.
+#   checks its validity, outputs topologically sorted node list,
+#   if --boostrap is given, it sends to topology to a Plumber.
 #
 # Usage:
 #   run under shell:
-#   $ ./scheduler < job_spec.json   # run it from command line
+#   $ ./scheduler job_spec.json
+#   $ ./scheduler --bootstrap --host localhost --port 9999 --app scheduler job_spec.json
 #
+#   run under shell
 #   run under Plumber:
 #   $ curl -4 -s -v -d "[\"exec\", \"scheduler\", `cat job_spec.json`]" \
 #       http://localhost:9999/json
@@ -84,6 +87,19 @@ use FindBin;
 use lib "$FindBin::RealBin/../lib";
 
 use Event::Scheduler;
+use Getopt::Long;
+use LWP::UserAgent;
+
+my $g_bootstrap = 0;
+my $g_host = "localhost";
+my $g_port;
+my $g_app = "scheduler";
+
+GetOptions("bootstrap!"   => \$g_bootstrap,
+           "host=s"       => \$g_host,
+           "port=i"       => \$g_port,
+           "app=s"        => \$g_app,
+);
 
 my $spec = obtain_job_specification();
 my $sorted_nodes = topology_sort_nodes($spec->{nodes});
@@ -92,5 +108,15 @@ if (exists $ENV{PLUMBER_PORT}) {
     schedule($sorted_nodes, $spec);
 } else {
     print JSON->new->pretty->encode($sorted_nodes);
+
+    if ($g_bootstrap) {
+        my $plumber = Event::Plumber->new(host => $g_host, port => $g_port);
+        my $request = $plumber->createExecRequest($g_app, $spec);
+        my $ua = LWP::UserAgent->new();
+        my $response = $plumber->parseResponse($ua->request($request));
+
+        die "$response->[1]" if $response->[0] ne "ok";
+        print "@$response\n";
+    }
 }
 
