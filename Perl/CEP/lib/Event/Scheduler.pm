@@ -43,7 +43,6 @@ sub obtain_job_specification {
     die "No nodes defined!" unless defined $nodes;
     die "No machines defined!" unless defined $machines;
 
-    print STDERR Dumper($job_spec);
     return $job_spec;
 }
 

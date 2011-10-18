@@ -12,12 +12,13 @@
 # Usage:
 #   run under shell:
 #   $ ./scheduler job_spec.json
-#   $ ./scheduler --bootstrap --host localhost --port 9999 --app scheduler job_spec.json
 #
-#   run under shell
 #   run under Plumber:
 #   $ curl -4 -s -v -d "[\"exec\", \"scheduler\", `cat job_spec.json`]" \
 #       http://localhost:9999/json
+#
+#   or:
+#   $ ./scheduler --bootstrap --host localhost --port 9999 --app scheduler job_spec.json
 #
 # Protocol:
 #

@@ -1,0 +1,76 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use FindBin;
+use lib "$FindBin::Bin/../../../lib";
+
+use Data::Dumper;
+use Event::Plumber;
+use Event::Worker;
+use LWP::UserAgent;
+use JSON;
+use POE qw(Component::Server::TCP Component::Client::TCP);
+use Socket qw/unpack_sockaddr_in/;
+
+die "Must be called by Plumber!" unless exists $ENV{PLUMBER_PORT} &&
+    exists $ENV{PLUMBER_COOKIE};
+
+my $worker = Event::Worker->new();
+my $g_listener_port;
+
+POE::Session->create(
+    inline_states => {
+        _start      => \&on_start,
+        _stop       => \&on_stop,
+    },
+
+    args => [ $worker ];
+);
+
+POE::Kernel->run;
+exit;
+
+
+#########################################################
+
+sub on_start {
+    my ($kernel, $session, $heap, $worker) = @_[KERNEL, SESSION, HEAP, ARG0];
+    my $outputs = $worker->outputs;
+
+    $heap->{worker} = $worker;
+
+    if (keys %$outputs > 0) {
+        while (my ($k, $v) = each %$outputs) {
+            my ($host, $port, $secret) = @$v;
+
+            POE::Component::Client::TCP->new(
+                RemoteAddress   => $host,
+                RemotePort      => $port,
+
+                Connected       => sub {
+                    $_[HEAP]{server}->put("$secret $port");
+                },
+
+                ServerInput     => sub {
+                    my $input = $_[ARG0];
+
+                    print "from server: $input\n";
+                }
+            );
+        }
+    }
+
+    if (@$inputs > 0) {
+        POE::Component::Server::TCP->new(
+            Started => sub {
+                my $listener = $_[HEAP]{listener};
+                my ($port, $addr) = unpack_sockaddr_in($listener->getsockname);
+
+                print "socket successfully bound to $port\n";
+
+                $g_listener_port = $port;
+            }
+        );
+    }
+}
+
