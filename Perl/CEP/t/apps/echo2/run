@@ -13,22 +13,19 @@ die "Must be called by Plumber!" unless exists $ENV{PLUMBER_PORT} &&
     exists $ENV{PLUMBER_COOKIE};
 
 my $plumber = Event::Plumber->new();
-my $request = $plumber->createEstablishRequest();
-my $ua = LWP::UserAgent->new();
-my $response = $plumber->parseResponse($ua->request($request));
+my @response = $plumber->establish();
 
-die "Bad response: $response->[1]" if $response->[0] ne "ok";
+die "Bad response: $response[1]" if $response[0] ne "ok";
 
-shift @$response;
-print STDERR "pid $$ got args: , ", Dumper($response);
+shift @response;
+print STDERR "pid $$ got args: , ", Dumper(\@response);
 
-$request = $plumber->createEstablish2Request(int(rand(65536)), "secret-$$");
-$response = $plumber->parseResponse($ua->request($request));
+@response = $plumber->establish2(int(rand(65536)), "secret-$$");
 
-die "Bad response: $response->[1]" if $response->[0] ne "ok";
+die "Bad response: $response[1]" if $response[0] ne "ok";
 
-shift @$response;
-print STDERR "pid $$ got response: @$response\n";
+shift @response;
+print STDERR "pid $$ got response: @response\n";
 
 print STDERR "pid $$ go to sleep\n";
 sleep 9999999

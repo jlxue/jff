@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use HTTP::Request;
 use JSON;
+use LWP::UserAgent;
 use constant    DEFAULT_PORT    => 9999;
 
 sub new {
@@ -24,7 +25,7 @@ sub new {
 }
 
 
-# Args:     action, args...
+# Args:     (action, args...)
 # Returns:  HTTP::Request object
 #
 sub createRequest {
@@ -46,14 +47,14 @@ sub createRequest {
 
 
 # Args:     HTTP::Response object
-# Returns:  ["bad" | "ok", args....]
+# Returns:  ("bad" | "ok", args....)
 #
 sub parseResponse {
     my $self = shift;
     my $response = shift;
 
     unless (defined $response) {
-        return ["bad", "failed to obtain HTTP response!"];
+        return ("bad", "failed to obtain HTTP response!");
     }
 
     die "Not a HTTP::Response object!\n" unless
@@ -62,10 +63,10 @@ sub parseResponse {
     my $content = $response->content;
 
     if ($response->code != 200) {
-        return ["bad", defined($content) ? $content : "Empty response!"];
+        return ("bad", defined($content) ? $content : "Empty response!");
     }
 
-    return decode_json($content);
+    return @{ decode_json($content) };
 }
 
 
@@ -106,6 +107,38 @@ sub createEstablish2Request {
     return $self->createRequest("establish2", $ENV{PLUMBER_COOKIE}, @_);
 }
 
+
+sub exec {
+    my $self = shift;
+
+    return $self->_request($self->createExecRequest(@_));
+}
+
+
+sub establish {
+    my $self = shift;
+
+    return $self->_request($self->createEstablishRequest(@_));
+}
+
+
+sub establish2 {
+    my $self = shift;
+
+    return $self->_request($self->createEstablish2Request(@_));
+}
+
+
+sub _request {
+    my ($self, $req) = @_;
+    my $ua = LWP::UserAgent->new();
+
+    if (exists $self->{timeout}) {
+        $ua->timeout( $self->{timeout} );
+    }
+
+    return $self->parseResponse($ua->request($req));
+}
 
 1;
 

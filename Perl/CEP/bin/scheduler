@@ -89,7 +89,6 @@ use lib "$FindBin::RealBin/../lib";
 
 use Event::Scheduler;
 use Getopt::Long;
-use LWP::UserAgent;
 
 my $g_bootstrap = 0;
 my $g_host = "localhost";
@@ -112,12 +111,10 @@ if (exists $ENV{PLUMBER_PORT}) {
 
     if ($g_bootstrap) {
         my $plumber = Event::Plumber->new(host => $g_host, port => $g_port);
-        my $request = $plumber->createExecRequest($g_app, $spec);
-        my $ua = LWP::UserAgent->new();
-        my $response = $plumber->parseResponse($ua->request($request));
+        my @response = $plumber->exec($g_app, $spec);
 
-        die "$response->[1]" if $response->[0] ne "ok";
-        print "@$response\n";
+        die "$response[1]" if $response[0] ne "ok";
+        print "@response\n";
     }
 }
 

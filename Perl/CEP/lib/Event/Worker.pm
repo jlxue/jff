@@ -10,14 +10,12 @@ sub new {
     my $class = shift;
 
     my $plumber = Event::Plumber->new();
-    my $request = $plumber->createEstablishRequest();
-    my $ua = LWP::UserAgent->new();
-    my $response = $plumber->parseResponse($ua->request($request));
+    my @response = $plumber->establish();
 
-    die $response->[1] if $response->[0] ne "ok";
+    die $response[1] if $response[0] ne "ok";
 
-    shift @$response;
-    my ($inputs, $outputs, $args) = @$response;
+    shift @response;
+    my ($inputs, $outputs, $args) = @response;
 
     my $self = {inputs => $inputs, outputs => $outputs, args => $args};
 

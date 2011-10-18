@@ -26,12 +26,10 @@ sub obtain_job_specification {
         $job_spec = decode_json(<>);
     } else {
         my $plumber = Event::Plumber->new();
-        my $request = $plumber->createEstablishRequest();
-        my $ua = LWP::UserAgent->new();
-        my $response = $plumber->parseResponse($ua->request($request));
+        my @response = $plumber->establish();
 
-        die $response->[1] if $response->[0] ne "ok";
-        $job_spec = $response->[1];
+        die $response[1] if $response[0] ne "ok";
+        $job_spec = $response[1];
     }
 
 
@@ -171,9 +169,11 @@ sub schedule {
         my ($host, $port) = split /:/, $machines->[$m];
         my $plumber;
         if (defined $port) {
-            $plumber = Event::Plumber->new(host => $host, port => $port);
+            $plumber = Event::Plumber->new(host => $host, port => $port,
+                timeout => $left_time);
         } else {
-            $plumber = Event::Plumber->new(host => $host);
+            $plumber = Event::Plumber->new(host => $host,
+                timeout => $left_time);
         }
 
         # connect this node's outputs to child nodes' inputs
@@ -185,13 +185,10 @@ sub schedule {
             $outputs{$output} = $inputs{$output};
         }
 
-        my $ua = LWP::UserAgent->new(timeout => $left_time);
-        my $request = $plumber->createExecRequest($node->{app},
-            $node->{inputs}, \%outputs, $node->{args});
-        my $response = $plumber->parseResponse($ua->request($request));
+        my @response = $plumber->exec($node->{app}, $node->{inputs}, \%outputs, $node->{args});
 
-        if ($response->[0] ne "ok") {
-            warn "Failed to schedule node $i: " . $response->[1] . "\n";
+        if ($response[0] ne "ok") {
+            warn "Failed to schedule node $i: " . $response[1] . "\n";
 
             $m = 0 if ++$m == @$machines;
             redo;
@@ -199,15 +196,15 @@ sub schedule {
             my $inputs_num = @{ $node->{inputs} };
             # ["ok", port, "secret"] or ["ok"]
             die "Bad response from " . $node->{app} . " at $machines->[$m]\n" unless
-                ($inputs_num > 0 && @$response == 3) ||
-                ($inputs_num == 0 && @$response == 1);
+                ($inputs_num > 0 && @response == 3) ||
+                ($inputs_num == 0 && @response == 1);
 
-            shift @$response;
+            shift @response;
 
-            print STDERR "Successfully scheduled $node->{app} to $machines->[$m]:@$response\n";
+            print STDERR "Successfully scheduled $node->{app} to $machines->[$m]:@response\n";
 
             my $connection_info;
-            $connection_info = [$host, @$response] if @$response == 2;
+            $connection_info = [$host, @response] if @response == 2;
 
             for my $input (@{ $node->{inputs} }) {
                 $inputs{$input} = $connection_info;
@@ -216,11 +213,9 @@ sub schedule {
     }
 
     my $plumber = Event::Plumber->new();
-    my $request = $plumber->createEstablish2Request();
-    my $ua = LWP::UserAgent->new();
-    my $response = $plumber->parseResponse($ua->request($request));
+    my @response = $plumber->establish2();
 
-    die $response->[1] unless $response->[0] ne "ok";
+    die $response[1] unless $response[0] ne "ok";
 }
 
 
