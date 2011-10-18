@@ -196,14 +196,18 @@ sub schedule {
             $m = 0 if ++$m == @$machines;
             redo;
         } else {
-            # ["ok", port, "secret"]
+            my $inputs_num = @{ $node->{inputs} };
+            # ["ok", port, "secret"] or ["ok"]
             die "Bad response from " . $node->{app} . " at $machines->[$m]\n" unless
-                @$response == 3;
+                ($inputs_num > 0 && @$response == 3) ||
+                ($inputs_num == 0 && @$response == 1);
+
             shift @$response;
 
             print STDERR "Successfully scheduled $node->{app} to $machines->[$m]:@$response\n";
 
-            my $connection_info = [$host, @$response];
+            my $connection_info;
+            $connection_info = [$host, @$response] if @$response == 2;
 
             for my $input (@{ $node->{inputs} }) {
                 $inputs{$input} = $connection_info;

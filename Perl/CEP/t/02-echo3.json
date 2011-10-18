@@ -1,0 +1,38 @@
+{
+    "schema"    : "scheduler/1.0",
+    "timeout"   : 60,
+
+    "nodes"     : [
+        {
+            "app"       : "echo3",
+            "inputs"    : [],
+            "outputs"   : ["a", "b"],
+            "args"      : ["root"]
+        },
+
+        {
+            "app"       : "echo3",
+            "inputs"    : ["a"],
+            "outputs"   : ["c"],
+            "args"      : ["left"]
+        },
+
+        {
+            "app"       : "echo3",
+            "inputs"    : ["b"],
+            "outputs"   : ["d"],
+            "args"      : ["right"]
+        },
+
+        {
+            "app"       : "echo3",
+            "inputs"    : ["c", "d"],
+            "outputs"   : [],
+            "args"      : ["leaf"]
+        }
+    ],
+
+    "machines"  : [
+        "localhost"
+    ]
+}
