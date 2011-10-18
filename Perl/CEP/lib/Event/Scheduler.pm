@@ -189,6 +189,7 @@ sub schedule {
 
         if ($response[0] ne "ok") {
             warn "Failed to schedule node $i: " . $response[1] . "\n";
+            die "Only one machine to dispatch worker, give up!" if @$machines == 1;
 
             $m = 0 if ++$m == @$machines;
             redo;
