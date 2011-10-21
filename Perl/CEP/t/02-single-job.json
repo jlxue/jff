@@ -4,7 +4,7 @@
 
     "nodes"     : [
         {
-            "app"       : "echo",
+            "app"       : "echo2",
             "inputs"    : [],
             "outputs"   : [],
             "args"      : []
