@@ -350,6 +350,9 @@ sub action_exec {
 
     my $cookie = $app . "-" . time() ."-$$-" . int(rand(9999));
 
+    my $heap = $poe_kernel->get_active_session()->get_heap();
+    my $who = $heap->{remote_ip} . ":" . $heap->{remote_port};
+
     my $pid = fork();
     if (! defined $pid) {
         return ["bad", "Failed to run app!"];
@@ -362,6 +365,7 @@ sub action_exec {
             pid => $pid,
             sid => $poe_kernel->get_active_session()->ID,
             arg => \@args,
+            who => $who,
         };
 
         # Register handler in "Master" session, so this child session
@@ -380,8 +384,21 @@ sub action_exec {
         open STDIN, '<&', $nullfh->fileno() or
             die "Can't redirect stdin(pid=$$): $!";
 
+        my $job;
+        if (@args > 0 && ref($args[0]) eq 'HASH') {
+            $job = $args[0]{job} if exists $args[0]{job};
+        }
+
         $ENV{PLUMBER_COOKIE} = $cookie;
-        exec { $path } $app or
+        $ENV{PLUMBER_APP} = $app;
+        $ENV{PLUMBER_WHO} = $who;
+        $ENV{PLUMBER_JOB} = $job if defined $job;
+
+        my @tokens = ("--app", $app);
+        push @tokens, "--requestor", $who;
+        push @tokens, "--job", $job if defined $job;
+
+        exec { $path } $app, @tokens or
             print STDERR "Can't execute $path: $!";
 
         POSIX::_exit(1);

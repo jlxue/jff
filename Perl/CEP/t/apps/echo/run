@@ -22,6 +22,7 @@ which curl >/dev/null || {
 echo "# show PLUMBER environment"
 env | grep ^PLUMBER
 
+echo "command line args: $0 $@"
 
 json="[\"establish\", \"$PLUMBER_COOKIE\"]"
 json=`query_plumber "$json"`
