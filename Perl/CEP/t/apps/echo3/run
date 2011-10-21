@@ -16,6 +16,7 @@ die "Must be called by Plumber!" unless exists $ENV{PLUMBER_PORT} &&
     exists $ENV{PLUMBER_COOKIE};
 
 my $worker = Event::Worker->new();
+print "worker: ", Dumper($worker);
 
 POE::Session->create(
     inline_states => {

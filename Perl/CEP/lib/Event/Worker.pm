@@ -14,12 +14,12 @@ sub new {
 
     die $response[1] if $response[0] ne "ok";
 
-    shift @response;
-    my ($inputs, $outputs, $args) = @response;
+    my $h = $response[1];
 
-    my $self = {inputs => $inputs, outputs => $outputs, args => $args};
-
-    print Dumper($self);
+    my $self = {};
+    $self->{inputs} = exists $h->{inputs} ? $h->{inputs} : [];
+    $self->{outputs} = exists $h->{outputs} ? $h->{outputs} : {};
+    $self->{args} = exists $h->{args} ? $h->{args} : [];
 
     bless $self, $class;
 }

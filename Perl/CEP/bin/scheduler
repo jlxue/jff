@@ -31,7 +31,10 @@
 #   (4) scheduler assigns a machine to first leaf node;
 #   (5) scheduler requests plumber on that machine to spawn app for the
 #       leaf node, aka. sends
-#       ["exec", "some_app", [...inputs...], {...outputs...}, args]
+#       ["exec", "some_app", {
+#           inputs  => [...inputs...],
+#           outputs => {...outputs...},
+#           args    => args}]
 #       to plumber;
 #
 #   [...inputs...]:     $spec->{nodes}[0]{inputs}, for example:

@@ -185,7 +185,11 @@ sub schedule {
             $outputs{$output} = $inputs{$output};
         }
 
-        my @response = $plumber->exec($node->{app}, $node->{inputs}, \%outputs, $node->{args});
+        my @response = $plumber->exec($node->{app}, {
+                inputs  => $node->{inputs},
+                outputs => \%outputs,
+                args    => $node->{args}
+        });
 
         if ($response[0] ne "ok") {
             warn "Failed to schedule node $i: " . $response[1] . "\n";
