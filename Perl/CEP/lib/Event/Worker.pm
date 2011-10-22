@@ -116,6 +116,8 @@ sub _connectInputs {
     my ($host, $port, $secret);
 
     POE::Component::Server::TCP->new(
+        Alias   => "Listener",
+
         Started => sub {
             my $listener = $_[HEAP]{listener};
             ($port, $host) = unpack_sockaddr_in($listener->getsockname);
@@ -148,6 +150,11 @@ sub _connectInputs {
             } else {
                 $self->{input_poe_session_ids}{$input} = $_[SESSION]->ID;
                 $_[HEAP]{client}->put("ok");
+
+                # Don't listen again if inputs are all connected.
+                if (keys %{ $self->{input_poe_session_ids} } == keys %{ $self->{inputs} }) {
+                    $_[KERNEL]->post("Listener", "shutdown");
+                }
             }
         }
     );
