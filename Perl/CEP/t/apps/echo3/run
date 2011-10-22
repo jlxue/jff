@@ -5,12 +5,6 @@ use FindBin;
 use lib "$FindBin::Bin/../../../lib";
 
 use Data::Dumper;
-use Event::Plumber;
-use Event::Worker;
-use LWP::UserAgent;
-use JSON;
-use POE qw(Component::Server::TCP Component::Client::TCP);
-use Socket qw/unpack_sockaddr_in/;
 
 die "Must be called by Plumber!" unless exists $ENV{PLUMBER_PORT} &&
     exists $ENV{PLUMBER_COOKIE};
@@ -18,82 +12,5 @@ die "Must be called by Plumber!" unless exists $ENV{PLUMBER_PORT} &&
 my $worker = Event::Worker->new();
 print "worker: ", Dumper($worker);
 
-POE::Session->create(
-    inline_states => {
-        _start      => \&on_start,
-        _stop       => \&on_stop,
-    },
-
-    args => [ $worker ],
-);
-
-POE::Kernel->run;
-exit;
-
-
-#########################################################
-
-sub on_start {
-    my ($kernel, $session, $heap, $worker) = @_[KERNEL, SESSION, HEAP, ARG0];
-    my $inputs = $worker->inputs;
-    my $outputs = $worker->outputs;
-
-    $heap->{worker} = $worker;
-
-    if (keys %$outputs > 0) {
-        while (my ($k, $v) = each %$outputs) {
-            my ($host, $port, $secret) = @$v;
-
-            POE::Component::Client::TCP->new(
-                RemoteAddress   => $host,
-                RemotePort      => $port,
-
-                Connected       => sub {
-                    $_[HEAP]{server}->put("$secret $port");
-                },
-
-                ServerInput     => sub {
-                    my $input = $_[ARG0];
-
-                    print "from server: $input\n";
-                }
-            );
-        }
-    }
-
-    if (@$inputs > 0) {
-        POE::Component::Server::TCP->new(
-            Started => sub {
-                my $listener = $_[HEAP]{listener};
-                my ($port, $addr) = unpack_sockaddr_in($listener->getsockname);
-
-                print "socket successfully bound to $port\n";
-
-                my $plumber = Event::Plumber->new();
-                my @response = $plumber->establish2($port, "secret-$$");
-                die $response[1] if $response[0] ne "ok";
-            },
-
-            ClientConnected => sub {
-                print "got a connection from $_[HEAP]{remote_ip} port ",
-                    $_[HEAP]{remote_port}, "\n";
-            },
-
-            ClientInput => sub {
-                my $line = $_[ARG0];
-
-                print "got a client input: $line\n";
-                $_[HEAP]{client}->put("ok");
-            }
-        );
-    } else {
-        my $plumber = Event::Plumber->new();
-        my @response = $plumber->establish2();
-        die $response[1] if $response[0] ne "ok";
-    }
-}
-
-sub on_stop {
-    print "on_stop!\n";
-}
+$worker->run();
 
