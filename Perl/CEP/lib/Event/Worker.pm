@@ -9,7 +9,7 @@ use POE qw(Component::Server::TCP Component::Client::TCP);
 use Socket qw/unpack_sockaddr_in/;
 
 sub new {
-    my $class = shift;
+    my ($class, %params) = @_;
 
     my $plumber = Event::Plumber->new();
     my @response = $plumber->establish();
@@ -26,17 +26,22 @@ sub new {
     $self->{input_poe_session_ids} = {};
     $self->{output_poe_session_ids} = {};
 
+    $self->{onInput} =  exists $params{onInput} ? $params{onInput} :
+        \&onInput;
+    $self->{onFeedback} = exists $params{onFeedback} ?  $params{onFeedback} :
+        \&onFeedback;
+
     bless $self, $class;
 }
 
 
 sub inputs {
-    return shift->{inputs};
+    return @{ shift->{inputs} };
 }
 
 
 sub outputs {
-    return shift->{outputs};
+    return keys %{ shift->{outputs} };
 }
 
 
@@ -47,7 +52,7 @@ sub args {
 
 sub run {
     my $self = shift;
-    my $outputs = $self->outputs;
+    my $outputs = $self->{outputs};
 
     if (keys %$outputs > 0) {
         $self->_connectOutputs();
@@ -61,7 +66,7 @@ sub run {
 
 sub _connectOutputs {
     my $self = shift;
-    my $outputs = $self->outputs;
+    my $outputs = $self->{outputs};
 
     while (my ($output, $info) = each %$outputs) {
         die "Bad output information!" unless defined $info &&
@@ -79,15 +84,17 @@ sub _connectOutputs {
 
             ServerInput         => sub {
                 my $line = $_[ARG0];
-
                 print "from server: $line\n";
 
                 if ($line =~ /^ok\b/i) {
                     $self->{output_poe_session_ids}{$output} = $_[SESSION]->ID;
-                    $_[HEAP]{name} = $output;
 
-                    $_[KERNEL]->state("ServerInput", $self, "onChildInput");
+                    $_[KERNEL]->state("ServerInput", sub {
+                            $self->{onFeedback}->($output, $_[ARG0]);
+                        });
                 } else {
+                    $_[KERNEL]->state("ServerInput");
+
                     die "failed to connect output \"$output\": $line";
                 }
 
@@ -103,9 +110,9 @@ sub _connectOutputs {
 
 sub _connectInputs {
     my $self = shift;
-    my $inputs = $self->inputs;
+    my $inputs = $self->{inputs};
 
-    if (keys %$inputs == 0) {
+    if (@$inputs == 0) {
         my $plumber = Event::Plumber->new();
         my @response = $plumber->establish2();
 
@@ -137,18 +144,30 @@ sub _connectInputs {
 
         ClientInput => sub {
             my $line = $_[ARG0];
-
             print "got a client input: $line\n";
+
+            $_[KERNEL]->state("ClientInput");
+
             my ($secret2, $input) = split / /, $line;
 
             if ($secret ne $secret2) {
                 $_[HEAP]{client}->put("bad Wrong secret");
                 $_[KERNEL]->yield("shutdown");
+
             } elsif (exists $self->{input_poe_session_ids}{$input}) {
                 $_[HEAP]{client}->put("bad Duplicate input $input");
                 $_[KERNEL]->yield("shutdown");
+
+            } elsif (! grep {$_ eq $input} @{ $self->{inputs} }) {
+                $_[HEAP]{client}->put("bad Unknown input $input");
+                $_[KERNEL]->yield("shutdown");
+
             } else {
                 $self->{input_poe_session_ids}{$input} = $_[SESSION]->ID;
+                $_[KERNEL]->state("ClientInput", sub {
+                        $self->{onInput}->($input, $_[ARG0]);
+                    });
+
                 $_[HEAP]{client}->put("ok");
 
                 # Don't listen again if inputs are all connected.
@@ -160,11 +179,48 @@ sub _connectInputs {
     );
 }
 
-sub onChildInput {
+
+sub onInput {
+    my ($input_name, $data) = @_;
+
+    print "pid $$ got input from $input_name: $data\n";
 }
 
 
-sub onParentInput {
+sub onFeedback {
+    my ($output_name, $data) = @_;
+
+    print "pid $$ got feedback from $output_name: $data\n";
+}
+
+
+sub output {
+    my ($self, $output_name, $data) = @_;
+
+    die "Unknown output: $output_name" unless
+        exists $self->{output_poe_session_ids}{$output_name};
+
+    my $sid = $self->{output_poe_session_ids}{$output_name};
+    my $session = $poe_kernel->ID_id_to_session($sid);
+
+    die "POE session not found!" unless defined $session;
+
+    $session->get_heap()->{server}->put($data);
+}
+
+
+sub feedback {
+    my ($self, $input_name, $data) = @_;
+
+    die "Unknown input: $input_name" unless
+        exists $self->{input_poe_session_ids}{$input_name};
+
+    my $sid = $self->{input_poe_session_ids}{$input_name};
+    my $session = $poe_kernel->ID_id_to_session($sid);
+
+    die "POE session not found!" unless defined $session;
+
+    $session->get_heap()->{client}->put($data);
 }
 
 1;
