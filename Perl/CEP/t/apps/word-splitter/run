@@ -39,6 +39,8 @@ sub onInput {
     my ($name, $line) = @_;
     my @words = split /\s+/, $line;
 
+    print "Got words: @words\n";
+
     for my $word (@words) {
         $word =~ s/^\W+|\W+$//g;
 
@@ -52,11 +54,15 @@ sub onInput {
 
 
 sub flush {
-    while (my ($word, $count) = each %words) {
-        $worker->output($outputs[$i], "$word $count");
-        $i = 0 if ++$i == @outputs;
-    }
+    if (keys %words > 0) {
+        print "flush words!\n";
 
-    %words = ();
+        while (my ($word, $count) = each %words) {
+            $worker->output($outputs[$i], "$word $count");
+            $i = 0 if ++$i == @outputs;
+        }
+
+        %words = ();
+    }
 }
 

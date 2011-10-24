@@ -7,6 +7,7 @@ use lib "$FindBin::Bin/../../../lib";
 use BerkeleyDB;
 use Data::Dumper;
 use Event::Worker;
+use POE;
 
 die "Must be called by Plumber!" unless exists $ENV{PLUMBER_PORT} &&
     exists $ENV{PLUMBER_COOKIE};
@@ -14,11 +15,24 @@ die "Must be called by Plumber!" unless exists $ENV{PLUMBER_PORT} &&
 my $worker = Event::Worker->new(onInput => \&onInput);
 print "worker: ", Dumper($worker);
 
-tie my %words, "BerkeleyDB::Hash",
+my $db = tie my %words, "BerkeleyDB::Hash",
     -Filename   => "word_freq.db",
     -Flags      => DB_CREATE,
     -Mode       => 0644
         or die "Can't open bdb file \"word_freq.db\": $! $BerkeleyDB::Error\n";
+
+POE::Session->create(
+    inline_states   => {
+        _start  => sub {
+            $_[KERNEL]->delay("flush",  5);
+        },
+
+        flush   => sub {
+            $db->db_sync;
+            $_[KERNEL]->delay("flush",  5);
+        }
+    }
+);
 
 $worker->run();
 
@@ -27,6 +41,13 @@ sub onInput {
     my ($name, $line) = @_;
 
     my ($word, $count) = split /\s+/, $line;
-    $words{$word} += $count;
+
+    print "word-collector: $word $count\n";
+
+    if (exists $words{$word}) {
+        $words{$word} += $count;
+    } else {
+        $words{$word} = $count;
+    }
 }
 
