@@ -220,7 +220,7 @@ sub schedule {
     my $plumber = Event::Plumber->new();
     my @response = $plumber->establish2();
 
-    die $response[1] unless $response[0] ne "ok";
+    die $response[1] unless $response[0] eq "ok";
 }
 
 

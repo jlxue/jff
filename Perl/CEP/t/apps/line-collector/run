@@ -24,16 +24,18 @@ POE::Component::Server::TCP->new(
     ClientConnected     => sub {
         print "client connected from $_[HEAP]->{remote_ip} " .
             "port $_[HEAP]->{remote_port}, " .
-            "session id " . $_[SESSION]->ID;
+            "session id " . $_[SESSION]->ID . "\n";
     },
 
     ClientDisconnected  => sub {
         print "client disconnected from $_[HEAP]->{remote_ip} " .
             "port $_[HEAP]->{remote_port}, " .
-            "session id " . $_[SESSION]->ID;
+            "session id " . $_[SESSION]->ID . "\n";
     },
 
     ClientInput => sub {
+        print "line-collector: got input for $outputs[$i]: $_[ARG0]\n";
+
         $worker->output($outputs[$i], $_[ARG0]);
 
         $i = 0 if ++$i == @outputs;
