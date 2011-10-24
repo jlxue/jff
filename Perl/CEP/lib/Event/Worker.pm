@@ -5,6 +5,7 @@ use Data::Dumper;
 use Event::Plumber;
 use JSON;
 use LWP::UserAgent;
+use Module::Load;
 use POE qw(Component::Server::TCP Component::Client::TCP);
 use Socket qw/unpack_sockaddr_in/;
 
@@ -19,17 +20,23 @@ sub new {
     my $h = $response[1];
 
     my $self = {};
-    $self->{inputs} = exists $h->{inputs} ? $h->{inputs} : [];
-    $self->{outputs} = exists $h->{outputs} ? $h->{outputs} : {};
-    $self->{args} = exists $h->{args} ? $h->{args} : [];
+    $self->{inputs} = $h->{inputs} || [];
+    $self->{outputs} = $h->{outputs} || {};
+    $self->{args} = $h->{args} || [];
 
     $self->{input_poe_session_ids} = {};
     $self->{output_poe_session_ids} = {};
 
-    $self->{onInput} =  exists $params{onInput} ? $params{onInput} :
-        \&onInput;
-    $self->{onFeedback} = exists $params{onFeedback} ?  $params{onFeedback} :
-        \&onFeedback;
+    $self->{onInput} =  $params{onInput} || \&onInput;
+    $self->{onFeedback} = $params{onFeedback} || \&onFeedback;
+
+    $self->{HighMark} = $params{HighMark} || 10 * 1024 * 1024;
+
+    $self->{InputFilter} = $params{InputFilter};
+    $self->{OutputFilter} = $params{OutputFilter};
+
+    $self->{FeedbackInputFilter} = $params{FeedbackInputFilter};
+    $self->{FeedbackOutputFilter} = $params{FeedbackOutputFilter};
 
     bless $self, $class;
 }
@@ -64,6 +71,29 @@ sub run {
 }
 
 
+# See POE::Component::Server::TCP  ClientFilter
+#
+sub _createFilter {
+    my $filter = shift;
+
+    my $ref_type = ref($filter);
+    if ($ref_type eq "") {
+        load $filter;
+        return $filter->new;
+    } elsif ($ref_type eq 'ARRAY') {
+        die "Bad filter argument!" if @$filter < 1;
+
+        my $class = shift @$filter;
+        load $class;
+        return $class->new(@$filter);
+    } elsif ($filter->isa("POE::Filter")) {
+        return $filter->clone();
+    } else {
+        die "Bad filter argument!";
+    }
+}
+
+
 sub _connectOutputs {
     my $self = shift;
     my $outputs = $self->{outputs};
@@ -86,12 +116,25 @@ sub _connectOutputs {
                 my $line = $_[ARG0];
                 print "from server: $line\n";
 
+                $_[HEAP]{server}->pause_input();
+
                 if ($line =~ /^ok\b/i) {
                     $self->{output_poe_session_ids}{$output} = $_[SESSION]->ID;
 
                     $_[KERNEL]->state("ServerInput", sub {
                             $self->{onFeedback}->($output, $_[ARG0]);
                         });
+
+                    $_[HEAP]{server}->set_high_mark($self->{HighMark});
+
+                    if ($self->{OutputFilter}) {
+                        $_[HEAP]{server}->set_output_filter(_createFilter($self->{OutputFilter}));
+                    }
+
+                    if ($self->{FeedbackInputFilter}) {
+                        $_[HEAP]{server}->set_input_filter(_createFilter($self->{FeedbackInputFilter}));
+                    }
+
                 } else {
                     $_[KERNEL]->state("ServerInput");
 
@@ -100,6 +143,12 @@ sub _connectOutputs {
 
                 if (keys %{ $self->{output_poe_session_ids} } == keys %{ $self->{outputs} }) {
                     print "connected all outputs\n";
+
+                    for my $sid (values %{ $self->{output_poe_session_ids} }) {
+                        my $session = ID_id_to_session($sid);
+                        die "Bad session!" unless defiend $session;
+                        $session->get_heap()->{server}->resume_input();
+                    }
 
                     $self->_connectInputs();
                 }
@@ -147,6 +196,7 @@ sub _connectInputs {
             print "got a client input: $line\n";
 
             $_[KERNEL]->state("ClientInput");
+            $_[HEAP]{client}->pause_input();
 
             my ($secret2, $input) = split / /, $line;
 
@@ -170,8 +220,24 @@ sub _connectInputs {
 
                 $_[HEAP]{client}->put("ok");
 
+                $_[HEAP]{server}->set_high_mark($self->{HighMark});
+
+                if ($self->{InputFilter}) {
+                    $_[HEAP]{client}->set_input_filter(_createFilter($self->{InputFilter}));
+                }
+
+                if ($self->{FeedbackOutputFilter}) {
+                    $_[HEAP]{client}->set_output_filter(_createFilter($self->{FeedbackOutputFilter}));
+                }
+
                 # Don't listen again if inputs are all connected.
                 if (keys %{ $self->{input_poe_session_ids} } == keys %{ $self->{inputs} }) {
+                    for my $sid (values %{ $self->{input_poe_session_ids} }) {
+                        my $session = ID_id_to_session($sid);
+                        die "Bad session!" unless defiend $session;
+                        $session->get_heap()->{client}->resume_input();
+                    }
+
                     $_[KERNEL]->post("Listener", "shutdown");
                 }
             }
@@ -222,6 +288,7 @@ sub feedback {
 
     $session->get_heap()->{client}->put($data);
 }
+
 
 1;
 
