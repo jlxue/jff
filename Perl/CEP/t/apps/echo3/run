@@ -5,6 +5,7 @@ use FindBin;
 use lib "$FindBin::Bin/../../../lib";
 
 use Data::Dumper;
+use Event::Worker;
 
 die "Must be called by Plumber!" unless exists $ENV{PLUMBER_PORT} &&
     exists $ENV{PLUMBER_COOKIE};

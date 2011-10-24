@@ -1,0 +1,44 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use FindBin;
+use lib "$FindBin::Bin/../../../lib";
+
+use Data::Dumper;
+use Event::Worker;
+use POE;
+
+die "Must be called by Plumber!" unless exists $ENV{PLUMBER_PORT} &&
+    exists $ENV{PLUMBER_COOKIE};
+
+my $worker = Event::Worker->new();
+print "worker: ", Dumper($worker);
+
+my $args = $worker->args;
+my @outputs = $worker->outputs;
+my $i = 0;
+
+POE::Component::Server::TCP->new(
+    Port                => $args->{port},
+
+    ClientConnected     => sub {
+        print "client connected from $_[HEAP]->{remote_ip} " .
+            "port $_[HEAP]->{remote_port}, " .
+            "session id " . $_[SESSION]->ID;
+    },
+
+    ClientDisconnected  => sub {
+        print "client disconnected from $_[HEAP]->{remote_ip} " .
+            "port $_[HEAP]->{remote_port}, " .
+            "session id " . $_[SESSION]->ID;
+    },
+
+    ClientInput => sub {
+        $worker->output($outputs[$i], $_[ARG0]);
+
+        $i = 0 if ++$i == @outputs;
+    }
+);
+
+$worker->run();
+

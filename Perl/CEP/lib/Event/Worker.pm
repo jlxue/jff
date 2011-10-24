@@ -7,7 +7,7 @@ use JSON;
 use LWP::UserAgent;
 use Module::Load;
 use POE qw(Component::Server::TCP Component::Client::TCP);
-use Socket qw/unpack_sockaddr_in/;
+use Socket qw/unpack_sockaddr_in inet_ntoa/;
 
 sub new {
     my ($class, %params) = @_;
@@ -145,8 +145,8 @@ sub _connectOutputs {
                     print "connected all outputs\n";
 
                     for my $sid (values %{ $self->{output_poe_session_ids} }) {
-                        my $session = ID_id_to_session($sid);
-                        die "Bad session!" unless defiend $session;
+                        my $session = $poe_kernel->ID_id_to_session($sid);
+                        die "Bad session!" unless defined $session;
                         $session->get_heap()->{server}->resume_input();
                     }
 
@@ -220,7 +220,7 @@ sub _connectInputs {
 
                 $_[HEAP]{client}->put("ok");
 
-                $_[HEAP]{server}->set_high_mark($self->{HighMark});
+                $_[HEAP]{client}->set_high_mark($self->{HighMark});
 
                 if ($self->{InputFilter}) {
                     $_[HEAP]{client}->set_input_filter(_createFilter($self->{InputFilter}));
@@ -231,10 +231,10 @@ sub _connectInputs {
                 }
 
                 # Don't listen again if inputs are all connected.
-                if (keys %{ $self->{input_poe_session_ids} } == keys %{ $self->{inputs} }) {
+                if (keys %{ $self->{input_poe_session_ids} } == @{ $self->{inputs} }) {
                     for my $sid (values %{ $self->{input_poe_session_ids} }) {
-                        my $session = ID_id_to_session($sid);
-                        die "Bad session!" unless defiend $session;
+                        my $session = $poe_kernel->ID_id_to_session($sid);
+                        die "Bad session!" unless defined $session;
                         $session->get_heap()->{client}->resume_input();
                     }
 

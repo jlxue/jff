@@ -1,0 +1,32 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use FindBin;
+use lib "$FindBin::Bin/../../../lib";
+
+use BerkeleyDB;
+use Data::Dumper;
+use Event::Worker;
+
+die "Must be called by Plumber!" unless exists $ENV{PLUMBER_PORT} &&
+    exists $ENV{PLUMBER_COOKIE};
+
+my $worker = Event::Worker->new(onInput => \&onInput);
+print "worker: ", Dumper($worker);
+
+tie my %words, "BerkeleyDB::Hash",
+    -Filename   => "word_freq.db",
+    -Flags      => DB_CREATE,
+    -Mode       => 0644
+        or die "Can't open bdb file \"word_freq.db\": $! $BerkeleyDB::Error\n";
+
+$worker->run();
+
+####################################################################
+sub onInput {
+    my ($name, $line) = @_;
+
+    my ($word, $count) = split /\s+/, $line;
+    $words{$word} += $count;
+}
+

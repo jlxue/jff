@@ -1,0 +1,62 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use FindBin;
+use lib "$FindBin::Bin/../../../lib";
+
+use Data::Dumper;
+use Event::Worker;
+use POE;
+
+die "Must be called by Plumber!" unless exists $ENV{PLUMBER_PORT} &&
+    exists $ENV{PLUMBER_COOKIE};
+
+my $worker = Event::Worker->new(onInput => \&onInput);
+print "worker: ", Dumper($worker);
+
+my $args = $worker->args;
+my @outputs = $worker->outputs;
+my $i = 0;
+my %words;
+
+POE::Session->create(
+    inline_states   => {
+        _start  => sub {
+            $_[KERNEL]->delay("flush",  5);
+        },
+
+        flush   => sub {
+            flush();
+            $_[KERNEL]->delay("flush",  5);
+        }
+    }
+);
+
+$worker->run();
+
+####################################################################
+sub onInput {
+    my ($name, $line) = @_;
+    my @words = split /\s+/, $line;
+
+    for my $word (@words) {
+        $word =~ s/^\W+|\W+$//g;
+
+        $words{$word}++ if length($word) > 0;
+    }
+
+    if (keys %words > 1000) {
+        flush();
+    }
+}
+
+
+sub flush {
+    while (my ($word, $count) = each %words) {
+        $worker->output($outputs[$i], "$word $count");
+        $i = 0 if ++$i == @outputs;
+    }
+
+    %words = ();
+}
+

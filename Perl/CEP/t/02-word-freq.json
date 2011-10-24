@@ -1,0 +1,52 @@
+{
+    "schema"    : "scheduler/1.0",
+    "timeout"   : 60,
+
+    "nodes"     : [
+        {
+            "app"       : "line-collector",
+            "inputs"    : [],
+            "outputs"   : ["a", "b", "c", "d"],
+            "args"      : { "port": 9192 }
+        },
+
+        {
+            "app"       : "word-splitter",
+            "inputs"    : ["a"],
+            "outputs"   : ["a1"],
+            "args"      : []
+        },
+
+        {
+            "app"       : "word-splitter",
+            "inputs"    : ["b"],
+            "outputs"   : ["b1"],
+            "args"      : []
+        },
+
+        {
+            "app"       : "word-splitter",
+            "inputs"    : ["c"],
+            "outputs"   : ["c1"],
+            "args"      : []
+        },
+
+        {
+            "app"       : "word-splitter",
+            "inputs"    : ["d"],
+            "outputs"   : ["d1"],
+            "args"      : []
+        },
+
+        {
+            "app"       : "word-collector",
+            "inputs"    : ["a1", "b1", "c1", "d1"],
+            "outputs"   : [],
+            "args"      : []
+        }
+    ],
+
+    "machines"  : [
+        "localhost"
+    ]
+}

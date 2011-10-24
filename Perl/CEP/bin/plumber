@@ -43,6 +43,7 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 
+use Cwd;
 use Data::Dumper;
 use File::Spec;
 use Getopt::Long;
@@ -84,6 +85,7 @@ GetOptions("port=i"     => \$g_port,
            "exec=s"     => \$g_libexec_path);
 die "Bad port $g_port\n" if $g_port <= 0 || $g_port > 65535;
 die "Bad directory \"$g_libexec_path\"\n" unless -d $g_libexec_path;
+$g_libexec_path = File::Spec->rel2abs($g_libexec_path);
 
 INFO "listen on port $g_port";
 
@@ -383,6 +385,9 @@ sub action_exec {
 
         open STDIN, '<&', $nullfh->fileno() or
             die "Can't redirect stdin(pid=$$): $!";
+
+        my $cwd = File::Spec->catdir($g_libexec_path, $app);
+        chdir $cwd or die "Can't chdir to $cwd: $!";
 
         my $job;
         if (@args > 0 && ref($args[0]) eq 'HASH') {
