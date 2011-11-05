@@ -326,6 +326,11 @@ Inside-out class
     Object::InsideOut
 
 
+Excel
+=====
+Spreadsheet::WriteExcel
+Excel::Writer::XLSX
+
 #######################################################################
 
 
@@ -441,3 +446,4 @@ Data::Rmap
 Parallel::Scoreboard
 JE (a JavaScript engine written in Perl)
 snaked (Task scheduler)
+
