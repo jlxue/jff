@@ -1,0 +1,22 @@
+# redirect traffic from port 80 to port 8080
+IP=192.168.1.103
+sudo iptables -t nat -A PREROUTING -p tcp \
+    --dport 80 --dst $IP -j REDIRECT --to-ports 8080
+
+# for local traffic
+sudo iptables -t nat -A OUTPUT -p tcp \
+     --dport 80 --dst 127.0.0.1 -j REDIRECT --to-ports 8080
+
+# clear
+sudo iptables -t nat -F PREROUTING
+
+# list
+sudo iptables -t nat -L
+
+http://www.google.com/search?q=iptables+port+redirect
+http://hi.baidu.com/todayboy/blog/item/939bf0444e9d8040500ffe7f.html
+use REDIRECT and PREROUTING
+
+http://phoenix007.iteye.com/blog/712583
+use dnat
+
