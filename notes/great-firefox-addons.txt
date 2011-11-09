@@ -32,3 +32,15 @@ Prevent tab pages from reloading on startup:
 
         http://getsatisfaction.com/mozilla/topics/why_does_firefox_have_to_reload_all_my_tabs_every_time_it_restores_a_session
 
+
+=======================================
+
+ThunderBird
+
+External Edtiro
+Lightning
+Provider for Microsoft Exchange
+Quote Colors
+Display Mail User Agent
+MinimizeToTray Plus
+Add-on Compatibility Reporter
