@@ -1,0 +1,35 @@
+User monitoring
+    http://keynote.com/
+    http://www.compuware.com/application-performance-management/
+    http://www.research.ibm.com/pagedetailer/
+    http://developer.yahoo.com/yslow/
+
+Load balancer: Bind, PowerDNS, LVS, HAProxy, Perlbal, Nginx
+Edge server: Squid, YTS, Varnish
+
+Application: Apache, JBoss, Tomcat, NodeJS
+             Abuse Prevention, internal IP DB
+             Real-time user analytics
+             Certificate-based authentication
+             User DB
+Backend servers
+
+Server monitoring: Nagios, Cacti
+
+Data Highway
+Hadoop
+
+=======
+Hudson/Jenkins
+dpkg + apt, fai-project.org
+cfengine, puppet
+git
+cowbuilder
+multistrap
+
+======
+libapache2-modsecurity
+libapache2-mod-bw
+libapache2-mod-defensible
+libapache2-mod-evasive
+libapache2-mod-qos
