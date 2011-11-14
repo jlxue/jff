@@ -41,7 +41,7 @@ Classes
 # aptitude install libssl-dev libdb-dev libpcre3-dev libselinux1-dev \
            libldap2-dev libmysqlclient15-dev libpq-dev libgraphviz-dev \
            libacl1-dev flex bison
- (cfengine-3.0.2b4 ÒªÇó /usr/include/pgsql£¬µ«ÊÇ Debian lenny ÔÚ /usr/include/postgresql)
+ (cfengine-3.0.2b4 è¦æ±‚ /usr/include/pgsqlï¼Œä½†æ˜¯ Debian lenny åœ¨ /usr/include/postgresql)
 
 $ ./configure --prefix=/usr/local --enable-DCE --enable-selinux --with-sql
 $ make

@@ -9,6 +9,8 @@ fi
 ROOT="$1"; ROOT=${ROOT%/}
 SCRIPT_DIR=`dirname "$0"`
 
+sudo multistrap -d "$ROOT" -f "$SCRIPT_DIR/multistrap-squeeze.conf"
+
 do_mount () {
     mount | fgrep -q "$1" || return 0
     mount | fgrep -q "$ROOT$1" && return 0
@@ -29,9 +31,7 @@ do_mount /sys/fs/fuse/connections
 do_mount /proc/sys/fs/binfmt_misc
 do_mount /proc/fs/nfsd
 
-[ ! -e $ROOT/etc ] && sudo cp -a /etc/resolv.conf $ROOT/etc/
+[ ! -e $ROOT/etc/resolv.conf ] && sudo cp -a /etc/resolv.conf $ROOT/etc/
 
-sudo multistrap -d "$ROOT" -f "$SCRIPT_DIR/multistrap-squeeze.conf"
-
-sudo chroot $ROOT /bin/sh -c "\"aptitude update; aptitude install '?or(~prequired,~pstandard,~pimportant)'\""
+sudo chroot $ROOT /bin/sh -c "aptitude update; aptitude install '?or(~prequired,~pstandard,~pimportant)'"
 
