@@ -9,6 +9,7 @@ SCRIPT_DIR=`dirname $0`
 SCRIPTS=`cat<<END
 install-packages.sh
 locale.sh
+firewall.sh
 END`
 
 for f in $SCRIPTS; do
