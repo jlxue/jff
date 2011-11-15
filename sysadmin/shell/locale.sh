@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e
+set -e -x
 
 # generate locale data for zh_CN.UTF-8 and en_US.UTF-8
 perl -e '

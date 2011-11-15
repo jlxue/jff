@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e
+set -e -x
 
 PATH=/bin:/sbin:/usr/bin:/usr/sbin
 
@@ -19,5 +19,5 @@ for f in $SCRIPTS; do
     fi
 done
 
-etckeeper unclean && etckeeper commit "save /etc after some config change"
+! etckeeper unclean || etckeeper commit "save /etc after some config change"
 

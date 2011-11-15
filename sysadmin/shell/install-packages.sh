@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e
+set -e -x
 
 ###########################################################
 i () {
@@ -19,9 +19,15 @@ i shorewall-init shorewall shorewall6
 
 
 ###########################################################
-aptitude update
-aptitude install -o Dpkg::Options::=--force-confold \
-    -o Dpkg::Options::=--force-confdef --assume-yes $PACKAGES
+aptitude -q update
 
-etckeeper unclean && etckeeper commit "save /etc before any config change"
+aptitude -q install -o Dpkg::Options::=--force-confold \
+    -o Dpkg::Options::=--force-confdef --assume-yes -s $PACKAGES |
+        grep -q 'No packages will be installed' || {
+
+    aptitude -q install -o Dpkg::Options::=--force-confold \
+        -o Dpkg::Options::=--force-confdef --assume-yes $PACKAGES
+}
+
+! etckeeper unclean || etckeeper commit "save /etc before any config change"
 

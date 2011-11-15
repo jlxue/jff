@@ -1,14 +1,16 @@
 #!/bin/sh
 
-set -e
+set -e -x
 
 ROOT=`dirname $0`
 
 shorewall check $ROOT/etc/shorewall
 shorewall6 check $ROOT/etc/shorewall6
 
-cmp $ROOT/etc/default/shorewall-init /etc/default/shorewall-init ||
-    rsync -av --no-owner --no-group $ROOT/etc/default/shorewall-init /etc/default/
+for f in shorewall-init shorewall shorewall6; do
+    cmp -s $ROOT/etc/default/$f /etc/default/$f ||
+        rsync -av --no-owner --no-group $ROOT/etc/default/$f /etc/default/
+done
 
 diff -aurNq /etc/shorewall/ $ROOT/etc/shorewall/ >/dev/null || {
     rsync -avr --no-owner --no-group --delete $ROOT/etc/shorewall/ /etc/shorewall/
