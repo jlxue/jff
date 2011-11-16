@@ -37,7 +37,7 @@ Prevent tab pages from reloading on startup:
 
 ThunderBird
 
-External Edtiro
+External Editor
 Lightning
 Provider for Microsoft Exchange
 Quote Colors
