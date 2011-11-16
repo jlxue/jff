@@ -1,7 +1,7 @@
 能否妥善处理特殊文件，比如 socket、管道、 从内核读取数据的设备文件?
 
 aide    功能够用，使用简单，比 samhein 在文件完整性检测方面稍差一点
-samhein 功能强悍，但稍嫌臃肿，支持即时监视
+samhain 功能强悍，但稍嫌臃肿，支持即时监视
 tripwire 功能够用，使用稍嫌复杂，需要密码
 fcheck  使用简单，用于不怎么要求高安全性的场合，数据库是明文，便于版本管理
 debsums 依赖 /var/lib/dpkg/info/*.md5sums 的安全，可用于做软件包基本的检查
@@ -37,7 +37,7 @@ fcheck
     Perl 脚本，不支持 acl, selinux context, xattr
     不能处理 log 文件
 
-samhein
+samhain
     C/S 模式
     Debian 上动态链接
     支持 acl, selinux context, xattr
