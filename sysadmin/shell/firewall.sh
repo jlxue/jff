@@ -2,23 +2,23 @@
 
 set -e -x
 
-ROOT=`dirname $0`
+SCRIPT_DIR=`dirname $0`
+. $SCRIPT_DIR/lib.sh
 
-shorewall check $ROOT/etc/shorewall
-shorewall6 check $ROOT/etc/shorewall6
+shorewall check $SCRIPT_DIR/etc/shorewall
+shorewall6 check $SCRIPT_DIR/etc/shorewall6
 
 for f in shorewall-init shorewall shorewall6; do
-    cmp -s $ROOT/etc/default/$f /etc/default/$f ||
-        rsync -av --no-owner --no-group $ROOT/etc/default/$f /etc/default/
+    sync_file $SCRIPT_DIR/etc/default/$f /etc/default/$f
 done
 
-diff -aurNq /etc/shorewall/ $ROOT/etc/shorewall/ >/dev/null || {
-    rsync -avr --no-owner --no-group --delete $ROOT/etc/shorewall/ /etc/shorewall/
+cmp_dir $SCRIPT_DIR/etc/shorewall /etc/shorewall || {
+    overwrite_dir $SCRIPT_DIR/etc/shorewall /etc/shorewall/
     service shorewall restart
 }
 
-diff -aurNq /etc/shorewall6/ $ROOT/etc/shorewall6/ >/dev/null || {
-    rsync -avr --no-owner --no-group --delete $ROOT/etc/shorewall6/ /etc/shorewall6/
+cmp_dir $SCRIPT_DIR/etc/shorewall6 /etc/shorewall6 || {
+    overwrite_dir $SCRIPT_DIR/etc/shorewall6 /etc/shorewall6/
     service shorewall6 restart
 }
 

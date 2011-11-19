@@ -2,6 +2,9 @@
 
 set -e -x
 
+SCRIPT_DIR=`dirname $0`
+. $SCRIPT_DIR/lib.sh
+
 ###########################################################
 i () {
     PACKAGES="$PACKAGES $@"
@@ -43,5 +46,5 @@ aptitude -q install -o Dpkg::Options::=--force-confold \
         -o Dpkg::Options::=--force-confdef --assume-yes $PACKAGES
 }
 
-! etckeeper unclean || etckeeper commit "save /etc before any config change"
+save_etc "save /etc before any config change"
 

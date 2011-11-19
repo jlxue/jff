@@ -5,6 +5,7 @@ set -e -x
 PATH=/bin:/sbin:/usr/bin:/usr/sbin
 
 SCRIPT_DIR=`dirname $0`
+. $SCRIPT_DIR/lib.sh
 
 SCRIPTS=`cat<<END
 install-packages.sh
@@ -20,5 +21,5 @@ for f in $SCRIPTS; do
     fi
 done
 
-! etckeeper unclean || etckeeper commit "save /etc after some config change"
+save_etc "save /etc after some config change"
 
