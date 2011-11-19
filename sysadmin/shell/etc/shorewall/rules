@@ -16,3 +16,14 @@ SECTION NEW
 
 SSH(ACCEPT)	net		$FW
 Ping(ACCEPT)	net		$FW
+
+# for client -> krb5kdc, krb4 use udp 750, krb5 uses tcp/udp 88.
+ACCEPT		net		$FW		tcp	88
+ACCEPT		net		$FW		udp	88
+ACCEPT		net		$FW		udp	750
+
+# for kpasswd -> kadmin
+ACCEPT		net		$FW		tcp	464
+ACCEPT		net		$FW		udp	464
+ACCEPT		net		$FW		tcp	749
+ACCEPT		net		$FW		udp	749
