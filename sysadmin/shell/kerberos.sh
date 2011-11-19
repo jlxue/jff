@@ -86,6 +86,16 @@ kadmin.local -q "get_policy -terse user" | grep -q '^\s*"\?user"\?\s' || {
 [ "`pidof kadmind`" ] || service krb5-admin-server start
 
 
+kadmin.local -q "get_principal -terse host/kerberos.corp.example.com" |
+    grep -q '^\s*"\?host/kerberos.corp.example.com"\?\s' || {
+        ( echo "add_principal -policy service -randkey host/kerberos.corp.example.com";
+          echo "ktadd -k /etc/krb5.keytab -norandkey host/kerberos.corp.example.com";
+        ) | kadmin.local
+
+    chmod 600 /etc/krb5.keytab
+}
+
+
 ensure_mode_user_group /etc/hosts               644 root root
 ensure_mode_user_group /etc/krb5.conf           644 root root
 ensure_mode_user_group /etc/krb5.keytab         600 root root

@@ -11,6 +11,7 @@ SCRIPTS=`cat<<END
 install-packages.sh
 locale.sh
 firewall.sh
+ntp.sh
 kerberos.sh
 END`
 
