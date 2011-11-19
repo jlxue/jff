@@ -21,8 +21,8 @@ vars:
                                };
 
     "krb_addresses" slist   => {
-                                "127.0.0.1	krb.corp.example.com krb",
-                                "::1		krb.corp.example.com krb"
+                                "127.0.0.1	kerberos.corp.example.com kerberos krb",
+                                "::1		kerberos.corp.example.com kerberos krb"
                                };
 
     "krb_log_file" slist    => {

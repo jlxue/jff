@@ -9,7 +9,7 @@ fi
 ROOT="$1"; ROOT=${ROOT%/}
 SCRIPT_DIR=`dirname "$0"`
 
-sudo multistrap -d "$ROOT" -f "$SCRIPT_DIR/multistrap-wheezy.conf"
+[ -d $ROOT/bin ] || sudo multistrap -d "$ROOT" -f "$SCRIPT_DIR/multistrap-wheezy.conf"
 
 do_mount () {
     mount | fgrep -q "$1" || return 0

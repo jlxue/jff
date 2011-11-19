@@ -15,7 +15,7 @@ i "?or(~prequired,~pstandard,~pimportant)"
 i git etckeeper
 
 ## security
-i auditd
+i auditd acct
 i debsums aide samhain
 i chkrootkit rkhunter   # loop in unhide.rb
 i fail2ban snort
@@ -23,6 +23,9 @@ i fail2ban snort
 ## firewall
 i shorewall-init shorewall shorewall6
 
+i ntp
+i pwgen krb5-admin-server krb5-kdc krb5-user krb5-clients
+i libpam-krb5
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none

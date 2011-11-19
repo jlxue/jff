@@ -10,6 +10,7 @@ SCRIPTS=`cat<<END
 install-packages.sh
 locale.sh
 firewall.sh
+kerberos.sh
 END`
 
 for f in $SCRIPTS; do
