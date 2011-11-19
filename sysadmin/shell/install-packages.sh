@@ -18,6 +18,7 @@ i "?or(~prequired,~pstandard,~pimportant)"
 i git etckeeper
 
 ## security
+i libpam-cracklib
 i auditd acct
 i debsums aide samhain
 i chkrootkit rkhunter   # loop in unhide.rb
@@ -45,6 +46,12 @@ aptitude -q install -o Dpkg::Options::=--force-confold \
     aptitude -q install -o Dpkg::Options::=--force-confold \
         -o Dpkg::Options::=--force-confdef --assume-yes $PACKAGES
 }
+
+
+###########################################################
+[ "`etckeeper vcs config --get color.ui`" = auto ] ||
+    etckeeper vcs config --local color.ui auto
+
 
 save_etc "save /etc before any config change"
 
