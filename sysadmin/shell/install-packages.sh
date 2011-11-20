@@ -27,9 +27,13 @@ i fail2ban snort
 ## firewall
 i shorewall-init shorewall shorewall6
 
+## kerberos
 i ntp
 i pwgen krb5-admin-server krb5-kdc krb5-user krb5-clients
 i libpam-krb5
+
+## ldap
+i slapd ldap-utils libsasl2-modules-gssapi-mit
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none

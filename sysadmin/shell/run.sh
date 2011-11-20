@@ -13,6 +13,7 @@ locale.sh
 firewall.sh
 ntp.sh
 kerberos.sh
+ldap.sh
 END`
 
 for f in $SCRIPTS; do
