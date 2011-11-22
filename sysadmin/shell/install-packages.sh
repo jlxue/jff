@@ -34,6 +34,7 @@ i libpam-krb5
 
 ## ldap
 i slapd ldap-utils libsasl2-modules-gssapi-mit
+i libpam-ccreds libnss-ldapd nscd
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none
