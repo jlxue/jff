@@ -44,6 +44,9 @@ export APT_LISTBUGS_FRONTEND APT_LISTCHANGES_FRONTEND DEBIAN_FRONTEND
 
 aptitude -q update
 
+aptitude -q safe-upgrade -o Dpkg::Options::=--force-confold \
+    -o Dpkg::Options::=--force-confdef --assume-yes
+
 aptitude -q install -o Dpkg::Options::=--force-confold \
     -o Dpkg::Options::=--force-confdef --assume-yes -s $PACKAGES |
         grep -q 'No packages will be installed' || {
