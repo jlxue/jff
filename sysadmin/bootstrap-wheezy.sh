@@ -33,5 +33,5 @@ do_mount /proc/fs/nfsd
 
 [ ! -e $ROOT/etc/resolv.conf ] && sudo cp -a /etc/resolv.conf $ROOT/etc/
 
-sudo chroot $ROOT /bin/sh -c "aptitude update; aptitude safe-upgrade; aptitude install '?or(~prequired,~pstandard,~pimportant)'"
+sudo chroot $ROOT /bin/sh -c "apt-get install aptitude; aptitude update; aptitude safe-upgrade; aptitude install '?or(~prequired,~pstandard,~pimportant)'"
 
