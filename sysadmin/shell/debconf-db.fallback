@@ -1,0 +1,12 @@
+Name: slapd/domain
+Template: slapd/domain
+Value: corp.example.com
+Owners: slapd
+Flags: seen
+
+Name: shared/organization
+Template: shared/organization
+Value: corp.example.com
+Owners: slapd
+Flags: seen
+

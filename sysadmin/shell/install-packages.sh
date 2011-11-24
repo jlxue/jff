@@ -42,6 +42,11 @@ APT_LISTCHANGES_FRONTEND=none
 DEBIAN_FRONTEND=noninteractive
 export APT_LISTBUGS_FRONTEND APT_LISTCHANGES_FRONTEND DEBIAN_FRONTEND
 
+# See debconf(7) in package debconf-doc
+DEBCONF_DB_FALLBACK="File{filename:$SCRIPT_DIR/debconf-db.fallback}"
+export DEBCONF_DB_FALLBACK
+
+
 aptitude -q update
 
 aptitude -q safe-upgrade -o Dpkg::Options::=--force-confold \
