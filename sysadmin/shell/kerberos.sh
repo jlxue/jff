@@ -11,6 +11,29 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 #   Davor Ocelic
 #   SPINLOCK - advanced GNU/Linux and Unix solutions for commercial and education sectors.
 
+ensure_service_principal () {
+    local principal="$1"
+
+    kadmin.local -q "get_principal -terse $principal" |
+        grep -q '^\s*"\?'"$principal"'"\?\s' || {
+            ( echo "add_principal -policy service -randkey $principal";
+              echo "ktadd -k /etc/krb5.keytab -norandkey $principal";
+            ) | kadmin.local
+
+        chmod 600 /etc/krb5.keytab
+    }
+}
+
+ensure_policy () {
+    local length="$1" classes="$2" policy="$3"
+
+    kadmin.local -q "get_policy -terse $policy" | grep -q '^\s*"\?'"$policy"'"\?\s' || {
+        echo "add_policy -minlength $length -minclasses $classes $policy" | kadmin.local
+        KDCDB_CHANGED=1
+    }
+}
+
+
 grep -q "kerberos" /etc/hosts || {
     sed -i -e '$a \
 127.0.0.1	kerberos.corp.example.com kerberos krb\
@@ -55,25 +78,10 @@ krb5kdc_db=/var/lib/krb5kdc/principal
 }
 
 
-kadmin.local -q "get_policy -terse admin" | grep -q '^\s*"\?admin"\?\s' || {
-    echo 'add_policy -minlength 8 -minclasses 3 admin' | kadmin.local
-    KDCDB_CHANGED=1
-}
-
-kadmin.local -q "get_policy -terse host" | grep -q '^\s*"\?host"\?\s' || {
-    echo 'add_policy -minlength 8 -minclasses 4 host' | kadmin.local
-    KDCDB_CHANGED=1
-}
-
-kadmin.local -q "get_policy -terse service" | grep -q '^\s*"\?service"\?\s' || {
-    echo 'add_policy -minlength 8 -minclasses 4 service' | kadmin.local
-    KDCDB_CHANGED=1
-}
-
-kadmin.local -q "get_policy -terse user" | grep -q '^\s*"\?user"\?\s' || {
-    echo 'add_policy -minlength 8 -minclasses 2 user' | kadmin.local
-    KDCDB_CHANGED=1
-}
+ensure_policy 8 3 admin
+ensure_policy 8 4 host
+ensure_policy 8 4 service
+ensure_policy 8 2 user
 
 
 [ -z "$KRB5CONF_CHANGED$KDCCONF_CHANGED$KDCDB_CHANGED" ] ||
@@ -86,14 +94,9 @@ kadmin.local -q "get_policy -terse user" | grep -q '^\s*"\?user"\?\s' || {
 [ "`pidof kadmind`" ] || service krb5-admin-server start
 
 
-kadmin.local -q "get_principal -terse host/kerberos.corp.example.com" |
-    grep -q '^\s*"\?host/kerberos.corp.example.com"\?\s' || {
-        ( echo "add_principal -policy service -randkey host/kerberos.corp.example.com";
-          echo "ktadd -k /etc/krb5.keytab -norandkey host/kerberos.corp.example.com";
-        ) | kadmin.local
-
-    chmod 600 /etc/krb5.keytab
-}
+ensure_service_principal host/kerberos.corp.example.com
+ensure_service_principal host/ldap.corp.example.com
+ensure_service_principal ldap/ldap.corp.example.com
 
 
 ensure_mode_user_group /etc/hosts               644 root root
