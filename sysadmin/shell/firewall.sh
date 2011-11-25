@@ -2,7 +2,7 @@
 
 set -e -x
 
-SCRIPT_DIR=`dirname $0`
+SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 shorewall check $SCRIPT_DIR/etc/shorewall

@@ -4,7 +4,7 @@ set -e -x
 
 PATH=/bin:/sbin:/usr/bin:/usr/sbin
 
-SCRIPT_DIR=`dirname $0`
+SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 SCRIPTS=`cat<<END

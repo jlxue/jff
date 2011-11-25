@@ -2,7 +2,7 @@
 
 set -e -x
 
-SCRIPT_DIR=`dirname $0`
+SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 ###########################################################
@@ -43,6 +43,7 @@ DEBIAN_FRONTEND=noninteractive
 export APT_LISTBUGS_FRONTEND APT_LISTCHANGES_FRONTEND DEBIAN_FRONTEND
 
 # See debconf(7) in package debconf-doc
+# The file must be absolute file path!
 DEBCONF_DB_FALLBACK="File{filename:$SCRIPT_DIR/debconf-db.fallback}"
 export DEBCONF_DB_FALLBACK
 
