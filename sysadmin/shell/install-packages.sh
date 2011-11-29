@@ -13,6 +13,10 @@ i () {
 
 ###########################################################
 i "?or(~prequired,~pstandard,~pimportant)"
+i resolvconf
+
+# make Vimmer happier:-)
+i vim-nox vim-addon-manager vim-scripts
 
 ## manage /etc under git
 i git etckeeper
@@ -26,6 +30,14 @@ i fail2ban snort
 
 ## firewall
 i shorewall-init shorewall shorewall6
+
+## dhcp
+#i isc-dhcp-server
+
+## dns
+# unbound and dnsmasq are also very interesting:
+#   http://en.wikipedia.org/wiki/Comparison_of_DNS_server_software#Feature_matrix
+i bind9
 
 ## kerberos
 i ntp

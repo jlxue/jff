@@ -11,6 +11,8 @@ SCRIPTS=`cat<<END
 install-packages.sh
 locale.sh
 firewall.sh
+dns.sh
+dhcp.sh
 ntp.sh
 kerberos.sh
 ldap.sh

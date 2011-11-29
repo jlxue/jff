@@ -14,9 +14,10 @@
 #SECTION RELATED
 SECTION NEW
 
-SSH(ACCEPT)	net		$FW
-Ping(ACCEPT)	net		$FW
+DNS(ACCEPT)	net		$FW
 LDAP(ACCEPT)	net		$FW
+Ping(ACCEPT)	net		$FW
+SSH(ACCEPT)	net		$FW
 
 # for client -> krb5kdc, krb4 use udp 750, krb5 uses tcp/udp 88.
 ACCEPT		net		$FW		tcp	88
@@ -28,3 +29,5 @@ ACCEPT		net		$FW		tcp	464
 ACCEPT		net		$FW		udp	464
 ACCEPT		net		$FW		tcp	749
 ACCEPT		net		$FW		udp	749
+
+# vi:noet ts=8 sts=8 sw=8
