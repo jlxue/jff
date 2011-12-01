@@ -31,7 +31,7 @@ do_mount /sys/fs/fuse/connections
 do_mount /proc/sys/fs/binfmt_misc
 do_mount /proc/fs/nfsd
 
-[ ! -e $ROOT/etc/resolv.conf ] && sudo cp -a /etc/resolv.conf $ROOT/etc/
+[ -e $ROOT/etc/resolv.conf -o -L $ROOT/etc/resolv.conf ] || sudo cp -a /etc/resolv.conf $ROOT/etc/
 
 sudo chroot $ROOT /bin/sh -c "apt-get install aptitude; aptitude update; aptitude safe-upgrade; aptitude install '?or(~prequired,~pstandard,~pimportant)'"
 

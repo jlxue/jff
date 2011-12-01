@@ -6,12 +6,32 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 
+checkzones () {
+    while [ "$1" ]; do
+        named-checkzone -t $SCRIPT_DIR -w /var/cache/bind \
+            -i full -k fail -m fail -M fail -n fail -r fail -S fail -W warn \
+            "$1" "$2"
+
+        shift 2
+    done
+}
+
+
 [ "`pidof named`" ] || service bind9 start
 
-mkdir -p $SCRIPT_DIR/var/cache/bind     # required by next command
+# required by named-checkconf and named-checkzone
+mkdir -p $SCRIPT_DIR/var/cache/bind
 named-checkconf -t $SCRIPT_DIR -z
 
-#named-checkzone -t $SCRIPT_DIR ...
+checkzones `perl -nwe '
+    if ( /^\s*zone\s+"([^"]+)"/ ) {
+        $zone = $1;
+    } elsif ( /^\s*type\s+master/ ) {
+        $master = 1;
+    } elsif ( /^\s*file\s+"([^"]+)"/ ) {
+        print "$zone $1\n" if $master;
+        undef $master;
+    }' $SCRIPT_DIR/etc/bind/named.conf.*zones`
 
 
 cmp_dir $SCRIPT_DIR/etc/bind /etc/bind || {
