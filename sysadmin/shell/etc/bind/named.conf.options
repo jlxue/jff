@@ -18,7 +18,7 @@ options {
 	// };
 
     recursion yes;
-    allow-recursion { 10/8; 192.168/16; 127.0.0.1; ::1; };  # who cares 172.x ?
+    allow-recursion { localnets; };
 
     max-cache-size 200M;
     recursive-clients 1000;
@@ -26,13 +26,13 @@ options {
     #avoid-v4-udp-ports { };
     #avoid-v6-udp-ports { };
 
-    allow-query { 10/8; 192.168/16; 127.0.0.1; ::1; };
-    allow-transfer { 10/8; 192.168/16; };
+    allow-query { localnets; };
+    allow-transfer { localnets; };
     #black-hole { };
 
     enable-dnssec yes;
 
-    #ixfr-from-differences yes;
+    ixfr-from-differences yes;
 
     # http://www.isc.org/software/bind/delegation-only
     root-delegation-only exclude {
