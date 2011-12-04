@@ -85,9 +85,9 @@ ensure_policy 8 2 user
 [ "`pidof kadmind`" ] || service krb5-admin-server start
 
 
-ensure_service_principal host/kerberos.corp.example.com
-ensure_service_principal host/ldap.corp.example.com
-ensure_service_principal ldap/ldap.corp.example.com
+hostname=`hostname -f`
+ensure_service_principal host/$hostname
+ensure_service_principal ldap/$hostname
 
 
 ensure_mode_user_group /etc/hosts               644 root root

@@ -76,7 +76,7 @@ aptitude -q install -o Dpkg::Options::=--force-confold \
 
 ###########################################################
 [ "`etckeeper vcs config --get color.ui`" = auto ] ||
-    etckeeper vcs config --local color.ui auto
+    etckeeper vcs config color.ui auto
 
 
 save_etc "save /etc before any config change"
