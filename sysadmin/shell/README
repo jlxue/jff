@@ -1,0 +1,26 @@
+How to use:
+
+1) Install Debian Wheezy base system, use host name "gold", domain
+name "corp.example.com";
+
+2) Use static network configuration in /etc/network/interfaces:
+
+iface eth0 inet static
+    address 10.0.0.10
+    netmask 255.255.255.0
+    gateway 10.0.0.1
+
+Setup /etc/resolv.conf:
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+
+If you don't use 10.0.0.10 for the "gold" server, adjust ./etc/bind/db.{corp,10}.
+
+3) Run ./run.sh as root role, it may fail, fix errors and run ./run.sh
+again until all are OK.
+
+Add search line to /etc/resolv.conf:
+search corp.example.com
+nameserver 127.0.0.1
+nameserver 8.8.8.8
+nameserver 8.8.4.4
