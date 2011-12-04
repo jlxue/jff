@@ -11,14 +11,6 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 #   Davor Ocelic
 #   SPINLOCK — advanced GNU/Linux and Unix solutions for commercial and education sectors.
 
-grep -q "ldap" /etc/hosts || {
-    sed -i -e '$a \
-127.0.0.1	ldap.corp.example.com ldap\
-::1		ldap.corp.example.com ldap\
-' /etc/hosts
-
-    HOSTS_CHANGED=1
-}
 
 sync_file $SCRIPT_DIR/etc/ldap/ldap.conf /etc/ldap/ldap.conf
 

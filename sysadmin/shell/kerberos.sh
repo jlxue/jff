@@ -34,15 +34,6 @@ ensure_policy () {
 }
 
 
-grep -q "kerberos" /etc/hosts || {
-    sed -i -e '$a \
-127.0.0.1	kerberos.corp.example.com kerberos krb\
-::1		kerberos.corp.example.com kerberos krb\
-' /etc/hosts
-
-    HOSTS_CHANGED=1
-}
-
 cmp_file $SCRIPT_DIR/etc/krb5.conf /etc/krb5.conf || {
     overwrite_file $SCRIPT_DIR/etc/krb5.conf /etc/krb5.conf
     KRB5CONF_CHANGED=1
