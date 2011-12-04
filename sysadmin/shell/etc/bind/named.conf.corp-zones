@@ -1,0 +1,10 @@
+zone "corp.example.com" {
+    type master;
+    file "/etc/bind/db.corp";
+};
+
+zone "10.in-addr.arpa" {
+    type master;
+    file "/etc/bind/db.10";
+};
+

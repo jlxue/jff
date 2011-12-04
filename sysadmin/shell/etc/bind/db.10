@@ -1,0 +1,14 @@
+; vi: noet ts=8 sts=8 sw=8
+
+$TTL 86400
+
+@	3600	IN	SOA	ns.corp.example.com. dns-master.corp.example.com. (
+				2011120400	; serial number
+				2h		; refresh
+				20m		; retry
+				28d		; expire
+				2h )		; negative cache ttl
+	3600	IN	NS	ns.corp.example.com.
+
+10.0.0		IN	PTR	gold.corp.example.com.
+

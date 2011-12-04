@@ -1,0 +1,24 @@
+; vi: noet ts=8 sts=8 sw=8
+
+$TTL 86400
+
+@	3600	IN	SOA	ns dns-master (
+				2011120400	; serial number
+				2h		; refresh
+				20m		; retry
+				28d		; expire
+				2h )		; negative cache ttl
+	3600	IN	NS	ns
+	3600	IN	MX	10 mail
+	3600	IN	A	10.0.0.10
+
+
+gold			A	10.0.0.10
+
+ns			A	10.0.0.10
+mail			A	10.0.0.10
+www			CNAME	gold
+kerberos		CNAME	gold
+krb			CNAME	gold
+ldap			CNAME	gold
+
