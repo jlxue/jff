@@ -13,6 +13,8 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 
 
 sync_file $SCRIPT_DIR/etc/ldap/ldap.conf /etc/ldap/ldap.conf
+sync_file $SCRIPT_DIR/etc/nsswitch.conf /etc/nsswitch.conf
 
 ensure_mode_user_group /etc/ldap/ldap.conf  644 root root
+ensure_mode_user_group /etc/nsswitch.conf   644 root root
 
