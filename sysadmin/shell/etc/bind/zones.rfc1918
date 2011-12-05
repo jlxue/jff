@@ -1,4 +1,4 @@
-;zone "10.in-addr.arpa"      { type master; file "/etc/bind/db.empty"; };
+// zone "10.in-addr.arpa"      { type master; file "/etc/bind/db.empty"; };
  
 zone "16.172.in-addr.arpa"  { type master; file "/etc/bind/db.empty"; };
 zone "17.172.in-addr.arpa"  { type master; file "/etc/bind/db.empty"; };

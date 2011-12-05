@@ -22,21 +22,21 @@ ensure_mode_user_group () {
 
     [ x`stat --printf=%a "$file"` = x$mode ] || chmod $mode "$file"
     [ x`stat --printf=%U "$file"` = x$user -a x`stat --printf=%G "$file"` = x$group ] ||
-        chown $owner:$group "$file"
+        chown $user:$group "$file"
 }
 
 
 cmp_file () {
     local src="$1" dst="$2"
 
-    [ -e "$dst" ] && cmp -s "$dst" "$src"
+    [ -e "$dst" ] && cmp -s "$src" "$dst"
 }
 
 
 cmp_dir () {
     local src="$1" dst="$2"
 
-    [ -d "$dst" ] && diff -aurNq "$dst" "$src" >/dev/null
+    [ -d "$dst" ] && diff -aurNq "$@" >/dev/null
 }
 
 
@@ -51,6 +51,13 @@ overwrite_dir () {
     local src="$1" dst="$2"
 
     rsync -avr --delete --no-owner --no-group "$src/" "$dst"
+}
+
+
+overwrite_dir_ignore_extra () {
+    local src="$1" dst="$2"
+
+    rsync -avr --no-owner --no-group "$src/" "$dst"
 }
 
 
