@@ -9,6 +9,7 @@ Fission     (Progress bar in the address bar)
 FoxTab      (3D tab management)
 FoxProxy
 Greasemonkey
+    http://userscripts.org/scripts/show/9310    GoogleMonkeyR
 NoScript
 ReminderFox
 Remove It Permanently

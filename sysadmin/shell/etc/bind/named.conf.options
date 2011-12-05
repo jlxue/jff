@@ -30,7 +30,10 @@ options {
     allow-transfer { localnets; };
     #black-hole { };
 
+    # http://wiki.debian.org/DNSSEC
     dnssec-enable yes;
+    dnssec-validation yes;
+    dnssec-lookaside auto;
 
     ixfr-from-differences yes;
 
