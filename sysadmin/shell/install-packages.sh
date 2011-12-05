@@ -41,7 +41,7 @@ i bind9
 
 ## kerberos
 i ntp
-i pwgen krb5-admin-server krb5-kdc krb5-user krb5-clients
+i pwgen krb5-admin-server krb5-kdc krb5-user krb5-clients kstart
 i libpam-krb5
 
 ## ldap
