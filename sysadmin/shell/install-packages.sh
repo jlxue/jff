@@ -48,6 +48,11 @@ i libpam-krb5
 i slapd ldap-utils libsasl2-modules-gssapi-mit
 i libpam-ccreds libnss-ldapd nscd
 
+# other nss cache schemes: nsscache nss-updatedb sssd
+
+i ldapscripts smbldap-tools shelldap ldapvi
+
+
 ###########################################################
 APT_LISTBUGS_FRONTEND=none
 APT_LISTCHANGES_FRONTEND=none
