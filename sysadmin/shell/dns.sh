@@ -6,6 +6,24 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 
+# resolv.conf
+#
+cmp_file $SCRIPT_DIR/etc/resolvconf/resolv.conf.d/head /etc/resolvconf/resolv.conf.d/head || {
+    overwrite_file $SCRIPT_DIR/etc/resolvconf/resolv.conf.d/head /etc/resolvconf/resolv.conf.d/head
+    RESOLVCONF_CHANGED=1
+}
+
+cmp_file $SCRIPT_DIR/etc/resolvconf/resolv.conf.d/tail /etc/resolvconf/resolv.conf.d/tail || {
+    overwrite_file $SCRIPT_DIR/etc/resolvconf/resolv.conf.d/tail /etc/resolvconf/resolv.conf.d/tail
+    RESOLVCONF_CHANGED=1
+}
+
+[ -z "$RESOLVCONF_CHANGED" ] || service resolvconf restart
+
+
+# bind9
+#
+
 [ "`pidof named`" ] || service bind9 start
 
 # required by named-checkconf
@@ -18,6 +36,9 @@ cmp_dir $SCRIPT_DIR/etc/bind /etc/bind || {
     service bind9 reload
 }
 
+
+ensure_mode_user_group /etc/resolvconf/resolv.conf.d/head   644 root root
+ensure_mode_user_group /etc/resolvconf/resolv.conf.d/tail   644 root root
 
 ensure_mode_user_group /etc/bind            2755 root bind
 ensure_mode_user_group /etc/bind/bind.keys   644 root root

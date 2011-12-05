@@ -30,7 +30,7 @@ options {
     allow-transfer { localnets; };
     #black-hole { };
 
-    enable-dnssec yes;
+    dnssec-enable yes;
 
     ixfr-from-differences yes;
 
