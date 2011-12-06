@@ -15,20 +15,21 @@ ensure_service_principal () {
     local principal="$1"
 
     kadmin.local -q "get_principal -terse $principal" |
-        grep -q '^\s*"\?'"$principal"'"\?\s' || {
-            ( echo "add_principal -policy service -randkey $principal";
-              echo "ktadd -k /etc/krb5.keytab -norandkey $principal";
-            ) | kadmin.local
+        grep -q '^\s*"\?'"$principal@" ||
+            kadmin.local -q "add_principal -policy service -randkey $principal"
 
-        chmod 600 /etc/krb5.keytab
-    }
+    # Also can use "klist -ket /etc/krb5.keytab"
+    k5srvutil -f /etc/krb5.keytab list | grep -q "\s$principal@" ||
+        kadmin.local -q "ktadd -k /etc/krb5.keytab -norandkey $principal"
+
+    chmod 600 /etc/krb5.keytab
 }
 
 ensure_policy () {
     local length="$1" classes="$2" policy="$3"
 
     kadmin.local -q "get_policy -terse $policy" | grep -q '^\s*"\?'"$policy"'"\?\s' || {
-        echo "add_policy -minlength $length -minclasses $classes $policy" | kadmin.local
+        kadmin.local -q "add_policy -minlength $length -minclasses $classes $policy"
         KDCDB_CHANGED=1
     }
 }
