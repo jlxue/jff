@@ -14,6 +14,7 @@ i () {
 ###########################################################
 i "?or(~prequired,~pstandard,~pimportant)"
 i resolvconf
+#i unattended-upgrades
 
 # make Vimmer happier:-)
 i vim-nox vim-addon-manager vim-scripts
