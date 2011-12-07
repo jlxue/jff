@@ -22,3 +22,13 @@ kerberos		CNAME	gold
 krb			CNAME	gold
 ldap			CNAME	gold
 
+; see http://web.mit.edu/kerberos/krb5-1.9/krb5-1.9.2/doc/krb5-install.html#Hostnames-for-the-Master-and-Slave-KDCs
+_kerberos		TXT	"CORP.EXAMPLE.COM"
+_kerberos._udp		SRV	0 0 88 gold
+_kerberos._tcp		SRV	0 0 88 gold
+_kerberos-master._udp	SRV	0 0 88 gold
+_kerberos-master._tcp	SRV	0 0 88 gold
+_kerberos-adm._tcp	SRV	0 0 749 gold
+_kpasswd._udp		SRV	0 0 464 gold
+_kpasswd._tcp		SRV	0 0 464 gold
+

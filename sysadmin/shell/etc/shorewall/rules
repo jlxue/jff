@@ -28,6 +28,5 @@ ACCEPT		net		$FW		udp	750
 ACCEPT		net		$FW		tcp	464
 ACCEPT		net		$FW		udp	464
 ACCEPT		net		$FW		tcp	749
-ACCEPT		net		$FW		udp	749
 
 # vi:noet ts=8 sts=8 sw=8
