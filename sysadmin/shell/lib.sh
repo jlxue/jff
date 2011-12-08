@@ -70,3 +70,12 @@ sync_dir () {
     cmp_dir "$@" || overwrite_dir "$@"
 }
 
+
+file_newer () {
+    [ "$1" -a "$2" -a -e "$1" -a -e "$2" -a \( "$1" -nt "$2" \) ]
+}
+
+file_older () {
+    [ "$1" -a "$2" -a -e "$1" -a -e "$2" -a \( "$1" -ot "$2" \) ]
+}
+

@@ -20,17 +20,29 @@ cmp_file $SCRIPT_DIR/etc/nslcd.conf /etc/nslcd.conf || {
     service nslcd restart
 }
 
+
 # XXX: libsasl2-module-gssapi-mit <= 2.1.25.dfsg1-2 doesn't respect SASL
-# "keytab" option, this can be bypassed by appending this line
-# to /etc/default/slapd:
-# KRB5_KTNAME=/etc/slapd.keytab; export KRB5_KTNAME"
-#
-#   See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=651308 .
+# "keytab" option, so we have to set KRB5_KTNAME environment in /etc/default/slapd.
+# See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=651308 .
 cmp_file $SCRIPT_DIR/etc/ldap/sasl2/slapd.conf /etc/ldap/sasl2/slapd.conf || {
     overwrite_file $SCRIPT_DIR/etc/ldap/sasl2/slapd.conf /etc/ldap/sasl2/slapd.conf
-    service slapd restart
+    SLAPD_RESTART=1
 }
 
+cmp_file $SCRIPT_DIR/etc/default/slapd /etc/default/slapd || {
+    overwrite_file $SCRIPT_DIR/etc/default/slapd /etc/default/slapd
+    SLAPD_RESTART=1
+}
+
+pidfile=`slapcat -a cn=config -b cn=config | sed -ne 's/^olcPidFile\s*:\s*\([^[:space:]]\+\)\s*/\1/p'`
+file_newer "$pidfile" /etc/slapd.keytab || {
+    SLAPD_RESTART=1
+}
+
+[ -z "$SLAPD_RESTART" ] || service slapd restart
+
+
+ensure_mode_user_group /etc/default/slapd   644 root root
 ensure_mode_user_group /etc/ldap/sasl2/slapd.conf   644 root root
 ensure_mode_user_group /etc/ldap/ldap.conf  644 root root
 ensure_mode_user_group /etc/nsswitch.conf   644 root root
