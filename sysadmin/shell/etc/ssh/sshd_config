@@ -24,7 +24,7 @@ LogLevel INFO
 
 # Authentication:
 LoginGraceTime 120
-PermitRootLogin yes
+PermitRootLogin no
 StrictModes yes
 
 RSAAuthentication yes
@@ -48,27 +48,27 @@ PermitEmptyPasswords no
 ChallengeResponseAuthentication no
 
 # Change to no to disable tunnelled clear text passwords
-#PasswordAuthentication yes
+PasswordAuthentication no
 
 # Kerberos options
-#KerberosAuthentication no
+KerberosAuthentication no
 #KerberosGetAFSToken no
 #KerberosOrLocalPasswd yes
 #KerberosTicketCleanup yes
 
 # GSSAPI options
-#GSSAPIAuthentication no
-#GSSAPICleanupCredentials yes
+GSSAPIAuthentication yes
+GSSAPICleanupCredentials yes
 
 X11Forwarding yes
 X11DisplayOffset 10
-PrintMotd no
+PrintMotd yes
 PrintLastLog yes
 TCPKeepAlive yes
 #UseLogin no
 
-#MaxStartups 10:30:60
-#Banner /etc/issue.net
+MaxStartups 10:30:60
+Banner /etc/issue.net
 
 # Allow client to pass locale environment variables
 AcceptEnv LANG LC_*
