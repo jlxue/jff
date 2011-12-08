@@ -45,6 +45,9 @@ i ntp
 i pwgen krb5-admin-server krb5-kdc krb5-user krb5-clients kstart
 i libpam-krb5
 
+## OpenSSH
+i openssh-server
+
 ## ldap
 i slapd ldap-utils libsasl2-modules-gssapi-mit
 i libpam-ccreds libnss-ldapd nscd

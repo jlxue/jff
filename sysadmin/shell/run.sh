@@ -15,6 +15,7 @@ dns.sh
 dhcp.sh
 ntp.sh
 kerberos.sh
+ssh.sh
 ldap.sh
 END`
 
