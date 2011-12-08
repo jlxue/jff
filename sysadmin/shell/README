@@ -28,7 +28,7 @@ $ cat /etc/resolv.conf
 nameserver 8.8.8.8
 nameserver 8.8.4.4
 
-If you don't use 10.0.0.10 for the "gold" server, adjust ./etc/bind/db.{corp,10}.
+NOTICE: If you DON'T use 10.0.0.10 for the "gold" server, adjust ./etc/bind/db.{corp,10}.
 
 3) Run ./run.sh as root role, it may fail, fix errors and run ./run.sh
 again until all are OK.

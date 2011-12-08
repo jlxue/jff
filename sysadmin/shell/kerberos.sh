@@ -12,17 +12,19 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 #   SPINLOCK - advanced GNU/Linux and Unix solutions for commercial and education sectors.
 
 ensure_service_principal () {
-    local principal="$1"
+    local principal="$1" keytab="$2"
+
+    [ "$keytab" ] || keytab=/etc/krb5.keytab
 
     kadmin.local -q "get_principal -terse $principal" |
         grep -q '^\s*"\?'"$principal@" ||
             kadmin.local -q "add_principal -policy service -randkey $principal"
 
-    # Also can use "klist -ket /etc/krb5.keytab"
-    k5srvutil -f /etc/krb5.keytab list | grep -q "\s$principal@" ||
-        kadmin.local -q "ktadd -k /etc/krb5.keytab -norandkey $principal"
-
-    chmod 600 /etc/krb5.keytab
+    # Also can use "klist -ket $keytab"
+    k5srvutil -f $keytab list | grep -q "\s$principal@" || {
+        kadmin.local -q "ktadd -k $keytab -norandkey $principal"
+        chmod 600 $keytab
+    }
 }
 
 ensure_policy () {
@@ -88,8 +90,9 @@ ensure_policy 8 2 user
 
 hostname=`hostname -f`
 ensure_service_principal host/$hostname
-ensure_service_principal ldap/$hostname
+ensure_service_principal ldap/$hostname /etc/slapd.keytab
 
+ensure_mode_user_group /etc/slapd.keytab        600 openldap openldap
 
 ensure_mode_user_group /etc/hosts               644 root root
 ensure_mode_user_group /etc/krb5.conf           644 root root
