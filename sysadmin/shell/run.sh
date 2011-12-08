@@ -21,7 +21,8 @@ END`
 for f in $SCRIPTS; do
     f=$SCRIPT_DIR/$f
     if [ -f $f ]; then
-        $f
+        echo ">>>>>>>>>>>>> $f"
+        $f && echo "<<<<<<<<<<<<< $f"
     fi
 done
 

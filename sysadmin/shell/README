@@ -6,8 +6,8 @@ name "corp.example.com";
 $ cat /etc/hostname
 gold
 $ cat /etc/hosts
-127.0.0.1	localhost
-127.0.1.1	gold.corp.example.com	gold
+127.0.0.1   localhost
+127.0.1.1   gold.corp.example.com gold
 
 # The following lines are desirable for IPv6 capable hosts
 ::1     ip6-localhost ip6-loopback

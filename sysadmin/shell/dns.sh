@@ -21,6 +21,11 @@ cmp_file $SCRIPT_DIR/etc/resolvconf/resolv.conf.d/tail /etc/resolvconf/resolv.co
 [ -z "$RESOLVCONF_CHANGED" ] || service resolvconf restart
 
 
+# Kerberos and LDAP are critical services, avoid resolving to Internet sites
+# by mistake in case internal DNS server is down.
+sync_file $SCRIPT_DIR/etc/hosts /etc/hosts
+
+
 # bind9
 #
 
@@ -39,6 +44,7 @@ cmp_dir $SCRIPT_DIR/etc/bind /etc/bind -x rndc.key || {
 
 ensure_mode_user_group /etc/resolvconf/resolv.conf.d/head   644 root root
 ensure_mode_user_group /etc/resolvconf/resolv.conf.d/tail   644 root root
+ensure_mode_user_group /etc/hosts           644 root root
 
 ensure_mode_user_group /etc/bind            2755 root bind
 ensure_mode_user_group /etc/bind/bind.keys   644 root bind
