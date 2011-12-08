@@ -20,6 +20,9 @@ ensure_service_principal () {
         grep -q '^\s*"\?'"$principal@" ||
             kadmin.local -q "add_principal -policy service -randkey $principal"
 
+    # XXX: replace old keys? restart related services such as slapd??
+    #      just let administrator worry about it...
+    #
     # Also can use "klist -ket $keytab"
     k5srvutil -f $keytab list | grep -q "\s$principal@" || {
         kadmin.local -q "ktadd -k $keytab -norandkey $principal"

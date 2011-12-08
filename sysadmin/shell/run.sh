@@ -22,7 +22,10 @@ for f in $SCRIPTS; do
     f=$SCRIPT_DIR/$f
     if [ -f $f ]; then
         echo ">>>>>>>>>>>>> $f"
-        $f && echo "<<<<<<<<<<<<< $f"
+        $f && echo "<<<<<<<<<<<<< $f" || {
+            echo "ERROR: failed to run $f" >&2
+            exit 1
+        }
     fi
 done
 
