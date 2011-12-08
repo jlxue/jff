@@ -23,11 +23,21 @@ olcDbIndex: mail,givenName eq,subinitial
 
 ### security consideration ###################################
 
+# http://www.openldap.org/doc/admin24/security.html
+#
+# The "simple" auth sends password in clear text if not use TLS,
+# don't allow "simple" authentication(bind_simple) as we'll reply
+# on Kerberos v5, only SASL is allowed.
+#
+# Explictly disable annoymous(bind_anon) and unauthenticated(bind_anon_cred)
+# modes of "simple" method.
 dn: cn=config
 changetype: modify
 add: olcDisallows
-olcDisallows: bind_anon
+olcDisallows: bind_anon bind_anon_cred bind_simple
 
+# Only allow "user/password" authenticated mode of "simple" method, actually
+# this is unnecessary because "bind_simple" is already disabled above.
 dn: cn=config
 changetype: modify
 add: olcRequires
@@ -37,12 +47,6 @@ olcRequires: authc
 #changetype: modify
 #add: olcSecurity
 #olcSecurity: ssf=1 update_ssf=112 simple_bind=112
-
-# "simple" auth method sends password in clear text, so disable it.
-dn: cn=config
-changetype: modify
-add: olcDisallows
-olcDisallows: bind_simple
 
 ### Using TLS #################################################
 
