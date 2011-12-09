@@ -32,3 +32,5 @@ _kerberos-adm._tcp	SRV	0 0 749 gold
 _kpasswd._udp		SRV	0 0 464 gold
 _kpasswd._tcp		SRV	0 0 464 gold
 
+_ldap._tcp		SRV	0 0 389 gold
+
