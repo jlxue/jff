@@ -30,12 +30,18 @@ olcAuthzRegexp:
 replace: olcAuthzPolicy
 olcAuthzPolicy: any
 -
-replace: olcSaslHost
-olcSaslHost: ldap.corp.example.com
--
-replace: olcSaslRealm
-olcSaslRealm: CORP.EXAMPLE.COM
--
+
+
+# XXX: strange behaviour:  http://www.openldap.org/lists/openldap-technical/201012/msg00258.html
+#
+#dn: cn=config
+#changetype: modify
+#replace: olcSaslHost
+#olcSaslHost: ldap.corp.example.com
+#-
+#replace: olcSaslRealm
+#olcSaslRealm: CORP.EXAMPLE.COM
+#-
 
 
 ### Using TLS #################################################
@@ -57,16 +63,19 @@ olcSaslRealm: CORP.EXAMPLE.COM
 #
 # Explictly disable annoymous(bind_anon) and unauthenticated(bind_anon_cred)
 # modes of "simple" method.
+#
+# "-Y EXTERNAL -H ldapi:///" doesn't work if olcSaslSecProps contains "noactive".
+#
 dn: cn=config
 changetype: modify
 replace: olcDisallows
-olcDisallows: bind_anon bind_anon_cred bind_simple
+olcDisallows: bind_anon bind_simple tls_2_anon tls_authc
 -
 replace: olcLocalSSF
 olcLocalSSF: 128
 -
 replace: olcSaslSecProps
-olcSaslSecProps: noanonymous noplain noactive nodict minssf=112
+olcSaslSecProps: noanonymous,noplain,nodict,minssf=112
 -
 
 
