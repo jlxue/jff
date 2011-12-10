@@ -43,6 +43,7 @@ cmp_dir () {
 overwrite_file () {
     local src="$1" dst="$2"
 
+    mkdir -p `dirname "$dst"`
     rsync -av --no-owner --no-group "$src" "$dst"
 }
 
@@ -50,6 +51,7 @@ overwrite_file () {
 overwrite_dir () {
     local src="$1" dst="$2"
 
+    mkdir -p `dirname "$dst"`
     rsync -avr --delete --no-owner --no-group "$src/" "$dst"
 }
 
@@ -57,6 +59,7 @@ overwrite_dir () {
 overwrite_dir_ignore_extra () {
     local src="$1" dst="$2"
 
+    mkdir -p `dirname "$dst"`
     rsync -avr --no-owner --no-group "$src/" "$dst"
 }
 
