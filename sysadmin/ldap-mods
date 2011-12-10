@@ -1,24 +1,50 @@
+# See slapd-config(5)
+
 ### optimize database ######################################
 
 dn: olcDatabase={1}hdb,cn=config
 changetype: modify
 add: olcDbIndex
 olcDbIndex: default sub
-
-dn: olcDatabase={1}hdb,cn=config
-changetype: modify
+-
 add: olcDbIndex
 olcDbIndex: cn,sn,uid,displayName pres,sub,eq
-
-dn: olcDatabase={1}hdb,cn=config
-changetype: modify
+-
 add: olcDbIndex
 olcDbIndex: uidNumber,gidNumber,dc eq
-
-dn: olcDatabase={1}hdb,cn=config
-changetype: modify
+-
 add: olcDbIndex
 olcDbIndex: mail,givenName eq,subinitial
+-
+
+
+### authc id rewritting for authz id #########################
+dn: cn=config
+changetype: modify
+add: olcAuthIDRewrite
+olcAuthIDRewrite: 
+-
+add: olcAuthzRegexp
+olcAuthzRegexp: 
+-
+replace: olcAuthzPolicy
+olcAuthzPolicy: any
+-
+replace: olcSaslHost
+olcSaslHost: ldap.corp.example.com
+-
+replace: olcSaslRealm
+olcSaslRealm: CORP.EXAMPLE.COM
+-
+
+
+### Using TLS #################################################
+
+# apply to dn: cn=config
+#olcTLSCACertificateFile: /etc/ldap/ca-cert.pem
+#olcTLSCertificateFile: /etc/ldap/self-ca-cert.pem
+#olcTLSCertificateKeyFile: /etc/ldap/self-ca-key.pem
+#olcTLSVerifyClient: never
 
 
 ### security consideration ###################################
@@ -33,25 +59,34 @@ olcDbIndex: mail,givenName eq,subinitial
 # modes of "simple" method.
 dn: cn=config
 changetype: modify
-add: olcDisallows
+replace: olcDisallows
 olcDisallows: bind_anon bind_anon_cred bind_simple
+-
+replace: olcLocalSSF
+olcLocalSSF: 128
+-
+replace: olcSaslSecProps
+olcSaslSecProps: noanonymous noplain noactive nodict minssf=112
+-
 
-# Only allow "user/password" authenticated mode of "simple" method, actually
-# this is unnecessary because "bind_simple" is already disabled above.
-dn: cn=config
+
+dn: olcDatabase={-1}frontend,cn=config
 changetype: modify
-add: olcRequires
-olcRequires: authc
+replace: olcRequires
+olcRequires: bind LDAPv3 authc SASL strong
+-
+replace: olcSecurity
+olcSecurity: ssf=112 transport=112 update_ssf=128 update_transport=128 simple_bind=128
+-
 
-#dn: cn=config
+
+#dn: olcDatabase={-1}frontend,cn=config
 #changetype: modify
-#add: olcSecurity
-#olcSecurity: ssf=1 update_ssf=112 simple_bind=112
+#replace: olcSizeLimit
+#olcSizeLimit: ....
 
-### Using TLS #################################################
-
-#olcTLSCACertificateFile: /etc/ldap/ca-cert.pem
-olcTLSCertificateFile: /etc/ldap/self-ca-cert.pem
-olcTLSCertificateKeyFile: /etc/ldap/self-ca-key.pem
-olcTLSVerifyClient: never
+#dn: olcDatabase={-1}frontend,cn=config
+#changetype: modify
+#replace: olcTimeLimit
+#olcTimeLimit: ....
 
