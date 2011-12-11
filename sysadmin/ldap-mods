@@ -65,6 +65,9 @@ olcAuthzPolicy: any
 # modes of "simple" method.
 #
 # "-Y EXTERNAL -H ldapi:///" doesn't work if olcSaslSecProps contains "noactive".
+# "-Y GSSAPI -H ldap:///" doesn't work if olcSaslSecProps contains "nodict".
+# "-Y GSSAPI" doesn't allow transport=56 in olcSecurity.
+# GSSAPI has hardcoded ssf 56.
 #
 dn: cn=config
 changetype: modify
@@ -75,7 +78,7 @@ replace: olcLocalSSF
 olcLocalSSF: 128
 -
 replace: olcSaslSecProps
-olcSaslSecProps: noanonymous,noplain,nodict,minssf=112
+olcSaslSecProps: noanonymous,noplain,minssf=56
 -
 
 
@@ -85,7 +88,7 @@ replace: olcRequires
 olcRequires: bind LDAPv3 authc SASL strong
 -
 replace: olcSecurity
-olcSecurity: ssf=112 transport=112 update_ssf=128 update_transport=128 simple_bind=128
+olcSecurity: ssf=56 update_ssf=56 update_transport=56 simple_bind=112
 -
 
 
