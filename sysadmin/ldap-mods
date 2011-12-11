@@ -67,6 +67,10 @@ olcAuthzPolicy: any
 # "-Y EXTERNAL -H ldapi:///" doesn't work if olcSaslSecProps contains "noactive".
 # "-Y GSSAPI -H ldap:///" doesn't work if olcSaslSecProps contains "nodict".
 # "-Y GSSAPI" doesn't allow transport=56 in olcSecurity.
+# SASL negotiation without TLS doesn't allow bind, authc, SASL, strong in olcRequires,
+# these properties disallows "ldapwhoami", you must use "ldapwhoami -Y GSSAPI" or
+# explictly specify SASL_MECH in /etc/ldap/ldap.conf or ~/.ldaprc or ./ldaprc.
+#
 # GSSAPI has hardcoded ssf 56.
 #
 dn: cn=config
