@@ -29,7 +29,7 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 # search.sh     apache solr, katta.sourceforge.net
 # monitor.sh    cacti, nagios, SEC(Simple Event Correlator), logcheck, fluentd, scribe
 #               monit
-# sugarCRM?, groupware?, zimbra?
+# sugarCRM?, groupware?, zimbra?, asterisk?
 
 SCRIPTS=`cat<<END
 install-packages.sh
