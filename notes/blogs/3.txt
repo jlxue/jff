@@ -1,0 +1,41 @@
+服务配置测试环境，locale, etckeeper，shorewall
+
+
+配置服务需要一个环境反复安装测试，用虚拟机和 chroot 都是很方便的法子，Linux 的 container 支持看起来不错，不过还不会用。Debian 打包了一个 multistrap 程序，可以用来快速建立一个 Debian chroot 环境，使用很简单，它还有个设计理念与我心颇有戚戚焉：
+
+$ man multistrap
+
+...
+
+State
+multistrap is stateless - if the directory exists, it will simply proceed as normal and
+
+apt will try to pick up where it left off.
+
+这不就是实现了一个稳定状态么:-)
+
+为了再省点事，我写个几行脚本封装了下 multistrap，让它自动 mount 必需的一些文件系统如 /proc, /sys，脚本放在 https://github.com/Dieken/jff/tree/master/sysadmin，使用办法：
+
+$ ./bootstrap-wheezy.sh /path/to/wheezy/chroot/root
+
+这个命令自然也是可以在一次会话里重复调用的:-)   有兴趣尝试这个来搭建环境的同学，注意检查 multistrap-wheezy.conf 里的 arch 选项是不是要改成 amd64。
+
+由于这个 chroot 没有建立虚拟网络接口，所以 chroot 内外的服务共用网络端口区间，后面试验服务搭建时要小心，比如不要内外都同时启动 ssh server 和 dns server。
+
+为了简单起见，我会把所有服务都放在一台机器上，这台机器的主机名是 gold，内部网络的域名是 corp.example.com。试验的时候可以用 "hostname gold" 临时把主机名修改成 gold. 另外检查 chroot 里的 /etc/hostname 只包含 gold，/etc/hosts 有这样一行：
+
+127.0.1.1 gold.corp.example.com gold kerberos.corp.example.com kerberos krb ldap.corp.example.com ldap www.corp.example.com www corp.example.com
+
+这个设置的用意是尽量不依赖 DNS server，以免 DNS server 失败时，这台服务器上的服务解析到外部机器出现安全问题，同时也可以提高域名解析速度，毕竟所有服务都在一台机器上。
+
+接下来给这个测试服务器环境做些基本设置，这些设置我已经写成脚本，放在 https://github.com/Dieken/jff/tree/master/sysadmin/shell 下，其中 run.sh 是个汇总的脚本，其它 .sh 脚本除了 lib.sh  都是可以直接执行的，当然它们之间有依赖顺序，这个顺序记录在 run.sh 中，非常粗糙，单线程的顺序执行，所幸除了 apitude update/install，它执行的还很快。
+
+(1) locale，我选择系统默认 locale 是 en_US.UTF-8，选择 UTF-8 没啥好说的，Linux 下的主流，选择  en_US 而非 zh_CN 是避免一些命令行工具输出中文信息，干扰自动配置脚本解析其它程序的输出。
+
+(2) etckeeper，这是个将 /etc 纳入 GIT 版本控制的方便工具，装完后无需配置，有  cron 任务以及 apt hook 自动调用 etckeeper，你能很容易看到 /etc 的变迁情况，用 etckeeper vcs CMD OPTIONS 可以直接调用底层 VCS 工具。强烈推荐桌面用户也用用这个工具。
+
+(3) firewall，我选择了老少咸宜居家必备的 Shorewall (http://shorewall.net/GettingStarted.html)，我在个人 PC 上也安装这个，非常容易使用，其新版本支持 Universal 配置，对于单独主机的保护，配置起来尤为方便，我也是因为这个原因选择以 Debian testing 作为基础做试验，Debian stable 中的 shorewall 包不支持这个特性。
+
+简单来说，shorewall 封装 iptables 提供了高级抽象，让防火墙配置更简单更不容易出错，毕竟这是专业人士打造的，我等拿来就用好了。Shorewall 分成三部分：shorewall-init, shorewall, shorewall6，第一个提供了在网卡配置过程中的保护，后两个是真正的防火墙设置程序。安装过程很简单，复制下 Universal 样例配置文件到 /etc/shorewall, /etc/shorewall6，在 /etc/default 下修改 shorewall-init, shorewall, shorwall6 启动它们，额外的一点修改涉及日志设置，这个在 /usr/share/doc/shorewall/README.Debian.gz 中有说明。当你花个十分钟配置过一次后，以后再配置也就是秒秒中的事情，然后你就可以观摩下 sudo iptables -L 的输出了。对端口的打开关闭可以在 /etc/shorewall*/rules 中设置。
+
+
