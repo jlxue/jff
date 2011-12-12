@@ -24,6 +24,8 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 # bts.sh        bugzilla/mantis
 # ci.sh         jenkins
 # backup.sh     bacula/amanda
+# vpn.sh        openvpn
+# grok.sh       opengrok
 # search.sh     apache solr, katta.sourceforge.net
 # monitor.sh    cacti, nagios, SEC(Simple Event Correlator), logcheck, fluentd, scribe
 #               monit
