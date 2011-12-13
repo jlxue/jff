@@ -1,0 +1,27 @@
+dhcp, dns, ntp, kerberos, ssh
+
+一个局域网里头，机器正常开机最可能先接触的网络服务应该就是 DHCP 了，所以从它开刀是很自然的了，搭配 FAI 还可以 PXE 安装系统，不过在局域网里试验 DHCP 太容易冲突了，而且看 isc-dhcp-server 有个支持 ldap 的版本，dhcp 还有自动更新 dns 记录的功能，所以放到后面再鼓捣。
+
+局域网里有个 DNS 服务器会很方便，不用记住 IP 了，如果设置 DNS 域名时把用户 ID 加上去，那就更方便网络状态分析了。另外 Kerberos 要求服务所在机器必需有 DNS 域名。DNS 服务器程序有很多，http://en.wikipedia.org/wiki/Comparison_of_DNS_server_software 有一个很赞的表格对比，对于小企业规模自用，bind9，djbdns, powerdns, dnsmasq, unbound 都很有意思。bind 9 是市场份额最大的 DNS 服务器，占据 90% 多份额。djbdns 的安全方面口碑非常好，可惜 DJB 大神已然不维护这东西，它不支持 DNSSEC 和 IPv6。PowerDNS 支持很多存储后端，最吸引人的是 MySQL/PostgreSQL 后端支持了，
+但网上有大量舆论说这东西效率其实很低，我估计不消耗大量内存缓存的话，来一个请求就执行一系列 SQL 语句确实很崩溃，对于企业内部，应该还不至于域名变更频繁到需要用数据库的地步。dnsmasq 很适合局域网使用，伊内置支持 DHCP 和 TFTP，不过伊不支持 DNSSEC，不支持递归查询（实在是不想受制于 ISP 的 DNS forwarder 啊），貌似支持的 DNS 资源记录类型也很有限，当然也不支持 master、slave 模式了，个人觉得它很适合网吧、十来人的小企业。unbound 完美支持 IPv6、DNSSEC，不过伊对权威记录支持有限，不支持动态域名，我在自己的 PC 上就用 unbound，图它的 DNSSEC 支持，你懂的，防小人。。。。顺带提一句 DNSSEC，感兴趣的同学可以参考  http://wiki.debian.org/DNSSEC，有点点老，unbound 现在不用手动配置 root trust anchor，但还是很有参考价值，尤其是教你如何识别你是否处在 DNSSEC 保护中，很有意思。再顺带提一句，自己本机搭个 DNS server 比如 unbound、bind9，可以屏蔽 ISP 的域名错误广告页面哦。。。
+
+于是选择了牛刀  bind9.  《Linux Administration Handbook》的 DNS 一章非常给力，看完后对 DNS 的认识拔高了十几个台阶（原来认识太差了。。。），配置了下 bind9，其实很容易的。感兴趣的同学可以参考我放在 github 上的配置文件 shell/etc/bind/db.{corp,10}，我用的 10.x.y.z 私有 IP 地址空间，gold.corp.example.com 占用了 10.0.0.10，各位试验的时候如有 IP 地址差异记得改这两个文件。不过由于我这里全是单机配置，/etc/hosts 已然够用了，配置 bind9 只是为了全面点，以及为其它客户机服务。
+
+配置好 bind9 后不要忘记修改 etc/{shorewall,shorewall6}/rules 打开 53 端口。
+
+ntp 服务器是 kerberos 运行所需要的，因为 Kerberos 协议对时间比较敏感，默认配置下服务器和客户机两边时差超过 5 分钟，Kerberos 协议会拒绝工作。ntp 服务器程序也有好几个，ntp，openntpd，chrony，第一个是名门正统，第二个实现的特性不完全，好像不支持修正时钟频率，第三个适合桌面机以及笔记本等不是经常联网的机器，以及虚拟机这种时差漂移严重的环境，因为名门 ntp 实现的机制比较慢腾腾，笔记本等联网、运行、关机这么几个小时还不够 ntp 服务器同步完时间的（ntp 是逐步微调时间的，避免因时间跨度太大影响某些对时间特别敏感的应用）。Chrony 特意考虑了桌面用户，Anacron 也是，怪不得最新的 Federa 16 把  Chrony 设为默认的 NTP 服务器程序了：https://fedoraproject.org/wiki/Features/ChronyDefaultNTP#Current_status
+
+看过 MIT Kerberos 主页上的管理员和用户手册后，配置 Kerberos 服务器和客户端是很简单的事情，我就不罗嗦重复了，偷懒的同学可以去看看 kerberos.sh 脚本，或者这篇速成教程：http://techpubs.spinlocksolutions.com/dklar/kerberos.html 。需要注意的一点是 Kerberos 服务器在寻找 service principal 时是按照客户端连接的服务端 IP 地址反向解析域名判断的，比如你用 ssh localhost 或者 ssh 127.0.0.1，那么 支持 kerberos 的 ssh 服务器会去找  host@localhost，而不是我期望的 host@gold.corp.example.com，因为找不到这个 principal 而服务端报错。
+
+配置完 Kerberos 后，同样也不要忘记修改 Shorewall 配置文件开放端口，Kerberos 这厮开的端口比较多。客户机极为容易配置，把 libpam-krb5 和 krb5-user 装上就搞定，最好也把 libpam-ccreds 装上，这个模块会缓存认证信息，万一 kerberos 服务挂了，我们还是有机会登录成功。
+
+接下来配置 ssh server，否则要是在真机上，我就得一直趴机房里操作了。自然，ssh server 实现也颇有一些，dropbear 合适嵌入式系统，lsh-server 是 GNU 出品，据说维护不是很活跃，剩下的自然是如日中天的 openssh-server 了，可惜这玩意最近几年也频繁报告安全漏洞，solidot.org 都有新闻说 cracker 攻破系统后第一件事就是升级 openssh。。。。
+
+Debian Wheezy 里的 openssh 装完后需要配置才能开启 Kerberos 支持。/etc/ssh/sshd_config 里，把 PasswordAuthentication 和 ChallengeResponseAuthentication 都设置成 no，因为我们不直接用 pam_unix 的密码认证，也不用 S/KEY、OPIE 之类的一次一密认证方案，开着它们有风险。KerberosAuthentication 也要是 no，这个选项的意思是 ssh client 把密码传给 ssh server，ssh server 作为 kerberos client 向 kerberos server 认证，这个密码传输显然太不靠谱。GSSAPIAuthentication 设置成 yes 就能支持 kerberos v5 认证了，GSSAPI 本来是想设计为通用安全接口的，不过安全界好像不怎么鸟它，搞的它成了 Kerberos v5 的代名词。
+
+最后，UsePAM 设置成 yes，因为 pam 的 account 和 session 检查还是需要的。
+
+在 kerberos 服务端设置好 host@gold.corp.example.com 这个 service principal 并把其加入 /etc/krb5.keytab 后，就可以试试 kinit 再 ssh gold.corp.example.com，不要用 ssh localhost，原因在上面说了。SSO 的第一个无密码登录服务就诞生了！
+
+由于 kerberos ticket 过期后要重新 kinit 申请，可能会觉得有点麻烦，另外为了避免 kerberos 服务挂掉无法登录，可以用 ssh-keygen 生成一对公钥、私钥，配置好 ssh server 的公钥认证，给自己留条后路，省的出问题了就要趴机房热身。
+
