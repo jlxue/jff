@@ -1,0 +1,34 @@
+openldap, libnss-ldapd
+
+OpenLDAP 这个话题恐怕得写两篇，我还没搞定 libnss-ldapd 的配置。以前一直没实际玩过目录服务，初上手感觉非常别扭，术语完全不知所云，OpenLDAP 手册看了两遍还不是特别有谱。也许将来会发现折腾 OpenLDAP 是个错误，因为越来越多的服务都支持 SQL 型数据库存储用户信息。但无论如何，Kerberos + LDAP 的组合是个经典传奇，值得了解，不然 MS 也不会费力吧唧的搞个 Kerberos + LDAP 的组合拳 Active Directory 了。
+
+这里先以我粗浅的理解说一下目录服务是怎么回事。目录服务真的是像一个目录树，只是没有普通文件(当然你也可以认为空的目录节点是普通文件节点），每个目录有一个或者多个类型(objectClass)，表明这个目录本身可以有什么样的元信息，元信息是以 key-value 对的形式保存的。如同 Linux 下文件系统的加载点(mount point)，目录服务里的目录也是可以绑定到不同存储后端的，比如 cn=config 保存到 config 后端（在 /etc/ldap/slapd.d 下的众多 LDIF 文件里），dc=corp,dc=example,dc=com 存放在 /var/lib/ldap 下的  BerkeleyDB 数据库里。这里容易让人迷糊的是 dc= 这样的东西，在 LDAP 中，“路径”是以 DN 来指代的，Distinguished Name，dc 是 domain component，还有个 cn 是 common name，ou 是 orgnization unit，一个 DN 包含多个 以逗号分割的 components，就好像文件路径包含多个斜杠分割的目录、文件名。我觉得很不明白的是为啥要写 dc=, cn=, ou= 这样的东西，把这些放入 key-value 元信息不更简单么？
+
+LDAP 相比 SQL 数据库，个人觉得好处如下：
+
+    LDAP 为读优先设计，读取效率高；（我没实测过）
+    LDAP 的树状结构组织层次信息很方便，SQL 数据库则费力的多；
+    LDAP 的权限控制非常灵活；
+
+
+LDAP 的实现有两个，OpenLDAP 和 389 Directory Service (http://directory.fedoraproject.org/，389 是默认 LDAP 端口号），后者刚从水木上听说，貌似名气很小，留作以后研究了。
+
+OpenLDAP 服务器在 Debian 上的包名叫 slapd，为了支持 GSSAPI 认证，还需要 libsasl2-modules-gssapi-mit 这个包，SASL 是一个实现了很多认证方式的函数库，其中一种认证方式是 GSSAPI，其实也就是 Kerberos v5 了。安装时会询问服务器域名，填入 corp.example.com，这个会转换成 /var/lib/ldap 里数据库对应的目录树 dc=corp,dc=example,dc=com。另外一个预装的目录树是 cn=config，这个 slapd 的配置目录树，它是对老版本 slapd.conf 配置方式的改进，从而支持运行时修改 slapd 配置。
+
+麻烦的地方在于 GSSAPI 认证，需要阅读 SASL 的系统管理员手册，设置 /etc/ldap/sasl2/slapd.conf。这里有个小插曲，开始试验 slapd 的 Kerberos 认证的时候，它老是告诉我一个莫名的错误信息：
+    $ ldapwhoami
+    SASL/GSSAPI authentication started
+    ldap_sasl_interactive_bind_s: Other (e.g., implementation specific) error (80)
+            additional info: SASL(-1): generic failure: GSSAPI Error: Unspecified GSS failure.  Minor code may provide more information (Unknown error)
+
+后来发现是 slapd 调用 gssapi-mit sasl module 默认读取 /etc/krb5.keytab，因为 slapd 不是以 root 身份运行，它读不了这个文件，所以 slapd 就可耻的失败了，伊的错误信息就像是入门 C 程序员打印的日志，很 magic，而 SASL 也没报告啥明显的错误信息，由此可见一斑这俩的代码质量，咳咳。。。。于是需要设置下，让 SASL 读指定的 keytab 文件，SASL 的系统管理员手册中说 keytab 选项目前是不支持的，我查了下，其实是支持的，不过是 libsasl2-modules-gssapi-mit 这个包的编译脚本有误，具体见 http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=651308 。还好这个很容易绕过去，修改 /etc/default/slapd 设置  KRB5_KTNAME 环境变量即可，可惜这是个 Debian 打包的文件，我很不情愿修改它，因为在软件包升级时要留意打包者对它的修改。
+
+我是个偏执狂，为了安全起见，我就去修改 cn=config 目录内容，试图达到最大的安全性，因为很多其它服务要依赖 LDAP 服务，我不希望 LDAP 服务 IP 被抢啥的出现假冒 LDAP 服务，或者 LDAP 网络传输信息被窃听，结果发现 slapd 的安全相关选项的文档严重不足，我基本是狂琢磨文档狂对半测试才找出让 slapd 不报错的安全设置。这里我故意没用 TLS 认证，因为企业自身没有 CA 资格，搞个自签名证书客户端部署又麻烦，而且要让 TLS 支持客户端验证的话，客户端也要部署自己的证书，反正已经有 Kerberos 了，再折腾 TLS、PKI 就太蛋疼了。在配置过程中发现 SASL 无法识别 GSSAPI 的加密安全强度，给死了一个 ssf 参数 56（认为 GSSAPI 的加密强度是 DES，而其实 Kerberos 现在优先用 AES 了），SASL 开发者给出的理由是 GSSAPI 还是 Kerberos API 没提供获取加密算法的函数，从而无法评估加密强度。这个问题颇有年头了，从这也可以看出 Kerberos/GSSAPI/SASL 这个生态圈不是那么健康。
+
+这个安全配置的结果是只允许 root 用 -Y EXTERNAL -H ldapi:/// 或者 Kerberos client 用 -Y GSSAPI -H ldap:/// (注意前者是 ldapi 后者是 ldap)，并且禁止 SASL 认证算法协商（必须显式设置 /etc/ldap/ldap.conf 的 SASL_MECH 选项，要么是在命令行用 -Y GSSAPI），原因是这个协商过程貌似是明文的，我没搞明白怎么让 slapd 的 ssf 设置允许这个通信数据开始是低安全级别然后是高安全级别。所幸我只希望它用 GSSAPI，也就无所谓了。
+
+接下来是配置 nss 让它支持从 LDAP 获取 /etc/{passwd,group,shadow} 信息了，实际上 LDAP 也支持用来认证的，nss-pam-ldap 和 nss-pam-ldapd 是两个实现，后者是前者的改进版本，两个都同时有 pam 和 nss 模块。pam 模块支持用 LDAP 里的 shadow 密码验证用户，因为前面已经配置了 libpam-krb5，就没必要再用 pam-ldap/pam-ldapd 了，图增多处存储密码的麻烦以及密码泄漏的风险。顺带说一句，MIT Kerberos 服务默认的账户存储后端是 BerkeleyDB，它还支持 LDAP 后端，我本来想用 LDAP 后端，但这里有个蛋生鸡，鸡生蛋的问题：Kerberos 如何知道 LDAP 服务是真的呢？要达到这个效果，先要用 BerkeleyDB 后端，配置好 LDAP 的 kerberos principal，导出 keytab 文件，然后换用 LDAP  后端。这么搞有点麻烦，而且不记得那里看到的，Kerberos 开发人员不推荐这样的用法，因为增加了 Kerberos 账户数据库被攻陷的风险，而且因为依赖 LDAP 服务，Kerberos 系统发生故障的可能性更大了。
+
+从 nss-pam-ldapd 主页上看，(http://arthurdejong.org/nss-pam-ldapd/) 上看，这个实现比 nss-pam-ldap 要好。装上之后，发现这东西有点把问题搞复杂了，原来是用户登录，login 调用 nss-ldap模块（同一进程），再访问 slapd，现在是 login 调用 nss-ldapd模块（同一进程），委托本地的 nslcd (nss-pam-ldapd 自带）去访问 slapd，这就对 slapd 做身份鉴别造成麻烦了，首先，nslcd 需要配置 kerberos principal，默认是 host@`hostname -f`，以让其跟 slapd 互相认证，然后可能是 nslcd 告诉 slapd 说我是 userA，让 slapd 以 userA 身份进行授权。我还没搞明白 slapd 怎么知道 nslcd 声称 userA 是否合法，网上有说法是 nslcd 跟 slapd 认证成功后，会再以 userA 身份向 slapd 认证一次，如果是这样的话倒没有问题。目前还在摸索中，后文待续。
+
+BTW，安装 libnss-ldapd 会修改 /etc/nsswitch.conf 文件，这里面 passwd/group/shadow 必须选中，因为他们是登录必需的，其它可以琢情选用，比如 ethers 存放 MAC 地址，可能能让 dhcp server 的 ldap 后端使用，netgroup 据说可以设置组权限，aliases 存放邮件地址别名，虽然 MTA 默认不会用它，但或许能配置 MTA 让它读取 LDAP 服务。
