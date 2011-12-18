@@ -42,11 +42,15 @@ file_newer "$pidfile" /etc/slapd.keytab || {
 [ -z "$SLAPD_RESTART" ] || service slapd restart
 
 
+sync_file $SCRIPT_DIR/etc/cron.hourly/nss-updatedb /etc/cron.hourly/nss-updatedb
+
+
 ensure_mode_user_group /etc/default/slapd   644 root root
 ensure_mode_user_group /etc/ldap/sasl2/slapd.conf   644 root root
 ensure_mode_user_group /etc/ldap/ldap.conf  644 root root
 ensure_mode_user_group /etc/nsswitch.conf   644 root root
 ensure_mode_user_group /etc/nslcd.conf      640 root nslcd
+ensure_mode_user_group /etc/cron.hourly/nss-updatedb    755 root root
 
 # depends on krb5 principals setup in kerberos.sh
 [ "`pidof slapd`" ] || service slapd start

@@ -50,9 +50,9 @@ i openssh-server
 
 ## ldap
 i slapd ldap-utils libsasl2-modules-gssapi-mit
-i libpam-ccreds libnss-ldapd nscd
+i libpam-ccreds libnss-ldapd nscd nss-updatedb
 
-# other nss cache schemes: nsscache nss-updatedb sssd
+# other nss cache schemes: nsscache sssd
 
 i ldapscripts smbldap-tools shelldap ldapvi
 
