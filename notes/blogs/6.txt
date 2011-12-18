@@ -1,0 +1,25 @@
+openldap, libnss-ldapd (续)
+
+libnss-ldapd -> nslcd -> slapd 的认证和授权过程真是比较绕，在 nss-pam-ldapd 邮件列表问了下，几天了都没有回应。。。大致看了下 nss-pam-ldapd 的源码，发现 rebind 只发生在发生 referral 的时候，也就是说第一个 slapd 服务器的某个目录是委托另外一个 slapd 服务的。libnss-ldapd -> nslcd -> slapd 的认证和授权过程猜测如下：
+
+    * 用户进程比如 getent passwd 调用 glibc 库 nss 函数，最终通过 libnss-ldapd 库函数请求本地服务 nslcd，这个通讯是用的 UNIX domain socket，nslcd 通过这个 socket 可以知道用户进程的 pid、uid、gid 信息。
+
+    * /etc/nslcd.conf 里配置了 sasl_mech GSSAPI 认证方式，所以 nslcd 和 slapd 之间利用 Kerberos 做认证，nslcd 的身份由 /etc/nslcd.conf 配置的 krb5_ccname 获得 authentication id (authcid)，默认是 host@`hostname -f`@REALM。SASL 认证过程还会查找 nslcd 的 authorization id (authzid)，可以在 /etc/nslcd.conf 里配置。
+
+    * slapd 允许 host@`hostname -f`@REALM 做 sasl bind 成功，nslcd 端的 authzid 要起作用，需要在 slapd 一端配置 DN "uid=host/gold.corp.example.com,cn=gssapi,cn=auth" 的 authzFrom 和 authzTo 属性，默认情况下是没有配置的，所以 host@HOSTNAME 默认配置下相当于 LDAP 普通用户，对目录项有读权限。
+
+
+在这个过程中，libnss-ldapd 并没有用用户进程的 krb ticket 向 nslcd 和 slapd 做身份认证，对于服务器来说，可以让 nslcd 使用 host@HOSTNAME krb5 principal，nslcd 没有 admin principal 的话是没法修改 slapd 里的数据的，只是 slapd 没法细分用户权限了(nslcd 的 authzid 只能是固定的，不能根据用户身份变动)，对于普通用户机器来说，如果管理员没有给配置 host principal(一般也不大可能让管理员配置这个，麻烦，而且不归管理员负责），那么普通用户得配置 nslcd 使用自己的 user ticket，这也是比较麻烦的。比较方便的是让 slapd 支持匿名 bind，也就是匿名认证，但是我又不喜欢网络上的访客能随随便便的获取账户列表。安全与方便，两难啊。
+
+由于 nslcd 使用的 krb5 principal 没有特权，所以它没法修改 slapd 上的 userPassword，不过因为我原本就打算全用 krb5 认证，压根就不让 slapd 保存用户密码摘要，所以也没问题。另一个问题是 nslcd 没有权限修改用户 shell、gecos 等信息，但这些一般都不会修改，不是个大问题，而且其实 chsh 命令貌似不认 ldap 或者是 nss-ldapd 不支持 chsh，这个命令压根就不去找 ldap，如果你 chsh 改一个 ldap 里存储的账户，chsh 会报告说在 /etc/passwd 里找不到这个用户，这个问题也在 nss-pam-ldapd 邮件列表里问了，但尚无回信。
+
+libnss-ldapd 在鉴别用户上有上述缺陷，其前辈  libnss-ldap 也是一样的，配置文件里也是写死了 authcid 和 authzid，我原以为 libnss-ldap 没有独立的 nslcd 服务， 用户进程直接跟 slapd 交互，就可以在跟 slapd 认证时直接使用 user krb5 ticket，实际并非如此，可能这两个东西在设计之初并没有考虑到这个问题，或者我想复杂或想歪了。
+
+关于 pam、nss 与 slapd 的集成，除了 nss-pam-ldap 和 nss-pam-ldapd 外，还有一些其它方案。RedHat 做了一个 sssd，前几年宣传的比较火，现在似乎淡定了，开发还在继续，但不知道为什么 Debian 社区开发者没有收录，似乎其它发行版以及广大用户也没怎么采纳，估计也还是有不少问题。
+
+sssd 要解决的一个重大问题是离线时账户处理问题，用过 Windows 的域账户（MS 的 domain controller 其实就是 Kerberos KDC，domain 就是 realm，account 就是 principal）的用户就会知道，在连不上域控制器时，用户依然可以以域账户身份登录系统，这是因为 Windows 缓存了域账户信息。在 nss-pam-ldap/nss-pam-ldapd/pam-krb5 中，用户登录凭证(credential，典型的是密码)可以用 pam-ccreds 缓存，用户账户信息(home dir, login shell, uid, gid, groups) 却没有缓存方案，nscd 可以修改配置长时间缓存数据，但这会导致它长时间不联系 ldap 服务器更新缓存，这个问题可以修正（比如 nscd 尝试连接 ldap 成功就更新本地缓存），但貌似 nscd 维护者没兴趣这么做，毕竟术业有专攻，伊设计之初就没考虑离线应用。哪怕是 pam-ccreds，如果用户信息是存放在 ldap 里的，slapd 连接不上时，login 找不到用户，依然不会允许登录，所以 nss-pam-ldap/nss-pam-ldapd + kerberos + slapd 的单点登录方案还是不甚理想，十分依赖 kerberos + slapd  都可以连接并且工作正常(slapd 的 gssapi 认证需要 kerberos 服务)。
+
+单点故障、离线应用，痛楚啊。牺牲一点及时性，还是有绕过的办法的，那就是 nsscache 和 nss-updatedb，前者不依赖 nss-ldap 和 nss-ldapd，要配置 ldap 连接、认证等，后者依赖 nss-ldapd/nss-ldapd 获取信息，只有当 ldap 无法连接上时才会用到缓存信息，所以 nss-updatedb 及时性更好。两种方案都需要 cron 任务定期更新缓存。
+
+pam, nss 这块真龌龊。。。。
+
