@@ -1,0 +1,32 @@
+邮件系统各组件的选择: Exim, Dovecot, Sympa, Squirrelmail
+
+MTA: Exim4
+    http://shearer.org/MTA_Comparison
+
+    MTA 没有多少选择余地，全面倒向 Exim vs Postfix 了，Debian 标配 Exim，
+    用它应该也没太大问题。
+
+POP3/IMAP: dovecot-imapd
+
+    有 IMAP 了，没啥必要再支持 POP3. IMAP server 也有挺多开源实现，老牌
+    的 uw-imapd 还有很多人使用， courier-imap, cyrus-imapd, dovecot 各有
+    支持者，性能有不少说 courier-imap 坏话的，说其在单个邮件夹里邮件数量
+    太多时性能很差，总的来说，cyrus-imapd、dovecot 性能都很好，cyrus 貌
+    似更企业级点，但文档不够丰富。 dbmail 用数据库做存储后端，有人支持，
+    利用 MySQL 做后端后效率很不错，有人反对，说文件系统本身就是一个优化的
+    变长文件数据库，dbmail 用数据库后某些情况下效率还没 cyrus 好。个人感
+    觉 dbmail 把一个问题搞成两个问题了，让 mail admin 需要额外操心数据库的
+    维护和优化。
+
+    Cyrus 有一个非常棒的特性能极大的节约磁盘空间：
+    http://www.cyrusimap.org/docs/cyrus-imapd/2.4.12/overview.php#singleinstance
+
+mailing list: Sympa
+
+    mailman 似乎在开源界更流行点，Sympa 据说比较“企业级”，对我来说，重要的
+    是 mailman 是 Python 写的，Sympa 是 Perl 写的，我不懂 Python。。。
+
+Web mail: Squirrelmail
+
+    Web mail 的开源实现多的一塌糊涂，Squirrelmail 得到很多舆论支持。
+
