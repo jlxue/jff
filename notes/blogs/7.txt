@@ -4,7 +4,7 @@ MTA: Exim4
     http://shearer.org/MTA_Comparison
 
     MTA 没有多少选择余地，全面倒向 Exim vs Postfix 了，Debian 标配 Exim，
-    用它应该也没太大问题。
+    内部用它应该也没太大问题。 Postfix 可以用在 smart host 上。
 
 POP3/IMAP: dovecot-imapd
 
@@ -21,6 +21,21 @@ POP3/IMAP: dovecot-imapd
     Cyrus 有一个非常棒的特性能极大的节约磁盘空间：
     http://www.cyrusimap.org/docs/cyrus-imapd/2.4.12/overview.php#singleinstance
 
+    http://www.usenix.org/event/lisa05/tech/golubitsky/golubitsky.pdf
+    Toward an Automated Vulnerability Comparison of Open Source IMAP
+    比较详细的分析了 uw-imapd, courier-imap, cyrus-imapd 的代码质量和安
+    全风险，uw-imapd 问题比较大。cyrus 各有优缺点，cyrus 稍占优势。
+
+    http://qa.debian.org/popcon.php?package=uw-imap
+    http://qa.debian.org/popcon.php?package=dovecot
+    http://qa.debian.org/popcon.php?package=courier
+    http://qa.debian.org/popcon.php?package=cyrus-imapd-2.4
+    http://qa.debian.org/popcon.php?package=cyrus-imapd-2.2
+
+    uw-imapd 安装的人很多，但投票很少，dovecot 和 courier 分列一二名，
+    cyrus 很少。
+
+
 mailing list: Sympa
 
     mailman 似乎在开源界更流行点，Sympa 据说比较“企业级”，对我来说，重要的
@@ -29,4 +44,32 @@ mailing list: Sympa
 Web mail: Squirrelmail
 
     Web mail 的开源实现多的一塌糊涂，Squirrelmail 得到很多舆论支持。
+
+
+系统架构：
+
+           smtp                         smtp
+Internet <-----> smart host(postfix) <--------> internal MTA(exim4)
+                                                 ^  |
+                                                 |  | filter(spamc, clamav)
+                    +----------------------------+  |       <mailing list>
+                    |                               | lmtp
+                    |                               v
+                    |                           dovecot-lmtpd
+               smtp |                               ^
+                    |                               | maildir or dbox
+                    |                               |
+                    |                imap           v
+     Thunderbird, Squirrelmail   <------------- dovecot-imapd
+
+
+
+smarthost.corp.example.com:  拥有公网 IP
+smtp.corp.example.com: 内网 IP，非内网邮件通过 smarthost 向外转发，同时从
+                       smarthost 抓取外部邮件
+imap.corp.example.com: 内网 IP，使用 dovecot-lmtpd + dovecot-imapd 提供 IMAP 服务
+mail.corp.example.com: 内网 IP，Web mail
+
+smarthost 与 smtp.corp 之间通过 TLS 以及密码验证，其它系统间用
+内部的 kdc + slapd 做验证。
 
