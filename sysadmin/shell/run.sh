@@ -9,7 +9,6 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 
 # fai.sh        fai-project.org
 # mta.sh        exim + smarthost, spamassassin/bogofilter/bsfilter, clamav
-# imap.sh       dovecot/cyrus-imapd
 # webmail.sh    squirrelmail, calendar
 # maillist.sh   sympa/mailman   (forum?cms?)
 # samba.sh
@@ -41,6 +40,8 @@ ntp.sh
 kerberos.sh
 ssh.sh
 ldap.sh
+imap.sh
+smtp.sh
 END`
 
 for f in $SCRIPTS; do

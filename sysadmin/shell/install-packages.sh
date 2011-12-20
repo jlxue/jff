@@ -56,6 +56,20 @@ i libpam-ccreds libnss-ldapd nscd nss-updatedb
 
 i ldapscripts smbldap-tools shelldap ldapvi
 
+# MTA: exim/postfix
+i exim4 exim4-daemon-heavy
+
+# IMAP: dovecot/cyrus/courier
+i dovecot-imapd
+
+# antivirus
+i clamav
+
+# Web mail: squirrelmail
+i squirrelmail
+
+# mailing list: sympa/mailman
+i sympa
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none

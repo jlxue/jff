@@ -63,6 +63,10 @@ Cyrus SASL      http://www.cyrusimap.org/docs/cyrus-sasl/
 OpenLDAP        http://www.openldap.org/
                 http://techpubs.spinlocksolutions.com/dklar/ldap.html
 Bind 9          http://www.isc.org/software/bind/documentation
+Exim 4          http://wiki.debian.org/PkgExim4
+                http://www.exim.org/
+Dovecot         http://dovecot.org/
+
 
 =============================================================
 Resource:
