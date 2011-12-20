@@ -8,23 +8,17 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 
 sync_file $SCRIPT_DIR/etc/aliases /etc/aliases
 sync_file $SCRIPT_DIR/etc/email-addresses /etc/email-addresses
-sync_file $SCRIPT_DIR/etc/exim4/exim4.conf.template /etc/exim4/exim4.conf.template
-
 
 cmp_file $SCRIPT_DIR/etc/mailname /etc/mailname || {
     overwrite_file $SCRIPT_DIR/etc/mailname /etc/mailname
     CONF_CHANGED=1
 }
 
-cmp_dir $SCRIPT_DIR/etc/exim4/conf.d /etc/exim4/conf.d || {
-    overwrite_dir $SCRIPT_DIR/etc/exim4/conf.d /etc/exim4/conf.d
+cmp_dir $SCRIPT_DIR/etc/exim4 /etc/exim4 --exclude passwd.client {
+    overwrite_dir $SCRIPT_DIR/etc/exim4 /etc/exim4 --exclude passwd.client
     CONF_CHANGED=1
 }
 
-cmp_file $SCRIPT_DIR/etc/exim4/update-exim4.conf.conf /etc/exim4/update-exim4.conf.conf || {
-    overwrite_file $SCRIPT_DIR/etc/exim4/update-exim4.conf.conf /etc/exim4/update-exim4.conf.conf
-    CONF_CHANGED=1
-}
 
 [ -z "$CONF_CHANGED" ] || {
     /usr/sbin/update-exim4.conf --verbose

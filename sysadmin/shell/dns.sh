@@ -36,7 +36,7 @@ mkdir -p $SCRIPT_DIR/var/cache/bind
 named-checkconf -t $SCRIPT_DIR -z
 
 
-cmp_dir $SCRIPT_DIR/etc/bind /etc/bind -x rndc.key || {
+cmp_dir $SCRIPT_DIR/etc/bind /etc/bind --exclude rndc.key || {
     overwrite_dir_ignore_extra $SCRIPT_DIR/etc/bind /etc/bind
     service bind9 reload
 }
