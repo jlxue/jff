@@ -1,0 +1,3 @@
+# /usr/share/doc/exim4-base/README.Debian.gz
+#   2.7. Handling incoming mail for local accounts with low UID
+FIRST_USER_UID = 1000

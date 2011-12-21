@@ -57,14 +57,22 @@ and is readable by slapd.
 Reference:
 
 Shorewall       http://shorewall.net/
+
 Kerberos        http://web.mit.edu/kerberos/
                 http://techpubs.spinlocksolutions.com/dklar/kerberos.html
+
 Cyrus SASL      http://www.cyrusimap.org/docs/cyrus-sasl/
+
 OpenLDAP        http://www.openldap.org/
                 http://techpubs.spinlocksolutions.com/dklar/ldap.html
+
 Bind 9          http://www.isc.org/software/bind/documentation
+
 Exim 4          http://wiki.debian.org/PkgExim4
                 http://www.exim.org/
+                /usr/share/doc/exim4-base/README.Debian.gz
+                apropos exim
+
 Dovecot         http://dovecot.org/
 
 
