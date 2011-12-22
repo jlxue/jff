@@ -18,6 +18,9 @@ DNS(ACCEPT)	net		$FW
 LDAP(ACCEPT)	net		$FW
 Ping(ACCEPT)	net		$FW
 SSH(ACCEPT)	net		$FW
+SMTP(ACCEPT)	net		$FW
+IMAP(ACCEPT)	net		$FW
+HTTP(ACCEPT)	net		$FW
 
 # for client -> krb5kdc, krb4 use udp 750, krb5 uses tcp/udp 88.
 ACCEPT		net		$FW		tcp	88

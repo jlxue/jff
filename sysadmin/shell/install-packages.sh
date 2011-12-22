@@ -63,7 +63,11 @@ i exim4 exim4-daemon-heavy
 i dovecot-imapd
 
 # antivirus
-i clamav
+# XXX: http://web.nvd.nist.gov/view/vuln/search-results?query=clamav&search_type=all&cves=on
+i clamav clamav-unofficial-sigs
+
+# antispam: http://www.maretmanu.org/homepage/inform/exim-spam.php#spam
+i spamassassin
 
 # Web mail: squirrelmail
 i squirrelmail

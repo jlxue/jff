@@ -35,9 +35,10 @@ acl_check_data:
   #
   # exim4-daemon-heavy must be used for this section to work.
   #
-  # deny
-  #   malware = *
-  #   message = This message was detected as possible malware ($malware_name).
+  deny
+    malware = *
+    demime = *
+    message = This message was detected as possible malware ($malware_name).
 
 
   # Add headers to a message if it is judged to be spam. Before enabling this,
@@ -46,20 +47,15 @@ acl_check_data:
   #
   # exim4-daemon-heavy must be used for this section to work.
   #
-  # Please note that this is only suiteable as an example. There are
-  # multiple issues with this configuration method. For example, if you go
-  # this way, you'll give your spamassassin daemon write access to the
-  # entire exim spool which might be a security issue in case of a
-  # spamassassin exploit.
-  #
   # See the exim docs and the exim wiki for more suitable examples.
   #
-  # warn
-  #   spam = Debian-exim:true
-  #   add_header = X-Spam_score: $spam_score\n\
-  #             X-Spam_score_int: $spam_score_int\n\
-  #             X-Spam_bar: $spam_bar\n\
-  #             X-Spam_report: $spam_report
+  warn
+    spam = nobody:true
+    condition = ${if < {$message_size}{500K}}
+    add_header = X-Spam_score: $spam_score\n\
+              X-Spam_score_int: $spam_score_int\n\
+              X-Spam_bar: $spam_bar\n\
+              X-Spam_report: $spam_report
 
 
   # This hook allows you to hook in your own ACLs without having to

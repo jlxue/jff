@@ -2,7 +2,7 @@
 
 $TTL 86400
 
-@	3600	IN	SOA	ns dns-master (
+@	3600	IN	SOA	ns postmaster (
 				2011120400	; serial number
 				2h		; refresh
 				20m		; retry

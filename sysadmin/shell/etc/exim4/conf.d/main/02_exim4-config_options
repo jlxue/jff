@@ -46,7 +46,7 @@ message_size_limit = MESSAGE_SIZE_LIMIT
 # scanners. The second modification is in the acl_check_data access
 # control list.
 
-# av_scanner = clamd:/var/run/clamav/clamd.ctl
+av_scanner = clamd:/var/run/clamav/clamd.ctl
 
 
 # For spam scanning, there is a similar option that defines the interface to
