@@ -31,6 +31,7 @@ POD 文档 GUI 查看器
 
 模板系统
 =======
+    Text::Xslate
     Text::Template
     HTML::Mason
     HTML::Template::Pro
