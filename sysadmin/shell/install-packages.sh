@@ -76,6 +76,19 @@ i squirrelmail
 # mailing list: sympa/mailman
 i sympa
 
+# SQL database, Sympa requires mysql | postgresql
+i postgresql
+
+# apache2
+i apache2 apache2-mpm-worker
+
+# php, Squirrelmail requires libapache2-mod-php5 | php5, the former
+# requires libapache2-mpm-prefork, but I want more efficient worker
+# mpm and all dynamic web contents running in seperate processes for
+# maximum security, that's to say, FastCGI mode or separate WSGI/PSGI
+# mode.
+i php5 php5-fpm
+
 ###########################################################
 APT_LISTBUGS_FRONTEND=none
 APT_LISTCHANGES_FRONTEND=none
