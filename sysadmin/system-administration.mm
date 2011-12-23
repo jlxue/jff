@@ -200,6 +200,10 @@
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>
 </node>
+<node COLOR="#00b439" CREATED="1324634984921" ID="ID_1306922190" LINK="http://munin-monitoring.org" MODIFIED="1324635004311" TEXT="munin">
+<edge STYLE="bezier" WIDTH="thin"/>
+<font NAME="SansSerif" SIZE="16"/>
+</node>
 <node COLOR="#00b439" CREATED="1241588243901" ID="ID_1366097314" MODIFIED="1241589773049" TEXT="rrdtools">
 <edge STYLE="bezier" WIDTH="thin"/>
 <font NAME="SansSerif" SIZE="16"/>

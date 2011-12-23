@@ -26,7 +26,7 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 # vpn.sh        openvpn
 # grok.sh       opengrok
 # search.sh     apache solr, katta.sourceforge.net
-# monitor.sh    cacti, nagios, SEC(Simple Event Correlator), logcheck, fluentd, scribe
+# monitor.sh    cacti, nagios, munin, SEC(Simple Event Correlator), logcheck, fluentd, scribe
 #               monit
 # sugarCRM?, groupware?, zimbra?, asterisk?
 
