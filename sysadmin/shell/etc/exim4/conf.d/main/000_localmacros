@@ -1,6 +1,7 @@
 # /usr/share/doc/exim4-base/README.Debian.gz
 #   2.7. Handling incoming mail for local accounts with low UID
-FIRST_USER_UID = 1000
+# See /etc/exim4/conf.d/router/850_exim4-config_lowuid
+FIRST_USER_ACCOUNT_UID = 1000
 
 # See /etc/exim4/conf.d/main/02_exim4-config_options
 MESSAGE_SIZE_LIMIT = 10M

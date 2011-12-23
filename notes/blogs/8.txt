@@ -1,0 +1,25 @@
+exim4 smarthost 配置
+
+修改 /etc/exim4/update-exim4.conf.conf:
+
+-dc_eximconfig_configtype='local'
++dc_eximconfig_configtype='smarthost'
+-dc_smarthost=''
++dc_smarthost='your-remote-smtp-host'
+
+修改 /etc/email-addresses，加入调用 mail 命令的用户名
+和 smtp 账户名的映射关系：
+xxx: yyy@zzz.com
+
+修改 /etc/exim4/passwd.client:
+*:yyy@zzz.com:your-passwd
+
+用 * 而不是 your-remote-smtp-host 是因为这个 smtp 域名
+可能是个别名，真正连接后 IP 反向解析出来的是另一个域名
+导致 passwd.client 查找账户失败。
+
+然后重启 exim4 服务。
+
+不要修改 /etc/mailname 内容为 zzz.com，因为这个地方表示
+的是 exim4 所在机器的域名。
+
