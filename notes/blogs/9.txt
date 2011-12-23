@@ -1,0 +1,32 @@
+Exim 的配置
+
+Debian 默认安装的 exim4-daemon-light，不支持 ldap, sasl, perl
+interpreter, mysql/postgresql/sqlite 访问，所以需要替换成
+exim4-daemon-heavy。
+
+1. exim4 配置成 smarthost 模式，通过 smtp 或者 fetchmail 收信
+
+实际上我们这里期望配置的不是 smarthost，而是 smtp relay，
+它作为外部 smtp 服务器和内部 smtp 服务之间的桥梁，不用
+暴露内部的 kerberos+slapd 认证系统以及内部 smtp 服务器，
+同时，由于 clamav-daemon 以及 spamd 都有不少安全隐患，
+可以把它们部署到 smtp relay 上，减少对内部 smtp 服务器的
+威胁。
+
+2. clamav, spamassassin 支持
+
+配置这个只是为了熟悉一下流程。配置很简单，修改
+/etc/exim4/conf.d/main/02_exim4-config_options 打开
+av_scanner 选项。spamd_address 可以用默认设置。
+然后修改 /etc/exim4/conf.d/acl/40_exim4-config_check_data
+打开 malware 检测和 spam 评分。
+
+3. service auth 以及 ldap 账户查询
+
+exim4 支持 cyrus sasl 和 dovecot 认证，由于 exim4 也要
+查询 ldap 判断发件人、收件人地址是否存在，免不了需要
+sasl 做 GSSAPI 认证，而且不依赖 dovecot 也更为健壮，
+dovecot 也可以不必与 exim4 在同一台机器上。
+
+4. 通过 lmtp 转发给 dotcot-lmtpd
+

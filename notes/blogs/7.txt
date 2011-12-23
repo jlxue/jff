@@ -4,7 +4,7 @@ MTA: Exim4
     http://shearer.org/MTA_Comparison
 
     MTA 没有多少选择余地，全面倒向 Exim vs Postfix 了，Debian 标配 Exim，
-    内部用它应该也没太大问题。 Postfix 可以用在 smart host 上。
+    内部用它应该也没太大问题。 Postfix 可以用在 smart host/relay 上。
 
 POP3/IMAP: dovecot-imapd
 
@@ -49,7 +49,7 @@ Web mail: Squirrelmail
 系统架构：
 
            smtp                         smtp
-Internet <-----> smart host(postfix) <--------> internal MTA(exim4)
+Internet <-----> smtp relay(postfix) <--------> internal MTA(exim4)
                                                  ^  |
                                                  |  | filter(spamc, clamav)
                     +----------------------------+  |       <mailing list>
@@ -64,12 +64,12 @@ Internet <-----> smart host(postfix) <--------> internal MTA(exim4)
 
 
 
-smarthost.corp.example.com: 能被外网访问到，作为外网 SMTP server 和内网
+smtprelay.corp.example.com: 能被外网访问到，作为外网 SMTP server 和内网
                             smtp.corp.example.com 的桥梁
 smtp.corp.example.com: 内网 IP，非内网邮件通过 smarthost 向外转发，同时从
                        smarthost 抓取外部邮件
 imap.corp.example.com: 内网 IP，使用 dovecot-lmtpd + dovecot-imapd 提供 IMAP 服务
 mail.corp.example.com: 内网 IP，Web mail
 
-smarthost 与 smtp.corp 之间通过 TLS 以及密码验证，其它系统间用内部的 kdc + slapd 做验证。
+smtprelay 与 smtp.corp 之间通过 TLS 以及密码验证，其它系统间用内部的 kdc + slapd 做验证。
 
