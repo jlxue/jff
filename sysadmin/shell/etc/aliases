@@ -11,4 +11,5 @@ ftp: root
 abuse: root
 noc: root
 security: root
+clamav: root
 root: dieken

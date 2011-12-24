@@ -19,7 +19,7 @@ cmp_file $SCRIPT_DIR/etc/mailname /etc/mailname || {
     CONF_CHANGED=1
 }
 
-cmp_dir $SCRIPT_DIR/etc/exim4 /etc/exim4 --exclude passwd.client {
+cmp_dir $SCRIPT_DIR/etc/exim4 /etc/exim4 --exclude passwd.client || {
     overwrite_dir $SCRIPT_DIR/etc/exim4 /etc/exim4 --exclude passwd.client
     CONF_CHANGED=1
 }
