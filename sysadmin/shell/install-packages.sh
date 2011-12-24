@@ -12,7 +12,9 @@ i () {
 
 
 ###########################################################
-i "?or(~prequired,~pstandard,~pimportant)"
+# ~pstandard includes exim4-daemon-light, but we want exim4-daemon-heavy
+#i "?or(~prequired,~pstandard,~pimportant)"
+
 i resolvconf
 #i unattended-upgrades
 
