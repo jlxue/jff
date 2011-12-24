@@ -42,6 +42,11 @@ nameserver 127.0.0.1
 #nameserver 8.8.8.8
 #nameserver 8.8.4.4
 
+4) Run /usr/share/doc/exim4-base/examples/exim-gencert to generate
+certificates for Exim if you can't get CA issued certificates, the
+"Server name" must be "smtp.corp.example.com".
+
+
 =============================================================
 Issues:
 

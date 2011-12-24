@@ -1,0 +1,19 @@
+# http://www.exim.org/exim-html-current/doc/html/spec_html/ch37.html
+#   Chapter 37 - The dovecot authenticator
+
+gssapi_dovecot:
+  driver = dovecot
+  public_name = GSSAPI
+  server_socket = /var/run/dovecot/auth-client
+  server_set_id = $auth1
+
+digest_md5_dovecot:
+  driver = dovecot
+  public_name = DIGEST-MD5
+  #server_realm = <short main hostname>
+  server_socket = /var/run/dovecot/auth-client
+  server_set_id = $auth1
+  .ifndef AUTH_SERVER_ALLOW_NOTLS_PASSWORDS
+  server_advertise_condition = ${if eq{$tls_cipher}{}{}{*}}
+  .endif
+
