@@ -62,7 +62,7 @@ i ldapscripts smbldap-tools shelldap ldapvi
 i exim4 exim4-daemon-heavy
 
 # IMAP: dovecot/cyrus/courier
-i dovecot-imapd
+i dovecot-imapd dovecot-lmtpd dovecot-gssapi
 
 # antivirus
 # XXX: http://web.nvd.nist.gov/view/vuln/search-results?query=clamav&search_type=all&cves=on

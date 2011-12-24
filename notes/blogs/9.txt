@@ -1,17 +1,18 @@
 Exim 的配置
 
 Debian 默认安装的 exim4-daemon-light，不支持 ldap, sasl, perl
-interpreter, mysql/postgresql/sqlite 访问，所以需要替换成
-exim4-daemon-heavy。
+interpreter, mysql/postgresql/sqlite 访问，需要支持这些的话得
+安装 exim4-daemon-heavy。
 
 1. exim4 配置成 smarthost 模式，通过 smtp 或者 fetchmail 收信
 
-实际上我们这里期望配置的不是 smarthost，而是 smtp relay，
-它作为外部 smtp 服务器和内部 smtp 服务之间的桥梁，不用
-暴露内部的 kerberos+slapd 认证系统以及内部 smtp 服务器，
-同时，由于 clamav-daemon 以及 spamd 都有不少安全隐患，
-可以把它们部署到 smtp relay 上，减少对内部 smtp 服务器的
-威胁。
+通常意义上，smarthost 是用来为内部 smtp server 往外转发邮件的，
+并不负责从外界往内部转发邮件，按照前面邮件系统的设计，这里的
+"smarthost" 叫 smtp relay 或者 smtp gateway 更好一点，它作为
+外部 smtp 服务器和内部 smtp 服务之间的桥梁，不用暴露内部的
+kerberos+slapd 认证系统以及内部 smtp 服务器，同时，由于
+clamav-daemon 以及 spamd 都有不少安全隐患，可以把它们部署到
+smtp relay 上，减少对内部 smtp 服务器的威胁。
 
 2. clamav, spamassassin 支持
 
@@ -21,12 +22,25 @@ av_scanner 选项。spamd_address 可以用默认设置。
 然后修改 /etc/exim4/conf.d/acl/40_exim4-config_check_data
 打开 malware 检测和 spam 评分。
 
-3. service auth 以及 ldap 账户查询
+3. service auth
 
-exim4 支持 cyrus sasl 和 dovecot 认证，由于 exim4 也要
-查询 ldap 判断发件人、收件人地址是否存在，免不了需要
-sasl 做 GSSAPI 认证，而且不依赖 dovecot 也更为健壮，
-dovecot 也可以不必与 exim4 在同一台机器上。
+exim4 支持 cyrus sasl 和 dovecot sasl 认证，如果使用前者，
+那么 exim4 需要配置 krb5 keytab 以支持 SASL 的 GSSAPI 认证，
+exim4 使用 cyrus sasl 直接读取 keytab 并进行 GSSAPI 认证。
+如果使用 dovecot sasl，exim4 不需要配置 krb5 keytab，
+exim4 通过 Unix domain socket 或者 tcp socket 与 dovecot
+通讯，利用 dovecot 的 sasl 实现做认证，为支持 GSSAPI，
+dovecot 需要配置 krb5 keytab。
 
-4. 通过 lmtp 转发给 dotcot-lmtpd
+
+4. 查询收件人是否存在
+
+在这个 IT 基础设施设计中，实际上没有虚拟用户，slapd
+中储存的用户都是系统用户，所以有两种方法验证收件人
+是否存在，一是通过 nscd + nslcd + libnss-ldapd 查询
+slapd，二是直接查询 slapd，后者需要在 exim4 端配置
+krb5 keytab 以及 k5start 以做 LDAP SASL bind 所需的
+GSSAPI 认证。
+
+5. 通过 lmtp 转发给 dotcot-lmtpd
 
