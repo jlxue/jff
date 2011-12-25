@@ -47,6 +47,10 @@ certificates for Exim if you can't get CA issued certificates, the
 "Server name" must be "smtp.corp.example.com".
 
 
+5) Optionally,
+CONFDIR=`pwd`/etc/exim4 /usr/sbin/update-exim4.conf.template -r
+
+
 =============================================================
 Issues:
 
@@ -75,6 +79,7 @@ Bind 9          http://www.isc.org/software/bind/documentation
 
 Exim 4          http://wiki.debian.org/PkgExim4
                 http://www.exim.org/
+                http://www.jcdigita.com/eximconfig/
                 /usr/share/doc/exim4-base/README.Debian.gz
                 apropos exim
 
