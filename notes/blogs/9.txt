@@ -25,13 +25,20 @@ av_scanner 选项。spamd_address 可以用默认设置。
 3. service auth
 
 exim4 支持 cyrus sasl 和 dovecot sasl 认证，如果使用前者，
-那么 exim4 需要配置 krb5 keytab 以支持 SASL 的 GSSAPI 认证，
-exim4 使用 cyrus sasl 直接读取 keytab 并进行 GSSAPI 认证。
-如果使用 dovecot sasl，exim4 不需要配置 krb5 keytab，
-exim4 通过 Unix domain socket 或者 tcp socket 与 dovecot
-通讯，利用 dovecot 的 sasl 实现做认证，为支持 GSSAPI，
-dovecot 需要配置 krb5 keytab。
+有两种方式:
+  (1) 直接使用 cyrus sasl 库，由于 exim 以 Debian-exim 身份
+  运行无法读取 /etc/krb5.keytab，需要单独配置 /etc/smtp.keytab，
+  而由于 http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=651308，
+  需要修改 /etc/default/exim4 设置 KRB5_KTNAME 环境变量。
 
+  (2) 使用 saslauthd(在 sasl2-bin 包中)，此服务以 root 身份运行，
+  可以直接读取 /etc/krb5.keytab。但似乎 Exim 的 saslauthd 特性
+  仅支持基于用户名密码的认证。
+
+如果使用 dovecot sasl 认证，只能通过 socket 与 dovecot 通讯认证，
+好处是 keytab 是 dovecot 读取，在 exim 方不用配置 keytab。
+
+// SASL 还有 GNU SASL 实现，但 Exim 不支持。
 
 4. 查询收件人是否存在
 
