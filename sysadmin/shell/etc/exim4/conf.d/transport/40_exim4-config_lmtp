@@ -1,0 +1,14 @@
+dovecot_lmtp_local:
+  driver = lmtp
+  batch_max = 20
+  socket = /var/run/dovecot/lmtp
+  return_path_add
+
+dovecot_lmtp_tcp:
+  driver = smtp
+  protocol = lmtp
+  hosts = imap.corp.example.com
+  port = 24
+  allow_localhost
+  return_path_add
+
