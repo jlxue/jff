@@ -31,6 +31,11 @@ exim4 支持 cyrus sasl 和 dovecot sasl 认证，如果使用前者，
   而由于 http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=651308，
   需要修改 /etc/default/exim4 设置 KRB5_KTNAME 环境变量。
 
+  sasl 的配置文件查找目录可以如下方式查出：
+  $ strings /usr/lib/i386-linux-gnu/libsasl2.so.2.0.25 |grep /sasl
+  /etc/sasl2:/etc/sasl:/usr/lib/i386-linux-gnu/sasl2:/usr/lib/sasl2
+  /usr/lib/i386-linux-gnu/sasl2:/usr/lib/sasl2
+
   (2) 使用 saslauthd(在 sasl2-bin 包中)，此服务以 root 身份运行，
   可以直接读取 /etc/krb5.keytab。但似乎 Exim 的 saslauthd 特性
   仅支持基于用户名密码的认证。

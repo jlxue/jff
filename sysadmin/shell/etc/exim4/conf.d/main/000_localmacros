@@ -14,3 +14,6 @@ MAIN_TLS_ENABLE = true
 CHECK_DATA_WITH_AV_SCANNER = true
 CHECK_DATA_WITH_SPAMASSASSIN = true
 
+# See /etc/exim4/conf.d/auth/10_exim4-config_sasl
+USE_DOVECOT_SASL = true
+

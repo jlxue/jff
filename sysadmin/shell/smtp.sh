@@ -19,9 +19,20 @@ cmp_file $SCRIPT_DIR/etc/default/spamassassin /etc/default/spamassassin || {
     service spamassassin restart
 }
 
+
+# Only used when Exim4 uses cyrus-sasl to authenticate clients
+[ -d /etc/sasl2 ] || mkdir -m 755 /etc/sasl2
+sync_file $SCRIPT_DIR/etc/sasl2/exim.conf /etc/sasl2/exim.conf
+
 sync_file $SCRIPT_DIR/etc/aliases /etc/aliases
 sync_file $SCRIPT_DIR/etc/email-addresses /etc/email-addresses
 sync_file $SCRIPT_DIR/etc/msmtprc /etc/msmtprc
+
+
+cmp_file $SCRIPT_DIR/etc/default/exim4 /etc/default/exim4 || {
+    overwrite_file $SCRIPT_DIR/etc/default/exim4 /etc/default/exim4
+    CONF_CHANGED=1
+}
 
 cmp_file $SCRIPT_DIR/etc/mailname /etc/mailname || {
     overwrite_file $SCRIPT_DIR/etc/mailname /etc/mailname
@@ -42,7 +53,10 @@ cmp_dir $SCRIPT_DIR/etc/exim4 /etc/exim4 --exclude passwd.client \
 }
 
 
+ensure_mode_user_group /etc/sasl2                   755 root root
+ensure_mode_user_group /etc/sasl2/exim.conf         644 root root
 ensure_mode_user_group /etc/default/spamassassin    644 root root
+ensure_mode_user_group /etc/default/exim4           644 root root
 ensure_mode_user_group /etc/exim4               755 root root
 ensure_mode_user_group /etc/exim4/conf.d        755 root root
 ensure_mode_user_group /etc/exim4/update-exim4.conf.conf    644 root root
