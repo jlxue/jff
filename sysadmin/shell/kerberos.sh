@@ -93,8 +93,11 @@ ensure_policy 8 2 user
 hostname=`hostname -f`
 ensure_service_principal host/$hostname
 ensure_service_principal ldap/$hostname /etc/slapd.keytab
+ensure_service_principal smtp/$hostname /etc/dovecot.keytab
+ensure_service_principal imap/$hostname /etc/dovecot.keytab
 
 ensure_mode_user_group /etc/slapd.keytab        600 openldap openldap
+ensure_mode_user_group /etc/dovecot.keytab      600 dovecot dovecot
 
 ensure_mode_user_group /etc/hosts               644 root root
 ensure_mode_user_group /etc/krb5.conf           644 root root

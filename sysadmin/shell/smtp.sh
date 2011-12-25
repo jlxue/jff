@@ -6,6 +6,14 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 
+# See /usr/share/doc/clamav-base/README.Debian.gz
+# XXX: seems /var/spool/exim4/scan doesn't have to be group writable.
+id -Gn clamav | grep -qw Debian-exim || {
+    adduser clamav Debian-exim
+    service clamav-daemon restart
+    service clamav-freshclam restart
+}
+
 cmp_file $SCRIPT_DIR/etc/default/spamassassin /etc/default/spamassassin || {
     overwrite_file $SCRIPT_DIR/etc/default/spamassassin /etc/default/spamassassin
     service spamassassin restart
