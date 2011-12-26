@@ -16,6 +16,7 @@ ff00::0 ip6-mcastprefix
 ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 
+
 2) Use static network configuration in /etc/network/interfaces:
 
 iface eth0 inet static
@@ -30,6 +31,7 @@ nameserver 8.8.4.4
 
 NOTICE: If you DON'T use 10.0.0.10 for the "gold" server, adjust ./etc/bind/db.{corp,10}.
 
+
 3) Run ./run.sh as root role, it may fail, fix errors and run ./run.sh
 again until all are OK.
 
@@ -42,12 +44,16 @@ nameserver 127.0.0.1
 #nameserver 8.8.8.8
 #nameserver 8.8.4.4
 
-4) Run /usr/share/doc/exim4-base/examples/exim-gencert to generate
+
+4) As root, run "ldapmodify -Y EXTERNAL -H ldapi:/// -f ldap-mods.ldif"
+
+
+5) Run /usr/share/doc/exim4-base/examples/exim-gencert to generate
 certificates for Exim if you can't get CA issued certificates, the
 "Server name" must be "smtp.corp.example.com".
 
 
-5) Optionally,
+6) Optionally,
 CONFDIR=`pwd`/etc/exim4 /usr/sbin/update-exim4.conf.template -r
 
 
