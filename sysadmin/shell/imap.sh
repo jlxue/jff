@@ -22,6 +22,7 @@ ensure_mode_user_group /etc/dovecot/dovecot.conf            644 root root
 ensure_mode_user_group /etc/dovecot/dovecot-db.conf.ext     640 root dovecot
 ensure_mode_user_group /etc/dovecot/dovecot-dict-sql.conf.ext   640 root dovecot
 ensure_mode_user_group /etc/dovecot/dovecot-sql.conf.ext    640 root dovecot
+ensure_mode_user_group /etc/dovecot/dovecot-ldap.conf.ext   600 root root
 
 
 [ "`pidof dovecot`" ] || service dovecot start

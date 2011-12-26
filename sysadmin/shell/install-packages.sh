@@ -63,6 +63,9 @@ i exim4 exim4-daemon-heavy
 
 # IMAP: dovecot/cyrus/courier
 i dovecot-imapd dovecot-lmtpd dovecot-gssapi
+i dovecot-managesieved dovecot-sieve
+i dovecot-ldap dovecot-solr
+i dovecot-antispam #crm114
 
 # antivirus
 # XXX: http://web.nvd.nist.gov/view/vuln/search-results?query=clamav&search_type=all&cves=on
