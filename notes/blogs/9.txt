@@ -59,14 +59,22 @@ Dovecot 读取。
 除了 bounce 邮件 sender 为空，正常邮件应该两者一致，发邮件
 方不能伪造其它账户发出邮件。
 
+// Exim 的 spec 太长了，还不知道怎么配置。。。
 
-5. 查询收件人是否存在
+5. 查询本域收件人是否存在，不存在时在发送阶段就报错，不要用 bounce message 通知
 
 在这个 IT 基础设施设计中，实际上没有虚拟用户，slapd中储存的用户都是系统
 用户，所以有两种方法验证收件人是否存在，一是通过 nscd + nslcd +
 libnss-ldapd 查询slapd，二是直接查询 slapd，后者需要在 exim4 端配置krb5
-keytab 以及 k5start 以做 LDAP SASL bind 所需的GSSAPI 认证。
+keytab 以及 k5start 以做 LDAP SASL bind 所需的GSSAPI 认证(Kerberos
+里服务之间认证真麻烦，发行版自带的服务软件的默认配置大多没考虑 k5start
+的问题)，而最悲剧的是，Exim4 自身不支持 LDAP SASL bind(见 Exim 源码
+src/lookups/ldap.c)。
 
+// Exim 的 spec 太长了，还不知道怎么配置。。。
 
 6. 通过 lmtp 转发给 dotcot-lmtpd
+
+这个的配置很简单的，Exim 的手册 Dovecot 认证章节以及 Exim/Dovecot
+上的 wiki 都有例子。
 

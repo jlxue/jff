@@ -67,8 +67,7 @@ Internet <-----> smtp relay(postfix) <--------> internal MTA(exim4)
 smtprelay.corp.example.com: 能被外网访问到，作为外网 SMTP server 和内网
                             smtp.corp.example.com 的桥梁
 smtp.corp.example.com: 内网 IP，非内网邮件通过 smtprelay 向外转发，同时
-                       smtprelay 从外部 smtp server 接收邮件转发给内部
-                       smtp server
+                       smtprelay 从外部 smtp server 接收邮件转发给内部smtp server
 imap.corp.example.com: 内网 IP，使用 dovecot-lmtpd + dovecot-imapd 提供 IMAP 服务
 mail.corp.example.com: 内网 IP，Web mail
 
