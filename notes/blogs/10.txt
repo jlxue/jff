@@ -1,0 +1,66 @@
+dovecot 的配置
+
+1. auth-client UNIX domain socket 的配置，供 Exim 认证客户端用
+
+Dovecot 默认开了这个 socket，但是 auth-client 的文件权限比较紧，
+需要改成 Debian-exim 组让 Exim 可用。
+
+同时也需要单独配置 /etc/dovecot.keytab 包含 smtp 和 imap princials，以及
+选项 auth_krb5_keytab，因为 dovecot 进程没权限读取 /etc/krb5.keytab。如
+果 Exim 使用Cyrus SASL 做认证，就没必要修改 auth-client 属组以及在
+dovecot.keytab中包含 smtp principal。
+
+最后修改 auth_mechanisms = gssapi。这个过程也顺带完成了 imap 的
+gssapi 认证配置。
+
+用 kinit; gsasl --imap --verbose imap.corp.example.com 可以验证用户认证是否
+成功。
+
+BTW，Cyrus、Dovecot、Courier 这几家挺有意思，各自都实现了一套认证的
+库和服务，Cyrus 和 Courier 都有库和服务，Dovecot 则只对外暴露服务。
+这么搞倒是偏移了 Exim 和 Postfix :-)
+
+
+2. 让 dovecot 把用户邮件放在 /srv/mail/%u/Mail 目录下
+
+由于这套基础设施里用户帐号储存在 slapd 服务器上，提供基础服务的
+gold.corp.example.com  一般不允许普通帐号直接 shell 登录，所以很可能是没有
+建立其 /home/$USER 目录的，需要把邮件存在别处。/var/mail
+不是个好地方，已经被 Exim 用了，放到 /srv 下比较醒目，不容易
+误操作被清除掉。
+
+%u 表示用户邮件地址，默认是 localpart@domainpart 的形式，但是
+dovecot 的 system account 检查帐号时以整个 %u 查找，自然是找
+不到了，所以需要设置 auth_username_format = %n，这个设置让
+用户名变成 localpart。 然后修改 userdb 的 args 指定 home=/srv/mail/%u
+以及 mail_location = mdbox:/srv/mail/%u/Mail 。这里不把邮件
+直接存放在 home 下，是因为还需要在 home 下保存 Sieve 脚本，
+避免跟邮件混在一起。
+
+
+3. 服务端邮件过滤设置，Sieve 语言
+
+Sieve 是有 RFC 规范的邮件过滤脚本语言，这个被很多邮件服务器
+支持，比如 Exim, Dovecot, Cyrus。 除了 Sieve，Exim 还支持
+自己的过滤脚本语法，功能更强大，两种过滤脚本都在 ~/.forward
+文件里配置，通过特殊的文件头区分。除了 ~/.forward，Debian Exim
+还默认配置了 ~/.procmail, ~/.mailfilter 的 router，分别用于
+procmail 和 maildrop 做邮件过滤。
+
+不在 Exim 里做邮件过滤的原因是 Exim 没有 ManageSieve 这样的
+协议标准，安装过滤器需要 shell 帐号去修改文件。而在 dovecot 里，
+sieve 脚本的安装有有一些客户端可用，比如 SquirrelMail 插件,
+ThunderBird 扩展。
+
+Sieve 脚本默认是装在用户的 $HOME 目录的，跟上面一样的原因，
+需要修改这个目录：
+
+sieve = /srv/mail/%u/.dovecot.sieve
+sieve_dir = /srv/mail/%u/sieve
+
+
+这里需要再次强调的是，由于这个 IT 基础设施里，邮箱帐号都是
+系统帐号，没有虚拟账户，所以也简单了不少，增加新用户只需要
+在 kerberos + slapd 里设置好，不需要改动 Exim 和 Dovecot，
+Dovecot 会在 /srv/mail/ 下自动建立目录存放邮件。
+
