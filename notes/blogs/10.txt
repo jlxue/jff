@@ -18,7 +18,7 @@ gssapi 认证配置。
 
 BTW，Cyrus、Dovecot、Courier 这几家挺有意思，各自都实现了一套认证的
 库和服务，Cyrus 和 Courier 都有库和服务，Dovecot 则只对外暴露服务。
-这么搞倒是偏移了 Exim 和 Postfix :-)
+这么搞倒是便宜了 Exim 和 Postfix :-)
 
 
 2. 让 dovecot 把用户邮件放在 /srv/mail/%u/Mail 目录下
@@ -63,4 +63,10 @@ sieve_dir = /srv/mail/%u/sieve
 系统帐号，没有虚拟账户，所以也简单了不少，增加新用户只需要
 在 kerberos + slapd 里设置好，不需要改动 Exim 和 Dovecot，
 Dovecot 会在 /srv/mail/ 下自动建立目录存放邮件。
+
+Sieve 语言的使用参考：
+    http://sieve.info/
+    http://datatracker.ietf.org/wg/sieve/charter/
+    http://wiki2.dovecot.org/Pigeonhole/Sieve
+    http://wiki2.dovecot.org/Pigeonhole/ManageSieve/Clients
 
