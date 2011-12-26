@@ -1,11 +1,12 @@
 # See slapd-config(5)
 
 ### optimize database ######################################
+# present(pres), equality(eq), substring(sub), subintial, subany, subfinal,
 
 dn: olcDatabase={1}hdb,cn=config
 changetype: modify
 add: olcDbIndex
-olcDbIndex: default sub
+olcDbIndex: default pres,eq
 -
 add: olcDbIndex
 olcDbIndex: cn,sn,uid,displayName pres,sub,eq
@@ -19,13 +20,23 @@ olcDbIndex: mail,givenName eq,subinitial
 
 
 ### authc id rewritting for authz id #########################
+# http://lists.arthurdejong.org/openldap-software/2005/05/msg00295.html
+# > However, all of that is being superseded by authid-rewrite* statements,
+# > which are currently undocumented; actually, in 2.3 authz-regexp is
+# > converted in the corresponding authid-rewrite* statements, which are much
+# > more powerful (and dangerous...).
+
 dn: cn=config
 changetype: modify
-add: olcAuthIDRewrite
-olcAuthIDRewrite: 
+add: olcAuthzRegexp
+olcAuthzRegexp:
+  uid=([^,/]+),cn=gssapi,cn=auth
+  uid=$1,ou=People,dc=corp,dc=example,dc=com
 -
 add: olcAuthzRegexp
-olcAuthzRegexp: 
+olcAuthzRegexp:
+  uid=([^,/]+)/ldap,cn=gssapi,cn=auth
+  cn=admin,dc=corp,dc=example,dc=com
 -
 replace: olcAuthzPolicy
 olcAuthzPolicy: any
