@@ -44,7 +44,7 @@ overwrite_file () {
     local src="$1" dst="$2"
 
     mkdir -p `dirname "$dst"`
-    rsync -av --no-owner --no-group "$src" "$dst"
+    rsync -c -av --no-owner --no-group "$src" "$dst"
 }
 
 
@@ -53,7 +53,7 @@ overwrite_dir () {
 
     mkdir -p `dirname "$dst"`
     shift 2
-    rsync -avr --delete --no-owner --no-group "$src/" "$dst" "$@"
+    rsync -c -avr --delete --no-owner --no-group "$src/" "$dst" "$@"
 }
 
 
@@ -62,7 +62,7 @@ overwrite_dir_ignore_extra () {
 
     mkdir -p `dirname "$dst"`
     shift 2
-    rsync -avr --no-owner --no-group "$src/" "$dst" "$@"
+    rsync -c -avr --no-owner --no-group "$src/" "$dst" "$@"
 }
 
 
