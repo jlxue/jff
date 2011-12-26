@@ -84,6 +84,8 @@ Exim 4          http://wiki.debian.org/PkgExim4
                 apropos exim
 
 Dovecot         http://dovecot.org/
+                http://wiki2.dovecot.org/Pigeonhole/Sieve
+                http://wiki2.dovecot.org/Pigeonhole/ManageSieve
 
 
 =============================================================

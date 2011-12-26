@@ -22,6 +22,9 @@ SMTP(ACCEPT)	net		$FW
 IMAP(ACCEPT)	net		$FW
 HTTP(ACCEPT)	net		$FW
 
+# ManageSieve Protocol
+ACCEPT		net		$FW		tcp	4190
+
 # for client -> krb5kdc, krb4 use udp 750, krb5 uses tcp/udp 88.
 ACCEPT		net		$FW		tcp	88
 ACCEPT		net		$FW		udp	88

@@ -76,7 +76,7 @@ i clamav clamav-unofficial-sigs
 i spamassassin
 
 # Web mail: squirrelmail
-i squirrelmail
+i squirrelmail avelsieve
 
 # mailing list: sympa/mailman
 i sympa
