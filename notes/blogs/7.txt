@@ -24,7 +24,7 @@ POP3/IMAP: dovecot-imapd
     http://www.usenix.org/event/lisa05/tech/golubitsky/golubitsky.pdf
     Toward an Automated Vulnerability Comparison of Open Source IMAP
     比较详细的分析了 uw-imapd, courier-imap, cyrus-imapd 的代码质量和安
-    全风险，uw-imapd 问题比较大。cyrus 各有优缺点，cyrus 稍占优势。
+    全风险，uw-imapd 问题比较大。cyrus、courier 各有优缺点，cyrus 稍占优势。
 
     http://qa.debian.org/popcon.php?package=uw-imap
     http://qa.debian.org/popcon.php?package=dovecot
@@ -66,8 +66,9 @@ Internet <-----> smtp relay(postfix) <--------> internal MTA(exim4)
 
 smtprelay.corp.example.com: 能被外网访问到，作为外网 SMTP server 和内网
                             smtp.corp.example.com 的桥梁
-smtp.corp.example.com: 内网 IP，非内网邮件通过 smarthost 向外转发，同时从
-                       smarthost 抓取外部邮件
+smtp.corp.example.com: 内网 IP，非内网邮件通过 smtprelay 向外转发，同时
+                       smtprelay 从外部 smtp server 接收邮件转发给内部
+                       smtp server
 imap.corp.example.com: 内网 IP，使用 dovecot-lmtpd + dovecot-imapd 提供 IMAP 服务
 mail.corp.example.com: 内网 IP，Web mail
 
