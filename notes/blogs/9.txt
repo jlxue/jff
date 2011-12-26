@@ -48,7 +48,7 @@ exim4 支持 cyrus sasl 和 dovecot sasl 认证，如果使用前者，
 // SASL 还有 GNU SASL 实现，但 Exim 不支持。
 
 $ kinit
-$ gsasl --no-starttls --smtp --verbose smtp.corp.example.com 25
+$ gsasl --smtp --verbose smtp.corp.example.com 25
 可以验证 GSSAPI 认证是否成功，注意 hostname 必需是服务端 IP 反解
 得到的域名在 keytab 里有对应条目，并且 keytab 可以被 Exim 或者
 Dovecot 读取。

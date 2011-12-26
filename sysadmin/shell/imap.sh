@@ -6,12 +6,16 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 
+[ -d /srv/mail ] || mkdir -m 1777 /srv/mail
+
+
 cmp_dir $SCRIPT_DIR/etc/dovecot /etc/dovecot || {
     overwrite_dir $SCRIPT_DIR/etc/dovecot /etc/dovecot
     service dovecot reload
 }
 
 
+ensure_mode_user_group /srv/mail                1777 root root
 ensure_mode_user_group /etc/dovecot             755 root root
 ensure_mode_user_group /etc/dovecot/conf.d      755 root root
 ensure_mode_user_group /etc/dovecot/dovecot.conf            644 root root
