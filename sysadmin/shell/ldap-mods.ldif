@@ -25,14 +25,19 @@ olcDbIndex: mail,givenName eq,subinitial
 # > which are currently undocumented; actually, in 2.3 authz-regexp is
 # > converted in the corresponding authid-rewrite* statements, which are much
 # > more powerful (and dangerous...).
+#
+# This mapping is dangerous, because there is a "to * by self write"
+# access rule, I don't hope users can modify their groups or insert
+# other attributes to their DN. Maybe I should restrict the access rule
+# otherwise.
+#   add: olcAuthzRegexp
+#   olcAuthzRegexp:
+#     uid=([^,/]+),cn=gssapi,cn=auth
+#     uid=$1,ou=People,dc=corp,dc=example,dc=com
+#   -
 
 dn: cn=config
 changetype: modify
-add: olcAuthzRegexp
-olcAuthzRegexp:
-  uid=([^,/]+),cn=gssapi,cn=auth
-  uid=$1,ou=People,dc=corp,dc=example,dc=com
--
 add: olcAuthzRegexp
 olcAuthzRegexp:
   uid=([^,/]+)/ldap,cn=gssapi,cn=auth
