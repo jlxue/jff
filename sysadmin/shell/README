@@ -101,7 +101,21 @@ Web SSO         http://webauth.stanford.edu/features.html
                 http://www.jisc.ac.uk/uploaded_documents/CMSS-Gilmore.pdf
                 http://et.aset.psu.edu/publications/2003/WebSSO.shtml
 
+SPNEGO          http://mbechler.eenterphace.org/blog/index.php?/archives/6-Doing-GSSNegotiate-SSO-using-Mozilla-Firefox,-MIT-Kerberos-and-PHP.html
+                https://developer.mozilla.org/En/Integrated_Authentication
+                http://publib.boulder.ibm.com/infocenter/wasinfo/v6r1/index.jsp?topic=%2Fcom.ibm.websphere.base.doc%2Finfo%2Faes%2Fae%2Ftsec_SPNEGO_config_web.html
+
+                http://dev.chromium.org/developers/design-documents/http-authentication
+                http://code.google.com/p/chromium/issues/detail?id=28282
+                http://code.google.com/p/chromium/issues/detail?id=50065
+                http://www.google.com/support/forum/p/Chrome/thread?tid=28894030e871cb94&hl=en
+                http://blob.inf.ed.ac.uk/gdutton/2010/11/chrome-and-spnego/
+                http://code.google.com/p/chromium/issues/detail?id=50415
+
+                http://linsec.ca/blog/2011/07/26/kerberos-on-os-x-10-7-lion/
+
 =============================================================
 Resource:
 
 Free SSL certificate:   http://cert.startcom.org/
+
