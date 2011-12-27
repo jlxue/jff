@@ -2,11 +2,19 @@
 
 ### optimize database ######################################
 # present(pres), equality(eq), substring(sub), subintial, subany, subfinal,
+#
+# Modification to olcAccess compared to default settings:
+#   * remove self write
+#   * no special rule for userPassword,shadowLastChange because
+#     we don't use LDAP to store passwords, they are stored in Kerberos.
 
 dn: olcDatabase={1}hdb,cn=config
 changetype: modify
 add: olcDbIndex
 olcDbIndex: default pres,eq
+-
+add: olcDbIndex
+olcDbIndex: objectClass eq
 -
 add: olcDbIndex
 olcDbIndex: cn,sn,uid,displayName pres,sub,eq
@@ -16,6 +24,23 @@ olcDbIndex: uidNumber,gidNumber,dc eq
 -
 add: olcDbIndex
 olcDbIndex: mail,givenName eq,subinitial
+-
+delete: olcAccess
+-
+add: olcAccess
+olcAccess: {0}to attrs=userPassword,shadowLastChange
+  by self write
+  by anonymous auth
+  by dn="cn=admin,dc=corp,dc=example,dc=com" write
+  by * none
+-
+add: olcAccess
+olcAccess: {1}to dn.base="" by * read
+-
+add: olcAccess
+olcAccess: {2}to *
+  by dn="cn=admin,dc=corp,dc=example,dc=com" write
+  by * read
 -
 
 
@@ -36,16 +61,16 @@ olcDbIndex: mail,givenName eq,subinitial
 #     uid=$1,ou=People,dc=corp,dc=example,dc=com
 #   -
 
-dn: cn=config
-changetype: modify
-add: olcAuthzRegexp
-olcAuthzRegexp:
-  uid=([^,/]+)/ldap,cn=gssapi,cn=auth
-  cn=admin,dc=corp,dc=example,dc=com
--
-replace: olcAuthzPolicy
-olcAuthzPolicy: any
--
+#dn: cn=config
+#changetype: modify
+#add: olcAuthzRegexp
+#olcAuthzRegexp:
+#  uid=([^,/]+)/ldap,cn=gssapi,cn=auth
+#  cn=admin,dc=corp,dc=example,dc=com
+#-
+#replace: olcAuthzPolicy
+#olcAuthzPolicy: any
+#-
 
 
 # XXX: strange behaviour:  http://www.openldap.org/lists/openldap-technical/201012/msg00258.html
