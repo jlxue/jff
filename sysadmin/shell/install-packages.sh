@@ -75,8 +75,12 @@ i clamav clamav-unofficial-sigs
 # antispam: http://www.maretmanu.org/homepage/inform/exim-spam.php#spam
 i spamassassin
 
-# Web mail: squirrelmail
-i squirrelmail avelsieve
+# Web mail: squirrelmail or roundcube or imp4
+    #i squirrelmail squirrelmail-compatibility squirrelmail-decode
+    #i squirrelmail-logger squirrelmail-quicksave squirrelmail-secure-login
+    #i squirrelmail-sent-confirmation squirrelmail-spam-buttons
+    #i squirrelmail-viewashtml avelsieve
+i roundcube roundcube-pgsql roundcube-plugins roundcube-plugins-extra
 
 # mailing list: sympa/mailman
 i sympa
@@ -85,13 +89,30 @@ i sympa
 i postgresql
 
 # apache2
+# Web SSO: http://webauth.stanford.edu/features.html
 i apache2 apache2-mpm-worker
+    # GSS SPNEGO
+    i libapache2-mod-auth-kerb
 
-# php, Squirrelmail requires libapache2-mod-php5 | php5, the former
-# requires libapache2-mpm-prefork, but I want more efficient worker
-# mpm and all dynamic web contents running in seperate processes for
-# maximum security, that's to say, FastCGI mode or separate WSGI/PSGI
-# mode.
+    # Michigen Cosign: http://weblogin.org/, no Debian package yet
+
+    # Pubcookie: http://pubcookie.org/
+
+    # Standford WebAuth: doesn't support site-wide logout and MicroSoft IIS
+    #i libapache2-webkdc libwebkdc-perl
+
+    # Yale CAS, the CAS server depends on Java
+    #i libapache2-mod-auth-cas
+
+    # uses SAML, only service provider(SP) part, requires WebAuth/CAS/Cosign
+    # to act as home identity provider(IdP)
+    #i libapache2-mod-shib2
+
+# PHP
+# Squirrelmail requires libapache2-mod-php5 | php5, the former requires
+# libapache2-mpm-prefork, but I want more efficient worker mpm and all
+# dynamic web contents running in seperate processes for maximum
+# security, that's to say, FastCGI mode or separate WSGI/PSGI mode.
 i php5 php5-fpm
 
 ###########################################################

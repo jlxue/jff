@@ -95,6 +95,11 @@ Dovecot         http://dovecot.org/
                 http://wiki2.dovecot.org/Pigeonhole/Sieve
                 http://wiki2.dovecot.org/Pigeonhole/ManageSieve
 
+Web SSO         http://webauth.stanford.edu/features.html
+                https://wiki.jasig.org/display/CAS/Kerberos
+                http://www.umich.edu/~umweb/downloads/WebSSOImplementationComparision.pdf
+                http://www.jisc.ac.uk/uploaded_documents/CMSS-Gilmore.pdf
+                http://et.aset.psu.edu/publications/2003/WebSSO.shtml
 
 =============================================================
 Resource:
