@@ -1,0 +1,110 @@
+Web 单点登录(Single Sign On)
+
+在配置 sympa、squirrelmail、trac 等一票依赖 http 的服务之前，必需得
+把 Web SSO 配置好，不然每一个网站一个密码，那会相当的抓狂。
+
+Kerberos 在 Unix、Linux、Windows、MacOS 下已经是事实上的系统级别单点
+登录系统，虽然 Windows 这个奇芭搞了个不兼容实现。绝大多数软件都直接
+支持 krb5、gssapi、sasl 库的一种，gssapi 库基本是对 krb5 库的封装，
+sasl 支持很多种验证方式，其实现一般会用 gssapi 库来支持 kerberos。
+所以总的来说，非 Web 应用的 kerberos 配置还是挺简单的，配置 keytab
+路径和权限就基本搞定，而到了 Web 这里事情就复杂多了，根本原因是
+Web 浏览器对 Kerberos 支持非常薄弱。
+
+微软推出 Active Directory(Domain Controller 也即 KDC 和目录服务的
+结合体)后，也给 IIS、IE 增加了 Kerberos 支持，让 IIS、IE 在支持
+Basic、DIGEST-MD等 HTTP 标准认证方式后，又支持了所谓的
+Integrated Windows Authentication，就是拿 Kerberos ticket 做用户身份验证，
+从而达到完整的桌面应用、浏览器单点登录的效果。这个 IWA 更常见的称呼是
+SPNEGO (Simple and Protected GSSAPI Negotiation Mechanism)，体现在
+HTTP 协议上就是 Negotiation 认证。 Windows 支持两种 Negotiation
+认证方案： NTLM 和 Kerberos。
+
+MIT Kerberos 实现也加入了对 SPNEGO 的支持，但显然不支持 Windows 的私货
+NTLM，只支持 Kerberos。
+
+单点登录是很企业级的特性，各个浏览器也在纷纷加入这个特性，IE 很早就
+支持 SPNEGO（可惜是跟 MIT Kerberos 不兼容的 Kerberos 实现)；Firefox
+也很早，支持的很好，既支持 Windows Kerberos 实现（通过 SSPI 实现，
+Security Support Provider Interface)，又支持 MIT Kerberos； Chrome
+最新版本也有所支持，刚前几个月达到比较好的水准，在 Linux 上支持
+MIT/Heimdal 两种 Kerberos 实现，Windows 上支持 SSPI 实现，可惜还
+不支持 Windows 上的 MIT Kerberos 库(Putty 同时支持两个，不知道
+为什么 Chrome 没抄了去，可能是没来的及：
+http://www.chiark.greenend.org.uk/~sgtatham/putty/wishlist/kerberos-gssapi.html)。
+Safari 用了 Heimdal Kerberos 实现，但据说有 bug。
+
+所以总的来说，SPNEGO 的 Kerberos 认证各个浏览器还是勉强够用的，尤其
+是有跨平台的 Firefox 鼎力支持，更赞的是 MIT Kerberos 的 Windows
+客户端做的非常棒，各位同学有兴趣可以下载下来玩玩：
+http://web.mit.edu/kerberos/dist/index.html#kfw-3.2
+(有点旧，但依然能用)
+
+在 Linux 和 Windows 上 Firefox 测试了下，都成功支持 SPNEGO。Chrome
+果然是目前只支持 SSPI，测试办法如下：
+
+服务端： apache2 + libapache2-mod-auth-kerb + MIT kdc，针对 /cgi-bin
+         配置 AuthType Kerberos。
+客户端： Firefox URL 输入 about:config，修改
+        network.negotiate-auth.trusted-uris         corp.example.com
+        network.negotiate-auth.using-native-gsslib  true
+        network.auth.use-sspi                       false
+
+        第二个选项是默认值，不要改，true 表示用 gssapi 或者 firefox
+        内置的 gssapi 实现。第三个选项只在 Windows 版 Firefox 里有。
+        改完选项后重启 Firefox。
+
+在 kfw 里登录取得 ticket 后，用 firefox 访问
+http://www.corp.example.com/cgi-bin/env.pl 输出 CGI 程序运行时的
+环境变量，就能看到 REMOTE_USER=xxx@CORP.EXAMPLE.COM 了，如果没有
+取得 ticket，那么访问会被拒绝。对于 https 协议也是有效的。
+
+Chrome 浏览器设置见
+http://dev.chromium.org/developers/design-documents/http-authentication
+这个页面讲的是用命令行选项，据说有办法配置 Chrome 使得启动时无需
+指定命令行选项：http://blob.inf.ed.ac.uk/gdutton/2010/11/chrome-and-spnego/
+我没有试验。
+
+我用的 MIT KDC，IE 就不用试验了，MacOS 上的 Safari 也没条件测试，
+据说有 bug：http://linsec.ca/blog/2011/07/26/kerberos-on-os-x-10-7-lion/
+
+
+综上，基于 Kerberos 的通吃单点登录方案是基本可行的。
+
+
+可能是早期浏览器对 SPNEGO 的支持不够普及，以及 Kerberos 并不是
+广泛使用，尤其在 Intranet 外部用的少，所以出现了大量的专门用于
+Web 的 SSO 解决方案，比较有名气几个：
+
+CAS:     Yale 制造，老牌 Web SSO 实现，重度使用 Java 技术。
+WebAuth: Standford 制造，一个很大特点是认证信息全部在 cookie 里，
+         从而 KDC 负担很轻。缺点是 IIS 支持不够，以及没有单点登出(Single Sign Out)功能。
+CoSign:  Michigen 制造，比较新的 Web SSO 实现，WebAuth 作者很推崇这个，
+         可惜 Debian 里还没有打包它。在 CoSign 主页上列举了几篇 Web SSO
+         比较的文章，值得一看。
+shibboleth: 基于 SAML 规范实现，它解决的是不同机构间也即不同的安全域间的单点登录，
+         比如 A、B 两家公司合作，A 的员工 a 想访问 B 的服务，那么
+         B 的服务可以借助 A 的单点登录系统检查 a 的身份。这里头
+         提供服务的一方叫 SP(Service Provider)，提供身份验证的一方
+         叫 IdP(Identity Provider)，双方要有一个证书信任关系。
+         CAS、WebAuth、CoSign 都可以作为这里的 IdP。 这个目前是
+         互联网上很热门的方向，但是对于中小规模的企业内部，基本可以不用
+         关心跨安全域的单点登录问题。
+
+由于 SPNEGO 逐渐被浏览器广泛支持，CAS、WebAuth、CoSign 也支持 SPNEGO，
+当这个方法不可用时才用自定义的认证协议。自然，三者都可以获取 Kerberos
+ticket，把 Kerberos 嫁接到 Web 上来，毫不奇怪的是三者的架构跟 Kerberos
+极为相似。
+
+BTW，CAS、WebAuth、CoSign 都是大学里制造出来的，解决大学里的单点登录
+问题，反观国内，我是没听说哪个学校搞单点登录的，倒是在网上搜到一些
+国内的学术论文谈论 SSO -_-b
+
+我还不清楚基于 Kerberos 的 SPNEGO 认证方法是否很消耗计算资源，
+似乎每一次请求都要做 SPNEGO 认证。如果要节省资源，那么一个初步
+的设想是可以不对 web app 的 URL 设定 SPNEGO 认证，web app 从
+cookie 里判断出客户端是否认证过，如果没有，就重定向到 login
+页面，这个页面是用 SPNEGO 保护的，用户通过验证后服务器设置
+cookie，并跳转回 web app 正常页面，这样既能利用 SPNEGO 做
+身份验证，又不用每次请求都做一次 SPNEGO 验证的计算。
+
