@@ -45,7 +45,9 @@ nameserver 127.0.0.1
 #nameserver 8.8.4.4
 
 
-4) As root, run "ldapmodify -Y EXTERNAL -H ldapi:/// -f ldap-mods.ldif"
+4) As root, run:
+    # ldapmodify -Y EXTERNAL -H ldapi:/// -c -f ldap-mods.ldif
+    # service slapd restart
 
 
 5) Run /usr/share/doc/exim4-base/examples/exim-gencert to generate

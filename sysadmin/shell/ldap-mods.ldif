@@ -7,40 +7,53 @@
 #   * remove self write
 #   * no special rule for userPassword,shadowLastChange because
 #     we don't use LDAP to store passwords, they are stored in Kerberos.
+#   * remove privilege of admin DN because we don't use it.
+
+# separate them to different items because "ldapmodify -c"
+# skips all left if any add/delete action fails.
 
 dn: olcDatabase={1}hdb,cn=config
 changetype: modify
 add: olcDbIndex
 olcDbIndex: default pres,eq
 -
+
+dn: olcDatabase={1}hdb,cn=config
+changetype: modify
 add: olcDbIndex
 olcDbIndex: objectClass eq
 -
+
+dn: olcDatabase={1}hdb,cn=config
+changetype: modify
 add: olcDbIndex
 olcDbIndex: cn,sn,uid,displayName pres,sub,eq
 -
+
+dn: olcDatabase={1}hdb,cn=config
+changetype: modify
 add: olcDbIndex
 olcDbIndex: uidNumber,gidNumber,dc eq
 -
+
+dn: olcDatabase={1}hdb,cn=config
+changetype: modify
 add: olcDbIndex
 olcDbIndex: mail,givenName eq,subinitial
 -
+
+dn: olcDatabase={1}hdb,cn=config
+changetype: modify
 delete: olcAccess
 -
+
+dn: olcDatabase={1}hdb,cn=config
+changetype: modify
 add: olcAccess
-olcAccess: {0}to attrs=userPassword,shadowLastChange
-  by self write
+olcAccess: {0}to *
   by anonymous auth
-  by dn="cn=admin,dc=corp,dc=example,dc=com" write
-  by * none
--
-add: olcAccess
-olcAccess: {1}to dn.base="" by * read
--
-add: olcAccess
-olcAccess: {2}to *
-  by dn="cn=admin,dc=corp,dc=example,dc=com" write
-  by * read
+  by dn.regex="^uid=[^,/]+/ldap,cn=gssapi,cn=auth$" write
+  by users read
 -
 
 
