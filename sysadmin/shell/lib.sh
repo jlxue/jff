@@ -1,7 +1,7 @@
 #!/bin/sh
 
-export BACKUP_DIR={$BACKUP_DIR:-/root/cfg-bak-`date +%Y%m%d-%H%M%S`}
-[ `expr index "$BACKUP_DIR" /` -ne 1 ] || {
+export BACKUP_DIR=${BACKUP_DIR:-/root/cfg-bak/`date +%Y%m%d-%H%M%S`}
+[ `expr index "$BACKUP_DIR" /` -eq 1 ] || {
     echo "BACKUP_DIR must be absolute path!" >&2
     exit 1
 }
@@ -48,28 +48,28 @@ cmp_dir () {
 
 
 overwrite_file () {
-    local src="$1" dst="$2"
+    local src="$1" dst="$2" bdir="$BACKUP_DIR/`dirname $2`"
 
-    mkdir -p `dirname "$dst"`
-    rsync -b --backup-dir "$BACKUP_DIR" -c -av --no-owner --no-group "$src" "$dst"
+    mkdir -p `dirname "$dst"` "$bdir"
+    rsync -b --backup-dir "$bdir" -c -av --no-owner --no-group "$src" "$dst"
 }
 
 
 overwrite_dir () {
-    local src="$1" dst="$2"
+    local src="$1" dst="$2" bdir="$BACKUP_DIR/$2"
 
-    mkdir -p `dirname "$dst"`
+    mkdir -p `dirname "$dst"` "$bdir"
     shift 2
-    rsync -b --backup-dir "$BACKUP_DIR" -c -avr --delete --no-owner --no-group "$src/" "$dst" "$@"
+    rsync -b --backup-dir "$bdir" -c -avr --delete --no-owner --no-group "$src/" "$dst" "$@"
 }
 
 
 overwrite_dir_ignore_extra () {
-    local src="$1" dst="$2"
+    local src="$1" dst="$2" bdir="$BACKUP_DIR/$2"
 
-    mkdir -p `dirname "$dst"`
+    mkdir -p `dirname "$dst"` "$bdir"
     shift 2
-    rsync -b --backup-dir "$BACKUP_DIR" -c -avr --no-owner --no-group "$src/" "$dst" "$@"
+    rsync -b --backup-dir "$bdir" -c -avr --no-owner --no-group "$src/" "$dst" "$@"
 }
 
 

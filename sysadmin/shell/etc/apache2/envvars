@@ -24,7 +24,7 @@ export APACHE_LOG_DIR=/var/log/apache2$SUFFIX
 ## The locale used by some modules like mod_dav
 export LANG=C
 ## Uncomment the following line to use the system default locale instead:
-#. /etc/default/locale
+. /etc/default/locale
 
 export LANG
 
