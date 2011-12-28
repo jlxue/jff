@@ -91,7 +91,9 @@ i postgresql
 # apache2
 # Web SSO: http://webauth.stanford.edu/features.html
 i apache2 apache2-mpm-worker
-    # GSS SPNEGO
+i ssl-cert  # See /usr/share/doc/apache2.2-common/README.Debian.gz
+
+    # GSSAPI SPNEGO
     i libapache2-mod-auth-kerb
 
     # Michigen Cosign: http://weblogin.org/, no Debian package yet
@@ -107,6 +109,13 @@ i apache2 apache2-mpm-worker
     # uses SAML, only service provider(SP) part, requires WebAuth/CAS/Cosign
     # to act as home identity provider(IdP)
     #i libapache2-mod-shib2
+
+# Other apache2 modules
+i libapache2-mod-auth-ntlm-winbind
+i libapache2-mod-bw libapache2-mod-evasive libapache2-mod-qos libapache2-modsecurity
+i libapache2-mod-encoding libapache2-mod-xsendfile
+i libapache2-mod-fcgid libapache2-mod-wsgi
+
 
 # PHP
 # Squirrelmail requires libapache2-mod-php5 | php5, the former requires

@@ -42,6 +42,7 @@ ssh.sh
 ldap.sh
 imap.sh
 smtp.sh
+apache.sh
 END`
 
 for f in $SCRIPTS; do
