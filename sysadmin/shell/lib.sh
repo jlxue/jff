@@ -1,5 +1,12 @@
 #!/bin/sh
 
+export BACKUP_DIR={$BACKUP_DIR:-/root/cfg-bak-`date +%Y%m%d-%H%M%S`}
+[ `expr index "$BACKUP_DIR" /` -ne 1 ] || {
+    echo "BACKUP_DIR must be absolute path!" >&2
+    exit 1
+}
+
+
 save_etc () {
     local msg="$1"
 
@@ -44,7 +51,7 @@ overwrite_file () {
     local src="$1" dst="$2"
 
     mkdir -p `dirname "$dst"`
-    rsync -c -av --no-owner --no-group "$src" "$dst"
+    rsync -b --backup-dir "$BACKUP_DIR" -c -av --no-owner --no-group "$src" "$dst"
 }
 
 
@@ -53,7 +60,7 @@ overwrite_dir () {
 
     mkdir -p `dirname "$dst"`
     shift 2
-    rsync -c -avr --delete --no-owner --no-group "$src/" "$dst" "$@"
+    rsync -b --backup-dir "$BACKUP_DIR" -c -avr --delete --no-owner --no-group "$src/" "$dst" "$@"
 }
 
 
@@ -62,7 +69,7 @@ overwrite_dir_ignore_extra () {
 
     mkdir -p `dirname "$dst"`
     shift 2
-    rsync -c -avr --no-owner --no-group "$src/" "$dst" "$@"
+    rsync -b --backup-dir "$BACKUP_DIR" -c -avr --no-owner --no-group "$src/" "$dst" "$@"
 }
 
 

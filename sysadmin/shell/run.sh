@@ -3,6 +3,7 @@
 set -e -x
 
 PATH=/bin:/sbin:/usr/bin:/usr/sbin
+export BACKUP_DIR={$BACKUP_DIR:-/root/cfg-bak-`date +%Y%m%d-%H%M%S`}
 
 SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
