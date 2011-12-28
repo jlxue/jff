@@ -1,0 +1,7 @@
+# Default settings for auth_kerb_module
+
+<IfModule auth_kerb_module>
+  KrbMethodK5Passwd Off
+  #KrbMethodK4Passwd Off
+  Krb5Keytab /etc/http.keytab
+</IfModule>
