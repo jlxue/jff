@@ -722,15 +722,16 @@
   # end of the example
 -->
 
-    <!-- poor man's startup notification -->
-    <!--
-    <application class="Firefox-bin" name="firefox-bin" role="browser" type="normal">
+    <!-- poor man's startup notification, use xprop in x11-utils or
+         obxprop to tell application class/name/role/type. See comment above.
+    -->
+    <application class="Iceweasel" name="Navigator" role="browser" type="normal">
       <focus>no</focus>
       <maximized>true</maximized>
       <iconic>yes</iconic>
     </application>
 
-    <application class="Icedove-bin" name="icedove-bin" role="" type="normal">
+    <application class="Icedove" name="Mail" role="3pane" type="normal">
       <focus>no</focus>
       <maximized>true</maximized>
       <iconic>yes</iconic>
@@ -738,9 +739,7 @@
 
     <application class="Pidgin" name="Pidgin" role="buddy_list" type="normal">
       <focus>no</focus>
-      <iconic>yes</iconic>
     </application>
-    -->
 
   </applications>
 </openbox_config>
