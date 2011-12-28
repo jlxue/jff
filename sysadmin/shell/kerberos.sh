@@ -93,7 +93,7 @@ ensure_policy 8 2 user
 hostname=`hostname -f`
 ensure_service_principal host/$hostname
 ensure_service_principal ldap/$hostname /etc/slapd.keytab
-ensure_service_principal http/$hostname /etc/http.keytab
+ensure_service_principal HTTP/$hostname /etc/http.keytab
 
 # Only used when Exim4 uses cyrus-sasl to authenticate clients
 ensure_service_principal smtp/$hostname /etc/smtp.keytab
