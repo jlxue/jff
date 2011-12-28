@@ -58,14 +58,6 @@ i libpam-ccreds libnss-ldapd nscd nss-updatedb
 
 i ldapscripts smbldap-tools shelldap ldapvi
 
-# MTA: exim/postfix
-i exim4 exim4-daemon-heavy
-
-# IMAP: dovecot/cyrus/courier
-i dovecot-imapd dovecot-lmtpd dovecot-gssapi
-i dovecot-managesieved dovecot-sieve
-i dovecot-ldap dovecot-solr
-i dovecot-antispam #crm114
 
 # antivirus
 # XXX: http://web.nvd.nist.gov/view/vuln/search-results?query=clamav&search_type=all&cves=on
@@ -75,18 +67,15 @@ i clamav clamav-unofficial-sigs
 # antispam: http://www.maretmanu.org/homepage/inform/exim-spam.php#spam
 i spamassassin
 
-# Web mail: squirrelmail or roundcube or imp4
-    #i squirrelmail squirrelmail-compatibility squirrelmail-decode
-    #i squirrelmail-logger squirrelmail-quicksave squirrelmail-secure-login
-    #i squirrelmail-sent-confirmation squirrelmail-spam-buttons
-    #i squirrelmail-viewashtml avelsieve
-i roundcube roundcube-pgsql roundcube-plugins roundcube-plugins-extra
+# MTA: exim/postfix
+i exim4 exim4-daemon-heavy
 
-# mailing list: sympa/mailman
-i sympa
+# IMAP: dovecot/cyrus/courier
+i dovecot-imapd dovecot-lmtpd dovecot-gssapi
+i dovecot-managesieved dovecot-sieve
+i dovecot-ldap dovecot-solr
+i dovecot-antispam #crm114
 
-# SQL database, Sympa requires mysql | postgresql
-i postgresql
 
 # apache2
 # Web SSO: http://webauth.stanford.edu/features.html
@@ -123,6 +112,20 @@ i libapache2-mod-fcgid libapache2-mod-wsgi
 # dynamic web contents running in seperate processes for maximum
 # security, that's to say, FastCGI mode or separate WSGI/PSGI mode.
 i php5 php5-fpm
+
+
+# SQL database, Sympa requires mysql | postgresql
+i postgresql
+
+# Web mail: squirrelmail or roundcube or imp4
+    #i squirrelmail squirrelmail-compatibility squirrelmail-decode
+    #i squirrelmail-logger squirrelmail-quicksave squirrelmail-secure-login
+    #i squirrelmail-sent-confirmation squirrelmail-spam-buttons
+    #i squirrelmail-viewashtml avelsieve
+i roundcube roundcube-pgsql roundcube-plugins roundcube-plugins-extra
+
+# mailing list: sympa/mailman
+i sympa
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none
