@@ -1,6 +1,0 @@
-# for failover in case bind9 on 127.0.0.1 is not available
-#   -- disable by default because recursive local bind9 is often
-#   -- slower than Google's cached forwarder DNS server and we
-#   -- will get non DNSSEC results.
-#nameserver 8.8.8.8
-#nameserver 8.8.4.4

@@ -1,9 +1,0 @@
-# Default settings for auth_kerb_module
-
-<IfModule auth_kerb_module>
-  KrbMethodNegotiate On
-  KrbMethodK5Passwd Off
-  #KrbMethodK4Passwd Off        # Seems latest version doesn't support it
-  KrbSaveCredentials  Off
-  Krb5Keytab /etc/http.keytab
-</IfModule>
