@@ -115,7 +115,7 @@ i php5 php5-fpm
 
 
 # SQL database, Sympa requires mysql | postgresql
-i postgresql
+#i postgresql
 
 # Web mail: squirrelmail or roundcube or imp4
     #i squirrelmail squirrelmail-compatibility squirrelmail-decode
@@ -125,7 +125,8 @@ i postgresql
 i roundcube roundcube-pgsql roundcube-plugins roundcube-plugins-extra
 
 # mailing list: sympa/mailman
-i sympa
+#i sympa
+i mailman
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none
