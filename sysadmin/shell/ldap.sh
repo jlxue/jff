@@ -43,7 +43,7 @@ file_newer "$pidfile" /etc/slapd.keytab || {
 
 
 sync_file $SCRIPT_DIR/etc/cron.hourly/nss-updatedb /etc/cron.hourly/nss-updatedb
-sync_file $SCRIPT_DIR/etc/ldapscripts/ldapscripts.conf etc/ldapscripts/ldapscripts.conf
+sync_file $SCRIPT_DIR/etc/ldapscripts/ldapscripts.conf /etc/ldapscripts/ldapscripts.conf
 
 
 ensure_mode_user_group /etc/default/slapd   644 root root
@@ -52,6 +52,8 @@ ensure_mode_user_group /etc/ldap/ldap.conf  644 root root
 ensure_mode_user_group /etc/nsswitch.conf   644 root root
 ensure_mode_user_group /etc/nslcd.conf      640 root nslcd
 ensure_mode_user_group /etc/cron.hourly/nss-updatedb    755 root root
+ensure_mode_user_group /etc/ldapscripts/ldapscripts.conf    644 root root
+ensure_mode_user_group /etc/ldapscripts/ldapscripts.passwd  640 root root
 
 # depends on krb5 principals setup in kerberos.sh
 [ "`pidof slapd`" ] || service slapd start
