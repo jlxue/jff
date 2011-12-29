@@ -24,10 +24,13 @@ cmp_file $SCRIPT_DIR/etc/default/spamassassin /etc/default/spamassassin || {
 [ -d /etc/sasl2 ] || mkdir -m 755 /etc/sasl2
 sync_file $SCRIPT_DIR/etc/sasl2/exim.conf /etc/sasl2/exim.conf
 
-sync_file $SCRIPT_DIR/etc/aliases /etc/aliases
 sync_file $SCRIPT_DIR/etc/email-addresses /etc/email-addresses
 sync_file $SCRIPT_DIR/etc/msmtprc /etc/msmtprc
 
+cmp_file $SCRIPT_DIR/etc/aliases /etc/aliases || {
+    overwrite_file $SCRIPT_DIR/etc/aliases /etc/aliases
+    newaliases
+}
 
 cmp_file $SCRIPT_DIR/etc/default/exim4 /etc/default/exim4 || {
     overwrite_file $SCRIPT_DIR/etc/default/exim4 /etc/default/exim4
