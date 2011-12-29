@@ -1,0 +1,33 @@
+# Messages get sent out with
+# envelope from "mailman-bounces@virtual_domain"
+# But mailman doesn't put such addresses
+# in the aliases. Recognise these here.
+mailman_workaround:
+  debug_print = "R: mailman_workaround for $local_part@$domain"
+  domains = +local_domains
+  require_files = MAILMAN_HOME/lists/$local_part/config.pck
+  driver = accept
+  local_parts = mailman
+  local_part_suffix_optional
+  local_part_suffix = -bounces : -bounces+* : \
+           -confirm+* : -join : -leave : \
+           -subscribe : -unsubscribe : \
+           -owner : -request : -admin : -loop
+  transport = mailman_transport
+  group = MAILMAN_GROUP
+
+# Mailman lists
+mailman_router:
+  debug_print = "R: mailman_router for $local_part@$domain"
+  domains = +local_domains
+  condition = ${lookup{$local_part@$domain}lsearch{MAILMAN_HOME/data/virtual-mailman}{1}{0}}
+  require_files = MAILMAN_HOME/lists/$local_part/config.pck
+  driver = accept
+  local_part_suffix_optional
+  local_part_suffix = -bounces : -bounces+* : \
+                      -confirm+* : -join : -leave : \
+                      -subscribe : -unsubscribe : \
+                      -owner : -request : -admin : -loop
+  transport = mailman_transport
+  group = MAILMAN_GROUP
+

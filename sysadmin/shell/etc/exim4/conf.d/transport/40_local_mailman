@@ -1,0 +1,14 @@
+mailman_transport:
+  debug_print = "T: mailman_transport for $local_part@$domain"
+  driver = pipe
+  command = MAILMAN_WRAP \
+            '${if def:local_part_suffix \
+                  {${sg{$local_part_suffix}{-(\\w+)(\\+.*)?}{\$1}}} \
+                  {post}}' \
+            $local_part
+  current_directory = MAILMAN_HOME
+  home_directory = MAILMAN_HOME
+  user = MAILMAN_USER
+  group = MAILMAN_GROUP
+  freeze_exec_fail = true
+

@@ -19,3 +19,15 @@ CHECK_DATA_WITH_SPAMASSASSIN = true
 
 # See transport/40_exim4-config_lmtp
 LOCAL_DELIVERY = dovecot_lmtp_local
+
+# See/usr/share/doc/mailman/README.Exim4.Debian.gz
+#
+# Home dir for your Mailman installation -- aka Mailman's prefix
+# directory.
+MAILMAN_HOME=/var/lib/mailman
+MAILMAN_WRAP=MAILMAN_HOME/mail/mailman
+# User and group for Mailman, should match your --with-mail-gid
+# switch to Mailman's configure script.
+MAILMAN_USER=list
+MAILMAN_GROUP=list
+

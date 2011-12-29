@@ -94,7 +94,11 @@ DEFAULT_SEND_REMINDERS = 0
 # Uncomment if you use Postfix virtual domains (but not
 # postfix-to-mailman.py), but be sure to see
 # /usr/share/doc/mailman/README.Debian first.
-# MTA='Postfix'
+MTA = 'Postfix'
+POSTFIX_ALIAS_CMD = '/bin/true'
+POSTFIX_MAP_CMD = 'chmod o+r'
+POSTFIX_STYLE_VIRTUAL_DOMAINS = [ 'corp.example.com' ]
+
 
 #-------------------------------------------------------------
 # Uncomment if you want to filter mail with SpamAssassin. For

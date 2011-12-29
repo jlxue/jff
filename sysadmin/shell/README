@@ -46,6 +46,7 @@ nameserver 127.0.0.1
 
 
 4) As root, run:
+    # service slapd start
     # ldapmodify -Y EXTERNAL -H ldapi:/// -c -f ldap-mods.ldif
     # service slapd restart
 
@@ -68,6 +69,12 @@ and is readable by slapd.
     SASL/GSSAPI authentication started
     ldap_sasl_interactive_bind_s: Other (e.g., implementation specific) error (80)
             additional info: SASL(-1): generic failure: GSSAPI Error: Unspecified GSS failure.  Minor code may provide more information (Unknown error)
+
+
+If Kerberos authentication fails, check:
+  (1) Is service key in xxx.keytab?
+  (2) Is xxx.keytab readable?
+  (3) Has the service been restarted after xxx.keytab is changed?
 
 
 =============================================================

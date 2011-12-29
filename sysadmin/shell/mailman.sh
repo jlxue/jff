@@ -11,6 +11,8 @@ SITE_LIST=$( sed -rne "s/^[[:space:]]*MAILMAN_SITE_LIST[[:space:]]*=[[:space:]]*
 [ -n "$SITE_LIST" ] || SITE_LIST='mailman'
 /var/lib/mailman/bin/list_lists -b | grep -q "^${SITE_LIST}$" || {
     echo "You must run 'newlist $SITE_LIST' as root first!" >&2
+    echo "Notice don't add the mailman aliases to /etc/aliases," >&2
+    echo "because they are processed specially in /etc/exim4/conf.d/." >&22
     exit 1
 }
 
