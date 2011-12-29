@@ -43,6 +43,7 @@ file_newer "$pidfile" /etc/slapd.keytab || {
 
 
 sync_file $SCRIPT_DIR/etc/cron.hourly/nss-updatedb /etc/cron.hourly/nss-updatedb
+sync_file $SCRIPT_DIR/etc/ldapscripts/ldapscripts.conf etc/ldapscripts/ldapscripts.conf
 
 
 ensure_mode_user_group /etc/default/slapd   644 root root

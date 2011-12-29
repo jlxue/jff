@@ -2,7 +2,7 @@
 
 $TTL 86400
 
-@	3600	IN	SOA	ns.corp.example.com. dns-master.corp.example.com. (
+@	3600	IN	SOA	ns.corp.example.com. postmaster.corp.example.com. (
 				2011120400	; serial number
 				2h		; refresh
 				20m		; retry

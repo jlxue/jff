@@ -1,4 +1,4 @@
-#!/bin/dash
+#!/bin/sh
 
 # Update local /var/lib/misc/{passwd,group}.db from slapd.
 # Sleep randomly to avoid network congestion and slapd's peak load.
