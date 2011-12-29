@@ -44,6 +44,7 @@ ldap.sh
 imap.sh
 smtp.sh
 apache.sh
+mailman.sh
 END`
 
 for f in $SCRIPTS; do
