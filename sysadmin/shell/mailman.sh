@@ -16,7 +16,14 @@ SITE_LIST=$( sed -rne "s/^[[:space:]]*MAILMAN_SITE_LIST[[:space:]]*=[[:space:]]*
     exit 1
 }
 
+cmp_dir $SCRIPT_DIR/etc/mailman /etc/mailman --exclude en --exclude zh_CN || {
+    overwrite_dir_ignore_extra $SCRIPT_DIR/etc/mailman /etc/mailman
+    /var/lib/mailman/bin/genaliases
+    service mailman restart
+}
+
+
 ensure_mode_user_group /etc/mailman     755 root list
 
-[ "`pidof mailman`" ] || service mailman start
+[ "`pgrep mailmanctl`" ] || service mailman start
 

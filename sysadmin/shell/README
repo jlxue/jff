@@ -56,7 +56,11 @@ certificates for Exim if you can't get CA issued certificates, the
 "Server name" must be "smtp.corp.example.com".
 
 
-6) Optionally,
+6) Run "newlist mailman" as root, notice don't add those
+mailman aliases to /etc/aliases, see ./smtp.sh.
+
+
+7) Optionally,
 CONFDIR=`pwd`/etc/exim4 /usr/sbin/update-exim4.conf.template -r
 
 
