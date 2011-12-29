@@ -8,9 +8,9 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 shorewall check $SCRIPT_DIR/etc/shorewall
 shorewall6 check $SCRIPT_DIR/etc/shorewall6
 
-for f in shorewall-init shorewall shorewall6; do
-    sync_file $SCRIPT_DIR/etc/default/$f /etc/default/$f
-done
+sync_file $SCRIPT_DIR/etc/default/shorewall-init /etc/default/shorewall-init
+sync_file $SCRIPT_DIR/etc/default/shorewall /etc/default/shorewall
+sync_file $SCRIPT_DIR/etc/default/shorewall6 /etc/default/shorewall6
 
 cmp_dir $SCRIPT_DIR/etc/shorewall /etc/shorewall || {
     overwrite_dir $SCRIPT_DIR/etc/shorewall /etc/shorewall/
