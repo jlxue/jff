@@ -1,16 +1,16 @@
-<VirtualHost lists.corp.example.com>
-    ServerName lists.corp.example.com
+<VirtualHost list.corp.example.com>
+    ServerName list.corp.example.com
     ServerAdmin webmaster@corp.example.com
     DocumentRoot /var/www
 
 
-    ErrorLog ${APACHE_LOG_DIR}/lists-error.log
+    ErrorLog ${APACHE_LOG_DIR}/list-error.log
 
     # Possible values include: debug, info, notice, warn, error, crit,
     # alert, emerg.
     LogLevel warn
 
-    CustomLog ${APACHE_LOG_DIR}/lists-access.log combined
+    CustomLog ${APACHE_LOG_DIR}/list-access.log combined
 
 
     #<Directory /var/lib/mailman/archives/>

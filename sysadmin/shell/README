@@ -62,7 +62,7 @@ mailman aliases to /etc/aliases, see ./smtp.sh.
 You may want to fix broken mailing list url:
     http://mail.python.org/pipermail/mailman-users/2008-January/060106.html
     The with_list script: # withlist -l -r fix_url LISTNAME -u NEW-DOMAIN
-    For example: # withlist -l -r fix_url mailman -u lists.corp.example.com
+    For example: # withlist -l -r fix_url mailman -u list.corp.example.com
 
     http://mail.python.org/pipermail/mailman-users/2002-September/022781.html
     The config_list script.
