@@ -73,6 +73,10 @@ Optional:
 
 6.2) Run "mmsitepass" as root, it's required to create new list on mailman Web UI.
 
+6.3) Fix file permission:
+# chown www-data:list /var/lib/mailman/archives/private
+# chgrp -R list /var/lib/mailman/archives/private
+
 6.3) Restart apache2 and mailman services.
 
 
