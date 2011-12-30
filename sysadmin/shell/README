@@ -67,6 +67,10 @@ You may want to fix broken mailing list url:
     http://mail.python.org/pipermail/mailman-users/2002-September/022781.html
     The config_list script.
 
+And you may have to modify these files manually to fix bad links:
+/var/lib/mailman/archives/public/mailman/index.html
+/var/lib/mailman/archives/private/mailman/index.html
+
 7) Optionally,
 CONFDIR=`pwd`/etc/exim4 /usr/sbin/update-exim4.conf.template -r
 
