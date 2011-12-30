@@ -1,7 +1,7 @@
 <VirtualHost list.corp.example.com>
     ServerName list.corp.example.com
     ServerAdmin webmaster@corp.example.com
-    DocumentRoot /var/www
+    DocumentRoot /srv/www/list
 
 
     ErrorLog ${APACHE_LOG_DIR}/list-error.log
@@ -12,6 +12,16 @@
 
     CustomLog ${APACHE_LOG_DIR}/list-access.log combined
 
+    <Directory />
+        Options FollowSymLinks
+        AllowOverride None
+    </Directory>
+    <Directory /srv/www/list/>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride None
+        Order allow,deny
+        allow from all
+    </Directory>
 
     #<Directory /var/lib/mailman/archives/>
     #    Options FollowSymLinks

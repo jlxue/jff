@@ -5,6 +5,7 @@ set -e -x
 SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
+mkdir -m 0755 /srv/www/list
 
 # stolen from /etc/init.d/mailman
 SITE_LIST=$( sed -rne "s/^[[:space:]]*MAILMAN_SITE_LIST[[:space:]]*=[[:space:]]*(['\"])([^'\"]+)\\1/\\2/p" /etc/mailman/mm_cfg.py )
@@ -24,6 +25,7 @@ cmp_dir $SCRIPT_DIR/etc/mailman /etc/mailman --exclude en --exclude zh_CN || {
 
 
 ensure_mode_user_group /etc/mailman     755 root list
+ensure_mode_user_group /srv/www/list    755 root root
 
 [ "`pgrep mailmanctl`" ] || service mailman start
 
