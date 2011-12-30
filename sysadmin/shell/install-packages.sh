@@ -122,7 +122,9 @@ i php5 php5-fpm
     #i squirrelmail-logger squirrelmail-quicksave squirrelmail-secure-login
     #i squirrelmail-sent-confirmation squirrelmail-spam-buttons
     #i squirrelmail-viewashtml avelsieve
-i roundcube roundcube-pgsql roundcube-plugins roundcube-plugins-extra
+i roundcube roundcube-plugins roundcube-plugins-extra
+# Let's try roundcube-sqlite first.
+#i roundcube-pgsql
 
 # mailing list: sympa/mailman
 #i sympa
