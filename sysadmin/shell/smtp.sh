@@ -50,12 +50,6 @@ cmp_dir $SCRIPT_DIR/etc/exim4 /etc/exim4 --exclude passwd.client \
 }
 
 
-[ -z "$CONF_CHANGED" ] || {
-    /usr/sbin/update-exim4.conf --verbose
-    service exim4 reload
-}
-
-
 ensure_mode_user_group /etc/sasl2                   755 root root
 ensure_mode_user_group /etc/sasl2/exim.conf         644 root root
 ensure_mode_user_group /etc/default/spamassassin    644 root root
@@ -73,11 +67,14 @@ ensure_mode_user_group /etc/email-addresses     644 root root
 ensure_mode_user_group /etc/msmtprc             644 root root
 
 
+[ -z "$CONF_CHANGED" ] || {
+    /usr/sbin/update-exim4.conf --verbose
+    service exim4 reload
+}
+
+
 [ "`pidof clamd`" ] || service clamav-daemon start
-
 [ "`pidof freshclam`" ] || service clamav-freshclam start
-
 [ "`pgrep spamd`" ] || service spamassassin start
-
 [ "`pidof exim4`" ] || service exim4 start
 

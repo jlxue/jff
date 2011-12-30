@@ -45,6 +45,7 @@ imap.sh
 smtp.sh
 apache.sh
 mailman.sh
+roundcube.sh
 END`
 
 for f in $SCRIPTS; do

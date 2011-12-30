@@ -38,7 +38,7 @@ named-checkconf -t $SCRIPT_DIR -z
 
 cmp_dir $SCRIPT_DIR/etc/bind /etc/bind --exclude rndc.key || {
     overwrite_dir_ignore_extra $SCRIPT_DIR/etc/bind /etc/bind
-    service bind9 reload
+    BIND9_CONFCHANGED=1
 }
 
 
@@ -62,4 +62,7 @@ ensure_mode_user_group /etc/bind/named.conf.local           644 root bind
 ensure_mode_user_group /etc/bind/named.conf.options         644 root bind
 ensure_mode_user_group /etc/bind/rndc.key                   640 bind bind
 ensure_mode_user_group /etc/bind/zones.rfc1918              644 root bind
+
+
+[ -z "$BIND9_CONFCHANGED" ] || service bind9 reload
 
