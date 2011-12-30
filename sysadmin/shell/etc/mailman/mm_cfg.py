@@ -63,7 +63,7 @@ IMAGE_LOGOS         = '/images/mailman/'
 
 #-------------------------------------------------------------
 # Default domain for email addresses of newly created MLs
-DEFAULT_EMAIL_HOST = 'corp.example.com'
+DEFAULT_EMAIL_HOST = 'list.corp.example.com'
 #-------------------------------------------------------------
 # Default host for web interface of newly created MLs
 DEFAULT_URL_HOST   = 'list.corp.example.com'
@@ -97,7 +97,7 @@ DEFAULT_SEND_REMINDERS = 0
 MTA = 'Postfix'
 POSTFIX_ALIAS_CMD = '/bin/true'
 POSTFIX_MAP_CMD = 'chmod o+r'
-POSTFIX_STYLE_VIRTUAL_DOMAINS = [ 'corp.example.com' ]
+POSTFIX_STYLE_VIRTUAL_DOMAINS = [ 'list.corp.example.com' ]
 
 
 #-------------------------------------------------------------

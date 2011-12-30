@@ -56,13 +56,13 @@ certificates for Exim if you can't get CA issued certificates, the
 "Server name" must be "smtp.corp.example.com".
 
 
-6) Run "newlist mailman" as root, notice don't add those
+6.1) Run "newlist mailman" as root, notice don't add those
 mailman aliases to /etc/aliases, see ./smtp.sh.
 
 You may want to fix broken mailing list url:
     http://mail.python.org/pipermail/mailman-users/2008-January/060106.html
     The with_list script: # withlist -l -r fix_url LISTNAME -u NEW-DOMAIN
-    For example: # withlist -l -r fix_url mailman -u list.corp.example.com
+    For example: # withlist -l -r fix_url mailman --urlhost list.corp.example.com
 
     http://mail.python.org/pipermail/mailman-users/2002-September/022781.html
     The config_list script.
@@ -71,10 +71,13 @@ And you may have to modify these files manually to fix bad links:
 /var/lib/mailman/archives/public/mailman/index.html
 /var/lib/mailman/archives/private/mailman/index.html
 
-7) Run "mmsitepass SOME-SITE-PASS" as root, creating new list
-on mailman Web UI requires it.
+6.2) Run "mmsitepass SOME-SITE-PASS" as root, creating new list on
+mailman Web UI requires it.
 
-8) Optionally,
+6.3) Restart apache2 and mailman services.
+
+
+7) Optionally,
 CONFDIR=`pwd`/etc/exim4 /usr/sbin/update-exim4.conf.template -r
 
 
