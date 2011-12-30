@@ -71,7 +71,10 @@ And you may have to modify these files manually to fix bad links:
 /var/lib/mailman/archives/public/mailman/index.html
 /var/lib/mailman/archives/private/mailman/index.html
 
-7) Optionally,
+7) Run "mmsitepass SOME-SITE-PASS" as root, creating new list
+on mailman Web UI requires it.
+
+8) Optionally,
 CONFDIR=`pwd`/etc/exim4 /usr/sbin/update-exim4.conf.template -r
 
 
