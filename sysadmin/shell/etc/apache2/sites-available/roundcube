@@ -1,0 +1,20 @@
+<VirtualHost mail.corp.example.cm>
+    ServerName mail.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /var/lib/roundcube
+
+    ErrorLog ${APACHE_LOG_DIR}/mail-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/mail-access.log combined
+
+    <IfModule mod_fcgid.c>
+        AddHandler fcgid-script .php
+        FcgidFixPathinfo 1
+    </IfModule>
+
+    Include /etc/roundcube/apache.conf
+</VirtualHost>
