@@ -1,0 +1,5 @@
+<IfModule mod_fcgid.c>
+  AddHandler    fcgid-script .php
+  FcgidFixPathinfo  1
+  FcgidWrapper  /usr/lib/cgi-bin/php5 .php
+</IfModule>

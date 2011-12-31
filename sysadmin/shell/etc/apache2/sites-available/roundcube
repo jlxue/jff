@@ -11,10 +11,5 @@
 
     CustomLog ${APACHE_LOG_DIR}/mail-access.log combined
 
-    <IfModule mod_fcgid.c>
-        AddHandler fcgid-script .php
-        FcgidFixPathinfo 1
-    </IfModule>
-
     Include /etc/roundcube/apache.conf
 </VirtualHost>
