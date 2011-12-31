@@ -1,4 +1,4 @@
-<VirtualHost list.corp.example.com>
+<VirtualHost *:80>
     ServerName list.corp.example.com
     ServerAdmin webmaster@corp.example.com
     DocumentRoot /srv/www/list

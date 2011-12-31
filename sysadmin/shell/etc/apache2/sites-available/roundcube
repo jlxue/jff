@@ -1,4 +1,4 @@
-<VirtualHost mail.corp.example.cm>
+<VirtualHost *:80>
     ServerName mail.corp.example.com
     ServerAdmin webmaster@corp.example.com
     DocumentRoot /var/lib/roundcube
