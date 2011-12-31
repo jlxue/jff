@@ -1,0 +1,35 @@
+<IfModule !mod_php4.c>
+<IfModule !mod_php4_filter.c>
+<IfModule !mod_php5.c>
+<IfModule !mod_php5_filter.c>
+<IfModule !mod_php5_hooks.c>
+<IfModule mod_actions.c>
+<IfModule mod_alias.c>
+<IfModule mod_mime.c>
+<IfModule mod_fcgid.c>
+    FcgidFixPathinfo  1
+
+    # Path to php.ini – defaults to /etc/phpX/cgi
+    #DefaultInitEnv PHPRC=/etc/php5/cgi
+
+    # Number of PHP childs that will be launched. Leave undefined to let PHP decide.
+    #DefaultInitEnv PHP_FCGI_CHILDREN 3
+
+    # Maximum requests before a process is stopped and a new one is launched
+    DefaultInitEnv PHP_FCGI_MAX_REQUESTS 5000
+
+    # Define a new handler "php-fcgi" for ".php" files, plus the action that must follow
+    AddHandler php-fcgi .php
+    Action php-fcgi /cgi-bin/php5
+
+    # Define the MIME-Type for ".php" files
+    AddType application/x-httpd-php .php
+</IfModule>
+</IfModule>
+</IfModule>
+</IfModule>
+</IfModule>
+</IfModule>
+</IfModule>
+</IfModule>
+</IfModule>

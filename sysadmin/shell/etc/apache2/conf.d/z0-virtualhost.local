@@ -1,5 +1,0 @@
-# See http://httpd.apache.org/docs/2.2/mod/core.html#servername
-#     http://httpd.apache.org/docs/2.2/vhosts/details.html
-
-NameVirtualHost *
-
