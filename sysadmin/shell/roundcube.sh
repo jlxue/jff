@@ -29,6 +29,5 @@ ensure_mode_user_group /etc/roundcube/main.inc.php          640 root www-data
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 
-[ "`pidof php5-fpm`" ] || service php5-fpm start
 [ "`pidof apache2`" ] || service apache2 start
 

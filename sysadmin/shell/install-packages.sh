@@ -111,7 +111,7 @@ i libapache2-mod-fcgid libapache2-mod-wsgi
 # libapache2-mpm-prefork, but I want more efficient worker mpm and all
 # dynamic web contents running in seperate processes for maximum
 # security, that's to say, FastCGI mode or separate WSGI/PSGI mode.
-i php5 php5-fpm
+i php5 php5-cgi
 
 
 # SQL database, Sympa requires mysql | postgresql
