@@ -17,7 +17,7 @@ cmp_dir $SCRIPT_DIR/etc/modsecurity /etc/modsecurity || {
 }
 
 
-[ -z "$CONF_CHANGED" ] || service apache2 reload
+[ -z "$CONF_CHANGED" ] || service apache2 restart
 
 [ "`pidof apache2`" ] || service apache2 start
 

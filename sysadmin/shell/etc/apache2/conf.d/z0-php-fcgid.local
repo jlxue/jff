@@ -10,20 +10,20 @@
     FcgidFixPathinfo  1
 
     # Path to php.ini – defaults to /etc/phpX/cgi
-    #DefaultInitEnv PHPRC=/etc/php5/cgi
+    #FcgidInitialEnv PHPRC /etc/php5/cgi
 
     # Number of PHP childs that will be launched. Leave undefined to let PHP decide.
-    #DefaultInitEnv PHP_FCGI_CHILDREN 3
+    #FcgidInitialEnv PHP_FCGI_CHILDREN 3
 
     # Maximum requests before a process is stopped and a new one is launched
-    DefaultInitEnv PHP_FCGI_MAX_REQUESTS 5000
+    FcgidInitialEnv PHP_FCGI_MAX_REQUESTS 1000
 
-    # Define a new handler "php-fcgi" for ".php" files, plus the action that must follow
-    AddHandler php-fcgi .php
-    Action php-fcgi /cgi-bin/php5
+    AddHandler fcgid-script .php
+
+    FcgidWrapper "/usr/bin/php5-cgi -d suhosin.session.encrypt=off" .php
 
     # Define the MIME-Type for ".php" files
-    AddType application/x-httpd-php .php
+    #AddType application/x-httpd-php .php
 </IfModule>
 </IfModule>
 </IfModule>
