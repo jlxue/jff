@@ -1,0 +1,69 @@
+企业内部 IT 基础设施中 Web 应用搭建的一些想法
+
+
+在之前的系列文章中，已经基本成功的搭建了 kerberos/openldap/exim/dovecot，
+它们都是以单独用户身份运行的独立服务，对 krb5/gssapi/sasl 支持都很好，
+所以搭建并不是很麻烦的事情。而到了 Web app 这里情况就复杂多了，我计划
+搭 mailman(sympa 在 Debian testing 上打的包有很多文件权限问题，装不上），
+oundcube(抛弃 squirrelmail，伊太难看了)，bugzilla, twiki, trac, redmine，
+Jenkins, OpenGrok 等等，为了提高隔离度确保安全性，我希望这些 web app 都以
+独立用户身份运行，同时维护的开销又小，下面是一些部署上的想法。
+
+
+1. 为每个 web app 提供独立域名
+
+比如 list.corp.example.com, mail.corp.example.com, bug.corp.example 等等，
+而不是 Debian 上 web app 打包时默认的 /xxx，/cgi-bin/xxx 的方式，这样一
+是用户比较容易记忆，二是是可以隐藏具体的软件包名字，让 url 尽可能不依赖
+软件包名字，便于迁移到另外的软件包，比如某天想用 mantis 替换 bugzilla，
+可以域名不变(但很可能需要加一些 rewrite 规则，让原来的 bugzilla 的
+query path 可以继续工作，不破坏如 wiki 等地方的链接)，三是把 web app
+部署到一台机器还是多台机器这个细节对用户透明，在单台机器单 IP 上可以
+用 Apache 的 name based virtual host 特性很方便的部署和测试。
+
+由于这些都是内部域名，前面已经配置了 bind，所以设置这些单独域名是很
+容易的。对于在家办公的情况，可以 vpn 连接公司内网，连上后我估计是可以用
+内部域名的。
+
+
+2. 尽量不使用内嵌运行方式如 mod_perl、mod_php 等
+
+为了减少维护开销，我希望单机上一个 apache 服务就可以够用，内嵌 mod_perl
+和 mod_php 的 apache 服务器，其子进程用来服务静态文件是不划算的，推荐
+做法是内嵌 mod_perl/mod_php 的 apache 服务器专门服务 perl/php 页面，
+用单独的 apache 或者 nginx 放在前面服务静态页面。
+
+资源消耗其实是个小问题，在中小规模企业内部，用 mod_perl/mod_php enabled
+apache 服务静态文件也没什么大不了的。我更关注的是 web app 的隔离度，
+以低开销的方式让不同 web app 运行在不同的用户身份，因为 web app
+很容易出现安全漏洞，而我这里又极力推行 Kerberos + OpenLDAP 单点登录，
+如果所有 web app 全都以 www-data 身份运行，无疑安全隐患大的多。
+
+隔离 web app 的办法很多了，多台物理机器当然是终极大招，单台物理机器上，
+可以用系统级虚拟机、容器技术，也可以运行多个 apache 服务，而最省资源而且
+省事的权衡方案是用一个 apache 服务搭配 mod_suexec + CGI/FastCGI。
+
+形势看起来很完美，single Apache + mod_suexec + CGI/FastCGI，但实际
+却是小问题多多，Debian 上打包的 web app 都假定了最常见的部署方式：
+/xxx url 方式以及 www-data 用户身份。前者还好修正，搞个 Alias 就行，
+后者却是很头大，而且 mod_suexec 对 uid 有限制，看 mailman 的文档：
+
+$ less /usr/share/doc/mailman/README.Debian
+...
+Apache + suexec
+---------------
+
+Since suexec forbids execution of CGIs with gid < 50 and www-data (the default
+for mailman cgi) is 33, you should execute the cgi with a gid of 50-99 or 65534.
+It cannot be any other gid since mailman cgi check that gid < 100 or == 65534.
+
+list 用户的 id 和 gid 是 38，按照 suexec 的要求，我得改
+/etc/group 并 chgrp -R list /var/lib/mailman，比较龌龊，折腾。
+
+而另一个问题就更头大了，web app 的身份验证问题，基本是个 web app 都会折腾
+自己的身份验证代码，如何让它们使用 REMOTE_USER 是个麻烦事，很可能需要修改
+web app 的源码。
+
+
+仅记录一些麻烦事，留待后续折腾。
+

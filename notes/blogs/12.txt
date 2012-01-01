@@ -1,0 +1,38 @@
+Apache 运行 PHP 的软件包组合
+
+因为要搭 roundcube，不想用 mod_php，所以在水木上询问了这个问题，得到  JulyClyde@，cybergene@, adoal@ 的指点，在这里再总结下。
+
+    内嵌方式：libapache2-mod-php5 + apache2-mpm-prefork，mod_php 目前还不是多线程安全的，不能用于 apache2-mpm-worker。mod_php 是运行 PHP 代码效率最高的方式，但是据说内嵌了 mod_php 的 apache child 在服务静态文件时因 mod_php 消耗大量内存而不值，所以只建议将内嵌了 mod_php 的 apache server 服务纯 php 请求。对于其它内嵌模块，也有类似的准则，比如  mod_perl。
+    CGI 方式：apache2-mpm-prefork + mod_cgi(在 apache2.2-bin 包中) 或者 apache2-mpm-worker + mod_cgid (在 apache2.2-bin 包中)，第二种组合是现在推荐的方式。
+    FastCGI 方式：
+        apache2 + libapache2-mod-fastcgi + php5-cgi/php5-fpm/
+        apache2 + libapache2-mod-fcgid + php5-cgi
+        apache2.3 + mod_proxy_cgi + php5-fpm
+
+php5-cgi 既可以作为普通 php 解释器被以命令行形式启动，也可以作为 external FastCGI server 形式启动：
+
+$ php-cgi -h
+Usage: php [-q] [-h] [-s] [-v] [-i] [-f <file>]
+php <file> [args...]
+-a Run interactively
+-b <address:port>|<port> Bind Path for external FASTCGI Server mode
+-C Do not chdir to the script's directory
+-c <path>|<file> Look for php.ini file in this directory
+-n No php.ini file will be used
+-d foo[=bar] Define INI entry foo with value 'bar'
+-e Generate extended information for debugger/profiler
+-f <file> Parse <file>. Implies `-q'
+-h This help
+-i PHP information
+-l Syntax check only (lint)
+-m Show compiled in modules
+-q Quiet-mode. Suppress HTTP Header output.
+-s Display colour syntax highlighted source.
+-v Version number
+-w Display source with stripped comments and whitespace.
+-z <file> Load Zend extension <file>.
+-T <count> Measure execution time of script repeated <count> times.
+
+而 php5-fpm 只支持 external FASTCGI server 模式。mod_fcgid 和 php5-fpm 均有 fastcgi 进程管理功能，是比较推荐使用的。mod_fastcgi 现在是不推荐的。
+
+nginx 不直接支持 CGI 方式，所以需要 fcgiwap 作为一个 cgi server 运行 CGI 程序。spawn-fcgi 是运行 FastCGI程序的方式，对于 PHP 而言不如 php-fpm，见 http://php-fpm.org/about/。
