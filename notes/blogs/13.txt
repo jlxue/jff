@@ -5,7 +5,7 @@
 它们都是以单独用户身份运行的独立服务，对 krb5/gssapi/sasl 支持都很好，
 所以搭建并不是很麻烦的事情。而到了 Web app 这里情况就复杂多了，我计划
 搭 mailman(sympa 在 Debian testing 上打的包有很多文件权限问题，装不上），
-oundcube(抛弃 squirrelmail，伊太难看了)，bugzilla, twiki, trac, redmine，
+Roundcube(抛弃 squirrelmail，伊太难看了)，Bugzilla, Twiki, Trac, Redmine，
 Jenkins, OpenGrok 等等，为了提高隔离度确保安全性，我希望这些 web app 都以
 独立用户身份运行，同时维护的开销又小，下面是一些部署上的想法。
 
@@ -21,7 +21,7 @@ query path 可以继续工作，不破坏如 wiki 等地方的链接)，三是�
 部署到一台机器还是多台机器这个细节对用户透明，在单台机器单 IP 上可以
 用 Apache 的 name based virtual host 特性很方便的部署和测试。
 
-由于这些都是内部域名，前面已经配置了 bind，所以设置这些单独域名是很
+由于这些都是内部域名，前面已经配置了 Bind 9，所以设置这些单独域名是很
 容易的。对于在家办公的情况，可以 vpn 连接公司内网，连上后我估计是可以用
 内部域名的。
 

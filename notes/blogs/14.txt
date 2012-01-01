@@ -1,0 +1,18 @@
+Mailman 的配置
+
+本来想鼓捣 Sympa，在 Debian testing 上折腾了好长时间，貌似是打包问题，有很多文件权限不对头，导致 Sympa 服务启动不了，调试了下，文件权限不对的地方太多了，懒得鼓捣了。
+
+从 Debian Popcon 上看，Mailman 的装机量比 Sympa 多了一个数量级，Mailman 在开源社区的采用率之高真不是吹的。Mailman 安装还是挺简单的，装完后，按照 /usr/share/doc/mailman/README.Exim4.Debian.gz 的说明配置下与 Exim4 的配合就行了，基本就是复制它的配置命令。
+
+装上后发现四个问题，第一，Mailman 不判断系统邮件账户是否存在，比如我有个邮件账户叫 dieken@corp.example.com，然后我可以创建 dieken@corp.example.com 邮件列表。。。。这让我很郁闷，仔细想了下，Mailman 确实也无能为力，它并不能知道普通邮件账户的域名部分是啥东西，而且它也没必要知道这个，只有 MTA 和 MDA 关心这个，所以增加一个这个问题的配置项对 mailman 是无意义的。考虑到不能指望用户创建邮件列表时都加一个 -list 后缀什么的，我还是选择在 /etc/mailman/mm_cfg.py 里设置 DEFAULT_EMAIL_HOST 为 list.corp.example.com 里，这样创建的邮件列表域名部分都是 @list.corp.example.com。
+
+第二个问题是修改 mailing list 的 url host(用来生成归档页面、通知邮件里的 full URL) 后，之前生成的归档页面里的链接没有被 fix_url 改过来，只能手动编辑那几个 html 文件。这倒也情有可源，怪不得 mailman 了。
+
+第三个问题是 /var/lib/mailman/bin/genaliases 有时候出问题，导致 /var/lib/mailman/data/virtual-mailman 文件内容为空，这个文件里头记录一些 mailman 专用的邮件地址，不必放到 /etc/aliases 里，没这些地址，Exim 就不会按照 mailman 的转发规则转发邮件，而是报告邮件无法投递。我没能稳定复现这个问题，最后重装 mailman 后就正常了。
+
+第四个问题很诡异，Debian stable 和 testing 里 mailman 包的 /var/lib/mailman/archives/private 目录都是 list:www-data 属主，由于这个目录设置了 set gid 权限位，导致其子目录会继承 www-data 组设置，所以 root 执行  newlist 会在 private 目录下生成  root:www-data 属主的子目录， mailman 的 Web  UI 则生成 www-data:www-data 属主的子目录（我还没让 mailman CGI 程序以独立用户身份运行），要命的是 mailman 服务以 list:list 身份运行，导致做邮件归档时无法写入 /var/lib/mailman/archives/private 目录。在执行 chown www-data:list /var/lib/mailman/archives/private;  chgrp -R list /var/lib/mailman/archives/private 后问题解决。
+
+这个问题很奇怪，Debian stable 上 mailman 包被人装了很多次了，没人汇报这个 bug，testing/unstable 上的 mailman 也没人报告，我不知道为啥就我这里出问题了，要说 www-data 和 list 的 uid/gid 因为安装软件包顺序不一样会调换，其它目录的属主却没问题。
+
+BTW，Debian mailman maintainer 的邮件列表上基本 99% 都是垃圾邮件，也不加个反垃圾邮件的设置。。。。里头居然还有不少中文垃圾邮件，连政府公文都有。。。。
+
