@@ -69,7 +69,7 @@ $rcmail_config['smtp_debug'] = false;
 // %d - domain (http hostname without the first part)
 // %s - domain name after the '@' from e-mail address provided at login screen
 // For example %n = mail.domain.tld, %d = domain.tld
-$rcmail_config['default_host'] = '';
+$rcmail_config['default_host'] = 'imap.%d';
 
 // TCP port used for IMAP connections
 $rcmail_config['default_port'] = 143;
@@ -104,7 +104,7 @@ $rcmail_config['imap_force_caps'] = false;
 $rcmail_config['imap_force_lsub'] = false;
 
 // IMAP connection timeout, in seconds. Default: 0 (no limit)
-$rcmail_config['imap_timeout'] = 0;
+$rcmail_config['imap_timeout'] = 10;
 
 // Optional IMAP authentication identifier to be used as authorization proxy
 $rcmail_config['imap_auth_cid'] = null;
@@ -162,7 +162,7 @@ $rcmail_config['smtp_auth_pw'] = null;
 $rcmail_config['smtp_helo_host'] = '';
 
 // SMTP connection timeout, in seconds. Default: 0 (no limit)
-$rcmail_config['smtp_timeout'] = 0;
+$rcmail_config['smtp_timeout'] = 10;
 
 // ----------------------------------
 // SYSTEM
