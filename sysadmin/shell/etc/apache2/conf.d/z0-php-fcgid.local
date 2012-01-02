@@ -3,8 +3,6 @@
 <IfModule !mod_php5.c>
 <IfModule !mod_php5_filter.c>
 <IfModule !mod_php5_hooks.c>
-<IfModule mod_actions.c>
-<IfModule mod_alias.c>
 <IfModule mod_mime.c>
 <IfModule mod_fcgid.c>
     FcgidFixPathinfo  1
@@ -20,12 +18,10 @@
 
     AddHandler fcgid-script .php
 
-    FcgidWrapper "/usr/bin/php5-cgi -d suhosin.session.encrypt=off" .php
+    FcgidWrapper /usr/bin/php5-cgi .php
 
     # Define the MIME-Type for ".php" files
     #AddType application/x-httpd-php .php
-</IfModule>
-</IfModule>
 </IfModule>
 </IfModule>
 </IfModule>
