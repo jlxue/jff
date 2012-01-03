@@ -12,6 +12,9 @@
 
     CustomLog ${APACHE_LOG_DIR}/list-access.log combined
 
+    AuthType Kerberos
+    Require valid-user
+
     <Directory />
         Options FollowSymLinks
         AllowOverride None
