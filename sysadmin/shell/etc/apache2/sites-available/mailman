@@ -12,13 +12,6 @@
 
     CustomLog ${APACHE_LOG_DIR}/list-access.log combined
 
-    AuthType Kerberos
-    Require valid-user
-
-    <Directory />
-        Options FollowSymLinks
-        AllowOverride None
-    </Directory>
     <Directory /srv/www/list/>
         Options Indexes FollowSymLinks MultiViews
         AllowOverride None
@@ -32,18 +25,26 @@
     #</Directory>
 
     <Directory /usr/lib/cgi-bin/mailman/>
+        AuthType Kerberos
+        Require valid-user
+
         AllowOverride None
         Options ExecCGI
         AddHandler cgi-script .cgi
         Order allow,deny
         Allow from all
     </Directory>
+
     <Directory /var/lib/mailman/archives/public/>
+        AuthType Kerberos
+        Require valid-user
+
         Options FollowSymlinks
         AllowOverride None
         Order allow,deny
         Allow from all
     </Directory>
+
     <Directory /usr/share/images/mailman/>
         AllowOverride None
         Order allow,deny
