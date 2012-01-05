@@ -69,14 +69,14 @@ $rcmail_config['smtp_debug'] = false;
 // %d - domain (http hostname without the first part)
 // %s - domain name after the '@' from e-mail address provided at login screen
 // For example %n = mail.domain.tld, %d = domain.tld
-$rcmail_config['default_host'] = 'imap.%d';
+$rcmail_config['default_host'] = 'tls://imap.corp.example.com';
 
 // TCP port used for IMAP connections
 $rcmail_config['default_port'] = 143;
 
 // IMAP AUTH type (DIGEST-MD5, CRAM-MD5, LOGIN, PLAIN or empty to use
 // best server supported one)
-$rcmail_config['imap_auth_type'] = null;
+$rcmail_config['imap_auth_type'] = 'DIGEST-MD5';
 
 // If you know your imap's folder delimiter, you can specify it here.
 // Otherwise it will be determined automatically
@@ -132,7 +132,7 @@ $rcmail_config['messages_cache'] = false;
 // %d - domain (http hostname without the first part)
 // %z - IMAP domain (IMAP hostname without the first part)
 // For example %n = mail.domain.tld, %d = domain.tld
-$rcmail_config['smtp_server'] = '';
+$rcmail_config['smtp_server'] = 'tls://smtp.corp.example.com';
 
 // SMTP port (default is 25; 465 for SSL)
 $rcmail_config['smtp_port'] = 25;

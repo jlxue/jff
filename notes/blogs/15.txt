@@ -1,0 +1,81 @@
+RoundCube 的配置
+
+1. Dovecot 认证机制和密码存储方案
+
+http://wiki2.dovecot.org/Authentication
+http://wiki2.dovecot.org/Authentication/Mechanisms/DigestMD5
+http://wiki2.dovecot.org/AuthDatabase/PasswdFile
+
+Authentication mechanisms: 网络协议，密码以何种方式传送(明文，或者协议特定编码方式)
+
+Password scheme: 密码在 passdb 中以何种方式编码(明文，DES、MD5、SHA1 等)
+
+Password db: 密码以何种方式保存(关系数据库、LDAP 等)
+
+auth mech 允许的 passwd scheme 对照表：
+
+| auth mech    | passwd scheme       |
+|--------------+---------------------|
+| PLAIN, LOGIN | Any                 |
+| CRAM-MD5     | PLAIN, CRAM-MD5     |
+| DIGEST-MD5   | PLAIN, DIGEST-MD5   |
+| APOP         |                     |
+| NTLM         | PLAIN, NTLM, LANMAN |
+| GSS-SPNEGO   |                     |
+| GSSAPI       |                     |
+| RPA          | PLAIN, RPA          |
+| ANONYMOUS    |                     |
+| OTP          | PLAIN, OTP          |
+| SKEY         | PLAIN, SKEY         |
+| EXTERNAL     |                     |
+
+
+passdb driver 的默认 password scheme 以及允许的 password schemes:
+
+| passdb driver             | default passwd scheme    | allowed other passwd schemes |
+|---------------------------+--------------------------+------------------------------|
+| SQL                       | MD5-CRYPT                | any                          |
+| LDAP                      | CRYPT                    | any                          |
+| PasswordFile              | CRYPT                    | any                          |
+| Passwd,Shadow,VPopMail    | CRYPT                    | none                         |
+| PAM,BSDAuth,CheckPassword | (Dovecot 不直接访问密码)    |                              |
+
+密码保存时可以显式标明是什么 scheme：{SCHEME-NAME}password
+
+DIGEST-MD5 scheme：
+$ echo -n "user:corp.example.com:123456" | md5sum
+e9650e0c2630f58366d6e84df967f957  -
+$ doveadm pw -s digest-md5 -u user@corp.example.com -p 123456
+{DIGEST-MD5}e9650e0c2630f58366d6e84df967f957
+
+注意这里 "corp.example.com" 是 realm，不是 domain，虽然这里把 realm 取成
+跟 domain 一样。另外 htdigest 生成的文件格式是：
+user:corp.example.com:e9650e0c2630f58366d6e84df967f957
+而 dovecot 要求的是下面的一种：
+user@corp.example.com:e9650e0c2630f58366d6e84df967f957
+user@corp.example.com:{DIGEST-MD5}e9650e0c2630f58366d6e84df967f957
+user@corp.example.com:{DIGEST-MD5.HEX}e9650e0c2630f58366d6e84df967f957
+第一种格式要求 passdb 的 args 选项有 scheme=digest-md5 参数。
+
+RoundCube 只支持 DIGEST-MD5, CRAM-MD5, PLAIN, LOGIN 认证方式，
+DIGEST-MD5 最安全(RoundCube 使用的 Auth_SASL 库还支持 Digest-MD5
+的改良版 SCRAM，但 RoundCube 并没用它，而且 Dovecot 也不支持)。
+
+2. Dovecot 的 passdb 和 userdb
+
+passdb 是用来查询密码以验证用户，userdb 是验证通过后查询 user 的 mail
+location 等信息以决定怎么投递邮件或者读取邮件。
+
+3. Dovecot master user
+
+http://wiki2.dovecot.org/Authentication/MasterUsers
+
+两种 master user 登录方式：
+  a. 只有 PLAIN 支持，authentication id = master user, authorization id = real user;
+  b. 用 real_user*master_user 名字登录。
+
+由于选择 digest-md5 作为 RoundCube 和 Dovecot 之间认证方式，
+只能使用第二种 master user 登录方式。
+
+可以用 cyrus-clients-2.4 包的 imtest 或者 gsasl 包的 gsasl 测试：
+

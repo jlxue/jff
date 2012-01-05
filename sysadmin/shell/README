@@ -80,7 +80,18 @@ Optional:
 6.3) Restart apache2 and mailman services.
 
 
-7) Optionally,
+7) Run "htdigest -c tmp_passwdfile corp.example.com webmail", replace
+"webmail:corp.example.com:" in ./tmp_passwdfile with
+"webmail@corp.example.com:{DIGEST-MD5.HEX}", and add this line to /etc/dovecot/master-users.
+
+Change /etc/roundcube/main.inc.php:
+    $rcmail_config['imap_auth_pw'] = null;
+to
+    $rcmail_config['imap_auth_pw'] = 'PASSWORD-FOR-WEBMAIL';
+
+
+
+8) Optionally,
 CONFDIR=`pwd`/etc/exim4 /usr/sbin/update-exim4.conf.template -r
 
 
