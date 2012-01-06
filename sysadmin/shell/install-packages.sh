@@ -46,6 +46,8 @@ i bind9
 i ntp
 i pwgen krb5-admin-server krb5-kdc krb5-user krb5-clients kstart
 i libpam-krb5
+i libverto-libev1   # krb5-kdc depends libverto1 which depends libverto-libev1 | libverto-glib1
+                    # but actually krb5-kdc-1.10+dfsg~alpha2-1 can't start without libverto-libev1
 
 ## OpenSSH
 i openssh-server
