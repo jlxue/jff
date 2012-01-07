@@ -10,7 +10,7 @@ Authentication mechanisms: 网络协议，密码以何种方式传送(明文，�
 
 Password scheme: 密码在 passdb 中以何种方式编码(明文，DES、MD5、SHA1 等)
 
-Password db: 密码以何种方式保存(关系数据库、LDAP 等)
+Password db: 用户和密码以何种方式保存(关系数据库、LDAP 等)
 
 auth mech 允许的 passwd scheme 对照表：
 
@@ -55,7 +55,7 @@ user:corp.example.com:e9650e0c2630f58366d6e84df967f957
 user@corp.example.com:e9650e0c2630f58366d6e84df967f957
 user@corp.example.com:{DIGEST-MD5}e9650e0c2630f58366d6e84df967f957
 user@corp.example.com:{DIGEST-MD5.HEX}e9650e0c2630f58366d6e84df967f957
-第一种格式要求 passdb 的 args 选项有 scheme=digest-md5 参数。
+如果设置了 auth_username_format = %n，那么第一列用户名只能是 user。
 
 RoundCube 只支持 DIGEST-MD5, CRAM-MD5, PLAIN, LOGIN 认证方式，
 DIGEST-MD5 最安全(RoundCube 使用的 Auth_SASL 库还支持 Digest-MD5
@@ -74,8 +74,63 @@ http://wiki2.dovecot.org/Authentication/MasterUsers
   a. 只有 PLAIN 支持，authentication id = master user, authorization id = real user;
   b. 用 real_user*master_user 名字登录。
 
-由于选择 digest-md5 作为 RoundCube 和 Dovecot 之间认证方式，
-只能使用第二种 master user 登录方式。
+本来想用 DIGEST-MD5 作为 master passdb(/etc/dovecot/master-users)
+里密码存储方式以及 master user 认证方式，结果发现很悲剧的是不可能，
+原因是 imap 客户端以 "real_user*master_user:corp.example.com:password"
+计算 hash，而 master passdb 里只能用 "master:corp.example.com:password"
+计算 hash（因为不可能为所有 user*master 组合计算 hash，而且 imap-login
+进程查找 master 用户时是在 master passdb 中找 master 用户名）。
 
-可以用 cyrus-clients-2.4 包的 imtest 或者 gsasl 包的 gsasl 测试：
+用 CRAM-MD5 作为认证方式和密码保存方式是可以的, CRAM-MD5 的密码 hash
+跟用户名和 realm 无关：
+$ doveadm pw -s CRAM-MD5 -u webmail@corp.example.com    # passwd: 123456
+$ cat >>/etc/dovecot/master-users
+webmail:{CRAM-MD5}dd59f669267e9bb13d42a1ba57c972c5b13a4b2ae457c9ada8035dc7d8bae41b
+^D
+$ gsasl --imap imap.corp.example.com --verbose -m CRAM-MD5 \
+    -a 'dieken*webmail@corp.example.com' -p 123456
+
+由于 auth_username_format = %n 的设置，这里 @corp.example.com 都不是必需的。
+
+但是要让这个成功，需要修改一下 Dovecot 2.0 代码，在 src/auth/auth.c
+中的 auth_passdb_list_have_lookup_credentials() 中对 auth->masterdbs
+也遍历一下：
+
+http://hg.dovecot.org/dovecot-2.0/file/684381041dc4/src/auth/auth.c
+    121 static bool auth_passdb_list_have_lookup_credentials(struct auth 
+*auth)
+    122 {
+    123     struct auth_passdb *passdb;
+    124
+    125     for (passdb = auth->passdbs; passdb != NULL; passdb = passdb->next) {
+    126         if (passdb->passdb->iface.lookup_credentials != NULL)
+    127             return TRUE;
+    128     }
+
+            for (passdb = auth->masterdbs; passdb != NULL; passdb = passdb->next) {
+                if (passdb->passdb->iface.lookup_credentials != NULL)
+                    return TRUE;
+            }
+
+    129     return FALSE;
+    130 }
+
+没有这个补丁的话，如果 /etc/dovecot/conf.d/10-auth.conf 中设置了
+auth_mechanisms = gssapi digest-md5 cram-md5， imap-login 进程会
+因为 pam passdb 不支持 DIGEST-MD5 和 CRAM-MD5 而退出：
+DIGEST-MD5 mechanism can't be supported with given passdbs
+或者
+CRAM-MD5 mechanism can't be supported with given passdbs
+
+在 Dovecot 邮件列表问了下，Dovecot 作者 Timo Sirainen 表示“我猜也许可以这样改”。。。
+
+http://hg.dovecot.org/dovecot-2.0/rev/b05793c609ac
+似乎是这次修改忘记了原来其它代码依赖于检查所有 passdb，给 Tim 提了个补丁:
+http://dovecot.org/list/dovecot/2012-January/062966.html
+
+另一个问题是 master passdb 的 "pass" 选项，从配置文件里注释看，
+这只是 master user 认证通过后再判断下 real_user 是否真的存在(不检查
+可能导致 dovecot 创建一个用户)，但 pass=true 时是去查找 passdb 而非
+userdb，查找 PAM passdb 时因为这种 passdb 不支持 lookup_credentials 而失败，
+其实只用 "lookup_username" 成功就可以了，这地方的实现逻辑有点问题。
 
