@@ -1,0 +1,36 @@
+diff -r 38972af8bd29 src/auth/auth.c
+--- a/src/auth/auth.c	Fri Jan 06 16:04:20 2012 +0200
++++ b/src/auth/auth.c	Sat Jan 07 10:26:30 2012 +0800
+@@ -111,6 +111,10 @@
+ {
+ 	struct auth_passdb *passdb;
+ 
++	for (passdb = auth->masterdbs; passdb != NULL; passdb = passdb->next) {
++		if (passdb->passdb->iface.verify_plain != NULL)
++			return TRUE;
++	}
+ 	for (passdb = auth->passdbs; passdb != NULL; passdb = passdb->next) {
+ 		if (passdb->passdb->iface.verify_plain != NULL)
+ 			return TRUE;
+@@ -122,6 +126,10 @@
+ {
+ 	struct auth_passdb *passdb;
+ 
++	for (passdb = auth->masterdbs; passdb != NULL; passdb = passdb->next) {
++		if (passdb->passdb->iface.lookup_credentials != NULL)
++			return TRUE;
++	}
+ 	for (passdb = auth->passdbs; passdb != NULL; passdb = passdb->next) {
+ 		if (passdb->passdb->iface.lookup_credentials != NULL)
+ 			return TRUE;
+@@ -133,6 +141,10 @@
+ {
+ 	struct auth_passdb *passdb;
+ 
++	for (passdb = auth->masterdbs; passdb != NULL; passdb = passdb->next) {
++		if (passdb->passdb->iface.set_credentials != NULL)
++			return TRUE;
++	}
+ 	for (passdb = auth->passdbs; passdb != NULL; passdb = passdb->next) {
+ 		if (passdb->passdb->iface.set_credentials != NULL)
+ 			return TRUE;

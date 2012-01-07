@@ -1,0 +1,43 @@
+diff -r 38972af8bd29 src/auth/auth.c
+--- a/src/auth/auth.c	Fri Jan 06 16:04:20 2012 +0200
++++ b/src/auth/auth.c	Sat Jan 07 10:24:12 2012 +0800
+@@ -69,12 +69,10 @@
+ 		db_count = 0;
+ 	}
+ 
+-	/* initialize passdbs first and count them */
+ 	for (passdb_count = 0, i = 0; i < db_count; i++) {
+ 		if (passdbs[i]->master)
+ 			continue;
+ 
+-		auth_passdb_preinit(auth, passdbs[i], &auth->passdbs);
+ 		passdb_count++;
+ 		last_passdb = i;
+ 	}
+@@ -82,6 +80,8 @@
+ 		i_fatal("Last passdb can't have pass=yes");
+ 
+ 	for (i = 0; i < db_count; i++) {
++		auth_passdb_preinit(auth, passdbs[i], &auth->passdbs);
++
+ 		if (!passdbs[i]->master)
+ 			continue;
+ 
+@@ -190,8 +190,6 @@
+ 	struct auth_passdb *passdb;
+ 	struct auth_userdb *userdb;
+ 
+-	for (passdb = auth->masterdbs; passdb != NULL; passdb = passdb->next)
+-		passdb_init(passdb->passdb);
+ 	for (passdb = auth->passdbs; passdb != NULL; passdb = passdb->next)
+ 		passdb_init(passdb->passdb);
+ 	for (userdb = auth->userdbs; userdb != NULL; userdb = userdb->next)
+@@ -205,8 +203,6 @@
+ 	struct auth_passdb *passdb;
+ 	struct auth_userdb *userdb;
+ 
+-	for (passdb = auth->masterdbs; passdb != NULL; passdb = passdb->next)
+-		passdb_deinit(passdb->passdb);
+ 	for (passdb = auth->passdbs; passdb != NULL; passdb = passdb->next)
+ 		passdb_deinit(passdb->passdb);
+ 	for (userdb = auth->userdbs; userdb != NULL; userdb = userdb->next)

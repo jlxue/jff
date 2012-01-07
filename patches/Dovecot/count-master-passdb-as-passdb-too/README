@@ -1,0 +1,118 @@
+http://dovecot.org/list/dovecot/2012-January/062966.html
+
+
+[Dovecot] Strange error: DIGEST-MD5 mechanism can't be supported with given passdbs
+Yubao Liu yubao.liu at gmail.com
+Sat Jan 7 05:36:27 EET 2012
+
+On 01/07/2012 01:51 AM, Timo Sirainen wrote:
+> On 6.1.2012, at 19.45, Yubao Liu wrote:
+>> On 01/07/2012 12:44 AM, Timo Sirainen wrote:
+>>> On Sat, 2012-01-07 at 00:15 +0800, Yubao Liu wrote:
+>>>> I don't know why this function doesn't check auth->masterdbs, if I
+>>>> insert these lines after line 128, that error goes away, and dovecot's
+>>>> imap-login process happily does DIGEST-MD5 authentication [1].
+>>>> In my configuration, "masterdbs" contains "passdb passwd-file",
+>>>> "passdbs" contains " passdb pam".
+>>> So .. you want DIGEST-MD5 authentication for the master users, but not
+>>> for anyone else? I hadn't really thought anyone would want that..
+>> Is there any special reason that master passdb isn't taken into
+>> account in src/auth/auth.c:auth_passdb_list_have_lookup_credentials() ?
+>> I feel master passdb is also a kind of passdb.
+> I guess it could be changed. It wasn't done intentionally that way.
+>
+I guess this change broke old way:
+http://hg.dovecot.org/dovecot-2.0/rev/b05793c609ac
+
+In old version,  "auth->passdbs" contains all passdbs, this revision
+changes "auth->passdbs" to only contain non-master passdbs.
+
+I'm not sure which fix is better or even my proposal is correct or fully:
+   a) in src/auth/auth.c:auth_passdb_preinit(), insert master passdb to
+       auth->passdbs too,  and remove duplicate code for masterdbs
+       in auth_init() and auth_deinit().
+
+   b) add similar code for masterdbs in 
+auth_passdb_list_have_verify_plain(),
+       auth_passdb_list_have_lookup_credentials(), 
+auth_passdb_list_have_set_credentials().
+>> This is exactly my use case, I use Kerberos for system users,
+>> I'm curious why master passdb isn't used to check "have_lookup_credentials" ability
+>> http://wiki2.dovecot.org/Authentication/MultipleDatabases
+>>> Currently the fallback works only with the PLAIN authentication mechanism.
+>> I hope this limitation can be relaxed.
+> It might already be .. I don't remember. In any case you have only PAM passdb, so it shouldn't matter. GSSAPI isn't a passdb.
+If the fix above is added, then I can use CRAM-MD5 with master 
+passwd-file passdb
+and normal pam passdb, else imap-login process can't startup due to check in
+auth_mech_list_verify_passdb().
+
+Attached two patches against dovecot-2.0 branch for the two schemes,
+the first is cleaner but may affect other logics in other source files.
+
+
+Another related question is "pass" option in master passdb, if I set it 
+to "yes",
+the authentication fails:
+Jan  7 11:26:00 gold dovecot: auth: Debug: client in: 
+AUTH#0111#011CRAM-MD5#011service=imap#011secured#011lip=127.0.1.1#011rip=127.0.0.1#011lport=143#011rport=51771
+Jan  7 11:26:00 gold dovecot: auth: Debug: client out: 
+CONT#0111#011PDk4NjcwMDY1MTU3NzI3MjguMTMyNTkwNjc2MEBnb2xkPg==
+Jan  7 11:26:00 gold dovecot: auth: Debug: client in: 
+CONT#0111#011ZGlla2VuKndlYm1haWwgYmNkMzFiMWE1YjQ1OWQ0OGRkZWQ4ZmIzZDhmMjVhZTc=
+Jan  7 11:26:00 gold dovecot: auth: Debug: 
+auth(webmail,127.0.0.1,master): Master user lookup for login: dieken
+Jan  7 11:26:00 gold dovecot: auth: Debug: 
+passwd-file(webmail,127.0.0.1,master): lookup: user=webmail 
+file=/etc/dovecot/master-users
+Jan  7 11:26:00 gold dovecot: auth: passdb(webmail,127.0.0.1,master): 
+Master user logging in as dieken
+Jan  7 11:26:00 gold dovecot: auth: Error: passdb(dieken,127.0.0.1): No 
+passdbs support skipping password verification - pass=yes can't be used 
+in master passdb
+Jan  7 11:26:00 gold dovecot: auth: Debug: password(dieken,127.0.0.1): 
+passdb doesn't support credential lookups
+
+My normal passdb is a PAM passdb,  it doesn't support credential 
+lookups, that's
+reasonable, but I feel the comment for "pass" option is confusing:
+
+$ less /etc/dovecot/conf.d/auth-master.conf.ext
+....
+# Example master user passdb using passwd-file. You can use any passdb 
+though.
+passdb {
+   driver = passwd-file
+   master = yes
+   args = /etc/dovecot/master-users
+
+   # Unless you're using PAM, you probably still want the destination 
+user to
+   # be looked up from passdb that it really exists. pass=yes does that.
+   pass = yes
+}
+
+According the comment, it's to check whether the real user exists, why not
+to check userdb but another passdb? Even it must check against passdb,
+in this case, it's obvious not necessary to lookup credentials, it's 
+enough to
+to lookup user name only.
+
+Regards,
+Yubao Liu
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: schemeA-count-master-passdb-as-passdb-too.patch
+Type: text/x-patch
+Size: 1357 bytes
+Desc: not available
+URL: <http://dovecot.org/pipermail/dovecot/attachments/20120107/bdf891a0/attachment.bin>
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: schemeB-also-check-against-master-passdbs.patch
+Type: text/x-patch
+Size: 1187 bytes
+Desc: not available
+URL: <http://dovecot.org/pipermail/dovecot/attachments/20120107/bdf891a0/attachment-0001.bin>
+
