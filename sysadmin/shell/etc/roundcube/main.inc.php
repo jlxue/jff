@@ -76,7 +76,7 @@ $rcmail_config['default_port'] = 143;
 
 // IMAP AUTH type (DIGEST-MD5, CRAM-MD5, LOGIN, PLAIN or empty to use
 // best server supported one)
-$rcmail_config['imap_auth_type'] = 'DIGEST-MD5';
+$rcmail_config['imap_auth_type'] = 'CRAM-MD5';
 
 // If you know your imap's folder delimiter, you can specify it here.
 // Otherwise it will be determined automatically
@@ -107,10 +107,10 @@ $rcmail_config['imap_force_lsub'] = false;
 $rcmail_config['imap_timeout'] = 10;
 
 // Optional IMAP authentication identifier to be used as authorization proxy
-$rcmail_config['imap_auth_cid'] = null;
+$rcmail_config['imap_auth_cid'] = 'webmail';
 
 // Optional IMAP authentication password to be used for imap_auth_cid
-$rcmail_config['imap_auth_pw'] = null;
+$rcmail_config['imap_auth_pw'] = '@@IMAP_AUTH_PW@@';
 
 // Type of IMAP indexes cache. Supported values: 'db', 'apc' and 'memcache'.
 $rcmail_config['imap_cache'] = null;
@@ -265,7 +265,7 @@ $rcmail_config['username_domain'] = '';
 // %d - domain (http hostname without the first part)
 // %z - IMAP domain (IMAP hostname without the first part)
 // For example %n = mail.domain.tld, %d = domain.tld
-$rcmail_config['mail_domain'] = '';
+$rcmail_config['mail_domain'] = 'corp.example.com';
 
 // Password charset.
 // Use it if your authentication backend doesn't support UTF-8.
@@ -355,7 +355,7 @@ $rcmail_config['email_dns_check'] = false;
 // ----------------------------------
 
 // List of active plugins (in plugins/ directory)
-$rcmail_config['plugins'] = array();
+$rcmail_config['plugins'] = array('http_auth_autologin');
 
 // ----------------------------------
 // USER INTERFACE
