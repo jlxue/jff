@@ -1,4 +1,4 @@
-RoundCube 的配置
+RoundCube 的配置，与 Dovecot 的斗争
 
 1. Dovecot 认证机制和密码存储方案
 
@@ -203,4 +203,39 @@ print "a1_hex=$a1_hex, a2_hex=$a2_hex, response=",
 用户名错了(比如加了 @xxx 或者没加，以及 MUA 不识别
 * 记号) 或者 realm 错了(没指定或者应该为空)，这时就
 可以用上面的代码验证下。
+
+
+5. RoundCube 对 SSO 的支持
+
+RoundCube 并没有直接提供单点登录支持，有两种方式解决：
+
+(1) 利用 Apache + mod_auth_kerb 的 KrbSaveCrendentials
+特性，把 client 的 kerberos ticket 保存到 Apache 所在
+服务器上，然后 RoundCube 可以用这个 ticket 向 Dovecot
+做 gssapi 认证，但是这个做法问题很大。
+
+首先，Firefox里不仅要设置 network.negotiate-auth.trusted-uris 以支持
+GSS SPNEGO 认证，而且要设置 network.negotiate-auth.delegation-uris
+以允许将 ticket 传给 Apache。
+
+其次，为了安全起见，mod_auth_kerb 在每一个请求处理前把
+ticket 写入一个临时文件并设置 KRB5CCNAME 环境变量，在
+请求处理完后删除这个临时文件，这导致效率非常低下。
+
+第三，这个 ticket 传给 Apache 后，webapp 就能代表用户
+做任意 gssapi 认证，比如登录 ssh，这个风险实在太大了。
+
+
+(2) 利用 Apache + mod_auth_kerb 做 GSS SPNEGO 认证，
+Apache 会设置 REMOTE_USER 环境变量，给 RoundCube
+做一个插件，让其使用 master 用户以 REMOTE_USER 身份
+登录 Dovecot。如果修改其 DIGEST-MD5 代码使其识别
+Dovecot master user，那就更完美了，否则只能使用
+CRAM-MD5, PLAIN, LOGIN。
+
+
+这个办法问题是一旦 RoundCube 有安全问题导致 master
+password 泄漏，那么所有人的邮件都暴露了。但总之比
+第一种的安全风险小的多，我也没想到什么其它办法既能
+避免用户输入密码，又能不使用 master 用户的技巧。
 
