@@ -57,8 +57,8 @@ cmp_file $SCRIPT_DIR/etc/dbconfig-common/roundcube.conf /etc/dbconfig-common/rou
     CONF_CHANGED=1
 }
 
-cmp_dir $SCRIPT_DIR/etc/roundcube /etc/roundcube || {
-    overwrite_dir $SCRIPT_DIR/etc/roundcube /etc/roundcube
+cmp_dir $SCRIPT_DIR/etc/roundcube /etc/roundcube --exclude http_auth_autologin || {
+    overwrite_dir $SCRIPT_DIR/etc/roundcube /etc/roundcube --exclude http_auth_autologin
     CONF_CHANGED=1
 }
 
