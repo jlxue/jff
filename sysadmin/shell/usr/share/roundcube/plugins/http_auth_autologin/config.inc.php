@@ -1,0 +1,1 @@
+/etc/roundcube/plugins/http_auth_autologin/config.inc.php
