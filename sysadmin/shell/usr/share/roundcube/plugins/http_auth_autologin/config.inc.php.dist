@@ -1,0 +1,16 @@
+<?php
+
+# Dovecot's master user feature, set to empty or NULL
+# to not use "user*master" auth style.
+$rcmail_config['imap_auth_master_user_separator'] = '*';
+
+# Not use imap_auth_cid and imap_auth_pw because Dovecot's
+# "user*master" auth style isn't SASL proxy authorization,
+# although RoundCube doesn't use SASL proxy authorization for
+# CRAM-MD5, it may enhance it in the future.
+#
+# RoundCube supports SASL proxy authorization for Digest-MD5,
+# but Dovecot only supports SASL proxy authorization for PLAIN.
+$rcmail_config['imap_auth_master_user_name'] = 'webmail';
+$rcmail_config['imap_auth_master_password'] = '@@IMAP_AUTH_MASTER_PASSWORD@@';
+

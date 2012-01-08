@@ -107,10 +107,10 @@ $rcmail_config['imap_force_lsub'] = false;
 $rcmail_config['imap_timeout'] = 10;
 
 // Optional IMAP authentication identifier to be used as authorization proxy
-$rcmail_config['imap_auth_cid'] = 'webmail';
+$rcmail_config['imap_auth_cid'] = null;
 
 // Optional IMAP authentication password to be used for imap_auth_cid
-$rcmail_config['imap_auth_pw'] = '@@IMAP_AUTH_PW@@';
+$rcmail_config['imap_auth_pw'] = null;
 
 // Type of IMAP indexes cache. Supported values: 'db', 'apc' and 'memcache'.
 $rcmail_config['imap_cache'] = null;

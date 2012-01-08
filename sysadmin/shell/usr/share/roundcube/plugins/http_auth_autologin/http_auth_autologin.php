@@ -27,7 +27,7 @@ class http_auth_autologin extends rcube_plugin
             $this->add_hook('startup', array($this, 'startup'));
             $this->add_hook('authenticate', array($this, 'authenticate'));
 
-            if ($rcmail->config->get('auth_master_user_separator')) {
+            if ($rcmail->config->get('imap_auth_master_user_separator')) {
                 $this->add_hook('user_create', array($this, 'user_create'));
             }
         }
@@ -59,16 +59,16 @@ class http_auth_autologin extends rcube_plugin
             }
 
             # Dovecot's master user feature
-            $separator = $rcmail->config->get('auth_master_user_separator');
+            $separator = $rcmail->config->get('imap_auth_master_user_separator');
             if ($separator) {
-                $imap_auth_cid = $rcmail->config->get('imap_auth_cid');
-                if ($imap_auth_cid) {
+                $master_user = $rcmail->config->get('imap_auth_master_user_name');
+                if ($master_user) {
                     # For dovecot master user
-                    $args['user'] .= $separator . $imap_auth_cid;
+                    $args['user'] .= $separator . $master_user;
                 }
             }
 
-            $args['pass'] = $rcmail->config->get('imap_auth_pw');
+            $args['pass'] = $rcmail->config->get('imap_auth_master_password');
 
             $args['cookiecheck'] = false;
             $args['valid'] = true;
@@ -81,7 +81,7 @@ class http_auth_autologin extends rcube_plugin
     {
         $rcmail = rcmail::get_instance();
         $mail_domain = $rcmail->config->get('mail_domain');
-        $separator = $rcmail->config->get('auth_master_user_separator');
+        $separator = $rcmail->config->get('imap_auth_master_user_separator');
 
         $pos = strpos($args['user'], $separator);
         if ($pos === false) {
