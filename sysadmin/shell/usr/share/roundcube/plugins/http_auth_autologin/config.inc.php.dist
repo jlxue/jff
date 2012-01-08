@@ -11,6 +11,6 @@ $rcmail_config['imap_auth_master_user_separator'] = '*';
 #
 # RoundCube supports SASL proxy authorization for Digest-MD5,
 # but Dovecot only supports SASL proxy authorization for PLAIN.
-$rcmail_config['imap_auth_master_user_name'] = 'webmail';
+$rcmail_config['imap_auth_master_username'] = 'webmail';
 $rcmail_config['imap_auth_master_password'] = '@@IMAP_AUTH_MASTER_PASSWORD@@';
 

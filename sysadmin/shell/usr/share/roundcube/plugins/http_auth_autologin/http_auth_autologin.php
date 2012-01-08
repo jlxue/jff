@@ -61,7 +61,7 @@ class http_auth_autologin extends rcube_plugin
             # Dovecot's master user feature
             $separator = $rcmail->config->get('imap_auth_master_user_separator');
             if ($separator) {
-                $master_user = $rcmail->config->get('imap_auth_master_user_name');
+                $master_user = $rcmail->config->get('imap_auth_master_username');
                 if ($master_user) {
                     # For dovecot master user
                     $args['user'] .= $separator . $master_user;
