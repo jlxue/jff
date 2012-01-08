@@ -68,7 +68,7 @@ class http_auth_autologin extends rcube_plugin
                 }
             }
 
-            $args['pass'] .= $rcmail->config->get('imap_auth_pw');
+            $args['pass'] = $rcmail->config->get('imap_auth_pw');
 
             $args['cookiecheck'] = false;
             $args['valid'] = true;
