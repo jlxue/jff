@@ -39,10 +39,10 @@ $rcmail_config['syslog_facility'] = LOG_USER;
 $rcmail_config['smtp_log'] = true;
 
 // Log successful logins to <log_dir>/userlogins or to syslog
-$rcmail_config['log_logins'] = false;
+$rcmail_config['log_logins'] = true;
 
 // Log session authentication errors to <log_dir>/session or to syslog
-$rcmail_config['log_session'] = false;
+$rcmail_config['log_session'] = true;
 
 // Log SQL queries to <log_dir>/sql or to syslog
 $rcmail_config['sql_debug'] = false;
