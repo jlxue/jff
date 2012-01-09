@@ -53,7 +53,7 @@ i libverto-libev1   # krb5-kdc depends libverto1 which depends libverto-libev1 |
 i openssh-server
 
 ## ldap
-i slapd ldap-utils libsasl2-modules-gssapi-mit
+i slapd ldap-utils libsasl2-modules-gssapi-mit sasl2-bin
 i libpam-ccreds libnss-ldapd nscd nss-updatedb
 
 # other nss cache schemes: nsscache sssd
