@@ -355,10 +355,20 @@ $rcmail_config['email_dns_check'] = false;
 // ----------------------------------
 
 // List of active plugins (in plugins/ directory)
-$rcmail_config['plugins'] = array('http_auth_autologin', 'contextmenu',
-    'compose_addressbook', 'copymessage', 'keyboard_shortcuts', 'listcommands',
-    'managesieve', 'message_highlight', 'quickrules', 'sieverules',
-    'vcard_attachments', 'zipdownload');
+$rcmail_config['plugins'] = array(
+    'http_auth_autologin',
+    'contextmenu',
+    'compose_addressbook',
+    'copymessage',          # requires contextmenu
+    'jqueryui',
+    'keyboard_shortcuts',   # requires jqueryui, but <= 0.4 doesn't call require_plugin()
+    'listcommands',
+    #'managesieve',          # conflicts with sieverules because they contain duplicate files
+    'message_highlight',
+    'quickrules',           # requires sieverules
+    'sieverules',           # requires jqueryui
+    'vcard_attachments',
+    'zipdownload');
 
 // ----------------------------------
 // USER INTERFACE
