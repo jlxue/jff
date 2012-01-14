@@ -7,6 +7,7 @@
  * Reference:
  *  autologon plugin
  *  http_authentication plugin
+ *  dovecot_impersonate plugin
  *  https://github.com/aimxhaisse/roundcube-mod-auth-openid
  *  http://trac.roundcube.net/ticket/1486689
  *

@@ -355,7 +355,10 @@ $rcmail_config['email_dns_check'] = false;
 // ----------------------------------
 
 // List of active plugins (in plugins/ directory)
-$rcmail_config['plugins'] = array('http_auth_autologin');
+$rcmail_config['plugins'] = array('http_auth_autologin', 'contextmenu',
+    'compose_addressbook', 'copymessage', 'keyboard_shortcuts', 'listcommands',
+    'managesieve', 'message_highlight', 'quickrules', 'sieverules',
+    'vcard_attachments', 'zipdownload');
 
 // ----------------------------------
 // USER INTERFACE
