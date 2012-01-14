@@ -30,6 +30,7 @@ class http_auth_autologin extends rcube_plugin
 
             if ($rcmail->config->get('imap_auth_master_user_separator')) {
                 $this->add_hook('user_create', array($this, 'user_create'));
+                $this->add_hook('sieverules_connect', array($this, 'sieverules_connect'));
             }
         }
     }
@@ -95,6 +96,26 @@ class http_auth_autologin extends rcube_plugin
 
         if ($mail_domain) {
             $args['user_email'] = $user . '@' . $mail_domain;
+        }
+
+        return $args;
+    }
+
+    function sieverules_connect($args)
+    {
+        $rcmail = rcmail::get_instance();
+        $master_user = $rcmail->config->get('imap_auth_master_username');
+        $separator = $rcmail->config->get('imap_auth_master_user_separator');
+
+        # XXX: this is not tested, because I prefer the DIGEST-MD5 SASL
+        # proxy authorization scheme. And if authenticate() sets  $_SESSION
+        # properly, maybe this function isn't required at all.
+        if ($master_user) {
+            # For dovecot master user
+            $args['username'] .= $separator . $master_user;
+            $args['password'] = $rcmail->config->get('imap_auth_master_password');
+            $args['auth_cid'] = null;
+            $args['auth_pw'] = null;
         }
 
         return $args;
