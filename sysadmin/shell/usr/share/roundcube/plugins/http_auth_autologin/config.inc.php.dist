@@ -1,8 +1,9 @@
 <?php
 
 # Dovecot's master user feature, set to empty or NULL
-# to not use "user*master" auth style.
-$rcmail_config['imap_auth_master_user_separator'] = '*';
+# to not use "user*master" auth style, set to value of Dovecot's
+# auth_master_user_sepatator option such as '*' to enable it.
+$rcmail_config['imap_auth_master_user_separator'] = null;
 
 # Not use imap_auth_cid and imap_auth_pw because Dovecot's
 # "user*master" auth style isn't SASL proxy authorization,

@@ -13,15 +13,15 @@ $rcmail_config['managesieve_host'] = '%h';
 
 // authentication method. Can be CRAM-MD5, DIGEST-MD5, PLAIN, LOGIN, EXTERNAL
 // or none. Optional, defaults to best method supported by server.
-$rcmail_config['managesieve_auth_type'] = 'CRAM-MD5';
+$rcmail_config['managesieve_auth_type'] = 'DIGEST-MD5';
 
 // Optional managesieve authentication identifier to be used as authorization proxy.
 // Authenticate as a different user but act on behalf of the logged in user.
 // Works with PLAIN and DIGEST-MD5 auth.
-$rcmail_config['managesieve_auth_cid'] = null;
+$rcmail_config['managesieve_auth_cid'] = 'webmail';
 
 // Optional managesieve authentication password to be used for imap_auth_cid
-$rcmail_config['managesieve_auth_pw'] = null;
+$rcmail_config['managesieve_auth_pw'] = '@@MANAGESIEVE_AUTH_PW@@';
 
 // use or not TLS for managesieve server connection
 // it's because I've problems with TLS and dovecot's managesieve plugin

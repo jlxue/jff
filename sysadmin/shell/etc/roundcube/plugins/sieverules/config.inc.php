@@ -20,15 +20,15 @@ $rcmail_config['sieverules_debug'] = false;
 
 // authentication method. Can be CRAM-MD5, DIGEST-MD5, PLAIN, LOGIN, EXTERNAL
 // or none. Optional, defaults to best method supported by server.
-$rcmail_config['sieverules_auth_type'] = 'CRAM-MD5';
+$rcmail_config['sieverules_auth_type'] = 'DIGEST-MD5';
 
 // optional managesieve authentication identifier to be used as authorization proxy,
 // authenticate as a different user but act on behalf of the logged in user,
 // works with PLAIN and DIGEST-MD5 auth.
-$rcmail_config['sieverules_auth_cid'] = null;
+$rcmail_config['sieverules_auth_cid'] = 'webmail';
 
 // optional managesieve authentication password to be used for sieverules_auth_cid
-$rcmail_config['sieverules_auth_pw'] = null;
+$rcmail_config['sieverules_auth_pw'] = '@@SIEVERULES_AUTH_PW@@';
 
 // enable TLS for managesieve server connection
 $rcmail_config['sieverules_usetls'] = true;
