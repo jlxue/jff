@@ -10,17 +10,17 @@
 // %n - http hostname ($_SERVER['SERVER_NAME'])
 // %d - domain (http hostname without the first part)
 // For example %n = mail.domain.tld, %d = domain.tld
-$rcmail_config['sieverules_host'] = 'localhost';
+$rcmail_config['sieverules_host'] = '%h';
 
 // managesieve server port
-$rcmail_config['sieverules_port'] = 2000;
+$rcmail_config['sieverules_port'] = 4190;
 
 // Log managesieve conversation to <log_dir>/sieverules or to syslog
 $rcmail_config['sieverules_debug'] = false;
 
 // authentication method. Can be CRAM-MD5, DIGEST-MD5, PLAIN, LOGIN, EXTERNAL
 // or none. Optional, defaults to best method supported by server.
-$rcmail_config['sieverules_auth_type'] = null;
+$rcmail_config['sieverules_auth_type'] = 'CRAM-MD5';
 
 // optional managesieve authentication identifier to be used as authorization proxy,
 // authenticate as a different user but act on behalf of the logged in user,
@@ -31,7 +31,7 @@ $rcmail_config['sieverules_auth_cid'] = null;
 $rcmail_config['sieverules_auth_pw'] = null;
 
 // enable TLS for managesieve server connection
-$rcmail_config['sieverules_usetls'] = FALSE;
+$rcmail_config['sieverules_usetls'] = true;
 
 // folder delimiter - if your sieve system uses a different folder delimiter to
 // your IMAP server set it here, otherwise leave as null to use IMAP delimiter
@@ -55,26 +55,26 @@ $rcmail_config['sieverules_multiple_actions'] = TRUE;
 
 // allowed actions
 $rcmail_config['sieverules_allowed_actions'] = array(
-											'fileinto' => TRUE,
-											'vacation' => TRUE,
-											'reject' => TRUE,
-											'redirect' => TRUE,
-											'keep' => TRUE,
-											'discard' => TRUE,
-											'imapflags' => TRUE,
-											'notify' => TRUE,
-											'stop' => TRUE
-											);
+    'fileinto' => TRUE,
+    'vacation' => TRUE,
+    'reject' => TRUE,
+    'redirect' => TRUE,
+    'keep' => TRUE,
+    'discard' => TRUE,
+    'imapflags' => TRUE,
+    'notify' => TRUE,
+    'stop' => TRUE
+);
 
 // headers listed as examples of "Other headers"
 $rcmail_config['sieverules_other_headers'] = array(
-											'Reply-To', 'List-Id', 'MailingList', 'Mailing-List',
-											'X-ML-Name', 'X-List', 'X-List-Name', 'X-Mailing-List',
-											'Resent-From', 'Resent-To', 'X-Mailer', 'X-MailingList',
-											'X-Spam-Status', 'X-Priority', 'Importance', 'X-MSMail-Priority',
-											'Precedence', 'Return-Path', 'Received', 'Auto-Submitted',
-											'X-Spam-Flag', 'X-Spam-Tests', 'Sender',
-											);
+    'Reply-To', 'List-Id', 'MailingList', 'Mailing-List',
+    'X-ML-Name', 'X-List', 'X-List-Name', 'X-Mailing-List',
+    'Resent-From', 'Resent-To', 'X-Mailer', 'X-MailingList',
+    'X-Spam-Status', 'X-Priority', 'Importance', 'X-MSMail-Priority',
+    'Precedence', 'Return-Path', 'Received', 'Auto-Submitted',
+    'X-Spam-Flag', 'X-Spam-Tests', 'Sender',
+);
 
 // Predefined rules
 // each rule should be in it own array - examples provided in README
@@ -91,7 +91,7 @@ $rcmail_config['sieverules_predefined_rules'] = array();
 // 0 - Disabled, option not shown in the UI
 // 1 - Enabled, option shown in the UI
 // 2 - Option shown in the UI and used by default
-$rcmail_config['sieverules_adveditor'] = 0;
+$rcmail_config['sieverules_adveditor'] = 1;
 
 // Allow users to use multiple rulesets
 $rcmail_config['sieverules_multiplerules'] = FALSE;
@@ -100,7 +100,7 @@ $rcmail_config['sieverules_multiplerules'] = FALSE;
 $rcmail_config['sieverules_default_file'] = '/etc/dovecot/sieve/default';
 
 // Auto load default sieve rule file if no rules exist and no import filters match
-$rcmail_config['sieverules_auto_load_default'] = FALSE;
+$rcmail_config['sieverules_auto_load_default'] = TRUE;
 
 // Example sieve rule file
 $rcmail_config['sieverules_example_file'] = '/etc/dovecot/sieve/example';
@@ -131,9 +131,8 @@ $rcmail_config['sieverules_use_elsif'] = TRUE;
 // 0 - List only subscribed folders
 // 1 - List subscribed and unsubscribed folders
 // 2 - List subscribed and unsubscribed folders and allow users to enter a folder name (for advanced users only, requires sieve mailbox extension)
-$rcmail_config['sieverules_fileinto_options'] = 0;
+$rcmail_config['sieverules_fileinto_options'] = 1;
 
 // For information on customising the rule file see "The structure of the rule file" in the README
 // For information on customising the contents of the drop downs see "Default values for header, operator and flag drop downs" in the README
 
-?>
