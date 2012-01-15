@@ -132,6 +132,10 @@ i roundcube roundcube-plugins roundcube-plugins-extra
 #i sympa
 i mailman
 
+# calendar service
+i calendarserver
+#i radicale
+
 ###########################################################
 APT_LISTBUGS_FRONTEND=none
 APT_LISTCHANGES_FRONTEND=none
