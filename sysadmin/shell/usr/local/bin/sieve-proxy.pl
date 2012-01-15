@@ -6,6 +6,8 @@ use AnyEvent::Handle;
 use AnyEvent::Socket;
 use Authen::SASL;
 use Getopt::Long;
+use MIME::Base64;
+use Socket qw(:DEFAULT :crlf);
 
 # Reference: sieve-connect libnet-managesieve-perl libnet-sieve-perl
 
@@ -83,6 +85,44 @@ sub accept_cb {
                     $sieveclient->push_write($hdl->{rbuf});
                     $hdl->{rbuf} = '';
                 });
+
+            my $expect_end_of_server_announce;
+            $expect_end_of_server_announce = sub {
+                my ($handle, $line) = @_;
+
+                AE::log debug => "[sieve client] $line";
+
+                if ($line =~ /^OK\s/) {
+                    $handle->stop_read();
+
+                    my $sasl = Authen::SASL->new(
+                        mechansim   => "GSSAPI",
+                        debug       => 15,
+                    );
+                    die "SASL object creation failed: $!\n" unless defined $sasl;
+
+                    my $saslclient = $sasl->client_new("sieve", $g_sieve_server, "noanonymous noplaintext");
+                    die "SASL client object creation failed: $!\n" unless defined $saslclient;
+
+                    #$saslclient->property(realm => "corp.example.com");
+                    #$saslclient->property(externalssf => 56);
+
+                    my $sasl_tosend = $saslclient->client_start();
+                    if ($saslclient->code()) {
+                        die "SASL error: " . $saslclient->error();
+                    }
+                } else {
+                    if ($line eq '"STARTTLS"') {
+                        AE::log info => "[sieve client] discard STARTTLS from sieve server";
+                    } else {
+                        $proxyclient->push_write($line . CRLF);
+                    }
+
+                    $handle->push_read(line => $expect_end_of_server_announce);
+                }
+            };
+
+            $handle->push_read(line => $expect_end_of_server_announce);
         },
 
         on_connect_error    => sub {

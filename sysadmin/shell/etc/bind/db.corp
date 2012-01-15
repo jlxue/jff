@@ -37,3 +37,5 @@ _kpasswd._tcp		SRV	0 0 464 gold
 
 _ldap._tcp		SRV	0 0 389 gold
 
+_sieve._tcp		SRV	0 0 4190 gold
+

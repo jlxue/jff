@@ -101,6 +101,7 @@ ensure_service_principal smtp/$hostname /etc/smtp.keytab
 ensure_service_principal smtp/$hostname /etc/dovecot.keytab
 
 ensure_service_principal imap/$hostname /etc/dovecot.keytab
+ensure_service_principal sieve/$hostname /etc/dovecot.keytab
 
 
 ensure_mode_user_group /etc/slapd.keytab        600 openldap openldap
