@@ -133,8 +133,9 @@ i roundcube roundcube-plugins roundcube-plugins-extra
 i mailman
 
 # calendar service
-i calendarserver
+#   "radicale" is funny but not powerful enough
 #i radicale
+i calendarserver
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none
