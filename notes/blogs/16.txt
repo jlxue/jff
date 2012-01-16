@@ -1,0 +1,34 @@
+RoundCube 的配置(续)
+
+Dovecot 的 master user 支持两种方式登录为其它用户：
+
+    Proxy SASL authorization，只有 PLAIN 认证机制支持；
+    user*master 作为用户名，密码为 master 的密码，PLAIN 和 CRAM-MD5 认证方式支持，DIGEST-MD5 不支持。
+
+让 RoundCube 使用第二种方式，CRAM-MD5 认证，可以成功登录，但是需要对 authenticate hook 做点手脚，避免 RoundCube 把用户识别为 user*master，而非 user。这样做是可以，但我有点洁癖，老觉得这样不爽，于是凭这几天调试 Dovecot DIGEST-MD5 认证的经验，给 Dovecot 加了 DIGEST-MD5 的 proxy SASL 授权支持：http://dovecot.org/list/dovecot/2012-January/063120.html ，于是 IMAP 以及 ManageSieve 登录都不用操心了，RoundCube 支持 DIGEST-MD5 proxy SASL authorization。
+
+在配置 RoundCube 过程中出现一个很奇怪的问题，RoundCube 老提示访问服务器被拒绝，Apache error log 里显示：
+
+[error] [client 127.0.0.1] client denied by server configuration: /var/lib/roundcube/
+
+开始以为是给 RoundCube 配置的 VirtualHost 有问题，然后怀疑是 RoundCube 代码，最后逐一排查 Apache 安全相关的模块，发现是默认配置的 mod-evasive 搞的鬼……
+
+最后给 RoundCube 配置了一些插件：
+
+$rcmail_config['plugins'] = array(
+    'http_auth_autologin',
+    'contextmenu',
+    'compose_addressbook',
+    'copymessage', # requires contextmenu
+    'jqueryui',
+    'keyboard_shortcuts', # requires jqueryui, but <= 0.4 doesn't call require_plugin()
+    'listcommands',
+    #'managesieve', # conflicts with sieverules because they contain duplicate files
+    'message_highlight',
+    'quickrules', # requires sieverules
+    'sieverules', # requires jqueryui
+    'vcard_attachments',
+    'zipdownload');
+
+Sieve 插件用了 SieveRules，它似乎是在 ManageSieve 插件基础上增强的。
+
