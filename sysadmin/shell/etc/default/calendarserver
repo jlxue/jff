@@ -2,7 +2,7 @@
 # This is a POSIX shell fragment
 
 # uncomment to start calendarserver on system startup
-#start_calendarserver=yes
+start_calendarserver=yes
 
 # options to pass to calendarserver on startup
 #DAEMON_OPTS=""

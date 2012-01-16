@@ -125,6 +125,7 @@
       -->
 
     <!-- XML File Directory Service -->
+    <!--
     <key>DirectoryService</key>
     <dict>
       <key>type</key>
@@ -136,6 +137,7 @@
         <string>/etc/caldavd/accounts.xml</string>
       </dict>
     </dict>
+    -->
     
     <!-- Open Directory Service (Mac OS X) -->
     <!--
@@ -319,7 +321,7 @@
 
     <!-- Anonymous read access for root resource -->
     <key>EnableAnonymousReadRoot</key>
-    <true/>
+    <false/>
 
     <!-- Anonymous read access for resource hierarchy -->
     <key>EnableAnonymousReadNav</key>
@@ -352,7 +354,7 @@
       <key>Digest</key>
       <dict>
         <key>Enabled</key>
-        <true/>
+        <false/>
         <key>Algorithm</key>
         <string>md5</string>
         <key>Qop</key>
@@ -365,7 +367,7 @@
         <key>Enabled</key>
         <true/>
         <key>ServicePrincipal</key>
-        <string></string>
+        <string>HTTP/gold.corp.example.com@CORP.EXAMPLE.COM</string>
       </dict>
 
     </dict>
@@ -612,7 +614,7 @@
     <key>Memcached</key>
     <dict>
       <key>ServerEnabled</key>
-      <false/>
+      <true/>
     </dict>
 
   </dict>

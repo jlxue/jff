@@ -46,6 +46,7 @@ smtp.sh
 apache.sh
 mailman.sh
 roundcube.sh
+calendar.sh
 END`
 
 for f in $SCRIPTS; do
