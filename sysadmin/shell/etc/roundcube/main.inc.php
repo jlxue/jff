@@ -5,7 +5,7 @@
 | Main configuration file                                               |
 |                                                                       |
 | This file is part of the Roundcube Webmail client                     |
-| Copyright (C) 2005-2010, The Roundcube Dev Team                       |
+| Copyright (C) 2005-2011, The Roundcube Dev Team                       |
 | Licensed under the GNU GPL                                            |
 |                                                                       |
 +-----------------------------------------------------------------------+
@@ -222,6 +222,9 @@ $rcmail_config['session_lifetime'] = 10;
 // session domain: .example.org
 $rcmail_config['session_domain'] = '';
 
+// session name. Default: 'roundcube_sessid'
+$rcmail_config['session_name'] = null;
+
 // Backend to use for session storage. Can either be 'db' (default) or 'memcache'
 // If set to memcache, a list of servers need to be specified in 'memcache_hosts'
 // Make sure the Memcache extension (http://pecl.php.net/package/memcache) version >= 2.0.0 is installed
@@ -382,25 +385,30 @@ $rcmail_config['message_sort_col'] = '';
 $rcmail_config['message_sort_order'] = 'DESC';
 
 // These cols are shown in the message list. Available cols are:
-// subject, from, to, cc, replyto, date, size, status, flag, attachment
+// subject, from, to, cc, replyto, date, size, status, flag, attachment, 'priority'
 $rcmail_config['list_cols'] = array('subject', 'status', 'from', 'date', 'size', 'flag', 'attachment');
 
 // the default locale setting (leave empty for auto-detection)
 // RFC1766 formatted language name like en_US, de_DE, de_CH, fr_FR, pt_BR
 $rcmail_config['language'] = 'en_US';
 
-// use this format for short date display (date or strftime format)
+// use this format for date display (date or strftime format)
+$rcmail_config['date_format'] = 'Y-m-d';
+
+// give this choice of date formats to the user to select from
+$rcmail_config['date_formats'] = array('Y-m-d', 'd-m-Y', 'Y/m/d', 'm/d/Y', 'd/m/Y', 'd.m.Y', 'j.n.Y');
+
+// use this format for time display (date or strftime format)
+$rcmail_config['time_format'] = 'H:i';
+
+// give this choice of time formats to the user to select from
+$rcmail_config['time_formats'] = array('G:i', 'H:i', 'g:i a', 'h:i A');
+
+// use this format for short date display (derived from date_format and time_format)
 $rcmail_config['date_short'] = 'D H:i';
 
-// use this format for detailed date/time formatting (date or strftime format)
-$rcmail_config['date_long'] = 'd.m.Y H:i';
-
-// use this format for today's date display (date or strftime format)
-// Note: $ character will be replaced with 'Today' label
-$rcmail_config['date_today'] = 'H:i';
-
-// use this format for date display without time (date or strftime format)
-$rcmail_config['date_format'] = 'Y-m-d';
+// use this format for detailed date/time formatting (derived from date_format and time_format)
+$rcmail_config['date_long'] = 'Y-m-d H:i';
 
 // store draft message is this mailbox
 // leave blank if draft messages should not be stored
@@ -426,7 +434,7 @@ $rcmail_config['trash_mbox'] = 'Trash';
 // NOTE: Use folder names with namespace prefix (INBOX. on Courier-IMAP)
 $rcmail_config['default_imap_folders'] = array('INBOX', 'Drafts', 'Sent', 'Junk', 'Trash');
 
-// automatically create the above listed default folders on login
+// automatically create the above listed default folders on first login
 $rcmail_config['create_default_folders'] = false;
 
 // protect the default folders from renames, deletes, and subscription changes
@@ -439,6 +447,10 @@ $rcmail_config['quota_zero_as_unlimited'] = false;
 // Since Google only accepts connections over https your PHP installatation
 // requires to be compiled with Open SSL support
 $rcmail_config['enable_spellcheck'] = true;
+
+// Enables spellchecker exceptions dictionary.
+// Setting it to 'shared' will make the dictionary shared by all users.
+$rcmail_config['spellcheck_dictionary'] = false;
 
 // Set the spell checking engine. 'googie' is the default. 'pspell' is also available,
 // but requires the Pspell extensions. When using Nox Spell Server, also set 'googie' here.
@@ -454,6 +466,18 @@ $rcmail_config['spellcheck_uri'] = '';
 // Configure as a PHP style hash array: array('en'=>'English', 'de'=>'Deutsch');
 // Leave empty for default set of available language.
 $rcmail_config['spellcheck_languages'] = NULL;
+
+// Makes that words with all letters capitalized will be ignored (e.g. GOOGLE)
+$rcmail_config['spellcheck_ignore_caps'] = false;
+
+// Makes that words with numbers will be ignored (e.g. g00gle)
+$rcmail_config['spellcheck_ignore_nums'] = false;
+
+// Makes that words with symbols will be ignored (e.g. g@@gle)
+$rcmail_config['spellcheck_ignore_syms'] = false;
+
+// Use this char/string to separate recipients when composing a new message
+$rcmail_config['recipients_separator'] = ',';
 
 // don't let users set pagesize to more than this value if set
 $rcmail_config['max_pagesize'] = 200;
@@ -530,14 +554,21 @@ $rcmail_config['ldap_public']['Verisign'] = array(
 // The login name is used to search for the DN to bind with
 'search_base_dn' => '',
 'search_filter'  => '',   // e.g. '(&(objectClass=posixAccount)(uid=%u))'
+// DN and password to bind as before searching for bind DN, if anonymous search is not allowed
+'search_bind_dn' => '',
+'search_bind_pw' => '',
+// Default for %dn variable if search doesn't return DN value
+'search_dn_default' => '',
 // Optional authentication identifier to be used as SASL authorization proxy
 // bind_dn need to be empty
 'auth_cid'       => '',
 // SASL authentication method (for proxy auth), e.g. DIGEST-MD5
 'auth_method'    => '',
-// Indicates if the addressbook shall be displayed on the list.
+// Indicates if the addressbook shall be hidden from the list.
 // With this option enabled you can still search/view contacts.
 'hidden'        => false,
+// Indicates if the addressbook shall not list contacts but only allows searching.
+'searchonly'    => false,
 // Indicates if we can write to the LDAP directory or not.
 // If writable is true then these fields need to be populated:
 // LDAP_Object_Classes, required_fields, LDAP_rdn
@@ -577,6 +608,7 @@ $rcmail_config['ldap_public']['Verisign'] = array(
 'numsub_filter' => '(objectClass=organizationalUnit)',   // with VLV, we also use numSubOrdinates to query the total number of records. Set this filter to get all numSubOrdinates attributes for counting
 'sizelimit'     => '0',     // Enables you to limit the count of entries fetched. Setting this to 0 means no limit.
 'timelimit'     => '0',     // Sets the number of seconds how long is spend on the search. Setting this to 0 means no limit.
+'referrals'     => true|false,  // Sets the LDAP_OPT_REFERRALS option. Mostly used in multi-domain Active Directory setups
 
 // definition for contact groups (uncomment if no groups are supported)
 // for the groups base_dn, the user replacements %fu, %u, $d and %dc work as for base_dn (see above)
@@ -586,8 +618,8 @@ $rcmail_config['ldap_public']['Verisign'] = array(
 'base_dn'     => '',
 'filter'      => '(objectClass=groupOfNames)',
 'object_classes' => array("top", "groupOfNames"),
-// name of the member attribute, e.g. uniqueMember
-'member_attr'    => 'member',
+'member_attr'  => 'member',   // name of the member attribute, e.g. uniqueMember
+'name_attr'    => 'cn',       // attribute to be used as group name
 ),
 );
 */
@@ -614,6 +646,13 @@ $rcmail_config['autocomplete_max'] = 15;
 // available placeholders: {street}, {locality}, {zipcode}, {country}, {region}
 $rcmail_config['address_template'] = '{street}<br/>{locality} {zipcode}<br/>{country} {region}';
 
+// Matching mode for addressbook search (including autocompletion)
+// 0 - partial (*abc*), default
+// 1 - strict (abc)
+// 2 - prefix (abc*)
+// Note: For LDAP sources fuzzy_search must be enabled to use 'partial' or 'prefix' mode
+$rcmail_config['addressbook_search_mode'] = 0;
+
 // ----------------------------------
 // USER PREFERENCES
 // ----------------------------------
@@ -630,8 +669,8 @@ $rcmail_config['pagesize'] = 40;
 // use this timezone to display date/time
 $rcmail_config['timezone'] = 'auto';
 
-// is daylight saving On?
-$rcmail_config['dst_active'] = (bool)date('I');
+// is daylight saving On? Default: (bool)date('I');
+$rcmail_config['dst_active'] = null;
 
 // prefer displaying HTML messages
 $rcmail_config['prefer_html'] = true;
@@ -760,5 +799,8 @@ $rcmail_config['default_addressbook'] = null;
 
 // Enables spell checking before sending a message.
 $rcmail_config['spellcheck_before_send'] = false;
+
+// Skip alternative email addresses in autocompletion (show one address per contact)
+$rcmail_config['autocomplete_single'] = false;
 
 // end of config file

@@ -3,7 +3,7 @@
 ## database access settings in php format
 ## automatically generated from /etc/dbconfig-common/roundcube.conf
 ## by /usr/sbin/dbconfig-generate-include
-## Fri, 30 Dec 2011 09:13:30 +0000
+## Sat, 11 Feb 2012 20:24:51 +0800
 ##
 ## by default this file is managed via ucf, so you shouldn't have to
 ## worry about manual changes being silently discarded.  *however*,
@@ -12,8 +12,8 @@
 ##
 $dbuser='roundcube';
 $dbpass='';
-$basepath='/var/lib/dbconfig-common/sqlite/roundcube';
+$basepath='';
 $dbname='roundcube';
 $dbserver='';
 $dbport='';
-$dbtype='sqlite';
+$dbtype='pgsql';
