@@ -9,9 +9,6 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 # fai.sh        fai-project.org
-# mta.sh        exim + smarthost, spamassassin/bogofilter/bsfilter, clamav
-# webmail.sh    squirrelmail, calendar
-# maillist.sh   sympa/mailman   (forum?cms?)
 # samba.sh
 # im.sh         ejabberd/openfire
 # wiki.sh       fosiwiki/moinmoin

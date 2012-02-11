@@ -113,11 +113,11 @@ i libapache2-mod-fcgid libapache2-mod-wsgi
 # libapache2-mpm-prefork, but I want more efficient worker mpm and all
 # dynamic web contents running in seperate processes for maximum
 # security, that's to say, FastCGI mode or separate WSGI/PSGI mode.
-i php5 php5-cgi php5-sasl
+i php5 php5-suhosin php5-cgi php5-sasl
 
 
-# SQL database, Sympa requires mysql | postgresql
-#i postgresql
+# SQL database, Sympa, Roundcube etc require mysql | postgresql
+i postgresql
 
 # Web mail: squirrelmail or roundcube or imp4
     #i squirrelmail squirrelmail-compatibility squirrelmail-decode
@@ -125,8 +125,7 @@ i php5 php5-cgi php5-sasl
     #i squirrelmail-sent-confirmation squirrelmail-spam-buttons
     #i squirrelmail-viewashtml avelsieve
 i roundcube roundcube-plugins roundcube-plugins-extra
-# Let's try roundcube-sqlite first.
-#i roundcube-pgsql
+i roundcube-pgsql
 
 # mailing list: sympa/mailman
 #i sympa
