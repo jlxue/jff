@@ -14,5 +14,5 @@ cmp_file $SCRIPT_DIR/etc/ssh/sshd_config /etc/ssh/sshd_config || {
 ensure_mode_user_group /etc/ssh                 755 root root
 ensure_mode_user_group /etc/ssh/sshd_config     644 root root
 
-[ "`pidof sshd`" ] || service ssh start
+ensure_service_started ssh sshd
 

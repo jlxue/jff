@@ -91,3 +91,11 @@ file_older () {
     [ "$1" -a "$2" -a -e "$1" -a -e "$2" -a \( "$1" -ot "$2" \) ]
 }
 
+ensure_service_started () {
+    local name="$1" cmd="$2"
+
+    [ "$cmd" ] || cmd="$name"
+
+    [ "`pidof $cmd`" ] || service "$name" start
+}
+

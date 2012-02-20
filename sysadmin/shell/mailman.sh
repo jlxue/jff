@@ -24,5 +24,5 @@ ensure_mode_user_group /srv/www/list    755 root root
 }
 
 [ "`pgrep mailmanctl`" ] || service mailman start
-[ "`pidof apache2`" ] || service apache2 start
+ensure_service_started apache2 apache2
 

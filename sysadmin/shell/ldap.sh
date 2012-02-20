@@ -56,7 +56,7 @@ ensure_mode_user_group /etc/ldapscripts/ldapscripts.conf    644 root root
 ensure_mode_user_group /etc/ldapscripts/ldapscripts.passwd  640 root root
 
 # depends on krb5 principals setup in kerberos.sh
-[ "`pidof slapd`" ] || service slapd start
-[ "`pidof nscd`" ] || service nscd start
-[ "`pidof nslcd`" ] || service nslcd start
+ensure_service_started slapd slapd
+ensure_service_started nscd nscd
+ensure_service_started nslcd nslcd
 

@@ -29,7 +29,7 @@ sync_file $SCRIPT_DIR/etc/hosts /etc/hosts
 # bind9
 #
 
-[ "`pidof named`" ] || service bind9 start
+ensure_service_started bind9 named
 
 # required by named-checkconf
 mkdir -p $SCRIPT_DIR/var/cache/bind

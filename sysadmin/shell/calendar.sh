@@ -17,6 +17,6 @@ cmp_dir $SCRIPT_DIR/etc/caldavd /etc/caldavd || {
 
 [ -z "$CONF_CHANGED" ] || service calendarserver restart
 
-[ "`pidof memcached`" ] || service memcached start
-[ "`pidof caldavd`" ] || service calendarserver start
+ensure_service_started memcached memcached
+ensure_service_started calendarserver caldavd
 

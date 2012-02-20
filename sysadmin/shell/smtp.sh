@@ -74,8 +74,8 @@ ensure_mode_user_group /etc/msmtprc             644 root root
 }
 
 
-[ "`pidof clamd`" ] || service clamav-daemon start
-[ "`pidof freshclam`" ] || service clamav-freshclam start
+ensure_service_started clamav-daemon clamd
+ensure_service_started clamav-freshclam freshclam
 [ "`pgrep spamd`" ] || service spamassassin start
-[ "`pidof exim4`" ] || service exim4 start
+ensure_service_started exim4 exim4
 

@@ -5,5 +5,5 @@ set -e -x
 SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
-[ "`pidof ntpd`" ] || service ntp start
+ensure_service_started ntp ntpd
 

@@ -86,8 +86,8 @@ ensure_policy 8 2 user
 [ -z "$KRB5CONF_CHANGED$KDCCONF_CHANGED$KDCDB_CHANGED$KADM5ACL_CHANGED" ] ||
     service krb5-admin-server restart
 
-[ "`pidof krb5kdc`" ] || service krb5-kdc start
-[ "`pidof kadmind`" ] || service krb5-admin-server start
+ensure_service_started krb5-kdc krb5kdc
+ensure_service_started krb5-admin-server kadmind
 
 
 hostname=`hostname -f`

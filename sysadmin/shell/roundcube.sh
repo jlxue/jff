@@ -151,9 +151,9 @@ ensure_mode_user_group /etc/exim4/sasldb2                   640 root Debian-exim
 #ensure_mode_user_group /srv/www                             755 root root
 #ensure_mode_user_group /srv/www/mail                        755 root root
 
-[ "`pidof postgres`" ] || service postgresql start
+ensure_service_started postgresql postgres
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 
-[ "`pidof apache2`" ] || service apache2 start
+ensure_service_started apache2 apache2
 

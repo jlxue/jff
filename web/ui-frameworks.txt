@@ -1,3 +1,6 @@
+http://documentcloud.github.com/backbone/
+http://phonegap.com/
+
 Echo 3
 http://echo.nextapp.com/site/
 

@@ -26,5 +26,5 @@ ensure_mode_user_group /etc/dovecot/dovecot-ldap.conf.ext   600 root root
 ensure_mode_user_group /etc/dovecot/master-users            640 root dovecot
 
 
-[ "`pidof dovecot`" ] || service dovecot start
+ensure_service_started dovecot dovecot
 
