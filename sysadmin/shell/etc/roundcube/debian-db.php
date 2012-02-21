@@ -11,7 +11,7 @@
 ## above too.
 ##
 $dbuser='roundcube';
-$dbpass='';
+$dbpass='@@ROUNDCUBE_DB_PASSWORD@@';
 $basepath='';
 $dbname='roundcube';
 $dbserver='';

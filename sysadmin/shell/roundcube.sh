@@ -124,16 +124,47 @@ set -x
 ######################################################################################
 
 
-cmp_file $SCRIPT_DIR/etc/dbconfig-common/roundcube.conf /etc/dbconfig-common/roundcube.conf || {
-    overwrite_file $SCRIPT_DIR/etc/dbconfig-common/roundcube.conf /etc/dbconfig-common/roundcube.conf
+f=/etc/dbconfig-common/roundcube.conf
+tmpl=$SCRIPT_DIR$f
+dummy='@@ROUNDCUBE_DB_PASSWORD@@'
+db_passwd=
+set +x
+[ ! -e $f ] || {
+    db_passwd=$(grep 'dbc_dbpass\s*=' $f | sed -e "s/.*=\s*['\"]//; s/['\"].*//")
+    [ "$db_passwd" != "$dummy" ] || db_passwd=
+}
+[ "$db_passwd" ] || {
+    db_passwd=`pwgen -cnys 24 1`
+    echo "ALTER ROLE roundcube WITH ENCRYPTED PASSWORD '$db_passwd'" | su -c "psql -w -f -" postgres
+}
+
+sed -e "s/$dummy/$db_passwd/" $tmpl | diff -q $f - >/dev/null || {
+    sed -e "s/$dummy/$db_passwd/" $tmpl > $f
+    chmod 600 $f
+    chown root:root $f
     CONF_CHANGED=1
 }
 
+f=/etc/roundcube/debian-db.php
+tmpl=$SCRIPT_DIR$f
+dummy='@@ROUNDCUBE_DB_PASSWORD@@'
+sed -e "s/$dummy/$db_passwd/" $tmpl | diff -q $f - >/dev/null || {
+    sed -e "s/$dummy/$db_passwd/" $tmpl > $f
+    chmod 640 $f
+    chown root:www-data $f
+    CONF_CHANGED=1
+}
+
+set -x
+
+
+######################################################################################
 cmp_dir $SCRIPT_DIR/etc/roundcube /etc/roundcube --exclude http_auth_autologin \
-        --exclude managesieve --exclude sieverules --exclude main.inc.php || {
+        --exclude managesieve --exclude sieverules --exclude main.inc.php \
+        --exclude debian-db.php || {
     overwrite_dir $SCRIPT_DIR/etc/roundcube /etc/roundcube \
         --exclude http_auth_autologin --exclude managesieve --exclude sieverules \
-        --exclude main.inc.php
+        --exclude main.inc.php --exclude debian-db.php
     CONF_CHANGED=1
 }
 
