@@ -29,7 +29,7 @@ dummy='@@IMAP_AUTH_MASTER_PASSWORD@@'
 imap_passwd=
 set +x
 [ ! -e $f ] || {
-    imap_passwd=$(grep imap_auth_master_password $f | sed -e "s/.*=\s*['\"]//; s/['\"].*//")
+    imap_passwd=$(parse_value_by_key imap_auth_master_password $f)
     [ "$imap_passwd" != "$dummy" ] || imap_passwd=
 }
 [ "$imap_passwd" ] || imap_passwd=`pwgen -cnys 24 1`
@@ -130,7 +130,7 @@ dummy='@@ROUNDCUBE_DB_PASSWORD@@'
 db_passwd=
 set +x
 [ ! -e $f ] || {
-    db_passwd=$(grep 'dbc_dbpass\s*=' $f | sed -e "s/.*=\s*['\"]//; s/['\"].*//")
+    db_passwd=$(parse_value_by_key 'dbc_dbpass\s*=' $f)
     [ "$db_passwd" != "$dummy" ] || db_passwd=
 }
 [ "$db_passwd" ] || {

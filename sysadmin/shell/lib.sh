@@ -106,3 +106,9 @@ run_psql () {
     } | su -c "psql -w -X -1 -f -" postgres
 }
 
+parse_value_by_key () {
+    local key="$1" file="$2"
+
+    grep "$key" $file | sed -e "s/.*=\s*['\"]//; s/['\"].*//"
+}
+
