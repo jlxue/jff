@@ -33,12 +33,7 @@ set +x
     [ "$imap_passwd" != "$dummy" ] || imap_passwd=
 }
 [ "$imap_passwd" ] || imap_passwd=`pwgen -cnys 24 1`
-sed -e "s/$dummy/$imap_passwd/" $tmpl | diff -q $f - >/dev/null || {
-    sed -e "s/$dummy/$imap_passwd/" $tmpl > $f
-    chmod 640 $f
-    chown root:www-data $f
-    CONF_CHANGED=1
-}
+substitude_template "$tmpl" "$f" 640 root:www-data CONF_CHANGED -e "s/$dummy/$imap_passwd/"
 set -x
 ######################################################################################
 
@@ -68,12 +63,7 @@ f=/etc/roundcube/plugins/managesieve/config.inc.php
 tmpl=$SCRIPT_DIR$f
 dummy='@@MANAGESIEVE_AUTH_PW@@'
 set +x
-sed -e "s/$dummy/$imap_passwd/" $tmpl | diff -q $f - >/dev/null || {
-    sed -e "s/$dummy/$imap_passwd/" $tmpl > $f
-    chmod 640 $f
-    chown root:www-data $f
-    CONF_CHANGED=1
-}
+substitude_template "$tmpl" "$f" 640 root:www-data CONF_CHANGED -e "s/$dummy/$imap_passwd/"
 set -x
 ######################################################################################
 
@@ -85,12 +75,7 @@ f=/etc/roundcube/plugins/sieverules/config.inc.php
 tmpl=$SCRIPT_DIR$f
 dummy='@@SIEVERULES_AUTH_PW@@'
 set +x
-sed -e "s/$dummy/$imap_passwd/" $tmpl | diff -q $f - >/dev/null || {
-    sed -e "s/$dummy/$imap_passwd/" $tmpl > $f
-    chmod 640 $f
-    chown root:www-data $f
-    CONF_CHANGED=1
-}
+substitude_template "$tmpl" "$f" 640 root:www-data CONF_CHANGED -e "s/$dummy/$imap_passwd/"
 set -x
 ######################################################################################
 
@@ -114,12 +99,7 @@ f=/etc/roundcube/main.inc.php
 tmpl=$SCRIPT_DIR$f
 dummy='@@SMTP_PASS@@'
 dummy2='@@IMAP_AUTH_PW@@'
-sed -e "s/$dummy/$smtp_passwd/" -e "s/$dummy2/$imap_passwd/" $tmpl | diff -q $f - >/dev/null || {
-    sed -e "s/$dummy/$smtp_passwd/" -e "s/$dummy2/$imap_passwd/" $tmpl > $f
-    chmod 640 $f
-    chown root:www-data $f
-    CONF_CHANGED=1
-}
+substitude_template "$tmpl" "$f" 640 root:www-data CONF_CHANGED -e "s/$dummy/$smtp_passwd/" -e "s/$dummy2/$imap_passwd/"
 set -x
 ######################################################################################
 
@@ -138,23 +118,12 @@ set +x
     run_psql "ALTER ROLE roundcube WITH ENCRYPTED PASSWORD '$db_passwd'"
 }
 
-sed -e "s/$dummy/$db_passwd/" $tmpl | diff -q $f - >/dev/null || {
-    sed -e "s/$dummy/$db_passwd/" $tmpl > $f
-    chmod 600 $f
-    chown root:root $f
-    CONF_CHANGED=1
-}
+substitude_template "$tmpl" "$f" 600 root:root CONF_CHANGED -e "s/$dummy/$db_passwd/"
 
 f=/etc/roundcube/debian-db.php
 tmpl=$SCRIPT_DIR$f
 dummy='@@ROUNDCUBE_DB_PASSWORD@@'
-sed -e "s/$dummy/$db_passwd/" $tmpl | diff -q $f - >/dev/null || {
-    sed -e "s/$dummy/$db_passwd/" $tmpl > $f
-    chmod 640 $f
-    chown root:www-data $f
-    CONF_CHANGED=1
-}
-
+substitude_template "$tmpl" "$f" 640 root:www-data CONF_CHANGED -e "s/$dummy/$db_passwd/"
 set -x
 
 

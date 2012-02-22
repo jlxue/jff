@@ -112,3 +112,15 @@ parse_value_by_key () {
     grep "$key" $file | sed -e "s/.*=\s*['\"]//; s/['\"].*//"
 }
 
+substitude_template () {
+    local tmpl="$1" file="$2" mode="$3" og="$4" flag="$5"
+
+    shift 5
+    sed "$@" $tmpl | diff -q $file - >/dev/null || {
+        sed "$@" $tmpl > $file
+        chmod $mode $file
+        chown $og $file
+        eval $flag=1
+    }
+}
+
