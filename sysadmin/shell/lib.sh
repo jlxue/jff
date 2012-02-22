@@ -99,3 +99,10 @@ ensure_service_started () {
     [ "`pidof $cmd`" ] || service "$name" start
 }
 
+run_psql () {
+    {
+        echo '\set ON_ERROR_STOP'
+        echo "$@"
+    } | su -c "psql -w -X -1 -f -" postgres
+}
+

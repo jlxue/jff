@@ -135,7 +135,7 @@ set +x
 }
 [ "$db_passwd" ] || {
     db_passwd=`pwgen -cnys 24 1`
-    echo "ALTER ROLE roundcube WITH ENCRYPTED PASSWORD '$db_passwd'" | su -c "psql -w -f -" postgres
+    run_psql "ALTER ROLE roundcube WITH ENCRYPTED PASSWORD '$db_passwd'"
 }
 
 sed -e "s/$dummy/$db_passwd/" $tmpl | diff -q $f - >/dev/null || {
