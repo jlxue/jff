@@ -18,7 +18,8 @@ limitations under the License.
 
 <!DOCTYPE accounts SYSTEM "accounts.dtd">
 
-<accounts realm="Test Realm">
+<accounts realm="CORP.EXAMPLE.COM">
+<!--
   <user>
     <uid>admin</uid>
     <password>admin</password>
@@ -47,5 +48,6 @@ limitations under the License.
       <member type="users">test</member>
     </proxies>
   </location>
+-->
 </accounts>
 

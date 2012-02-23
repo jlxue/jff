@@ -31,12 +31,14 @@
     <string></string>
   </dict>
 -->
+<!--
   <dict>
     <key>username</key>
     <string>superuser</string>
     <key>password</key>
     <string>superuser</string>
   </dict>
+-->
 </array>
 </dict>
 </plist>

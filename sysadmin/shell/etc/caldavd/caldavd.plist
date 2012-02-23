@@ -32,7 +32,7 @@
 
     <!-- Network host name [empty = system host name] -->
     <key>ServerHostName</key>
-    <string></string> <!-- The hostname clients use when connecting -->
+    <string>calendar.corp.example.com</string> <!-- The hostname clients use when connecting -->
 
     <!-- HTTP port [0 = disable HTTP] -->
     <key>HTTPPort</key>
@@ -165,7 +165,6 @@
     <!-- Don't treat user id's smaller than firstValidUid as calendarserver users -->
     <!-- Don't treat group id's smaller than firstValidGid as calendarserver groups -->
     <!-- use shortName@mailDomain as calender user mail addresses -->
-    <!--
     <key>DirectoryService</key>
     <dict>
       <key>type</key>
@@ -174,7 +173,7 @@
       <key>params</key>
       <dict>
         <key>realmName</key>
-        <string>Test Realm</string>
+        <string>CORP.EXAMPLE.COM</string>
         <key>groupPrefix</key>
         <string>caldavd-</string>
         <key>firstValidUid</key>
@@ -186,12 +185,11 @@
         <key>lastValidGid</key>
         <integer>65533</integer>
         <key>mailDomain</key>
-        <string>example.com</string>
+        <string>corp.example.com</string>
         <key>cacheTimeout</key>
         <integer>30</integer>
       </dict>
     </dict>
-     -->
 
     <!--  OpenLDAP Directory Service -->
     <!--
