@@ -11,7 +11,7 @@ cmp_file $SCRIPT_DIR/etc/default/calendarserver /etc/default/calendarserver || {
 }
 
 cmp_dir $SCRIPT_DIR/etc/caldavd /etc/caldavd || {
-    overwrite_file $SCRIPT_DIR/etc/caldavd /etc/caldavd
+    overwrite_dir $SCRIPT_DIR/etc/caldavd /etc/caldavd
     CONF_CHANGED=1
 }
 
