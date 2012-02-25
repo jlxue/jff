@@ -1,6 +1,8 @@
 # Defaults for calendarserver initscript (/etc/init.d/calendarserver)
 # This is a POSIX shell fragment
 
+export KRB5_KTNAME=/etc/caldavd.keytab
+
 # uncomment to start calendarserver on system startup
 start_calendarserver=yes
 

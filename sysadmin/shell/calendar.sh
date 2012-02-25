@@ -17,6 +17,12 @@ cmp_dir $SCRIPT_DIR/etc/caldavd /etc/caldavd || {
 
 [ -z "$CONF_CHANGED" ] || service calendarserver restart
 
-ensure_service_started memcached memcached
-ensure_service_started calendarserver caldavd
+## calendarserver starts memcached itself, see
+##  /usr/lib/twisted-calendarserver/lib/python2.6/site-packages/calendarserver/tap/caldav.py
+##  /usr/lib/twisted-calendarserver/lib/python2.6/site-packages/twistedcaldav/config.py
+##
+#ensure_service_started memcached memcached
+
+# calendarserver requires "user_xattr" mount option for /var/spool/caldavd
+[ "`pgrep -f caldavd`" ] || service calendarserver start
 
