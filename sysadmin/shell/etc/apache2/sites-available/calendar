@@ -1,0 +1,16 @@
+<VirtualHost *:80>
+    ServerName calendar.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /nonexistent
+
+    ErrorLog ${APACHE_LOG_DIR}/calendar-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/calendar-access.log combined
+
+    ProxyPass 		/	http://localhost:8008/
+    ProxyPassReverse 	/ 	http://localhost:8008/
+</VirtualHost>

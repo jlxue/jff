@@ -59,6 +59,7 @@
     <!-- List of IP addresses to bind to [empty = all] -->
     <key>BindAddresses</key>
     <array>
+        <string>localhost</string>
     </array>
 
     <!-- List of port numbers to bind to for HTTP [empty = same as "Port"] -->
