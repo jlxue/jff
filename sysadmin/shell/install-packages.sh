@@ -132,7 +132,9 @@ i roundcube-pgsql
 i mailman
 
 # calendar service
-#   "radicale" is funny but not powerful enough
+#   "davical" is powerful but a little tough to setup
+#   "radicale" is funny but not powerful and mature enough
+#i davical
 #i radicale
 i calendarserver
 
