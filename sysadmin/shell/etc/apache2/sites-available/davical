@@ -1,0 +1,28 @@
+<VirtualHost *:80>
+    ServerName davical.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /usr/share/davical/htdocs
+
+    ErrorLog ${APACHE_LOG_DIR}/mail-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/mail-access.log combined
+
+    DirectoryIndex index.php index.html
+
+    Alias /images/ /usr/share/davical/htdocs/images/
+    <Directory /usr/share/davical/htdocs/>
+        AllowOverride None
+	Order allow,deny
+	Allow from all
+    </Directory>
+
+    AcceptPathInfo On
+
+    <IfModule mod_fcgid.c>
+        FcgidWrapper "/usr/bin/php5-cgi -d include_path=/usr/share/awl/inc -d error_reporting=E_ALL&~E_NOTICE -d default_charset=utf-8" .php
+    </IfModule>
+</VirtualHost>
