@@ -25,7 +25,7 @@ imap			CNAME	gold
 mail			CNAME	gold
 list			CNAME	gold
 calendar		CNAME	gold
-davical			CNAME	gold
+cal			CNAME	gold
 
 ; see http://web.mit.edu/kerberos/krb5-1.9/krb5-1.9.2/doc/krb5-install.html#Hostnames-for-the-Master-and-Slave-KDCs
 _kerberos		TXT	"CORP.EXAMPLE.COM"

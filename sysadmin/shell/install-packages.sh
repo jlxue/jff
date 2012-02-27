@@ -134,8 +134,8 @@ i mailman
 # calendar service
 #   "davical" is powerful but a little tough to setup
 #   "radicale" is funny but not powerful and mature enough
-#i davical
 #i radicale
+i davical php5-curl
 i calendarserver
 
 ###########################################################

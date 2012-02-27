@@ -1,23 +1,24 @@
 <VirtualHost *:80>
-    ServerName davical.corp.example.com
+    ServerName cal.corp.example.com
+    ServerAlias davical.corp.example.com
     ServerAdmin webmaster@corp.example.com
     DocumentRoot /usr/share/davical/htdocs
 
-    ErrorLog ${APACHE_LOG_DIR}/mail-error.log
+    ErrorLog ${APACHE_LOG_DIR}/davical-error.log
 
     # Possible values include: debug, info, notice, warn, error, crit,
     # alert, emerg.
     LogLevel warn
 
-    CustomLog ${APACHE_LOG_DIR}/mail-access.log combined
+    CustomLog ${APACHE_LOG_DIR}/davical-access.log combined
 
     DirectoryIndex index.php index.html
 
     Alias /images/ /usr/share/davical/htdocs/images/
     <Directory /usr/share/davical/htdocs/>
         AllowOverride None
-	Order allow,deny
-	Allow from all
+        Order allow,deny
+        Allow from all
     </Directory>
 
     AcceptPathInfo On
