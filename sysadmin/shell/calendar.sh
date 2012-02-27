@@ -24,5 +24,14 @@ cmp_dir $SCRIPT_DIR/etc/caldavd /etc/caldavd || {
 #ensure_service_started memcached memcached
 
 # calendarserver requires "user_xattr" mount option for /var/spool/caldavd
+mount_point=$(df /var/spool/caldavd | tail -1 | awk '{print $6}')
+[ "$mount_point" ] && {
+    perl -ane "print qq{\$F[3]\\n} if m{^/dev\S+\s\Q$mount_point\E\s}" /proc/mounts |
+        grep -wq user_xattr || {
+            echo "WARN: $mount_point isn't mounted with user_xattr option" >&2
+            mount -o remount,user_xattr "$mount_point"
+        }
+}
+
 [ "`pgrep -f caldavd`" ] || service calendarserver start
 
