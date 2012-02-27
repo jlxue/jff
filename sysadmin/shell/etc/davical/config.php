@@ -63,7 +63,7 @@ $c->pg_connect[] = "dbname=davical user=davical_app";
 * has lost his password and click on the login page
 * on "Help! I've forgotten my password"
 */
-$c->admin_email ='calendar-admin@example.com';
+$c->admin_email ='webmaster@corp.example.com';
 
 /**
 * default=true
