@@ -106,10 +106,34 @@ run_psql () {
     } | su -c "psql -w -X -1 -f -" postgres
 }
 
+set_postgresql_role_password () {
+    local role="$1" passwd="$2"
+
+    run_psql "ALTER ROLE $role WITH ENCRYPTED PASSWORD '$passwd'"
+}
+
 parse_value_by_key () {
     local key="$1" file="$2"
 
     grep "$key" $file | sed -e "s/.*=\s*['\"]//; s/['\"].*//"
+}
+
+parse_password_by_key () {
+    local key="$1" file="$2" dummy="$3" newflag="$4" passwd=
+
+    [ -z "$newflag" ] || eval $newflag=
+
+    [ ! -e "$file" ] || {
+        passwd=$(parse_value_by_key "$key" "$file")
+        [ "$passwd" != "$dummy" ] || passwd=
+    }
+
+    [ "$passwd" ] || {
+        passwd=`pwgen -cnys 24 1`
+        [ -z "$newflag" ] || eval $newflag=1
+    }
+
+    echo "$passwd"
 }
 
 substitude_template () {
@@ -123,4 +147,5 @@ substitude_template () {
         eval $flag=1
     }
 }
+
 

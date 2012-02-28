@@ -26,13 +26,8 @@ mkdir -p -m 0755 /etc/roundcube/plugins/http_auth_autologin
 f=/etc/roundcube/plugins/http_auth_autologin/config.inc.php
 tmpl=/usr/share/roundcube/plugins/http_auth_autologin/config.inc.php.dist
 dummy='@@IMAP_AUTH_MASTER_PASSWORD@@'
-imap_passwd=
 set +x
-[ ! -e $f ] || {
-    imap_passwd=$(parse_value_by_key imap_auth_master_password $f)
-    [ "$imap_passwd" != "$dummy" ] || imap_passwd=
-}
-[ "$imap_passwd" ] || imap_passwd=`pwgen -cnys 24 1`
+imap_passwd=$(parse_password_by_key imap_auth_master_password $f $dummy)
 substitude_template "$tmpl" "$f" 640 root:www-data CONF_CHANGED -e "s/$dummy/$imap_passwd/"
 set -x
 ######################################################################################
@@ -104,19 +99,14 @@ set -x
 ######################################################################################
 
 
+ensure_service_started postgresql postgres
+
 f=/etc/dbconfig-common/roundcube.conf
 tmpl=$SCRIPT_DIR$f
 dummy='@@ROUNDCUBE_DB_PASSWORD@@'
-db_passwd=
 set +x
-[ ! -e $f ] || {
-    db_passwd=$(parse_value_by_key 'dbc_dbpass\s*=' $f)
-    [ "$db_passwd" != "$dummy" ] || db_passwd=
-}
-[ "$db_passwd" ] || {
-    db_passwd=`pwgen -cnys 24 1`
-    run_psql "ALTER ROLE roundcube WITH ENCRYPTED PASSWORD '$db_passwd'"
-}
+db_passwd=$(parse_password_by_key 'dbc_dbpass\s*=' $f $dummy isnew)
+[ ! "$isnew" ] || set_postgresql_role_password roundcube "$db_passwd"
 
 substitude_template "$tmpl" "$f" 600 root:root CONF_CHANGED -e "s/$dummy/$db_passwd/"
 
@@ -150,8 +140,6 @@ ensure_mode_user_group /etc/dovecot/master-users            640 root dovecot
 ensure_mode_user_group /etc/exim4/sasldb2                   640 root Debian-exim
 #ensure_mode_user_group /srv/www                             755 root root
 #ensure_mode_user_group /srv/www/mail                        755 root root
-
-ensure_service_started postgresql postgres
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 
