@@ -112,19 +112,19 @@ set_postgresql_role_password () {
     run_psql "ALTER ROLE $role WITH ENCRYPTED PASSWORD '$passwd'"
 }
 
-parse_value_by_key () {
-    local key="$1" file="$2"
+capture_match () {
+    local pattern="$1" file="$2" flags="$3"
 
-    grep "$key" $file | sed -e "s/.*=\s*['\"]//; s/['\"].*//"
+    perl -ne "if ( m{$pattern}$flags ) { print \"\$1\"; exit(0); }" "$file"
 }
 
-parse_password_by_key () {
-    local key="$1" file="$2" dummy="$3" newflag="$4" passwd=
+parse_password_by_pattern () {
+    local pattern="$1" file="$2" dummy="$3" newflag="$4" passwd=
 
     [ -z "$newflag" ] || eval $newflag=
 
     [ ! -e "$file" ] || {
-        passwd=$(parse_value_by_key "$key" "$file")
+        passwd=$(capture_match "$pattern" "$file")
         [ "$passwd" != "$dummy" ] || passwd=
     }
 
