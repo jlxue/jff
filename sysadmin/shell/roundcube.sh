@@ -27,7 +27,7 @@ f=/etc/roundcube/plugins/http_auth_autologin/config.inc.php
 tmpl=/usr/share/roundcube/plugins/http_auth_autologin/config.inc.php.dist
 dummy='@@IMAP_AUTH_MASTER_PASSWORD@@'
 set +x
-imap_passwd=$(parse_password_by_pattern "imap_auth_master_password['\"]\\]\\s*=\\s*['\"]([^'\"]+)" $f $dummy)
+parse_password_by_pattern "imap_auth_master_password['\"]\\]\\s*=\\s*['\"]([^'\"]+)" $f $dummy imap_passwd
 substitude_template "$tmpl" "$f" 640 root:www-data CONF_CHANGED -e "s/$dummy/$imap_passwd/"
 set -x
 ######################################################################################
@@ -106,7 +106,7 @@ tmpl=$SCRIPT_DIR$f
 dummy='@@ROUNDCUBE_DB_PASSWORD@@'
 isnew=
 set +x
-db_passwd=$(parse_password_by_pattern "dbc_dbpass\\s*=\\s*['\"]([^'\"]+)" $f $dummy isnew)
+parse_password_by_pattern "dbc_dbpass\\s*=\\s*['\"]([^'\"]+)" $f $dummy db_passwd isnew
 [ ! "$isnew" ] || set_postgresql_role_password roundcube "$db_passwd"
 
 substitude_template "$tmpl" "$f" 600 root:root CONF_CHANGED -e "s/$dummy/$db_passwd/"

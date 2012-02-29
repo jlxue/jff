@@ -119,7 +119,7 @@ capture_match () {
 }
 
 parse_password_by_pattern () {
-    local pattern="$1" file="$2" dummy="$3" newflag="$4" passwd=
+    local pattern="$1" file="$2" dummy="$3" passwd_var="$4" newflag="$5" passwd=
 
     [ ! -e "$file" ] || {
         passwd=$(capture_match "$pattern" "$file")
@@ -131,7 +131,7 @@ parse_password_by_pattern () {
         [ -z "$newflag" ] || eval $newflag=1
     }
 
-    echo "$passwd"
+    eval $passwd_var=$(echo "$passwd" | sed -e 's|\(.\)|\\\1|g')
 }
 
 substitude_template () {

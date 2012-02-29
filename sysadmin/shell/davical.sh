@@ -27,14 +27,14 @@ set +x
 f=/etc/davical/administration.yml
 dummy=@@DAVICAL_DBA_PASSWORD@@
 isnew=
-davical_dba_passwd=$(parse_password_by_pattern '^\s*admin_db_pass\s*:\s*(\S+)' $f $dummy isnew)
+parse_password_by_pattern '^\s*admin_db_pass\s*:\s*(\S+)' $f $dummy davical_dba_passwd isnew
 [ ! "$isnew" ] || set_postgresql_role_password davical_dba "$davical_dba_passwd"
 substitude_template "$SCRIPT_DIR$f" "$f" 640 postgres:postgres CONF_CHANGED -e "s/$dummy/$davical_dba_passwd/"
 
 f=/etc/davical/config.php
 dummy=@@DAVICAL_APP_PASSWORD@@
 isnew=
-davical_app_passwd=$(parse_password_by_pattern "^\\s*\\$.*pg_connect.*\\spassword=([^'\"]+)" $f $dummy isnew)
+parse_password_by_pattern "^\\s*\\$.*pg_connect.*\\spassword=([^'\"]+)" $f $dummy davical_app_passwd isnew
 [ ! "$isnew" ] || set_postgresql_role_password davical_app "$davical_app_passwd"
 substitude_template "$SCRIPT_DIR$f" "$f" 640 root:www-data CONF_CHANGED -e "s/$dummy/$davical_app_passwd/"
 set -x
@@ -52,6 +52,8 @@ ensure_mode_user_group /etc/davical/config.php              640 root www-data
 #############################################################
 #### must create db users and copy configuration files first, see above
 su postgres -c 'psql -c "" davical' 2>/dev/null || {
-    su postgres -c /usr/share/davical/dba/create-database.sh
+    set +x
+    su postgres -c "/usr/share/davical/dba/create-database.sh davical `pwgen -cnys 24 1`"
+    set -x
 }
 
