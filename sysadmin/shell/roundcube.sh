@@ -104,6 +104,7 @@ ensure_service_started postgresql postgres
 f=/etc/dbconfig-common/roundcube.conf
 tmpl=$SCRIPT_DIR$f
 dummy='@@ROUNDCUBE_DB_PASSWORD@@'
+isnew=
 set +x
 db_passwd=$(parse_password_by_pattern "dbc_dbpass\\s*=\\s*['\"]([^'\"]+)" $f $dummy isnew)
 [ ! "$isnew" ] || set_postgresql_role_password roundcube "$db_passwd"

@@ -1,0 +1,9 @@
+# This is used by /usr/share/davical/dba/update-davical-database
+# which is called by /usr/share/davical/dba/create-database.sh
+---
+admin_db_user: davical_dba
+admin_db_pass: @@DAVICAL_DBA_PASSWORD@@
+admin_db_host: localhost
+admin_db_name: davical
+admin_db_port: 5432
+app_db_user: davical_app

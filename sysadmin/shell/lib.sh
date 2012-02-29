@@ -121,8 +121,6 @@ capture_match () {
 parse_password_by_pattern () {
     local pattern="$1" file="$2" dummy="$3" newflag="$4" passwd=
 
-    [ -z "$newflag" ] || eval $newflag=
-
     [ ! -e "$file" ] || {
         passwd=$(capture_match "$pattern" "$file")
         [ "$passwd" != "$dummy" ] || passwd=
