@@ -12,6 +12,7 @@ save_etc () {
 
     dpkg -l > /tmp/dpkg-list.$$
     cmp -s /tmp/dpkg-list.$$ /etc/dpkg-list.txt || cp /tmp/dpkg-list.$$ /etc/dpkg-list.txt
+    rm /tmp/dpkg-list.$$
 
     ! etckeeper unclean || etckeeper commit "$msg"
 }
