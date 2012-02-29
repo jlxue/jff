@@ -16,6 +16,9 @@
 
     Alias /images/ /usr/share/davical/htdocs/images/
     <Directory /usr/share/davical/htdocs/>
+        AuthType Kerberos
+        Require valid-user
+
         AllowOverride None
         Order allow,deny
         Allow from all

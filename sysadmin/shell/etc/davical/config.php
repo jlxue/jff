@@ -233,7 +233,7 @@ $c->external_refresh = 60;
 
 include_once('AuthPlugins.php');
 $c->authenticate_hook['optional'] = true;
-$c->authenticate_hook['server_auth_type'] = array('Negotiate', 'Basic');
+$c->authenticate_hook['server_auth_type'] = array('Negotiate', 'Digest');
 $c->authenticate_hook['config']['i_use_mode_kerberos'] = "i_know_what_i_am_doing";
 
 /********************************/
