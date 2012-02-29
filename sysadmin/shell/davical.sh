@@ -51,9 +51,18 @@ ensure_mode_user_group /etc/davical/config.php              640 root www-data
 
 #############################################################
 #### must create db users and copy configuration files first, see above
+f=/usr/share/davical/dba/create-database.sh
+f2=/usr/share/davical/dba/create-database-my.sh
+
+cmp_file $SCRIPT_DIR$f $f2 || {
+    overwrite_file $SCRIPT_DIR$f $f2
+}
+
 su postgres -c 'psql -c "" davical' 2>/dev/null || {
     set +x
-    su postgres -c "/usr/share/davical/dba/create-database.sh davical `pwgen -cnys 24 1`"
+    export pghost=localhost
+    export pgpassword=$davical_dba_passwd
+    su postgres -c "$f2 davical `pwgen -cnys 24 1`"
     set -x
 }
 

@@ -16,7 +16,7 @@
 * the array in $c->pg_connect.
 * used in the web interface but also the caldav Server
 */
-$c->pg_connect[] = "dbname=davical user=davical_app password=@@DAVICAL_APP_PASSWORD@@";
+$c->pg_connect[] = "dbname=davical user=davical_app host=localhost password=@@DAVICAL_APP_PASSWORD@@";
 // $c->pg_connect[] = "dbname=davical user=davical_app port=5433 host=somehost password=mypass";
 
 

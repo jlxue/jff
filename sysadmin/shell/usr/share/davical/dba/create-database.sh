@@ -70,10 +70,14 @@ create_db_user "${AWL_DBAUSER}"
 create_db_user "${AWL_APPUSER}"
 
 # FIXME: Need to check that the database was actually created.
-if ! createdb --encoding UTF8 --template template0 --owner "${AWL_DBAUSER}" "${DBNAME}" ; then
+if ! psql -c "" davical 2>/dev/null && ! createdb --encoding UTF8 --template template0 --owner "${AWL_DBAUSER}" "${DBNAME}" ; then
   echo "Unable to create database"
   exit 1
 fi
+
+# switch from postgres user to davical_dba to use tcp/ip host based authentication
+[ "$pghost" ] && export PGHOST=$pghost
+[ "$pgpassword" ] && export PGPASSWORD=$pgpassword
 
 #
 # Try a few alternatives for a database user or give up...
