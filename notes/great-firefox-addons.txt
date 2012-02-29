@@ -2,6 +2,7 @@ Adblock Plus
 Element Hiding Helper for Adblock Plus  (Ctrl-Shift-S or Ctrl-Shift-K)
 ChatZilla
 CHMReader
+Collusion
 Download Statusbar
 DownThemAll!
 Firebug
