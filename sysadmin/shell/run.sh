@@ -47,6 +47,7 @@ calendar.sh
 davical.sh
 mantis.sh
 bugzilla.sh
+foswiki.sh
 END`
 
 for f in $SCRIPTS; do

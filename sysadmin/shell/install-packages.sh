@@ -141,8 +141,6 @@ i calendarserver
 # hosting git repositories
 i gitolite
 
-i mantis
-
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none
