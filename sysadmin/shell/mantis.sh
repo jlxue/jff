@@ -7,8 +7,7 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 
 pkg=mantisbt-1.2.8
 
-[ -d /srv/www/mantisbt ] || (
-    set -e
+[ -d /srv/www/mantisbt ] || {
     [ ! -e /srv/www/$pkg ] || mv /srv/www/$pkg /srv/www/$pkg-`date +%Y%m%d-%H%M%S`
     rm -f /tmp/$pkg.tar.gz
     wget -O /tmp/$pkg.tar.gz 'http://sourceforge.net/projects/mantisbt/files/mantis-stable/1.2.8/mantisbt-1.2.8.tar.gz/download'
@@ -21,7 +20,7 @@ pkg=mantisbt-1.2.8
     }
 
     mv /srv/www/$pkg /srv/www/mantisbt
-)
+}
 
 ensure_service_started postgresql postgres
 
