@@ -151,7 +151,7 @@ i libtimedate-perl libdatetime-perl libdatetime-timezone-perl \
   libauthen-radius-perl libsoap-lite-perl libjson-rpc-perl \
   libjson-xs-perl libtest-taint-perl libhtml-parser-perl \
   libhtml-scrubber-perl libencode-detect-perl libtheschwartz-perl \
-  libapache2-mod-perl2
+  libapache2-mod-perl2 patchutils
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none

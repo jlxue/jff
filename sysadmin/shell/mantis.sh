@@ -5,6 +5,11 @@ set -e -x
 SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
+my_etckeeper () {
+    etckeeper "$@" -d /srv/www/mantisbt
+}
+
+
 pkg=mantisbt-1.2.8
 
 [ -d /srv/www/mantisbt ] || {
@@ -20,7 +25,11 @@ pkg=mantisbt-1.2.8
     }
 
     mv /srv/www/$pkg /srv/www/mantisbt
+    my_etckeeper init
+    my_etckeeper "import $pkg"
 }
+
+! my_etckeeper unclean || my_etckeeper commit "save before configuring"
 
 ensure_service_started postgresql postgres
 
@@ -47,4 +56,6 @@ ensure_mode_user_group /srv/www/mantisbt/config_inc.php 640 root www-data
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 
 ensure_service_started apache2 apache2
+
+! my_etckeeper unclean || my_etckeeper commit "save before configuring"
 

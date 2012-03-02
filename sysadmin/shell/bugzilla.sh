@@ -5,6 +5,11 @@ set -e -x
 SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
+my_etckeeper () {
+    etckeeper "$@" -d /srv/www/mantisbt
+}
+
+
 pkg=bugzilla-4.2
 
 [ -d /srv/www/bugzilla ] || {
@@ -20,7 +25,11 @@ pkg=bugzilla-4.2
     }
 
     mv /srv/www/$pkg /srv/www/bugzilla
+    my_etckeeper init
+    my_etckeeper "import $pkg"
 }
+
+! my_etckeeper unclean || my_etckeeper commit "save before configuring"
 
 ensure_service_started postgresql postgres
 
@@ -28,4 +37,6 @@ ensure_service_started postgresql postgres
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 
 ensure_service_started apache2 apache2
+
+! my_etckeeper unclean || my_etckeeper commit "save before configuring"
 
