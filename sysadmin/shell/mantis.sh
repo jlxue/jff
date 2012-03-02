@@ -15,13 +15,15 @@ pkg=mantisbt-1.2.8
     [ 054035ba0ebfc8997e10e2bc75d39483 = `md5sum /tmp/$pkg.tar.gz` ] &&
         [ 6cff6fd7d709e25c620c9717d6bf079ce52b73c5 = `sha1sum /tmp/$pkg.tar.gz` ]
 
-    tar -C /srv/www -zxvf /tmp/$pkg.tar.gz || {
+    tar --no-same-owner -C /srv/www -zxvf /tmp/$pkg.tar.gz || {
         /bin/rm -rf /srv/www/$pkg
         exit 1
     }
 
     mv /srv/www/$pkg /srv/www/mantisbt
 )
+
+ensure_mode_user_group /srv/www/mantisbt    755 root root
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 
