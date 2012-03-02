@@ -23,7 +23,27 @@ pkg=mantisbt-1.2.8
     mv /srv/www/$pkg /srv/www/mantisbt
 )
 
-ensure_mode_user_group /srv/www/mantisbt    755 root root
+ensure_service_started postgresql postgres
+
+pg_create_db_user   mantisbt
+pg_create_db        mantisbt mantisbt
+
+
+f=/srv/www/mantisbt/config_inc.php
+tmpl=$SCRIPT_DIR$f
+dummy='@@MANTISBT_PASSWORD@@'
+isnew=
+mantisbt_passwd=
+set +x
+parse_password_by_pattern "^\\s*\\\$g_db_password\\s*=\\s*['\"]([^'\"]+)" $f $dummy mantisbt_passwd isnew
+[ ! "$isnew" ] || pg_set_role_password mantisbt "$mantisbt_passwd"
+
+substitude_template "$tmpl" "$f" 640 root:www-data CONF_CHANGED -e "s/$dummy/$mantisbt_passwd/"
+set -x
+
+
+ensure_mode_user_group /srv/www/mantisbt                755 root root
+ensure_mode_user_group /srv/www/mantisbt/config_inc.php 640 root www-data
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 

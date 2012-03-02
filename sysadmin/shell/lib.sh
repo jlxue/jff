@@ -161,7 +161,7 @@ pg_create_db_user () {
 pg_create_db () {
     local dba="$1" dbname="$2"
 
-    su postgres "psql -c '' '$dbname'" 2>/dev/null ||
-        /usr/bin/createdb --encoding UTF8 --template template0 --owner "$dba" "$dbname"
+    su postgres -c "psql -c '' '$dbname'" 2>/dev/null ||
+        su postgres -c "/usr/bin/createdb --encoding UTF8 --template template0 --owner '$dba' '$dbname'"
 }
 
