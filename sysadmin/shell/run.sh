@@ -45,6 +45,8 @@ mailman.sh
 roundcube.sh
 calendar.sh
 davical.sh
+mantis.sh
+bugzilla.sh
 END`
 
 for f in $SCRIPTS; do

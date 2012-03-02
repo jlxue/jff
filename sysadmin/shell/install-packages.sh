@@ -138,6 +138,12 @@ i mailman
 i davical php5-curl
 i calendarserver
 
+# hosting git repositories
+i gitolite
+
+i mantis
+
+
 ###########################################################
 APT_LISTBUGS_FRONTEND=none
 APT_LISTCHANGES_FRONTEND=none
