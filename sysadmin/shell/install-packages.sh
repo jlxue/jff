@@ -141,6 +141,17 @@ i calendarserver
 # hosting git repositories
 i gitolite
 
+# dependencies for bugzilla 4.2
+i libtimedate-perl libdatetime-perl libdatetime-timezone-perl \
+  libdbi-perl libtemplate-perl libemail-send-perl libemail-mime-perl \
+  liburi-perl liblist-moreutils-perl libmath-random-isaac-perl \
+  libdbd-pg-perl libdbd-mysql-perl libgd-gd2-perl libchart-perl \
+  libtemplate-plugin-gd-perl libgd-text-perl libmime-tools-perl \
+  libwww-perl libxml-twig-perl libnet-ldap-perl libauthen-sasl-perl \
+  libauthen-radius-perl libsoap-lite-perl libjson-rpc-perl \
+  libjson-xs-perl libtest-taint-perl libhtml-parser-perl \
+  libhtml-scrubber-perl libencode-detect-perl libtheschwartz-perl \
+  libapache2-mod-perl2
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none
