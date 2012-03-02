@@ -1,0 +1,25 @@
+<VirtualHost *:80>
+    ServerName bug.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /srv/www/mantisbt
+
+    ErrorLog ${APACHE_LOG_DIR}/mantisbt-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/mantisbt-access.log combined
+
+    DirectoryIndex index.php index.html
+
+    <Directory /srv/www/mantisbt/>
+        #AuthType Kerberos
+        #Require valid-user
+
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+    </Directory>
+</VirtualHost>
+
