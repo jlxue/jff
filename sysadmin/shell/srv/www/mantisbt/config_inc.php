@@ -41,7 +41,7 @@ $g_database_name = 'mantisbt';
 $g_db_type       = 'pgsql';
 
 # --- Anonymous Access / Signup ---
-$g_allow_signup				= ON;
+$g_allow_signup				= OFF;
 $g_allow_anonymous_login	= OFF;
 $g_anonymous_account		= '';
 
