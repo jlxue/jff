@@ -26,7 +26,8 @@ pkg=bugzilla-4.2
 
     mv /srv/www/$pkg /srv/www/bugzilla
     my_etckeeper init
-    my_etckeeper "import $pkg"
+    my_etckeeper commit "import $pkg"
+    my_etckeeper vcs tag $pkg
 }
 
 ! my_etckeeper unclean || my_etckeeper commit "save before configuring"
