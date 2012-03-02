@@ -17,6 +17,11 @@ cmp_dir $SCRIPT_DIR/etc/modsecurity /etc/modsecurity || {
 }
 
 
+cmp_dir $SCRIPT_DIR/var/www /var/www || {
+    overwrite_dir $SCRIPT_DIR/var/www /var/www
+    CONF_CHANGED=1
+}
+
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 
 ensure_service_started apache2 apache2
