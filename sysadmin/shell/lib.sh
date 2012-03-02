@@ -100,19 +100,6 @@ ensure_service_started () {
     [ "`pidof $cmd`" ] || service "$name" start
 }
 
-run_psql () {
-    {
-        echo '\set ON_ERROR_STOP'
-        echo "$@"
-    } | su -c "psql -w -X -1 -f -" postgres
-}
-
-set_postgresql_role_password () {
-    local role="$1" passwd="$2"
-
-    run_psql "ALTER ROLE $role WITH ENCRYPTED PASSWORD '$passwd'"
-}
-
 capture_match () {
     local pattern="$1" file="$2" flags="$3"
 
@@ -147,4 +134,34 @@ substitude_template () {
     }
 }
 
+pg_run_sql () {
+    {
+        echo '\set ON_ERROR_STOP'
+        echo "$@"
+    } | su -c "psql -w -X -1 -f -" postgres
+}
+
+pg_set_role_password () {
+    local role="$1" passwd="$2"
+
+    pg_run_sql "ALTER ROLE $role WITH ENCRYPTED PASSWORD '$passwd'"
+}
+
+#### modified from /usr/share/davical/dba/create-database.sh
+pg_db_users () {
+  su postgres -c 'psql -qXAt -c "SELECT usename FROM pg_user;" template1'
+}
+
+pg_create_db_user () {
+  if ! pg_db_users | grep "^${1}$" >/dev/null ; then
+    su postgres -c "psql -qXAt -c 'CREATE USER ${1} NOCREATEDB NOCREATEROLE;' template1"
+  fi
+}
+
+pg_create_db () {
+    local dba="$1" dbname="$2"
+
+    su postgres "psql -c '' '$dbname'" 2>/dev/null ||
+        /usr/bin/createdb --encoding UTF8 --template template0 --owner "$dba" "$dbname"
+}
 

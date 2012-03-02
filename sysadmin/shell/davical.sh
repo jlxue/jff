@@ -5,37 +5,25 @@ set -e -x
 SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
-#### modified from /usr/share/davical/dba/create-database.sh
-db_users() {
-  su postgres -c 'psql -qXAt -c "SELECT usename FROM pg_user;" template1'
-}
-
-create_db_user() {
-  if ! db_users | grep "^${1}$" >/dev/null ; then
-    su postgres -c "psql -qXAt -c 'CREATE USER ${1} NOCREATEDB NOCREATEROLE;' template1"
-  fi
-}
-
-#############################################################
 
 ensure_service_started postgresql postgres
 
-create_db_user davical_dba
-create_db_user davical_app
+pg_create_db_user davical_dba
+pg_create_db_user davical_app
 
 set +x
 f=/etc/davical/administration.yml
 dummy=@@DAVICAL_DBA_PASSWORD@@
 isnew=
 parse_password_by_pattern '^\s*admin_db_pass\s*:\s*(\S+)' $f $dummy davical_dba_passwd isnew
-[ ! "$isnew" ] || set_postgresql_role_password davical_dba "$davical_dba_passwd"
+[ ! "$isnew" ] || pg_set_role_password davical_dba "$davical_dba_passwd"
 substitude_template "$SCRIPT_DIR$f" "$f" 640 postgres:postgres CONF_CHANGED -e "s/$dummy/$davical_dba_passwd/"
 
 f=/etc/davical/config.php
 dummy=@@DAVICAL_APP_PASSWORD@@
 isnew=
 parse_password_by_pattern "^\\s*\\$.*pg_connect.*\\spassword=([^'\"]+)" $f $dummy davical_app_passwd isnew
-[ ! "$isnew" ] || set_postgresql_role_password davical_app "$davical_app_passwd"
+[ ! "$isnew" ] || pg_set_role_password davical_app "$davical_app_passwd"
 substitude_template "$SCRIPT_DIR$f" "$f" 640 root:www-data CONF_CHANGED -e "s/$dummy/$davical_app_passwd/"
 set -x
 
