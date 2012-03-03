@@ -29,6 +29,7 @@ cal			CNAME	gold
 ; no Negotiate auth for cal.corp.example.com
 davical			CNAME	gold
 bug			CNAME	gold
+bugzilla		CNAME	gold
 
 ; see http://web.mit.edu/kerberos/krb5-1.9/krb5-1.9.2/doc/krb5-install.html#Hostnames-for-the-Master-and-Slave-KDCs
 _kerberos		TXT	"CORP.EXAMPLE.COM"
