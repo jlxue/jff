@@ -29,6 +29,7 @@ dir=/srv/www/bugzilla
     }
 
     mv /srv/www/$pkg $dir
+
     my_etckeeper init
     my_etckeeper commit "import $pkg"
     my_etckeeper vcs tag $pkg
@@ -37,33 +38,79 @@ dir=/srv/www/bugzilla
 ! my_etckeeper unclean || my_etckeeper commit "save before configuring"
 [ "`my_etckeeper vcs config --get color.ui`" = auto ] || my_etckeeper vcs config color.ui auto
 
-(
+
+{
+    pwd=`pwd`
     cd $dir
-    [ -e $dir/lib/PatchReader.pm ] ||
+
+    [ -e $dir/lib/PatchReader.pm ] || {
         /usr/bin/perl install-module.pl PatchReader
-    [ -e $dir/lib/Email/MIME/Attachment/Stripper.pm ] ||
+        new_module=1
+    }
+
+    [ -e $dir/lib/Email/MIME/Attachment/Stripper.pm ] || {
         /usr/bin/perl install-module.pl Email::MIME::Attachment::Stripper
-    [ -e $dir/lib/Email/Reply.pm ] ||
+        new_module=1
+    }
+
+    [ -e $dir/lib/Email/Reply.pm ] || {
         /usr/bin/perl install-module.pl Email::Reply
-    [ -e $dir/lib/Daemon/Generic.pm ] ||
+        new_module=1
+    }
+
+    [ -e $dir/lib/Daemon/Generic.pm ] || {
         /usr/bin/perl install-module.pl Daemon::Generic
-    [ -e $dir/lib/Apache2/SizeLimit.pm ] ||
+        new_module=1
+    }
+
+    [ -e $dir/lib/Apache2/SizeLimit.pm ] || {
         /usr/bin/perl install-module.pl Apache2::SizeLimit
+        new_module=1
+    }
+
+    [ -z "$new_module" ] || {
+        my_etckeeper commit "save after installing modules"
+    }
 
     [ -e $dir/lib/PatchReader.pm ] &&
         [ -e $dir/lib/Email/MIME/Attachment/Stripper.pm ] &&
         [ -e $dir/lib/Email/Reply.pm ] &&
         [ -e $dir/lib/Daemon/Generic.pm ] &&
         [ -e $dir/lib/Apache2/SizeLimit.pm ]
-)
+
+    cd "$pwd"
+}
 
 
 ensure_service_started postgresql postgres
 
+pg_create_db_user   bugzilla
+pg_create_db        bugzilla bugzilla
+
+
+f=/srv/www/bugzilla/localconfig
+tmpl=$SCRIPT_DIR$f
+dummy1='@@DB_PASS@@'
+dummy2='@@SITE_WIDE_SECRET@@'
+isnew=
+db_pass=
+site_wide_secret=
+set +x
+parse_password_by_pattern "^\\s*\\\$db_pass\\s*=\\s*['\"]([^'\"]+)" $f $dummy1 db_pass isnew
+[ ! "$isnew" ] || pg_set_role_password bugzilla "$db_pass"
+
+isnew=
+parse_password_by_pattern "^\\s*\\\$site_wide_secret\\s*=\\s*['\"]([^'\"]+)" $f $dummy2 site_wide_secret isnew 64
+
+substitude_template "$tmpl" "$f" 640 root:www-data CONF_CHANGED -e "s/$dummy1/$db_pass/" -e "s/$dummy2/$site_wide_secret/"
+set -x
+
+ensure_mode_user_group /srv/www/bugzilla                755 root root
+ensure_mode_user_group /srv/www/bugzilla/localconfig    640 root www-data
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 
 ensure_service_started apache2 apache2
 
-! my_etckeeper unclean || my_etckeeper commit "save before configuring"
+! my_etckeeper unclean || my_etckeeper commit "save after configuring"
 

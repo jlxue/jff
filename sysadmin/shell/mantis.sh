@@ -63,5 +63,5 @@ ensure_mode_user_group /srv/www/mantisbt/config_inc.php 640 root www-data
 
 ensure_service_started apache2 apache2
 
-! my_etckeeper unclean || my_etckeeper commit "save before configuring"
+! my_etckeeper unclean || my_etckeeper commit "save after configuring"
 
