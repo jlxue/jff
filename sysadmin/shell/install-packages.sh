@@ -151,7 +151,10 @@ i libtimedate-perl libdatetime-perl libdatetime-timezone-perl \
   libauthen-radius-perl libsoap-lite-perl libjson-rpc-perl \
   libjson-xs-perl libtest-taint-perl libhtml-parser-perl \
   libhtml-scrubber-perl libencode-detect-perl libtheschwartz-perl \
-  libapache2-mod-perl2 patchutils
+  libapache2-mod-perl2 patchutils \
+  libfile-flock-perl libfile-slurp-perl \
+  libanyevent-perl libevent-perl \
+  libapache2-mod-perl2-dev # required by Apache2::SizeLimit
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none

@@ -107,7 +107,7 @@ capture_match () {
 }
 
 parse_password_by_pattern () {
-    local pattern="$1" file="$2" dummy="$3" passwd_var="$4" newflag="$5" passwd=
+    local pattern="$1" file="$2" dummy="$3" passwd_var="$4" newflag="$5" len="$6" passwd=
 
     [ ! -e "$file" ] || {
         passwd=$(capture_match "$pattern" "$file")
@@ -115,7 +115,8 @@ parse_password_by_pattern () {
     }
 
     [ "$passwd" ] || {
-        passwd=`pwgen -cnys 24 1`
+        [ "$len" ] || len=24
+        passwd=`pwgen -cnys $len 1`
         [ -z "$newflag" ] || eval $newflag=1
     }
 
