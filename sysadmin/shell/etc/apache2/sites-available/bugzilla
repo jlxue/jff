@@ -30,4 +30,9 @@
             AllowOverride Limit FileInfo Indexes
         </Directory>
     </IfModule>
+
+    <Directory /srv/www/bugzilla/>
+        Order Allow,Deny
+        Allow from all
+    </Directory>
 </VirtualHost>
