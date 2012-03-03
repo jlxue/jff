@@ -6,7 +6,10 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 my_etckeeper () {
-    etckeeper "$@" -d /srv/www/mantisbt
+    local command="$1"
+
+    shift
+    etckeeper "$command" -d /srv/www/bugzilla "$@"
 }
 
 
@@ -31,6 +34,7 @@ pkg=bugzilla-4.2
 }
 
 ! my_etckeeper unclean || my_etckeeper commit "save before configuring"
+[ "`my_etckeeper vcs config --get color.ui`" = auto ] || my_etckeeper vcs config color.ui auto
 
 ensure_service_started postgresql postgres
 
