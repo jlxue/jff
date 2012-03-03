@@ -114,3 +114,5 @@ ensure_service_started apache2 apache2
 
 ! my_etckeeper unclean || my_etckeeper commit "save after configuring"
 
+sync_file $SCRIPT_DIR/etc/cron.d/bugzilla /etc/cron.d/bugzilla
+

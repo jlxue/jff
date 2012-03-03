@@ -1,0 +1,9 @@
+# http://www.bugzilla.org/docs/4.2/en/html/extraconfig.html
+
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# m   h  dom mon dow user  command
+  5   0  *   *   *   root  cd /srv/www/bugzilla && ./collectstats.pl
+ 55   0  *   *   *   root  cd /srv/www/bugzilla && ./whineatnews.pl
+*/15  0  *   *   *   root  cd /srv/www/bugzilla && ./whine.pl

@@ -34,5 +34,8 @@
     <Directory /srv/www/bugzilla/>
         Order Allow,Deny
         Allow from all
+
+        AddType application/vnd.mozilla.xul+xml .xul
+        AddType application/rdf+xml .rdf
     </Directory>
 </VirtualHost>
