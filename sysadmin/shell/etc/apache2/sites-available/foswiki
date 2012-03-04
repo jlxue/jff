@@ -172,7 +172,9 @@ SetEnvIf Request_URI "/pub/System/.*\.[hH][tT][mM][lL]?$" !blockAccess
     ErrorDocument 404 /bin/viewfile
 
     # Disable execution of PHP scripts
+    <IfModule mod_php5.c>
     php_admin_flag engine off
+    </IfModule>
 
     # This line will redefine the mime type for the most common types of scripts
     AddType text/plain .shtml .php .php3 .phtml .phtm .pl .py .cgi
