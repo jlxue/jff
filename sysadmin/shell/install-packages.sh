@@ -160,6 +160,7 @@ i libtimedate-perl libdatetime-perl libdatetime-timezone-perl \
 i rcs libapache-htpasswd-perl libcgi-session-perl \
   liblocale-maketext-lexicon-perl libcrypt-passwdmd5-perl \
   libarchive-zip-perl libnet-smtp-ssl-perl \
+  liberror-perl libfreezethaw-perl libtime-modules-perl
 
 
 ###########################################################

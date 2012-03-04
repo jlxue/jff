@@ -56,7 +56,7 @@ substitude_template "$tmpl" "$f" 640 root:www-data CONF_CHANGED -e "s/$dummy/$ma
 set -x
 
 
-ensure_mode_user_group /srv/www/mantisbt                755 root root
+ensure_mode_user_group /srv/www/mantisbt                750 root www-data
 ensure_mode_user_group /srv/www/mantisbt/config_inc.php 640 root www-data
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
