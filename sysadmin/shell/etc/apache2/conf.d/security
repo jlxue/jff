@@ -6,9 +6,12 @@
 # Debian packages.
 #
 <Directory />
-	AllowOverride None
-	Order Deny,Allow
-	Deny from all
+    AllowOverride None
+    Order Deny,Allow
+    Deny from all
+
+    # Default is "All" which includes "ExecCGI"
+    Options None
 </Directory>
 
 
