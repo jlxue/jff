@@ -11,14 +11,13 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 # fai.sh        fai-project.org
 # samba.sh
 # im.sh         ejabberd/openfire
-# wiki.sh       fosiwiki/moinmoin
+# wiki.sh       foswiki/moinmoin
 # cms.sh        drupal
 # blog.sh       wordpress
 # svn.sh        subversion + http, viewvc, reviewboard, Rietveld
 # git.sh        gitweb/cgit, gitolite, git-http-backend, gerrit
 # trac.sh
 # redmine.sh
-# bts.sh        bugzilla/mantis
 # ci.sh         jenkins
 # backup.sh     bacula/amanda
 # vpn.sh        openvpn
