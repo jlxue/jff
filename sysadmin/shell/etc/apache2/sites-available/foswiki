@@ -147,6 +147,14 @@ SetEnvIf Request_URI "/pub/System/.*\.[hH][tT][mM][lL]?$" !blockAccess
 
 </Directory>
 
+# When using Apache type login the following defines the Foswiki scripts
+# that makes Apache ask the browser to authenticate. It is correct that
+# scripts such as view are not authenticated.  This has to be LocationMatch because
+# the scripts are not accessed as files.
+<LocationMatch "^/+(attach|edit|manage|rename|save|upload|mail|logon|rest|.*auth).*">
+   Require valid-user
+</LocationMatch>
+
 # This sets the options on the pub directory, which contains attachments and
 # other files like CSS stylesheets and icons. AllowOverride None stops a
 # user installing a .htaccess file that overrides these options.
