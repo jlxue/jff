@@ -111,9 +111,15 @@ Optional:
 7.3) Restart apache2 and mailman services.
 
 
+++ Darwin CalendarServer Configuration ++
+
+8) The file system where /var/spool/davcald sits must be mounted with
+"user_xattr" option enabled.
+
+
 ++ DAViCal Configuration ++
 
-8) Turn off "Require valid-user" in /etc/apache2/sites-enabled/davical
+9) Turn off "Require valid-user" in /etc/apache2/sites-enabled/davical
 and restart Apache, then run this command as root user to find out
 admin's default password:
     # su postgres -c "psql davical -c 'select username, password from usr;'"
@@ -130,7 +136,7 @@ without password.
 
 ++ Mantis Configuration ++
 
-9) Access "http://bug.corp.example.com/admin/install.php" to finish
+10) Access "http://bug.corp.example.com/admin/install.php" to finish
 installation, you don't have to input anything in the input fields,
 just click the "Install/Upgrade Database" button.
 
@@ -139,7 +145,7 @@ Notice the default admin account is "administrator" with password "root".
 
 ++ Bugzilla Configuration ++
 
-10) Run these commands as root:
+11) Run these commands as root:
     # cd /srv/www/bugzilla
     # ./checkinstall.pl
 
