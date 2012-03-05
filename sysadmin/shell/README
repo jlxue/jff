@@ -1,5 +1,7 @@
 How to use:
 
+++ OS Installation ++
+
 1) Install Debian Wheezy base system, use host name "gold", domain
 name "corp.example.com";
 
@@ -17,6 +19,8 @@ ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 
 
+++ Network Configuration ++
+
 2) Use static network configuration in /etc/network/interfaces:
 
 iface eth0 inet static
@@ -32,6 +36,8 @@ nameserver 8.8.4.4
 NOTICE: If you DON'T use 10.0.0.10 for the "gold" server, adjust ./etc/bind/db.{corp,10}.
 
 
+++ Service Installation ++
+
 3) Run ./run.sh as root user, it may fail, fix errors and run ./run.sh
 again until all are OK.
 
@@ -45,18 +51,43 @@ nameserver 127.0.0.1
 #nameserver 8.8.4.4
 
 
+++ OpenLDAP Configuration ++
+
 4) As root, run:
     # service slapd start
     # ldapmodify -Y EXTERNAL -H ldapi:/// -c -f ldap-mods.ldif
     # service slapd restart
 
 
-5) Run /usr/share/doc/exim4-base/examples/exim-gencert to generate
+++ Kerberos Configuration ++
+
+5.1) Create Kerberos users:
+    # kadmin.local
+    kadmin.local: addprinc -policy user dieken
+    kadmin.local: addprinc -policy user jack
+
+5.2) Suppose "dieken" is the first local normal user with uid=1000,
+     "jack" is a user stored in OpenLDAP, run these commands as root:
+
+# /usr/sbin/ldapinit
+# /usr/sbin/ldapaddgroup users
+# /usr/sbin/ldapadduser jack users
+
+
+++ Exim Configuration ++
+
+6) Run /usr/share/doc/exim4-base/examples/exim-gencert to generate
 certificates for Exim if you can't get CA issued certificates, the
 "Server name" must be "smtp.corp.example.com".
 
+    ## Dovecot >= 2.0.18, due to these patches:
+    ## http://hg.dovecot.org/dovecot-2.0/rev/bed15faedfd4 auth: Check also masterdbs when checking if auth mechanism can be used.
+    ## http://hg.dovecot.org/dovecot-2.0/rev/525a179f324f auth: DIGEST-MD5 didn't read nonce-count parameter correctly.
+    ## http://hg.dovecot.org/dovecot-2.0/rev/847ca219989d auth: DIGEST-MD5 supports authorization id now.
 
-6.1) Run "newlist mailman" as root
+++ Mailman Configuration ++
+
+7.1) Run "newlist mailman" as root
 
 Optional:
     You may want to fix broken mailing list url if you have lists created before:
@@ -71,15 +102,46 @@ Optional:
     /var/lib/mailman/archives/public/mailman/index.html
     /var/lib/mailman/archives/private/mailman/index.html
 
-6.2) Run "mmsitepass" as root, it's required to create new list on mailman Web UI.
+7.2) Run "mmsitepass" as root, it's required to create new list on mailman Web UI.
 
-6.3) Fix file permission:
+7.3) Fix file permission:
 # chown www-data:list /var/lib/mailman/archives/private
 # chgrp -R list /var/lib/mailman/archives/private
 
-6.3) Restart apache2 and mailman services.
+7.3) Restart apache2 and mailman services.
 
 
+++ DAViCal Configuration ++
+
+8) Turn off "Require valid-user" in /etc/apache2/sites-enabled/davical
+and restart Apache, then run this command as root user to find out
+admin's default password:
+    # su postgres -c "psql davical -c 'select username, password from usr;'"
+    (the password is the bit after the '**' in the 'password' field)
+
+Login http://cal.corp.example.com/ with "admin" account, create a user
+for your Kerberos account, for example, dieken@CORP.EXAMPLE.COM
+
+Turn on "Require valid-user" again, restart Apache, use Firefox to
+access http://cal.corp.example.com/, if you have setup Negotiate
+authentication for your Firefox browser, you will find you can login
+without password.
+
+
+++ Mantis Configuration ++
+
+9) Access "http://bug.corp.example.com/admin/install.php" to finish
+installation, you don't have to input anything in the input fields,
+just click the "Install/Upgrade Database" button.
+
+Notice the default admin account is "administrator" with password "root".
+
+
+++ Bugzilla Configuration ++
+
+10) Run these commands as root:
+    # cd /srv/www/bugzilla
+    # ./checkinstall.pl
 
 
 =============================================================
