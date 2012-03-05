@@ -147,6 +147,10 @@ just click the "Install/Upgrade Database" button.
 
 Notice the default admin account is "administrator" with password "root".
 
+You may need to adjust default timezone in /etc/php5/cgi/php.ini:
+    date.timezone = Asia/Chongqing
+See http://php.net/manual/en/function.date-default-timezone-set.php
+
 
 ++ Bugzilla Configuration ++
 
