@@ -59,7 +59,11 @@ set -x
 ensure_mode_user_group /srv/www/mantisbt                750 root www-data
 ensure_mode_user_group /srv/www/mantisbt/config_inc.php 640 root www-data
 
-[ -z "$CONF_CHANGED" ] || service apache2 restart
+[ -z "$CONF_CHANGED" ] || {
+    service apache2 restart
+    # config_inc.php is in .gitignore, so add it explictly
+    my_etckeeper vcs add -f config_inc.php
+}
 
 ensure_service_started apache2 apache2
 
