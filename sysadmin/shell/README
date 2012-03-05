@@ -156,6 +156,36 @@ Notice the default admin account is "administrator" with password "root".
 
 
 =============================================================
+Firefox and ThunderBird settings:
+
+1) Thunderbird: Edit -> Preferences -> Advanced -> Config Editor
+            or  Tools -> Options -> Advanced -> Config Editor
+   Firefox: input "about:config" in URL box and press Enter key
+
+    network.negotiate-auth.trusted-uris: corp.example.com
+
+2) Thunderbird
+    IMAP:
+        Server Name: imap.corp.example.com
+        Port: 143
+        User Name: dieken
+        Connection security: STARTTLS
+        Authentication method: Kerberos / GSSAPI
+    SMTP:
+        Server Name: smtp.corp.example.com
+        Port: 25
+        User Name: dieken
+        Connection security: STARTTLS
+        Authentication method: Kerberos / GSSAPI
+
+3) Lightning
+  Darwin CalendarServer:
+    http://calendar.corp.example.com/calendars/users/dieken/calendar/
+  DAViCal:
+    http://cal.corp.example.com/caldav.php/dieken@CORP.EXAMPLE.COM/calendar/
+
+
+=============================================================
 Issues:
 
 If you encounter this error, check whether the keytab file exists
