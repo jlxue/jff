@@ -61,17 +61,22 @@ nameserver 127.0.0.1
 
 ++ Kerberos Configuration ++
 
-5.1) Create Kerberos users:
+5.1) Create Kerberos users (*/ldap are administrators of OpenLDAP server):
     # kadmin.local
     kadmin.local: addprinc -policy user dieken
     kadmin.local: addprinc -policy user jack
+    kadmin.local: addprinc -policy admin dieken/ldap
 
 5.2) Suppose "dieken" is the first local normal user with uid=1000,
-     "jack" is a user stored in OpenLDAP, run these commands as root:
+     "jack" is a user stored in OpenLDAP, run these commands as root
+     to create system user "jack"
 
-# /usr/sbin/ldapinit
-# /usr/sbin/ldapaddgroup users
-# /usr/sbin/ldapadduser jack users
+    # kinit dieken/ldap
+    # /usr/sbin/ldapinit
+    # /usr/sbin/ldapaddgroup users
+    # /usr/sbin/ldapadduser jack users
+    # kdestroy
+    # getent passwd | grep jack
 
 
 ++ Exim Configuration ++
