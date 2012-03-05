@@ -156,6 +156,8 @@ i libtimedate-perl libdatetime-perl libdatetime-timezone-perl \
   libanyevent-perl libevent-perl \
   libapache2-mod-perl2-dev # required by Apache2::SizeLimit
 
+i build-essential # required by bugzilla's install-modle.pl
+
 # dependencies for foswiki 1.1.4
 i rcs libapache-htpasswd-perl libcgi-session-perl \
   liblocale-maketext-lexicon-perl libcrypt-passwdmd5-perl \
