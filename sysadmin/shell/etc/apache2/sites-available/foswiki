@@ -127,9 +127,12 @@ SetEnvIf Request_URI "/pub/System/.*\.[hH][tT][mM][lL]?$" !blockAccess
 
 
     # Password file for Foswiki users
-    AuthUserFile "/srv/www/foswiki/data/.htpasswd"
     AuthName 'Enter your WikiName: (First name and last name, no space, no dots, capitalized, e.g. JohnSmith). Cancel to register if you do not have one.'
-    AuthType Basic
+    AuthUserFile "/srv/www/foswiki/data/.htpasswd"
+    AuthDigestDomain /
+    BrowserMatch "MSIE" AuthDigestEnableQueryStringHack=On
+    AuthDigestProvider file
+    AuthType Digest
 
     # File to return on access control error (e.g. wrong password)
     ErrorDocument 401 /System/UserRegistration
@@ -182,16 +185,13 @@ SetEnvIf Request_URI "/pub/System/.*\.[hH][tT][mM][lL]?$" !blockAccess
    #add an Expires header that is sufficiently in the future that the browser does not even ask if its uptodate
    # reducing the load on the server significantly
    #IF you can, you should enable this - it _will_ improve your Foswiki experience, even if you set it to under one day.
-   # you may need to enable expires_module in your main apache config
-   #LoadModule expires_module libexec/httpd/mod_expires.so
-   #AddModule mod_expires.c
-   #<ifmodule mod_expires.c>
-   #  <filesmatch "\.(jpe?g|gif|png|css(\.gz)?|js(\.gz)?|ico)$">
-   #       ExpiresActive on
-   #       ExpiresDefault "access plus 11 days"
-   #   </filesmatch>
-   #</ifmodule>
-   #
+   <IfModule mod_expires.c>
+     <FilesMatch "\.(jpe?g|gif|png|css(\.gz)?|js(\.gz)?|ico)$">
+          ExpiresActive on
+          ExpiresDefault "access plus 11 days"
+      </FilesMatch>
+   </IfModule>
+
    # Serve pre-compressed versions of .js and .css files, if they exist
    # Some browsers do not handle this correctly, which is why it is disabled by default
    # <FilesMatch "\.(js|css)$">
