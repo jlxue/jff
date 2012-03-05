@@ -26,8 +26,6 @@ mail			CNAME	gold
 list			CNAME	gold
 calendar		CNAME	gold
 cal			CNAME	gold
-; no Negotiate auth for cal.corp.example.com
-davical			CNAME	gold
 bug			CNAME	gold
 bugzilla		CNAME	gold
 wiki			CNAME	gold

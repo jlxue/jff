@@ -18,7 +18,7 @@ cmp_dir $SCRIPT_DIR/etc/modsecurity /etc/modsecurity || {
 
 
 #cmp_dir $SCRIPT_DIR/var/www /var/www || {
-#    overwrite_dir $SCRIPT_DIR/var/www /var/www
+#    overwrite_dir_ignore_extra $SCRIPT_DIR/var/www /var/www
 #    CONF_CHANGED=1
 #}
 

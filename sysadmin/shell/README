@@ -32,7 +32,7 @@ nameserver 8.8.4.4
 NOTICE: If you DON'T use 10.0.0.10 for the "gold" server, adjust ./etc/bind/db.{corp,10}.
 
 
-3) Run ./run.sh as root role, it may fail, fix errors and run ./run.sh
+3) Run ./run.sh as root user, it may fail, fix errors and run ./run.sh
 again until all are OK.
 
 $ cat /etc/resolv.conf
@@ -80,8 +80,6 @@ Optional:
 6.3) Restart apache2 and mailman services.
 
 
-7) Optionally,
-CONFDIR=`pwd`/etc/exim4 /usr/sbin/update-exim4.conf.template -r
 
 
 =============================================================
