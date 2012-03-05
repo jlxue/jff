@@ -159,6 +159,16 @@ See http://php.net/manual/en/function.date-default-timezone-set.php
     # ./checkinstall.pl
 
 
+++ Foswiki Configuration ++
+
+12) Turn off mod_fcgid related configuration in /etc/apache2/sites-available/foswiki,
+add your user name to "admin" group in /srv/www/foswiki/data/admin_group:
+
+admin: dieken@CORP.EXAMPLE.COM
+
+Restart Apache, access http://wiki.corp.example.com/bin/configure
+
+
 =============================================================
 Firefox and ThunderBird settings:
 

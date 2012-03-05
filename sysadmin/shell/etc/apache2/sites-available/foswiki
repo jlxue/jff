@@ -126,13 +126,14 @@ SetEnvIf Request_URI "/pub/System/.*\.[hH][tT][mM][lL]?$" !blockAccess
     </Files>
 
 
-    # Password file for Foswiki users
-    AuthName 'Enter your WikiName: (First name and last name, no space, no dots, capitalized, e.g. JohnSmith). Cancel to register if you do not have one.'
-    AuthUserFile "/srv/www/foswiki/data/.htpasswd"
-    AuthDigestDomain /
-    BrowserMatch "MSIE" AuthDigestEnableQueryStringHack=On
-    AuthDigestProvider file
-    AuthType Digest
+    #    # Password file for Foswiki users
+    #    AuthName 'Enter your WikiName: (First name and last name, no space, no dots, capitalized, e.g. JohnSmith). Cancel to register if you do not have one.'
+    #    AuthUserFile "/srv/www/foswiki/data/.htpasswd"
+    #    AuthDigestDomain /
+    #    BrowserMatch "MSIE" AuthDigestEnableQueryStringHack=On
+    #    AuthDigestProvider file
+    #    AuthType Digest
+    AuthType Kerberos
 
     # File to return on access control error (e.g. wrong password)
     ErrorDocument 401 /System/UserRegistration
@@ -143,7 +144,8 @@ SetEnvIf Request_URI "/pub/System/.*\.[hH][tT][mM][lL]?$" !blockAccess
     # cf. http://foswiki.org/Support/ProtectingYourConfiguration for details.
     <FilesMatch "^(configure)$">
         SetHandler cgi-script
-        Require user admin
+        AuthGroupFile /srv/www/foswiki/data/admin_group
+        Require group admin
         Satisfy All
         ErrorDocument 401 default
     </FilesMatch>

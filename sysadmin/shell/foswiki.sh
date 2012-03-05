@@ -44,7 +44,11 @@ dir=/srv/www/foswiki
 
 # lack Encode::compat, Lingua::EN::Sentence
 
-ensure_mode_user_group /srv/www/foswiki             750 www-data www-data
+[ -e /srv/www/foswiki/data/admin-group ] || touch /srv/www/foswiki/data/admin-group
+
+ensure_mode_user_group /srv/www/foswiki                     750 www-data www-data
+ensure_mode_user_group /srv/www/foswiki/data/.htpasswd      640 www-data www-data
+ensure_mode_user_group /srv/www/foswiki/data/admin-group    440 www-data www-data
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 
