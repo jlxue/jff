@@ -1,0 +1,9 @@
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# m   h  dom mon dow user       command
+ 55  23  *   *   *   www-data   cd /srv/www/foswiki/bin && ./statistics
+  0   0  *   *   0   www-data   cd /srv/www/foswiki/bin && ../tools/tick_foswiki.pl
+
+# See http://foswiki.org/System/MailerContrib
+  0   7  *   *   *   www-data   cd /srv/www/foswiki && perl -I bin tools/mailnotify -user AdminUser -q

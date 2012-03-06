@@ -156,7 +156,7 @@ SetEnvIf Request_URI "/pub/System/.*\.[hH][tT][mM][lL]?$" !blockAccess
 # that makes Apache ask the browser to authenticate. It is correct that
 # scripts such as view are not authenticated.  This has to be LocationMatch because
 # the scripts are not accessed as files.
-<LocationMatch "^/+(attach|edit|manage|rename|save|upload|mail|logon|rest|.*auth).*">
+<LocationMatch "^/+(attach|edit|manage|rename|save|statistics|upload|mail|logon|rest|.*auth).*">
    Require valid-user
 </LocationMatch>
 
