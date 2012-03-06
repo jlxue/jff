@@ -103,9 +103,9 @@ SetEnvIf Request_URI "/pub/System/.*\.[hH][tT][mM][lL]?$" !blockAccess
 
 
 <IfModule mod_fcgid.c>
-    DefaultMaxClassProcessCount 3
+    FcgidMaxProcessesPerClass 10
 
-    # Refer to details at http://fastcgi.coremail.cn/doc.htm
+    # Refer to http://httpd.apache.org/mod_fcgid/mod/mod_fcgid.html
 </IfModule>
 
 # This specifies the options on the Foswiki scripts directory. The ExecCGI
