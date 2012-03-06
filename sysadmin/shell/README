@@ -166,7 +166,8 @@ add your user name to "admin" group in /srv/www/foswiki/data/admin_group:
 
 admin: dieken@CORP.EXAMPLE.COM
 
-Restart Apache, access http://wiki.corp.example.com/bin/configure
+Restart Apache, access http://wiki.corp.example.com/bin/configure,
+the admin password to save configure is "123456", DO change it!.
 
 
 =============================================================
