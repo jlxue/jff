@@ -44,7 +44,16 @@ dir=/srv/www/foswiki
 
 # lack Encode::compat, Lingua::EN::Sentence
 
-[ -e /srv/www/foswiki/data/admin-group ] || touch /srv/www/foswiki/data/admin-group
+
+[ -e /srv/www/foswiki/data/admin-group ] || {
+    cp $SCRIPT_DIR/srv/www/foswiki/data/admin-group /srv/www/foswiki/data/admin-group
+}
+
+[ -e /srv/www/foswiki/lib/LocalSite.cfg ] || {
+    cp $SCRIPT_DIR/srv/www/foswiki/lib/LocalSite.cfg /srv/www/foswiki/lib/LocalSite.cfg
+    CONF_CHANGED=1
+}
+
 
 ensure_mode_user_group /srv/www/foswiki                     750 www-data www-data
 ensure_mode_user_group /srv/www/foswiki/data/.htpasswd      640 www-data www-data

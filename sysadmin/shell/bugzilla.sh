@@ -105,8 +105,17 @@ parse_password_by_pattern "^\\s*\\\$site_wide_secret\\s*=\\s*['\"]([^'\"]+)" $f 
 substitude_template "$tmpl" "$f" 640 root:www-data CONF_CHANGED -e "s/$dummy1/$db_pass/" -e "s/$dummy2/$site_wide_secret/"
 set -x
 
+
+[ -e /srv/www/bugzilla/data/params ] || {
+    cp $SCRIPT_DIR/srv/www/bugzilla/data/params /srv/www/bugzilla/data/params
+    CONF_CHANGED=1
+}
+
+
 ensure_mode_user_group /srv/www/bugzilla                750 root www-data
 ensure_mode_user_group /srv/www/bugzilla/localconfig    640 root www-data
+ensure_mode_user_group /srv/www/bugzilla/data/params    660 www-data www-data
+
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 
