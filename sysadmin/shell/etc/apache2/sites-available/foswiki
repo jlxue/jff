@@ -135,6 +135,10 @@ SetEnvIf Request_URI "/pub/System/.*\.[hH][tT][mM][lL]?$" !blockAccess
     #    AuthType Digest
     AuthType Kerberos
 
+    # Disallow anonymous readers, so actually the <LocationMatch ..> below is useless.
+    # The side effect is users don't have to click 'Login' link.
+    Require valid-user
+
     # File to return on access control error (e.g. wrong password)
     ErrorDocument 401 /System/UserRegistration
 
