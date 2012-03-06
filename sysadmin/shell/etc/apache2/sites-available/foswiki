@@ -144,7 +144,7 @@ SetEnvIf Request_URI "/pub/System/.*\.[hH][tT][mM][lL]?$" !blockAccess
     # cf. http://foswiki.org/Support/ProtectingYourConfiguration for details.
     <FilesMatch "^(configure)$">
         SetHandler cgi-script
-        AuthGroupFile /srv/www/foswiki/data/admin_group
+        AuthGroupFile /srv/www/foswiki/data/admin-group
         Require group admin
         Satisfy All
         ErrorDocument 401 default
