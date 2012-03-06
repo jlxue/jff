@@ -54,11 +54,18 @@ dir=/srv/www/foswiki
     CONF_CHANGED=1
 }
 
+[ -e /srv/www/foswiki/bin/foswiki.fcgi ] || {
+    overwrite_dir_ignore_extra $SCRIPT_DIR/srv/www/foswiki /srv/www/foswiki \
+        --exclude admin-group --exclude LocalSite.cfg
+    chown -R www-data:www-data /srv/www/foswiki
+    CONF_CHANGED=1
+}
 
 ensure_mode_user_group /srv/www/foswiki                     750 www-data www-data
 ensure_mode_user_group /srv/www/foswiki/data/.htpasswd      640 www-data www-data
 ensure_mode_user_group /srv/www/foswiki/data/admin-group    640 www-data www-data
 ensure_mode_user_group /srv/www/foswiki/lib/LocalSite.cfg   640 www-data www-data
+ensure_mode_user_group /srv/www/foswiki/working/configure/pkgdata/FastCGIEngineContrib_installer 750 www-data www-data
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 
