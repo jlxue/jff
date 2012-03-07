@@ -42,7 +42,8 @@ dir=/srv/www/foswiki
 
 # http://foswiki.org/System/InstallationGuide
 
-# lack Encode::compat, Lingua::EN::Sentence
+# XXX: lack Encode::compat, Lingua::EN::Sentence, you can install them with
+# "cd /srv/www/foswiki/bin; ../tools/dependencies_installer.pl"
 
 
 [ -e /srv/www/foswiki/data/admin-group ] || {
@@ -55,9 +56,11 @@ dir=/srv/www/foswiki
 }
 
 [ -e /srv/www/foswiki/bin/foswiki.fcgi ] || {
-    overwrite_dir_ignore_extra $SCRIPT_DIR/srv/www/foswiki /srv/www/foswiki \
-        --exclude admin-group --exclude LocalSite.cfg
-    chown -R www-data:www-data /srv/www/foswiki
+    (
+        set -e
+        cd /srv/www/foswiki
+        tools/extension_installer  FastCGIEngineContrib -a -d -r -c install
+    )
     CONF_CHANGED=1
 }
 

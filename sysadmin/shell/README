@@ -161,8 +161,11 @@ See http://php.net/manual/en/function.date-default-timezone-set.php
 
 ++ Foswiki Configuration ++
 
-12) Turn off mod_fcgid related configuration in /etc/apache2/sites-available/foswiki,
-add your user name to "admin" group in /srv/www/foswiki/data/admin_group:
+12.1) Optional, run these commands to install optional modules:
+    # cd /srv/www/foswiki/bin
+    # ../tools/dependencies_installer.pl
+
+12.2) add your user name to "admin" group in /srv/www/foswiki/data/admin_group:
 
 admin: dieken@CORP.EXAMPLE.COM
 
