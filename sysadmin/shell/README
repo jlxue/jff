@@ -163,7 +163,7 @@ See http://php.net/manual/en/function.date-default-timezone-set.php
 
 12.1) Optional, run these commands to install optional modules:
     # cd /srv/www/foswiki/bin
-    # ../tools/dependencies_installer.pl
+    # su www-data -c ../tools/dependencies_installer.pl
 
 12.2) add your user name to "admin" group in /srv/www/foswiki/data/admin_group:
 

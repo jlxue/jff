@@ -43,7 +43,7 @@ dir=/srv/www/foswiki
 # http://foswiki.org/System/InstallationGuide
 
 # XXX: lack Encode::compat, Lingua::EN::Sentence, you can install them with
-# "cd /srv/www/foswiki/bin; ../tools/dependencies_installer.pl"
+# "cd /srv/www/foswiki/bin; su www-data -c ../tools/dependencies_installer.pl"
 
 
 [ -e /srv/www/foswiki/data/admin-group ] || {
@@ -59,7 +59,7 @@ dir=/srv/www/foswiki
     (
         set -e
         cd /srv/www/foswiki
-        tools/extension_installer  FastCGIEngineContrib -a -d -r -c install
+        su www-data -c 'tools/extension_installer FastCGIEngineContrib -a -d -r -c install'
     )
     CONF_CHANGED=1
 }
@@ -68,7 +68,6 @@ ensure_mode_user_group /srv/www/foswiki                     750 www-data www-dat
 ensure_mode_user_group /srv/www/foswiki/data/.htpasswd      640 www-data www-data
 ensure_mode_user_group /srv/www/foswiki/data/admin-group    640 www-data www-data
 ensure_mode_user_group /srv/www/foswiki/lib/LocalSite.cfg   640 www-data www-data
-ensure_mode_user_group /srv/www/foswiki/working/configure/pkgdata/FastCGIEngineContrib_installer 750 www-data www-data
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 
