@@ -1,0 +1,10 @@
+http://code.google.com/p/html5rocks
+https://github.com/geraldb/slideshow-google-html5-slides
+http://slideshow.rubyforge.org/
+
+https://github.com/adamzap/landslide
+
+http://imakewebthings.com/deck.js/
+
+http://bartaz.github.com/impress.js/
+
