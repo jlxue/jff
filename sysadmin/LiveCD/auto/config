@@ -1,0 +1,14 @@
+#!/bin/sh
+
+lb config noauto \
+	-a i386 \
+	--apt-source-archives false \
+	-b iso \
+	--bootloader grub \
+	--distribution sid \
+	--hostname gold \
+	--linux-flavours 686-pae \
+	--mirror-binary http://mirrors.163.com/debian/ \
+	--mirror-bootstrap http://mirrors.163.com/debian/ \
+	--username dieken \
+	"${@}"
