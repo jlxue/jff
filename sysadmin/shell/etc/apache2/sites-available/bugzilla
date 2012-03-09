@@ -37,5 +37,8 @@
 
         AddType application/vnd.mozilla.xul+xml .xul
         AddType application/rdf+xml .rdf
+
+        AuthType Kerberos
+        Require valid-user
     </Directory>
 </VirtualHost>
