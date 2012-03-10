@@ -59,4 +59,5 @@ ensure_mode_user_group /etc/ldapscripts/ldapscripts.passwd  640 root root
 ensure_service_started slapd slapd
 ensure_service_started nscd nscd
 ensure_service_started nslcd nslcd
+ensure_service_started cron cron
 

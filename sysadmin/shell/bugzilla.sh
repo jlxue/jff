@@ -120,6 +120,7 @@ ensure_mode_user_group /srv/www/bugzilla/data/params    660 www-data www-data
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 
 ensure_service_started apache2 apache2
+ensure_service_started cron cron
 
 ! my_etckeeper unclean || my_etckeeper commit "save after configuring"
 
