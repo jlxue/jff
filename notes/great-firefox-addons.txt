@@ -9,6 +9,7 @@ Firebug
 Fission     (Progress bar in the address bar)
 FoxTab      (3D tab management)
 FoxProxy
+Ghostery
 Greasemonkey
     http://userscripts.org/scripts/show/9310    GoogleMonkeyR
 NoScript

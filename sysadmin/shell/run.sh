@@ -19,7 +19,7 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 # trac.sh
 # redmine.sh
 # ci.sh         jenkins
-# backup.sh     bacula/amanda
+# backup.sh     bacula/amanda/burp/backuppc/obnam
 # vpn.sh        openvpn
 # grok.sh       opengrok
 # search.sh     apache solr, katta.sourceforge.net

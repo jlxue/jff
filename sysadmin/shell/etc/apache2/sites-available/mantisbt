@@ -23,5 +23,11 @@
 
         Options ExecCGI
     </Directory>
+
+    # Override conf.d/javascript-common.conf
+    Alias /javascript /srv/www/mantisbt/javascript/
+    <Directory /srv/www/mantisbt/javascript/>
+        Options None
+    </Directory>
 </VirtualHost>
 
