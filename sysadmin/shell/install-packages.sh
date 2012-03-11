@@ -165,6 +165,8 @@ i rcs libapache-htpasswd-perl libcgi-session-perl \
   liberror-perl libfreezethaw-perl libtime-modules-perl \
   libfcgi-perl libgraphics-magick-perl
 
+# MoinMoin wiki
+i python-moinmoin
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none
