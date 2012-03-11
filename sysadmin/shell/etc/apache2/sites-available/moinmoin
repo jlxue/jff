@@ -1,0 +1,56 @@
+<VirtualHost *:80>
+    ServerName moin.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /nonexistent
+
+    ErrorLog ${APACHE_LOG_DIR}/moin-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/moin-access.log combined
+
+    <Directory "/usr/share/fckeditor/">
+        Order Allow,Deny
+        Allow from all
+    </Directory>
+
+    <Directory "/usr/share/moin/htdocs/">
+        Order Allow,Deny
+        Allow from all
+    </Directory>
+
+    <Directory "/usr/share/moin/server/">
+        <Files "moin.wsgi">
+            AuthType Kerberos
+            Require valid-user
+
+            Order Allow,Deny
+            Allow from all
+        </Files>
+    </Directory>
+
+    ### Serve static contents (images, javascript, css...) ###
+    AliasMatch "^/moin_static[0-9]*/applets/FCKeditor/(.*)" "/usr/share/fckeditor/$1"
+    <Directory "/usr/share/fckeditor/">
+        Options None
+        AllowOverride None
+    </Directory>
+
+    # The path to static contents changes (named after moinmoin version).
+    AliasMatch "^/moin_static[0-9]*/(.*)" "/usr/share/moin/htdocs/$1"
+    <Directory "/usr/share/moin/htdocs/">
+        Options -Indexes -FollowSymlinks
+        AllowOverride None
+    </Directory>
+
+    ### vhost ###
+    Alias /robots.txt /usr/share/moin/htdocs/robots.txt
+    Alias /favicon.ico /usr/share/moin/htdocs/favicon.ico
+
+    # Read: http://moinmo.in/HowTo/ApacheWithModWSGI
+    WSGIDaemonProcess mywiki user=www-data group=www-data processes=4 display-name=moin-wsgi-mywiki
+    WSGIProcessGroup mywiki
+    WSGIScriptAlias / "/usr/share/moin/server/moin.wsgi"
+</VirtualHost>

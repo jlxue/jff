@@ -15,7 +15,6 @@ cmp_dir $SCRIPT_DIR/etc/mailman /etc/mailman --exclude en --exclude zh_CN || {
 
 
 ensure_mode_user_group /etc/mailman     755 root list
-ensure_mode_user_group /srv/www         755 root root
 ensure_mode_user_group /srv/www/list    755 root root
 
 [ -z "$CONF_CHANGED" ] || {

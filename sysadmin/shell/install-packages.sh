@@ -166,7 +166,9 @@ i rcs libapache-htpasswd-perl libcgi-session-perl \
   libfcgi-perl libgraphics-magick-perl
 
 # MoinMoin wiki
-i python-moinmoin
+i python-moinmoin python-flup python-docutils python-xml \
+    antiword catdoc poppler-utils
+
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none

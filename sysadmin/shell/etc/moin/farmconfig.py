@@ -63,6 +63,7 @@ wikis = [
 # we like to have different:
 
 from MoinMoin.config import multiconfig, url_prefix_static
+from MoinMoin.auth import GivenAuth
 
 # Now we subclass this DefaultConfig. This means that we inherit every setting
 # from the DefaultConfig, except those we explicitely define different.
@@ -102,15 +103,19 @@ class FarmConfig(multiconfig.DefaultConfig):
     # Configure to enable subscribing to pages (disabled by default) or
     # sending forgotten passwords.
 
+    # The return address, e.g u"Wiki <noreply@mywiki.org>" [Unicode]
+    mail_from = u"Moin Wiki <noreply@corp.example.com>"
+
     # SMTP server, e.g. "mail.provider.com" (empty or None to disable mail)
     #mail_smarthost = ""
-
-    # The return address, e.g u"Jürgen Wiki <noreply@mywiki.org>" [Unicode]
-    #mail_from = u""
 
     # "user pwd" if you need to use SMTP AUTH
     #mail_login = ""
 
+    mail_sendmail = "/usr/sbin/sendmail -t -i"
+
+    # preload user subscribed pages with this page list:
+    #subscribed_pages_default = []
 
     # User interface ----------------------------------------------------
 
@@ -162,4 +167,11 @@ class FarmConfig(multiconfig.DefaultConfig):
 
     # Enable graphical charts, requires gdchart.
     #chart_options = {'width': 600, 'height': 300}
+
+    # See http://moinmo.in/HelpOnAuthentication
+    auth = [GivenAuth(autocreate=True, env_var='REMOTE_USER', strip_maildomain=True, titlecase=True)]
+
+    xapian_search = True
+    xapian_index_history = True
+    xapian_stemming = True
 

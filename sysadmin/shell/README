@@ -172,6 +172,12 @@ admin: dieken@CORP.EXAMPLE.COM
 Restart Apache, access http://wiki.corp.example.com/bin/configure .
 
 
+++ MoinMoin Configuration ++
+
+13) Access http://moin.corp.example.com/LanguageSetup to install
+    language pack, then restart Apache service.
+
+
 =============================================================
 Firefox and ThunderBird settings:
 

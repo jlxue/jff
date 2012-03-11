@@ -19,8 +19,8 @@ from farmconfig import FarmConfig
 class Config(FarmConfig):
 
     # basic options (you normally need to change these)
-    sitename = u'MyWiki' # [Unicode]
-    interwikiname = u'MyWiki' # [Unicode]
+    sitename = u'MainWiki' # [Unicode]
+    interwikiname = u'MainWiki' # [Unicode]
 
     # name of entry page / front page [Unicode], choose one of those:
 
@@ -30,5 +30,8 @@ class Config(FarmConfig):
     # b) if wiki content is maintained in many languages
     page_front_page = u"FrontPage"
 
-    data_dir = '/org/mywiki/data/'
+    data_dir = '/srv/www/moin/MainWiki/data/'
+    data_underlay_dir = '/srv/www/moin/MainWiki/underlay/'
 
+    superuser = [u"Dieken", ]
+    acl_rights_before = u"Dieken:read,write,delete,revert,admin"

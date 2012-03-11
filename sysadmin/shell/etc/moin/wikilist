@@ -9,4 +9,4 @@
 # in their home directory. To do so, list only the user's name, without
 # url. The format of ~/.moin/wikilist is the same as this file.
 
-#www-data wiki.example.org/
+www-data moin.corp.example.com/
