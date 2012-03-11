@@ -139,7 +139,6 @@ ensure_mode_user_group /etc/roundcube/plugins/managesieve/config.inc.php    640 
 ensure_mode_user_group /etc/roundcube/plugins/sieverules/config.inc.php     640 root www-data
 ensure_mode_user_group /etc/dovecot/master-users            640 root dovecot
 ensure_mode_user_group /etc/exim4/sasldb2                   640 root Debian-exim
-#ensure_mode_user_group /srv/www                             755 root root
 #ensure_mode_user_group /srv/www/mail                        755 root root
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart

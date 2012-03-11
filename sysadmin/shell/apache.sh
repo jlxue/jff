@@ -6,6 +6,8 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 
+mkdir -p -m 0755 /srv/www
+
 cmp_dir $SCRIPT_DIR/etc/apache2 /etc/apache2 || {
     overwrite_dir $SCRIPT_DIR/etc/apache2 /etc/apache2
     CONF_CHANGED=1
@@ -37,6 +39,8 @@ grep -q '^\s*date\.timezone\s*=' /etc/php5/cgi/php.ini || {
 
     CONF_CHANGED=1
 }
+
+ensure_mode_user_group /srv/www         755 root root
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 
