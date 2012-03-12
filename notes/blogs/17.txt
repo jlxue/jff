@@ -1,0 +1,18 @@
+日历服务
+
+
+经历了 Kerberos, Exim, Dovecot, RoundCube，Sieve 的折腾后，邮件服务算是告一段落了，接下来是跟邮件服务关系极为密切的日历服务。MS Exchange 就是一个结合邮件和日历服务的好例子，N 多企业都没法离开这货，悲剧的是 MS 的 Kerberos 加入了私有特性，邮件协议私有，日历协议私有，一个劲的把用户捆绑在 Windows 上。可我对 Outlook 很厌恶，主题树状视图比 ThunderBird 差的不是一星半点，看个邮件源码都不知道怎么看（Outlook 有隐藏功能可以看邮件头的源码，可以看 html 邮件的 html 源码，但是不知道怎么看邮件的源码），作为邮件客户端，Outlook 太二了，但是伊的日历功能是相当赞的，订会议室、查看会议参与人的空闲时间档、会议助手，等等。可惜 ThunderBird 的两个  Outlook 插件都对日历支持不是很给力，不然开启 Exchange 的 IMAP 支持后完全可以抛弃 Outlook。
+
+开源的日历服务器绝大多数都用 CalDAV 协议，日历使用 iCalendar 格式存储，CalDAV 协议是对 WebDAV 协议的扩充，允许多个客户端安全的同时操作服务器上的一个 iCalendar 文件。
+
+开源的日历服务端主要有三个：Apple 开源的 Darwin Calendar Server，PHP 写就的 DAViCal，Python 写就的 Radicale。DCS 原来是  Apple 的商业产品，也是用 Python 写的，应该是目前做的最企业级的开源日历服务程序了，支持多种认证方式，多种用户存储方式，XMPP 通知等等，Kerberos 认证自然支持的很好，难能可贵的是可以在 Kerberos 认证通过后自动创建 DCS 自己的帐号。
+
+DAViCal 据说比较成熟，支持很多 CalDAV 客户端，托 Apache + mod_krb 的福气，也可以支持 Kerberos 认证，但是悲剧的是伊不支持自动创建日历用户，需要管理员预先在 DAViCal 里为每个用户创建帐号，因此管理上不是很方便。DAViCal 是用 PHP 写的，很自然的一大优点是有 Web 管理界面，不过个人觉得没太大意义，默认权限设置就行了，普通帐号并不需要什么权限定制。
+
+Radicale 的出发点是想尽量简化，只负责通过 CalDAV 协议存储 iCalendar 文件，没什么高级功能，个人玩玩不错，使用简单，但据说伊当前的设计是每来一个请求都去磁盘上加载 iCalendar 文件再返回，并发请求多了性能会很差。
+
+配置 DCS 挺简单的，需要注意的是 /var/spool/caldavd 所在文件系统要启用 user_xattr 加载选项，装好后伊用 Python Twisted 实现了专用的  http/https server，监听非标准端口，在其前面用 Apache + mod_proxy 挡一下，一个 DCS 服务就搞定了。这里比较悲剧的是 Debian 打包的 DCS 很旧了，而且在 Debian testing 里居然被删除了，搞的我原来用 Debian testing 做试验，后来只能切换到用 Debian Sid，看来哪天还是折腾一把源码安装 DCS 得了。
+
+DAViCal 的配置也不是太麻烦，伊的官方文档为了简单，对 PostgresSQL 的访问控制把 davical_dba, davical_app 两个 SQL 帐号设置成 local trusted 了，由于我开了 ssh 服务，这个要求就太不靠谱了，所有本地用户都可以用那两个帐号访问 PostgreSQL 了。所以我修改了下安装脚本，让它支持  PostgreSQL 的 md5 密码认证方案。DAViCal 最近在搞网上调查，有兴趣的同学可以过去捧捧场：http://andrew.mcmillan.net.nz/node/182
+
+客户端的配置是很容易的，使用 ThunderBird + Lightning + Kerberos 认证，然后在 Config Editor 里把 network.negotiate-auth.trusted-uris 设置成 corp.example.com 以让 CalDAV 所用的 HTTP 协议顺利使用 Negotiate 认证方式。然后新建日历，DCS 的地址是 http://calendar.corp.example.com/calendars/users/dieken/calendar/，DAViCal 是 http://cal.corp.example.com/caldav.php/dieken@CORP.EXAMPLE.COM/calendar/，这里 dieken 是我的账户名，DAViCal 要是能把 @CORP.EXAMPLE.COM 自动去掉就好了——实在是不想去看去改 PHP 代码，太粗了，根子上就粗，连 #!... 都不支持，根据文件后缀判断，造就无数攻击。
