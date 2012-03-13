@@ -1,0 +1,4 @@
+# Release manifest for NormalizeUserPlugin
+data/System/NormalizeUserPlugin.txt 0644 Documentation
+lib/Foswiki/Plugins/NormalizeUserPlugin.pm 0644 Perl module
+
