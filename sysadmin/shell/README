@@ -163,24 +163,29 @@ See http://php.net/manual/en/function.date-default-timezone-set.php
 
 12.1) Optional, run these commands to install optional modules:
     # cd /srv/www/foswiki/bin
-    # su www-data -c ../tools/dependencies_installer.pl
+    # ../tools/dependencies_installer.pl
+    # chown -R www-data:www-data /srv/www/foswiki
 
-12.2) Build NormalizeUserPlugin:
-    $ wget ..../Foswiki-1.1.4.tgz
-    $ wget ..../BuildContrib.tgz
-    $ tar xf Foswiki-1.1.4.tgz
-    $ cd Foswiki-1.1.4
-    $ ln -s . core
-    $ tar xf ../BuildContrib.tgz
-    $ cp -a ../contrib/NormalizeUserPlugin .
-    $ perl build.pl NormalizeUserPlugin release
+12.2) Copy contrib/Foswiki/NormalizeUserPlugin/lib/Foswiki/Plugins/NormalizeUserPlugin.pm 
+      to /srv/www/foswiki/lib/Foswiki/Plugins/.
+
+Optional, the formal way to install the plugin, this will install NormalizeUserPlugin.txt to data/ too.
+    Build NormalizeUserPlugin:
+        $ wget ..../Foswiki-1.1.4.tgz
+        $ wget ..../BuildContrib.tgz
+        $ tar xf Foswiki-1.1.4.tgz
+        $ cd Foswiki-1.1.4
+        $ ln -s . core
+        $ tar xf ../BuildContrib.tgz
+        $ cp -a ../contrib/NormalizeUserPlugin .
+        $ perl build.pl NormalizeUserPlugin release
 
     Install NormalizeUserPlugin:
-    $ cp NormalizeUserPlugin/NormalizeUserPlugin_installer /tmp
-    $ cp NormalizeUserPlugin/NormalizeUserPlugin.tgz /tmp
-    $ su www-data
-    $ cd /srv/www/foswiki
-    $ /tmp/NormalizeUserPlugin_installer -a -r -c install
+        $ cp NormalizeUserPlugin/NormalizeUserPlugin_installer /tmp
+        $ cp NormalizeUserPlugin/NormalizeUserPlugin.tgz /tmp
+        $ su www-data
+        $ cd /srv/www/foswiki
+        $ /tmp/NormalizeUserPlugin_installer -a -r -c install
 
 12.3) add your user name to "admin" group in /srv/www/foswiki/data/admin-group:
 
