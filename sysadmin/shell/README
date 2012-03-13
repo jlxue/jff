@@ -165,7 +165,24 @@ See http://php.net/manual/en/function.date-default-timezone-set.php
     # cd /srv/www/foswiki/bin
     # su www-data -c ../tools/dependencies_installer.pl
 
-12.2) add your user name to "admin" group in /srv/www/foswiki/data/admin_group:
+12.2) Build NormalizeUserPlugin:
+    $ wget ..../Foswiki-1.1.4.tgz
+    $ wget ..../BuildContrib.tgz
+    $ tar xf Foswiki-1.1.4.tgz
+    $ cd Foswiki-1.1.4
+    $ ln -s . core
+    $ tar xf ../BuildContrib.tgz
+    $ cp -a ../contrib/NormalizeUserPlugin .
+    $ perl build.pl NormalizeUserPlugin release
+
+    Install NormalizeUserPlugin:
+    $ cp NormalizeUserPlugin/NormalizeUserPlugin_installer /tmp
+    $ cp NormalizeUserPlugin/NormalizeUserPlugin.tgz /tmp
+    $ su www-data
+    $ cd /srv/www/foswiki
+    $ /tmp/NormalizeUserPlugin_installer -a -r -c install
+
+12.3) add your user name to "admin" group in /srv/www/foswiki/data/admin-group:
 
 admin: dieken@CORP.EXAMPLE.COM
 
