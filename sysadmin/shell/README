@@ -141,7 +141,7 @@ without password.
 
 ++ Mantis Configuration ++
 
-10) Access "http://bug.corp.example.com/admin/install.php" to finish
+10.1) Access "http://bug.corp.example.com/admin/install.php" to finish
 installation, you don't have to input anything in the input fields,
 just click the "Install/Upgrade Database" button.
 
@@ -150,6 +150,14 @@ Notice the default admin account is "administrator" with password "root".
 You may need to adjust default timezone in /etc/php5/cgi/php.ini:
     date.timezone = Asia/Chongqing
 See http://php.net/manual/en/function.date-default-timezone-set.php
+
+10.2) Create a new admin account "dieken@CORP.EXAMPLE.COM" on Mantis management page,
+uncomment "$g_login_method = BASIC_AUTH" in /srv/www/mantis/config_inc.php,
+and uncomment "AuthType Kerberos", "Require valid-user" in
+/etc/apache2/sites-available/mantisbt, then restart Apache.
+
+10.3) Access dieken's email, Mantis will send an activation email,
+click the link in it to activate the account.
 
 
 ++ Bugzilla Configuration ++

@@ -44,6 +44,7 @@ $g_db_type       = 'pgsql';
 $g_allow_signup				= OFF;
 $g_allow_anonymous_login	= OFF;
 $g_anonymous_account		= '';
+#$g_login_method			= BASIC_AUTH;
 
 # --- Email Configuration ---
 $g_phpMailer_method		= PHPMAILER_METHOD_MAIL; # or PHPMAILER_METHOD_SMTP, PHPMAILER_METHOD_SENDMAIL
