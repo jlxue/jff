@@ -166,10 +166,9 @@ See http://php.net/manual/en/function.date-default-timezone-set.php
     # ../tools/dependencies_installer.pl
     # chown -R www-data:www-data /srv/www/foswiki
 
-12.2) Copy contrib/Foswiki/NormalizeUserPlugin/lib/Foswiki/Plugins/NormalizeUserPlugin.pm 
-      to /srv/www/foswiki/lib/Foswiki/Plugins/.
+12.2) Optional, the formal way to install NormalizeUserPlugin, this
+      will install NormalizeUserPlugin.txt to data/ too.
 
-Optional, the formal way to install the plugin, this will install NormalizeUserPlugin.txt to data/ too.
     Build NormalizeUserPlugin:
         $ wget ..../Foswiki-1.1.4.tgz
         $ wget ..../BuildContrib.tgz
