@@ -1,0 +1,13 @@
+Bug 跟踪系统
+
+不算 Trac、Redmine 这种啥都干但啥都不算最好的货色，以及商业用途收费广受好评的 JIRA，开源的 Bug 跟踪系统属 Bugzilla 知名度最高了，其次是 Mantis，剩下的 BugFree 和 BestPractice 的 RT 知名度就小的多了。
+
+Bugzilla 使用 Perl 编写，源自 Mozilla 社区，在开源界采纳程度极高，久经考验。几年前有舆论说 Bugzilla 是 Perl 写的，代码极难维护，除非重写，否则肯定是维护不下去了，但奇迹是这货依然位居开源 Bug 系统榜首，开发很活跃的样子，最近都发布 4.2 版了。我曾经扫过其代码，很吃惊的是代码非常整洁，显然出自专业程序员之手。Bugzilla 的 UI 是出了名的土鳖，最近的版本在不断改进 UI，但个人觉得只是表层打磨，依然骨子里很土鳖，颇符合程序员的 UI 设计水平。。。。最早 Bugzilla 只能运行在 CGI 方式下，效率很低，最新版本正式支持 mod_perl 方式运行，效率提升应该很明显，但手册警告说会相当耗内存，我因为要用一个 apache 支持多个 web 应用，很不乐意使用 mod_perl/mod_php/mod_python 之类的解释器内嵌技术，但 Bugzilla 的手册明确说明目前不支持 FastCGI 方式，Bugzilla 官方的 bug 系统里颇有一些 FastCGI 补丁，大都注明会导致什么什么特性失效。由于 FastCGI 方式下，多个 perl 解释器不能像 mod_perl + prefork 方式子进程之间共享加载的 Perl 模块，会浪费更多内存，效率上也不会跟 mod_perl 方式有明显差异，所以估计 Bugzilla 不会很快支持 FastCGI 运行方式，Apache + Bugzilla 依然会是长时间里的权威搭配，最新的 Apache 2.4 据说性能提升很明显，甚至某些情况下可以跟 Nginx 相比，Apache 排斥者可以稍微松口气:-)
+
+也不知道是幸与不幸，Debian 在不打包 TWiki (由于版权问题)后，又不打包 Bugzilla 了，还好 Debian 已经打包了绝大多数 Bugzilla 安装所需的 Perl 模块，所以在 Debian 里安装 Bugzilla 是非常容易的，Bugzilla 带的  checksetup.pl 很好用。在 Windows 下搭配 ActiveState Perl 安装 Bugzilla 也很容易，官方有详细文档，我曾经很意外的顺利装成功了，相当不理解许多人说 Bugzilla 难安装。
+
+Bugzilla 装完后，在 web 界面的配置页面里，有一个 Env 认证选项，可以从指定环境变量获取 user id, user email , user real name，前两者是必须的，恰巧我配置的  Kerberos realm 跟 mail domain 是一样的，所以都可以使用 HTTP GSSAPI Negotiate 认证获得的 REMOTE_USER 环境变量。用户第一次登录 Bugzilla 时，Bugzilla 会自动创建对应的 Bugzilla user，这点很不错。
+
+接下来聊聊 Mantis，这东西最吸引人的地方是其 UI 设计，用过 Bugzilla 后再看 Mantis 的界面，很可能会哇的一声。Mantis 使用 PHP 编写，安装过程是很典型的基于数据库的 PHP web 应用风格。但比较悲剧的是 Mantis HTTP auth 支持不是很给力，只支持 web server 的 BASIC_AUTH 以及 PHP 内置的  HTTP_AUTH，不支持 web server 的 GSSAPI Negotiate auth，也不会在用户第一次登录 Mantis 时自动创建用户，这点跟之前提到的 DAViCal 一个德行，都需要管理员预先创建 PHP app 自己的用户账户。要想在 SSO 环境里使用 Mantis，还需要动动其代码。
+
+Mantis 的代码起码从目录组织上看，就是明显的 PHP 糙快猛型，php 文件到处散布，根目录下就有两百多个 php 文件，显然绝大多数都是不应该从浏览器里访问的，我挺担心这样会不会有安全漏洞。Bugzilla 显然考虑了这种问题，.cgi 脚本跟模块代码分开，很容易按照目录设置访问权限。
