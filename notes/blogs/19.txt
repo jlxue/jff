@@ -1,0 +1,16 @@
+Wiki 系统
+
+公司里头共享知识，需要大家合力编辑并整理文档，非 Wiki 形式莫属。开源的 Wiki 系统很多，名气最大的有如下几个：
+
+    MediaWiki：PHP 编写，最出名的使用案例是维基百科了，我没有实际安装过，有传言说维护比较复杂。
+    TWiki：Perl 编写，由于版权纠纷，现在派生出 Foswiki，很有名气的“企业级 Wiki”，被很多公司使用，搭配插件，功能相当强悍，比如可以根据标记文本生成日历，可以生成 HTML 表单，可以内嵌 Bugzilla 查询结果，方便的标记让一块内容显示或隐藏，支持内嵌 HTML/CSS/JS 可以把页面定制的非常花哨。TWiki/Foswiki 的内容存储使用 RCS 版本控制系统，因此存储格式相当稳定可靠，备份也很方便。TWiki/Foswiki 的缺点是文档比较杂乱，默认配置的页面内容和链接太多，用户、组管理，站点、主题等设置直接用 Wiki 标记实现，给人感觉使用稍显复杂（貌似企业级东西不让你抓耳挠勺就不好意思说是“企业级”。。。。）
+    MoinMoin：Python 编写，很多大型开源项目都用它做 Wiki 系统，比如 http://wiki.debian.org, http://help.ubuntu.com/community/，http://wiki.python.org/， http://wiki.apache.org/，http://kernelnewbies.org/，默认界面非常的清新，文档编写和组织非常好，Category 的设计容易将文档分类（TWiki 需要装个 Tag 插件才有类似功能），MoinMoin 还有一些皮肤插件可以把界面模拟成文件管理器的样子，很方便站点结构的整理。MoinMoin 使用自己设计的基于文件的版本管理，每一次修改都完整保存一份，文件名是递增的数字，每创建一个页面会创建三个目录四五个文件，这种简单粗暴的存储方式很让人崩溃。MoinMoin 还有一个大赞的特性是其 DesktopEdition 运行方式，下载压缩包后解压缩，执行里头的 wikiserver.py 就会使用内置的 Web 服务器运行 MoinMoin，无需配置即可享用“桌面版” Wiki，拿来做个笔记啥的太方便不过了。
+    DokuWiki 和 PmWiki：都是 PHP 编写并直接使用文件的存储页面，特性比较少，貌似不支持所见即所得编辑。
+
+
+我喜欢 Foswiki 的功能丰富，又喜欢 MoinMoin 的简洁页面布局，而且两者现在都集成了所见即所得编辑器，所以两个都装着试验了下，Debian 没有打包前者，我之前装过 Bugzilla，已经装了一大堆 Perl 模块，所以 Foswiki 装起来也挺容易，官网上的 Apache 配置生成器很强大，不过比较悲剧的是安装文档组织的有点乱，而且忒长，我利用空余时间看了好几天才动手配置。。。。Foswiki 有 FastCGI 插件可以让 Foswiki 运行于 FastCGI 方式，效率还不错。认证方面支持 ApacheLogin 方式，可以让 Apache 处理认证，Foswiki 使用 REMOTE_USER 环境变量获得用户名，但又一个悲剧的事情是 GSSAPI Negotiate 认证后得到的用户名是 dieken@CORP.EXAMPLE.COM，Foswiki 显示成 "diekenCORPEXAMPLECOM" 了。。。有一个 LDAP 扩展可以处理用户名，但是我没打算让 Foswiki 查询 LDAP，所以自己琢磨着写 Foswiki 插件，再看了两三天个人觉得比较杂乱的官方文档，折腾了 Foswiki 推荐的插件辅助开发插件后，花了大约十来秒写了两行代码，于是一个去掉 user@REALM 中 @REALM 部分以及把 user 首字母大写的 Foswiki 插件闪亮登场，顺利达成我的期望效果。。。。。
+
+在上面摸索 Foswiki 对用户名处理逻辑的过程中，扫了下 Foswiki 代码，感觉代码质量不是很好，有明显的开源合作局部修改痕迹（比如上头判断一个条件返回了，底下过了几行，又判断这个条件），整体设计比较复杂，源码里注释夹杂 Foswiki 标记，看的头晕，但粗略来说，Foswiki 正在重构历史遗留的 CGI 风格代码，已经将大量代码放入单独模块，代码质量有望越来越好。
+
+MoinMoin 的安装就要简单的多，以前装过一次，不过忘记过程了，这次重装，看文档就花了个把小时，抄抄现成配置就基本搞定了，使用 mod_wsgi，MoinMoin 作为外部进程持续运行，类似于 FastCGI 模式。MoinMoin 最新版有个 GivenAuth 认证方式，可以利用 Apache 认证的 REMOTE_USER 变量，而且 GivenAuth 直接支持我上面提到的用户名规范化逻辑，所以很轻松就达到了我在 Foswiki 上折腾的用户名显示效果（实际上我是后折腾出 Foswiki 那个插件的。。。)
+
