@@ -12,6 +12,10 @@ sync_file $SCRIPT_DIR/etc/default/shorewall-init /etc/default/shorewall-init
 sync_file $SCRIPT_DIR/etc/default/shorewall /etc/default/shorewall
 sync_file $SCRIPT_DIR/etc/default/shorewall6 /etc/default/shorewall6
 
+ensure_mode_user_group /etc/default/shorewall-init  644 root root
+ensure_mode_user_group /etc/default/shorewall       644 root root
+ensure_mode_user_group /etc/default/shorewall6      644 root root
+
 cmp_dir $SCRIPT_DIR/etc/shorewall /etc/shorewall || {
     overwrite_dir $SCRIPT_DIR/etc/shorewall /etc/shorewall/
     service shorewall restart

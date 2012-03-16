@@ -33,5 +33,7 @@ mount_point=$(df /var/spool/caldavd | tail -1 | awk '{print $6}')
         }
 }
 
+ensure_mode_user_group /etc/default/calendarserver  644 root root
+
 [ "`pgrep -f caldavd`" ] || service calendarserver start
 

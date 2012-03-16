@@ -48,6 +48,7 @@ mantis.sh
 bugzilla.sh
 foswiki.sh
 moinmoin.sh
+ejabberd.sh
 END`
 
 for f in $SCRIPTS; do
