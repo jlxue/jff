@@ -169,6 +169,7 @@ i rcs libapache-htpasswd-perl libcgi-session-perl \
 i python-moinmoin python-flup python-docutils python-xml \
     antiword catdoc poppler-utils
 
+i ejabberd
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none
