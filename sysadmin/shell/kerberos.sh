@@ -105,12 +105,15 @@ ensure_service_principal smtp/$hostname /etc/dovecot.keytab
 ensure_service_principal imap/$hostname /etc/dovecot.keytab
 ensure_service_principal sieve/$hostname /etc/dovecot.keytab
 
+ensure_service_principal xmpp/$hostname /etc/xmpp.keytab
+
 
 ensure_mode_user_group /etc/slapd.keytab        600 openldap openldap
 ensure_mode_user_group /etc/http.keytab         600 www-data www-data
 ensure_mode_user_group /etc/smtp.keytab         600 Debian-exim Debian-exim
 ensure_mode_user_group /etc/dovecot.keytab      600 dovecot dovecot
 ensure_mode_user_group /etc/caldavd.keytab      600 caldavd caldavd
+ensure_mode_user_group /etc/xmpp.keytab         600 ejabberd ejabberd
 
 ensure_mode_user_group /etc/hosts               644 root root
 ensure_mode_user_group /etc/krb5.conf           644 root root

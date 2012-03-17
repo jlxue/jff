@@ -207,8 +207,16 @@ Restart Apache, access http://wiki.corp.example.com/bin/configure .
     language pack, then restart Apache service.
 
 
+++ ejabberd Configuration ++
+
+14) Run this command to register a new user:
+    # ejabberdctl register dieken corp.example.com `pwgen -cnys 64 1`
+
+    The password is not used for login.
+
+
 =============================================================
-Firefox and ThunderBird settings:
+Client settings:
 
 1) Thunderbird: Edit -> Preferences -> Advanced -> Config Editor
             or  Tools -> Options -> Advanced -> Config Editor
@@ -235,6 +243,17 @@ Firefox and ThunderBird settings:
     http://calendar.corp.example.com/calendars/users/dieken/calendar/
   DAViCal:
     http://cal.corp.example.com/caldav.php/dieken@CORP.EXAMPLE.COM/calendar/
+
+
+4) Create XMPP account in Pidgin
+    "Basic" tab page:
+        Protocol:   XMPP
+        Username:   dieken
+        Domain:     corp.example.com
+    "Advanced" tab page:
+        Connection security:    Require encryption
+        Connect port:           5222
+        Connect server:         xmpp.corp.example.com
 
 
 =============================================================

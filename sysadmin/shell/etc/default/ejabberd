@@ -149,6 +149,9 @@ ERLANG_NODE=ejabberd
 #
 EJABBERD_PID_PATH=/var/run/ejabberd/ejabberd.pid
 
+# For SASL GSSAPI authentication
+export KRB5_KTNAME=/etc/xmpp.keytab
+
 #.
 #'
 # vim: foldmarker=#',#. foldmethod=marker:
