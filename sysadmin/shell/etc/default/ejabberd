@@ -10,7 +10,7 @@
 #
 # Default: false
 #
-#POLL=false
+POLL=true
 
 # SMP: SMP support ([enable|auto|disable])
 #
@@ -23,7 +23,7 @@
 #
 # Default: disable
 #
-#SMP=disable
+SMP=auto
 
 # ERL_MAX_PORTS: Maximum number of simultaneously open Erlang ports
 #
