@@ -212,7 +212,12 @@ Restart Apache, access http://wiki.corp.example.com/bin/configure .
 14) Run this command to register a new user:
     # ejabberdctl register dieken corp.example.com `pwgen -cnys 64 1`
 
-    The password is not used for login.
+    You can use the password or your Kerberos ticket to login with Pidgin.
+
+    Access http://xmpp.corp.example.com:5280/admin with username
+    "dieken@corp.example.com" and the password above to manage this
+    ejabberd service, notice some options are cleared by
+    /etc/ejabberd/ejabberd.cfg due to "override_*" directives.
 
 
 =============================================================
