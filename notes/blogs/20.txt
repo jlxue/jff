@@ -1,0 +1,127 @@
+版本控制系统
+
+
+本系列第二十篇，给 coder 最爱的工具：Version Control System。当今流行的开源版本控制系统并不多： Subversion、 GIT、Mercurial、Bazaar。CVS 就淡忘了吧，虽然依然有很多人用，但实在是不能说流行了，或者更准确点，“时髦”。
+
+个人觉得一个 VCS 应该具备两点最核心的特性：
+
+    提交的原子性：一次提交多个文件的修改，要么全部提交成功，要么全部提交失败；一次提交能作为一个整体容易的查找出来并一个操作就撤销掉。CVS 和 Visual Source Safe 是这方面的失败者。
+    不需要管理员授权就可以随意的创建私有分支。
+
+其它诸如图形界面、重命名的支持、高级的合并算法，都是锦上添花，没有并不会大幅降低工作效率。上面第二个特性可能很多 Subversion 爱好者不以为然，那是你们被虐习惯了而已。有一个版本控制工具叫 SVK，构建在 Subversion 基础上，可以在本地创建私有分支，基本上是 DVCS 的路子，但是现在已经处于维护阶段，不再继续开发了。
+
+本来想再罗嗦几句 DVCS 的含义，写了好几段，发现太意识流，删除了。。。且简略说一下 GIT 的一些特点，因为我觉得 GIT 是最纯粹的 DVCS 工具。
+
+    GIT 里版本图是 commit 根据父子关系形成的单向无循环图，这里每个节点以 commit SHA1 做标记；
+    git fetch/push 是在不同开发者之间同步这个版本图的过程，最终大家能看到一个公共的、一致的版本图；
+    GIT 里 branch 名字准确说是 branch head 的名字，跟 tag 一样，都是特定开发者打下的私人的标记，标记本身不在版本历史里。其它人由于承认他的权威，接受他的标记，而标记本身并不影响版本图里 commit 的父子关系，所以去掉这些标记也是没关系的，只是大家要以 SHA1 值来称呼 branch head 和 tag 了。不同人起同样的 branch head 和 tag name 是没有关系的，对于 branch head，由于有 remote 名字空间区分，所以不会冲突，对于 tag，可以签名，所以冲突了也能识别出来。（这个地方跟 Mercurial 的做法有本质区别，Mercurial 里 branch head 的名字，tag 名字都是计入版本历史的，一个 branch head 名字被使用后，其它人不能再用同名的 branch，除非不合并)。
+    GIT 里两个 branch head 合并后，两个 branch head 名字指向同一个 branch head，其实就成了一个分支，这种分支合并而非仅仅修改合并，对于 DVCS 是有本质意义的，否则分布式开发里 branch head 会越来越多，无法收拾。对于非权威开发者，合并后要么丢弃自己的标记（因为它是多余的），要么继续保留作为自己的本地私人标记，方便自己识别，总之，不会公开出去。
+
+又说了一大段。。。。核心想法是 GIT 里版本图是“修改”构成的，不受“标记”的影响，因为技术上别人只关心你改了什么，不关心你打了什么标记，标记只是社会地位的体现，跟技术无关，所以 GIT 的版本图里是没有“中心”一说的，比如 Linus Torvalds 很长时间没修改 Linux 内核，然后合并了其它人的分支头，那么 Linus Torvalds 打的 branch head 标记会被 fast forward 机制修改成直接指向其它人标记的 branch head，并不产生新的 commit，从这个 branch head 往回看，其 commit 的 first parent 构成的线并不是被 Linus Torvalds 主导，也就是说：你贡献的多，你就是主导，而非你权威，你就是主导。这跟 Subversion 的做法是有本质区别的。
+
+laf，还是意识流了。。。。。
+
+继续罗嗦一句，有人可能误解 DVCS 不能用在公司里头做集中式版本管理，其实是完全可以的，参考 linux kernel 的分支发展历史，有权威就有集中控制。
+
+回到正题。。。。公司里应该选择什么 VCS：
+
+    开发人员太弱，不求上进，或者代码规模很小，并且开发团队不大，并且代码维护时间不会很长，那么可以用 Subversion，伊的 TortoiseSVN 目前是 Tortoise 系列最成功的一款。Subversion 的弊病在于建立私有分支不便、合并支持较弱、不支持重复文件去重从而版本库体积容易增长迅速（有本地直接 copy 然后 svn add 的兄弟吗？）。
+    否则如果很重视 Windows 支持或者受不了 GIT 的“丰富”命令行 UI，那么用 Mercurial，否则用 GIT。Mercurial 的主要缺陷是 branch name、tag 计入版本历史的设计。当然，肯定有人会争论这不是缺点，但从 Mercurial 对 branch 特性的改进以及 bookmark 扩展的提出，说明抱怨是颇有一些的，反观 GIT，blob/commit/tree/tag/branch 的设计从一开始到现在，思路完全没变，怪不得 Linus 说"In other words, I'm right. I'm always right, but sometimes I'm more right than other times. And dammit, when I say "files don't matter", I'm really really Right(tm). "，而且 GIT 现任保姆 Junio 说 "For people new to the list, the message is:  http://thread.gmane.org/gmane.comp.version-control.git/27/focus=217, I think I've quoted this link at least three times on this list;I consider it is _the_ most important message in the whole list archive.  If you haven't read it, read it now, print it out,  read it three more times, place it under the pillow before you sleep tonight.  Repeat that until you can recite the whole message.  It should not take more than a week."
+
+至于 bazaar，尽可能躲开吧，大概半年前我体验的时候依然很慢，另外 bazaar 的设计很有问题，bazaar 和 git 开发者早期有大量大量的口水战，git 开发者认为 bazaar 的 branch 设计压根就不是 DVCS 的设计。我记得 bazaar 的存储方式频繁的修改了好几版，最后改成跟 git 的 object store 很类似的方式。。。个人偏见，bazaar 表面伪装的很易用，骨子里设计的很繁复。
+
+虽然我很推崇 GIT，它当然也是有烦人的地方：命令行 UI 终是难让人满意，不是说命令行不好，而是其命令功能、选项设计不够简洁，这点 Mercurial 做的不错；没有 hg serve 那样的内置 web server，git instaweb 需要外置 web server；git submodule 不好用，Google 的 repo 工具改进的很有创意。
+
+BTW，提两个 GIT 里容易被人忽略的节约带宽和磁盘的特性：git clone 的 --depth 选项，可以不用 clone 整个版本历史；git help read-tree 提到的 Sparse checkout(GIT >= 1.7.0)，可以让 read-tree, checkout, merge 只操作某些目录，而非整个文件树。
+
+服务 GIT 代码库，现在最流行的方案是 Gitolite，基于 ssh 协议提供可写访问，之前有一个 Gitosis，已然过气了。另外 git 新版有一个 http-backend 命令，可以提供高效的 git over http 传输，但用的不广泛，原因不明。
+
+转一篇 bazaar 相关的讨论，原帖转移到 wordpress 不好访问了。
+bzr 的分支管理
+
+在 NewSMTH Emacs 版跟 SuperMMX 讨论了下 Bazaar，之前看其手册没能理解透彻
+的地方明白了许多。
+
+1. Bazaar 的三段式版本号是取决于参照哪个分支说的，命名规则是(SuperMMX 语)：
+
+第一个数字是哪个版本上开始拉出的分支。第二个数字表示是从这个版本上拉出来的
+分支是第几个合并过来的，只要祖先是这个版本的都算。第三个数字就是在拉出来的
+分之上第几次提交。
+
+1 2 3
+| | |
+a
+|
+b
+|\
+c e
+| |\
+d f g
+| |/
+| h
+|/
+i
+
+时间线从上往下，直线表示一个分支上的提交，\ 表示拉出分支的第一次提交，/ 表示合并
+上面的 1、2、3 表示不同的分支，以后把它们叫做 b1、b2、b3，分别代表 a、
+e 和 g 所在的分支。
+
+a、b、c、d 分别是 1、2、3、4，这个比较好理解。
+
+那么 e 呢？这得看你站在哪个角度上去看，站在 e 所在的分支本身 b2 去看，
+那么 e 就应该是 3，f 是 4，h 是 5。
+
+同样，g 在自己所在的分支上 b3 看是 4，那当合并到 b2 上以后，就不应该是
+4 了，因为已经有了 f。注意，现在已经是站在 e 所在分支 b2 的角度去看问题了，
+g 所在的分支 b3 是从 e 拉出来的，所以 g 的第一个数字应该是 3，而 b3 是
+第 1 个在 b2 上所合并的分支，所以第二个数字是 1，g 又是 b3 上的第一次
+提交，所以那么 g 在 b2 的版本号就是 3.1.1。
+
+然后 d 和 h 合并成 i 之后，站在 a 所在的分支 b1 角度去看 e、f、h 和 g
+分别应该是什么。很明显，e、f、h 的第一个数字和第二个数字是一样的，因为它
+们都是同一个分支上的，而这个分支是从 b 拉出来的，b 的版本号是 2，那么第
+一个数字就是 2。因为 b2 是 b1 上第一个合并的分支，所以第二个数字是 1。
+最后的数字他们分别是 1、2、3 了，所以 e、f、h 分别是 2.1.1、2.1.2
+以及 2.1.3。
+
+再看 g，它跟 e、f、h 都是从 b 出来的，那么第一个数字也是 2。第二个数字
+因为 b1 已经包含了 b2 了，所以它应该是 b1 上第二个合并的分支，所以应该是 2。
+第三个数字是 1。所以 g 最后在 b1 上就是 2.2.1。
+
+单纯从数字上看是没有办法区分是分支还是分支的分支的。
+
+2. init-repo 和 init 的区别
+
+仓库（Repository）就是存储版本（Revision）的，缺省情况 bzr init 是把
+一个目录变成 Bazaar 所控制的分支，至于真正的仓库在哪里，就看是不是在
+共享仓库（Shared Repository）里面，而共享仓库必须由 bzr init-repo
+来创建。如果所创建的分支是在共享仓库里，那么这个分支的版本数据就存在
+共享仓库中，否则就是在自己的分支仓库中。也就是说，在共享仓库中，
+所有分支的所有版本都只有一份。
+
+举个例子，现在远端仓库里 main branch 的版本是 100，我在本地需要三个分支
+同时来干不同的事。如果用一般的仓库的话，bzr branch 三次，那么前 100 个
+版本在三个分支中都存在，但如果用共享仓库的话，就只有一份。
+
+// bzr init-repo 是建立一个地方供多个分支存放版本记录，bzr init 是将一个目录
+// 纳入版本管理。
+
+3. checkout 和 branch 的关系
+
+checkout 就是和远端绑定的 working tree，直接提交到远端，而不需要再
+push 了，通过 bind/unbind 可以在 checkout 和 branch 之间转换。
+缺省的 checkout 是 heavy checkout，也就是历史数据都拿得到，diff 之类
+的命令都不要和远端打交道，只是 update/commit 才连接远端。而 lightweight
+checkout 可就跟 CVS/SVN 基本上就一样了，干个啥都要连远端。
+
+所以 Bazaar 推荐使用共享仓库，所有的分支都在共享仓库下，包括远端
+和本地的。
+
+// checkout 是 CVS 式，区别在于 heavy checkout 时可以本地缓存版本记录，
+// 提交到远程服务器上，除非 commit –local 或者 unbind 以转成一个 branch。
+// branch 是 DVCS 式， 提交到本地，然后 push 到远程服务器，用 bind 将一个
+// branch 转成 checkout。说白了，checkout 和 branch 就是指一个工作目录
+// 是跟本地分支关联还是跟远程分支关联。
+
+4. bzr 有 switch 命令，这样能一个工作目录对应多个分支。
+
