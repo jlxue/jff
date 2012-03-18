@@ -170,6 +170,7 @@ i python-moinmoin python-flup python-docutils python-xml \
     antiword catdoc poppler-utils
 
 i ejabberd imagemagick  # imagemagick is required for CAPTCHA
+#i pymsnt   # msn transport for Jabber
 
 
 ###########################################################
