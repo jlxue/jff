@@ -214,7 +214,7 @@ Restart Apache, access http://wiki.corp.example.com/bin/configure .
 
     You can use the password or your Kerberos ticket to login with Pidgin.
 
-    Access http://xmpp.corp.example.com:5280/admin with username
+    Access http://xmpp.corp.example.com/admin with username
     "dieken@corp.example.com" and the password above to manage this
     ejabberd service, notice some options are cleared by
     /etc/ejabberd/ejabberd.cfg due to "override_*" directives.

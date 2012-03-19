@@ -25,7 +25,9 @@ ensure_mode_user_group /var/log/ejabberd            2750 ejabberd adm
 ensure_mode_user_group /var/lib/ejabberd            700 ejabberd ejabberd
 
 mkdir -p -m 0755 /srv/www/xmpp
-ensure_mode_user_group /srv/www/xmpp                750 root www-data
+mkdir -p -m 0750 /srv/www/xmpp/muclogs
+ensure_mode_user_group /srv/www/xmpp                750 ejabberd www-data
+ensure_mode_user_group /srv/www/xmpp/muclogs        2750 ejabberd www-data
 
 
 [ -z "$CONF_CHANGED" ] || service ejabberd restart

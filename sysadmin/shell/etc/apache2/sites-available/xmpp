@@ -1,0 +1,27 @@
+<VirtualHost *:80>
+    ServerName xmpp.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /srv/www/xmpp
+
+    ErrorLog ${APACHE_LOG_DIR}/xmpp-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/xmpp-access.log combined
+
+    ProxyPass       /admin   http://localhost:5280/admin
+    ProxyPassReverse    /admin  http://localhost:5280/admin
+
+    <Directory "/srv/www/xmpp">
+        AuthType Kerberos
+        Require  valid-user
+
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+
+        Options Indexes
+    </Directory>
+</VirtualHost>
