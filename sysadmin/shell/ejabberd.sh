@@ -24,6 +24,9 @@ ensure_mode_user_group /etc/ejabberd/inetrc         644 root root
 ensure_mode_user_group /var/log/ejabberd            2750 ejabberd adm
 ensure_mode_user_group /var/lib/ejabberd            700 ejabberd ejabberd
 
+mkdir -p -m 0755 /srv/www/xmpp
+ensure_mode_user_group /srv/www/xmpp                750 root www-data
+
 
 [ -z "$CONF_CHANGED" ] || service ejabberd restart
 [ "`pgrep -f ejabberd`" ] || service ejabberd start
