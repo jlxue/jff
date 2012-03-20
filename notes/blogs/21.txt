@@ -1,0 +1,25 @@
+企业内部即时通讯服务
+
+公司内部同事之间基于网络的通讯方式，最常用的是邮件和即时通讯工具，比如 MSN、QQ、GTalk、Yahoo! Messenger，这些都是面向因特网用户的，面向企业内部的即时通讯工具我用过 RTX，相当好用，不过貌似是商业收费的（不清楚公司购买了没，哈哈）。搭建企业内部即时通讯服务，跟搭建企业内部邮件系统一样，主要是为了公司机密不被泄漏（不知道奇虎 360 内部是否禁止使用 QQ，再次哈哈！），其次是内部维护更方便监管以及历史回溯，比如记录聊天日志。顺带说一嘴，GTalk 的聊天记录默认会放邮箱里，有点恐怖，一是肯定会被 Google 分析用户行为，二是一旦帐号泄漏，那就尴尬大发了。
+
+公司内部搭建即时通讯服务只有两个选择，IRC 和 Jabber(XMPP)，前者貌似还不是现代意义的即时通讯，不支持用户之间脱离聊天室直接聊。Jabber 则特意打造为开放的即时通讯协议，GTalk 一开始就采用了 Jabber 协议，MSN 据说新版本也要皈依了。开源的 Jabberd 服务器有很多，但现在活的好的凤毛麟角，ejabberd 采用 Erlang 语言编写，对多 Jabberd 服务器组成集群支持的很好（Erlang 语言运行时天生就内置集群支持），估计是目前用的最广的 Jabberd 服务程序了，Debian 包含了它的安装包，所以在 Debian 上安装很容易，但可惜的是 ejabberd 一开始不支持 GSSAPI 认证，幸好 Mikma 同学发飙给它加入这个重要的企业级特性，在 http://www.ejabberd.im/cyrsasl_gssapi 上提供了针对 ejabberd 多个版本的补丁，ejabberd 维护者之一 Badlop 同学把这个特性收入了 ejabberd 3.0 分支中，期待其今年早日发布并收入 Debian 软件源中，等不及的同学可以按照这个步骤尝试下：
+
+    获取 Debian ejabberd 的源码包，或者 git clone 其代码库：git://git.deb.at/pkg/ejabberd.git
+    apt-get build-dep ejabberd 安装编译 ejabberd 所需要的软件包
+    aptitude install erlang-nox 安装 erlang 运行环境
+    安装 exmpp 和 esasl，注意 esasl 默认 make install 后会装到 /usr/local/lib/erlang 下，需要把它复制到 /usr/lib/erlang 的对应目录里，因为 ejabberd 不会去找 /usr/local/lib/erlang 下的 Erlang 模块；
+    删除掉除 debian/ 目录外的所有文件，将 ejabberd-3.0 代码从其官方 git 库抓下来并覆盖过去
+    cd src/;  aclocal; autoconf; cd ..
+    删除 debian/patches/*，我懒得把这些补丁移植到 3.0 上了，有兴趣的同学可以折腾下；
+    dpkg-buildpackage -rfakeroot -b -us -uc
+
+ejabberd 的配置挺简单的，读一遍官方 Installation and Operation Guide 就行了，Pidgin 对 GSSAPI 认证支持很好，按着 http://www.ejabberd.im/cyrsasl_gssapi 的说明配置下来（其实我只配置了 KRB5_KTNAME 以及 sasl_realm 就行了），Pidgin GSSAPI 认证一次通过。必需提一下的是 ejabberd 的 mod_muc_log 插件可以把聊天室的聊天日志保存到按日期命名的 HTML 文件里，颇有 IRC logger 的感觉。
+
+ejabberd 的其它功能如 pubsub 还不知道怎么用，与 MSN、ICQ、Yahoo! Messenger 的互通我也没折腾，因为我本来就想让这个服务局限在公司内部。比较滑稽的一件事情是 ejabberd 自带了个 web admin 界面，真是程序员的设计水平，简直就好比开了个 GUI 编辑器让你编辑配置文件，虚张了 web admin 的门面。。。。另外在 Pidgin 里创建聊天室时，我没搞定怎么让 logging 默认打开，在 ejabberd.cfg 里指定了没用，而且创建完后，Pidgin 没有 UI 可以重新配置聊天室，不知道是 Jabber 协议不支持还是 Pidgin 不支持。
+
+另一个现在活的不错的开源 Jabber 服务器是使用 Java 编写的 Openfire，它背后的公司还做了个 Jabber 客户端 Spark 以及 Jabber 协议库 Smack，三个我都粗略的用过，相当的易用，Openfire 最称道的是其 web admin 界面——这才能叫“Web 管理界面”啊！ 但图形配置界面做的好了，文本配置文件却没什么文档解释，不方便自动化配置。而且 Openfire 的集群支持是后加的，据说没 ejabberd 那么 scalable and stable，另外我也没发现它怎么把聊天室日志记录到 HTML 文件里，这个特性很重要啊。Openfire 官方提供了 deb 包，但是打包的太粗糙了，/etc/init.d/openfire 还是 2001 年的版本，里头判断 java 可执行程序路径的逻辑过时了，需要改改，日志文件伊输出到 /usr/share/openfire/ 里，真是让人无语。
+
+托 Java 的福气，Openfire 的 GSSAPI 认证支持很好，http://community.igniterealtime.org/docs/DOC-1060 说明的很详细，我试验了下，也是一次通过。
+
+比起商业的企业内部即时通讯工具如 RTX，ejabberd 是太阳春了，不过要求不高的话也很凑合用了，再加上是开源产品，折腾下还是很方便的（不懂 Erlang 的兄弟可以折腾下用 Java 写的 Openfire。。。)，开放的 Jabber 协议让写点 bot 啥的完全是小菜一碟。
+

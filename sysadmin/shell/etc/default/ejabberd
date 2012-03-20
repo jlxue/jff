@@ -135,7 +135,7 @@ ERL_EPMD_ADDRESS=127.0.0.1
 #
 # Default: ejabberd@localhost
 #
-ERLANG_NODE=ejabberd
+ERLANG_NODE=ejabberd@localhost
 
 #.
 #' EJABBERD_PID_PATH: ejabberd PID file
