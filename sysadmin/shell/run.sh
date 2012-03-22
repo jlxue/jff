@@ -26,6 +26,12 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 # monitor.sh    cacti, nagios, munin, SEC(Simple Event Correlator), logcheck, fluentd, scribe
 #               monit
 # sugarCRM?, groupware?, zimbra?, asterisk?
+# web conference:
+#   http://incubator.apache.org/openmeetings/
+#   http://code.google.com/p/bigbluebutton/
+#   https://www.webhuddle.com/
+#   http://ekiga.org
+#   http://moodle.org
 
 SCRIPTS=`cat<<END
 install-packages.sh
