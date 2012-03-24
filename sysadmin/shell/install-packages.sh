@@ -171,6 +171,8 @@ i python-moinmoin python-flup python-docutils python-xml \
 i ejabberd imagemagick  # imagemagick is required for CAPTCHA
 #i pymsnt   # msn transport for Jabber
 
+i samba smbclient samba-tools
+
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none
