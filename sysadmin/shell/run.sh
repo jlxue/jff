@@ -9,7 +9,6 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 # fai.sh        fai-project.org
-# samba.sh
 # im.sh         ejabberd/openfire
 # wiki.sh       foswiki/moinmoin
 # cms.sh        drupal
@@ -55,6 +54,7 @@ bugzilla.sh
 foswiki.sh
 moinmoin.sh
 ejabberd.sh
+samba.sh
 END`
 
 for f in $SCRIPTS; do
