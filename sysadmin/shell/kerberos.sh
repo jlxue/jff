@@ -107,6 +107,8 @@ ensure_service_principal sieve/$hostname /etc/dovecot.keytab
 
 ensure_service_principal xmpp/$hostname /etc/xmpp.keytab
 
+ensure_service_principal svn/$hostname /etc/svnserve.keytab
+
 
 ensure_mode_user_group /etc/slapd.keytab        600 openldap openldap
 ensure_mode_user_group /etc/http.keytab         600 www-data www-data

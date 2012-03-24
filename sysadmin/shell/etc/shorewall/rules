@@ -24,6 +24,7 @@ HTTP(ACCEPT)	net		$FW
 HTTPS(ACCEPT)	net		$FW
 JabberPlain(ACCEPT)	net	$FW
 SMB(ACCEPT)	net		$FW
+SVN(ACCEPT)	net		$FW
 
 # ManageSieve Protocol
 ACCEPT		net		$FW		tcp	4190
