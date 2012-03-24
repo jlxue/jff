@@ -6,6 +6,8 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 
+/usr/bin/testparm -s -v $SCRIPT_DIR/etc/samba/smb.conf
+
 cmp_file $SCRIPT_DIR/etc/default/samba /etc/default/samba || {
     overwrite_file $SCRIPT_DIR/etc/default/samba /etc/default/samba
     CONF_CHANGED=1
