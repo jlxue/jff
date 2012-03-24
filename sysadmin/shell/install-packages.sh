@@ -137,8 +137,12 @@ i mailman
 i davical php5-curl
 i calendarserver
 
-# hosting git repositories
+# host git repositories
 i gitolite
+
+# host svn repositories
+i subversion subversion-tools
+#i libapache2-svn
 
 # dependencies for bugzilla 4.2
 i libtimedate-perl libdatetime-perl libdatetime-timezone-perl \

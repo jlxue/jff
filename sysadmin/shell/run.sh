@@ -55,6 +55,7 @@ foswiki.sh
 moinmoin.sh
 ejabberd.sh
 samba.sh
+subversion.sh
 END`
 
 for f in $SCRIPTS; do
