@@ -22,6 +22,10 @@
 # harry_and_sally = harry,sally
 # harry_sally_and_joe = harry,sally,&joe
 
+[/]
+* = r
+dieken = rw
+
 # [/foo/bar]
 # harry = rw
 # &joe = r

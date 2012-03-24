@@ -260,6 +260,8 @@ Client settings:
         Connect port:           5222
         Connect server:         xmpp.corp.example.com
 
+5) Subversion client: access "svn://svn.corp.example.com/REPOS_NAME/"
+   it uses GSSAPI SASL mechansim to do authentication.
 
 =============================================================
 Issues:

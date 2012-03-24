@@ -15,12 +15,18 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 
 mkdir -p -m 0755 /srv/svn
 
-sync_file $SCRIPT_DIR/etc/init.d/svnserve /etc/init.d/svnserve
-update-rc.d svnserve defaults
-
+cmp_file $SCRIPT_DIR/etc/init.d/svnserve /etc/init.d/svnserve || {
+    overwrite_file $SCRIPT_DIR/etc/init.d/svnserve /etc/init.d/svnserve
+    CONF_CHANGED=1
+}
 
 cmp_file $SCRIPT_DIR/srv/svn/svnserve.conf /srv/svn/svnserve.conf || {
     overwrite_file $SCRIPT_DIR/srv/svn/svnserve.conf /srv/svn/svnserve.conf
+    CONF_CHANGED=1
+}
+
+cmp_file $SCRIPT_DIR/srv/svn/authz /srv/svn/authz || {
+    overwrite_file $SCRIPT_DIR/srv/svn/authz /srv/svn/authz
     CONF_CHANGED=1
 }
 
@@ -33,10 +39,12 @@ ensure_mode_user_group /srv/svn                 750 svn svn
 ensure_mode_user_group /srv/svn/authz           640 svn svn
 ensure_mode_user_group /srv/svn/svnserve.conf   640 svn svn
 ensure_mode_user_group /etc/sasl2               755 root root
-ensure_mode_user_group /etc/sasl2/svn.conf      640 svn svn
+ensure_mode_user_group /etc/sasl2/svn.conf      644 root root
 ensure_mode_user_group /etc/default/svnserve    644 root root
 ensure_mode_user_group /etc/init.d/svnserve     755 root root
 
+
+update-rc.d svnserve defaults
 
 [ -z "$CONF_CHANGED" ] || service svnserve restart
 
