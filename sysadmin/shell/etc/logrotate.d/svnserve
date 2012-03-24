@@ -1,0 +1,13 @@
+/var/log/svnserve.log {
+    weekly
+    missingok
+    rotate 12
+    compress
+    delaycompress
+    notifempty
+    create 640 root adm
+    sharedscripts
+    postrotate
+        /usr/sbin/service svnserve restart >/dev/null
+    endscript
+}

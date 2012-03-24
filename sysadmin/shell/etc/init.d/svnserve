@@ -20,10 +20,10 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="svnserver daemon service"
 NAME=svnserve
 PIDFILE=/var/run/$NAME.pid
+LOGFILE=/var/log/svnserve.log
 DAEMON=/usr/bin/$NAME
-DAEMON_ARGS="-d -T -r /srv/svn --config-file=/srv/svn/svnserve.conf --pid-file=$PIDFILE"
+DAEMON_ARGS="-d -T -r /srv/svn --config-file=/srv/svn/svnserve.conf --pid-file=$PIDFILE --log-file=$LOGFILE"
 SCRIPTNAME=/etc/init.d/$NAME
-export KRB5_KTNAME=/etc/svnserve.keytab
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
@@ -48,10 +48,16 @@ do_start()
 	#   0 if daemon has been started
 	#   1 if daemon was already running
 	#   2 if daemon could not be started
+	if [ "$STARTUP" != "yes" ]; then
+		echo -n " [STARTUP isn't \"yes\" in /etc/default/svnserve]"
+		return 2
+	fi
+
 	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
 		|| return 1
-	touch $PIDFILE
-	chown svn:svn $PIDFILE
+	touch $PIDFILE $LOGFILE
+	chown svn:svn $PIDFILE $LOGFILE
+	chmod 640 $LOGFILE
 	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -c svn:svn -- \
 		$DAEMON_ARGS \
 		|| return 2

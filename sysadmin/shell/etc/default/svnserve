@@ -1,0 +1,3 @@
+STARTUP=yes
+
+export KRB5_KTNAME=/etc/svnserve.keytab
