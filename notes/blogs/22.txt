@@ -1,0 +1,19 @@
+svnserve 配置
+
+题外话：Debian 上 Dovecot 终于升级到 2.0.18 了，CalenderServer 也升级了一把，解决了 Python 2.7 下无法启动的问题，Samba 4 居然也打包了，虽然安装时报一大堆错。。。
+
+作为 GIT 派，本来是不想配置 Subversion 的，不过对 TortoiseSVN 还真是印象良好，加上考虑到大众需求，未必所有人都喜欢 GIT 这样的口味，所以还是配置下 svnserve 玩玩。svn 最近的发展也挺有意思，.svn 目录只放在顶级工作目录里，fsfs 库的文件存储方式增加了 shard 特性，避免一个目录下有太多文件，还增加了 svnadmin pack 命令，颇有像 GIT 看齐的意思，不得不再赞一下 Linus 的高瞻远瞩。
+
+Subversion 的服务端有三种运行方式：http://svnbook.red-bean.com/en/1.7/svn.serverconfig.choosing.html
+
+    Apache + mod_dav_svn，亮点是可以利用 Apache 的认证机制、详细的访问日志、单写多读主从代理机制以及简单的代码库浏览 Web 界面。
+    svnserve daemon 或者  inetd
+    svnserve + ssh
+
+之前用 subversion 时一直用第一种方式，但在我这个 SSO 方案里，它有一些问题：代码库被 www-data 用户所有，同一个 Apache 上服务的其它 web 应用如果有漏洞，那么代码库也有暴露风险；mod_kerb 得到的用户名带有 @REALM 后缀，我估计很可能 mod_dav_svn 得到的也是这种用户名，这样写 authz 文件时比较罗嗦。
+
+第三种方式下 svnserve 所在机器需要定制 login shell，避免用户可以登录 svnserve 所在服务器获得 shell 访问，但即使这么做，由于 svnserve 处于 tunnel 模式，以 ssh 登录用户身份运行，所以要特别注意 svn repository 的文件权限，一般需要把所有用户放入 git 组，并使用 svnwrap 来统一 umask；如果仿造 gitolite 的做法，用同一个 svn 账户，用户用 ssh 公钥认证提交，那又用不了 kerberos 认证，而且很可能 svn log 里的 author 全是 svn 账户了。
+
+由于 svnserve 支持 SASL 认证，所以还是第二种方式最完美，不需要用户可以登录 svnserve 所在机器，可以用 Cyrus SASL 支持的 GSSAPI 认证，svnserve 的 --log-file 选项可以记录 svn 访问日志，美中不足的是 svnserve 的错误日志完全没有，比如登录失败了 svnserve 屁都不放一个，还好 Cyrus SASL 有调试日志。另一个问题是 svnserve 不支持接收到 SIGHUP 时重新打开日志文件，所以做日志 rotation 时需要重启 svnserve 服务。
+
+Debian 打包的 Subversion 没有提供 svnserve 的 /etc/init.d/svnserve 文件，我折腾了下，仿照 /etc/init.d/skeleton 写了一个，并创建了 svn 用户以及 svn 组，让 svnserve 以 svn 用户身份运行。svnserve 的 SASL 认证配置文件可以放在 /etc/sasl2/svn.conf 里。一番折腾后，svnserve 的 GSSAPI 认证搞定，Linux 下 svn 命令行以及 Windows 下 TortoiseSVN 都可以。需要注意的一点是 Kerberos for Windows 里如果当前 principal 不是 default principal，那么 TortoiseSVN、Putty 在做 GSSAPI 认证时都会触发 Kerberos for Windows 弹出密码输入窗口。
