@@ -220,6 +220,16 @@ Restart Apache, access http://wiki.corp.example.com/bin/configure .
     /etc/ejabberd/ejabberd.cfg due to "override_*" directives.
 
 
+++ Samba Configuration ++
+
+15) Use "pdbedit" to add user.
+
+
+++ Subversion Configuration ++
+
+16) Use "su svn -c 'svnadmin create /srv/svn/REPOS_NAME'" to create repository.
+
+
 =============================================================
 Client settings:
 

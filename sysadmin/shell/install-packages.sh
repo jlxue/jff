@@ -141,6 +141,7 @@ i calendarserver
 i gitolite
 
 # host svn repositories
+#   ViewVC isn't interesting enough...
 i subversion subversion-tools
 #i libapache2-svn
 
