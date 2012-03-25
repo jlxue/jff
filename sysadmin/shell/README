@@ -230,6 +230,15 @@ Restart Apache, access http://wiki.corp.example.com/bin/configure .
 16) Use "su svn -c 'svnadmin create /srv/svn/REPOS_NAME'" to create repository.
 
 
+++ Trac Configuration ++
+
+17) Create a project environment:
+  # trac-admin /srv/trac/First initenv
+  # chown -R trac:trac /srv/trac/First
+
+  Access it at http://trac.corp.example.com/ .
+
+
 =============================================================
 Client settings:
 

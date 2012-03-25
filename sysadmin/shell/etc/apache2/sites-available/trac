@@ -1,0 +1,37 @@
+<VirtualHost *:80>
+    ServerName trac.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /srv/www/trac/htdocs
+
+    ErrorLog ${APACHE_LOG_DIR}/trac-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/trac-access.log combined
+
+    WSGIDaemonProcess trac-sites user=trac group=trac processes=4
+    WSGIScriptAlias /   /srv/www/trac/cgi-bin/trac.wsgi
+
+    <Directory "/srv/www/trac/cgi-bin">
+        <Files "trac.wsgi">
+            AuthType Kerberos
+            Require  valid-user
+
+            Order allow,deny
+            Allow from all
+
+            WSGIProcessGroup trac-sites
+            WSGIApplicationGroup %{GLOBAL}
+
+            SetEnv trac.env_parent_dir /srv/trac
+        </Files>
+    </Directory>
+
+    <Directory "/srv/www/trac/htdocs">
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+    </Directory>
+</VirtualHost>

@@ -178,6 +178,13 @@ i ejabberd imagemagick  # imagemagick is required for CAPTCHA
 
 i samba smbclient samba-tools
 
+# Trac
+i trac trac-announcer trac-bitten trac-customfieldadmin \
+  trac-datefieldplugin trac-git trac-icalviewplugin \
+  trac-jsgantt trac-mastertickets trac-odtexport \
+  trac-subtickets trac-tags trac-wikiprint trac-wikirename \
+  trac-wysiwyg
+
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none
