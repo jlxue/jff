@@ -6,15 +6,6 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 
-[ "`getent group trac`" ] || addgroup --system trac
-
-[ "`getent passwd trac`" ] || adduser --system --home /srv/trac \
-    --shell /bin/false --ingroup trac --disabled-password \
-    --disabled-login --gecos "Trac account" trac
-
-id -G -n trac | grep -w -q svn || adduser trac svn
-
-
 mkdir -p -m 0755 /srv/trac
 mkdir -p -m 0755 /srv/www/trac
 
@@ -28,7 +19,9 @@ mkdir -p -m 0755 /srv/www/trac
 
 
 ensure_mode_user_group /srv/trac            750 trac trac
-ensure_mode_user_group /srv/www/trac        755 root root
+
+# Both www-data and trac users requires read permisson on it.
+ensure_mode_user_group /srv/www/trac        755 root trac
 
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart

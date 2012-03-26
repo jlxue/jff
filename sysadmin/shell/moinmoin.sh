@@ -15,12 +15,12 @@ mkdir -p -m 0755 /srv/www/moin
 
     [ -d $dir/data ] || {
         cp -a /usr/share/moin/data $dir/data
-        chown -R www-data:www-data $dir/data
+        chown -R moin:moin $dir/data
     }
 
     [ -d $dir/underlay ] || {
         cp -a /usr/share/moin/underlay $dir/underlay
-        chown -R www-data:www-data $dir/underlay
+        chown -R moin:moin $dir/underlay
     }
 }
 
@@ -31,7 +31,8 @@ cmp_dir $SCRIPT_DIR/etc/moin /etc/moin || {
 }
 
 
-ensure_mode_user_group /srv/www/moin/MainWiki   750 root www-data
+ensure_mode_user_group /srv/www/moin            750 root moin
+ensure_mode_user_group /srv/www/moin/MainWiki   750 root moin
 ensure_mode_user_group /etc/moin                755 root root
 
 

@@ -227,7 +227,9 @@ Restart Apache, access http://wiki.corp.example.com/bin/configure .
 
 ++ Subversion Configuration ++
 
-16) Use "su svn -c 'svnadmin create /srv/svn/REPOS_NAME'" to create repository.
+16) Create repository:
+    # svnadmin create /srv/svn/REPOS_NAME
+    # chown -R svn:svn /srv/svn/REPOS_NAME
 
 
 ++ Trac Configuration ++

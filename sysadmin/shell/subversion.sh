@@ -6,13 +6,6 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 
-[ "`getent group svn`" ] || addgroup --system svn
-
-[ "`getent passwd svn`" ] || adduser --system --home /srv/svn \
-    --shell /bin/false --ingroup svn --disabled-password \
-    --disabled-login --gecos "svnserver server account" svn
-
-
 mkdir -p -m 0755 /srv/svn
 
 sync_file $SCRIPT_DIR/etc/logrotate.d/svnserve /etc/logrotate.d/svnserve
@@ -41,6 +34,7 @@ cmp_file $SCRIPT_DIR/etc/sasl2/svn.conf /etc/sasl2/svn.conf || {
     overwrite_file $SCRIPT_DIR/etc/sasl2/svn.conf /etc/sasl2/svn.conf
     CONF_CHANGED=1
 }
+
 
 ensure_mode_user_group /srv/svn                 750 svn svn
 ensure_mode_user_group /srv/svn/authz           640 svn svn

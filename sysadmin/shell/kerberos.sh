@@ -116,6 +116,8 @@ ensure_mode_user_group /etc/smtp.keytab         600 Debian-exim Debian-exim
 ensure_mode_user_group /etc/dovecot.keytab      600 dovecot dovecot
 ensure_mode_user_group /etc/caldavd.keytab      600 caldavd caldavd
 ensure_mode_user_group /etc/xmpp.keytab         600 ejabberd ejabberd
+
+add_system_user_group "svnserve server account" /srv/svn svn svn
 ensure_mode_user_group /etc/svnserve.keytab     600 svn svn
 
 ensure_mode_user_group /etc/hosts               644 root root

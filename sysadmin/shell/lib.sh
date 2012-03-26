@@ -166,3 +166,23 @@ pg_create_db () {
         su postgres -c "/usr/bin/createdb --encoding UTF8 --template template0 --owner '$dba' '$dbname'"
 }
 
+# create user:group and add the user to other groups
+#   add_system_user_group "xxx account" /srv/xxx userA groupA groupB groupC
+add_system_user_group () {
+    local gecos="$1" home="$2" user="$3" group="$4"
+
+    [ "$group" ] || exit 1
+
+    shift 4
+
+    [ "`getent group $group`" ] || addgroup --system $group
+    [ "`getent passwd $user`" ] || adduser --system --home "$home" \
+        --shell /bin/false --ingroup $group --disabled-password \
+        --disabled-login --gecos "$gecos" $user
+
+    while [ "$1" ]; do
+        id -G -n $user | grep -w -q "$1" || adduser $user "$1"
+        shift
+    done
+}
+

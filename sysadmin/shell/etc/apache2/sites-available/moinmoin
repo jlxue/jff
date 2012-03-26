@@ -50,7 +50,7 @@
     Alias /favicon.ico /usr/share/moin/htdocs/favicon.ico
 
     # Read: http://moinmo.in/HowTo/ApacheWithModWSGI
-    WSGIDaemonProcess mywiki user=www-data group=www-data processes=4 display-name=moin-wsgi-mywiki
-    WSGIProcessGroup mywiki
+    WSGIDaemonProcess moin user=moin group=moin processes=4
+    WSGIProcessGroup moin
     WSGIScriptAlias / "/usr/share/moin/server/moin.wsgi"
 </VirtualHost>
