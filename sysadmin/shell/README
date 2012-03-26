@@ -241,6 +241,11 @@ Restart Apache, access http://wiki.corp.example.com/bin/configure .
   Access it at http://trac.corp.example.com/ .
 
 
+++ Redmine Configuration ++
+
+18) Default admin login name and password: admin/admin
+
+
 =============================================================
 Client settings:
 

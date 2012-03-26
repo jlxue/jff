@@ -1,0 +1,57 @@
+# Reference: /usr/share/doc/redmine/examples/*host.conf
+
+<VirtualHost *:80>
+    ServerName redmine.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /usr/share/redmine/public
+
+    ErrorLog ${APACHE_LOG_DIR}/redmine-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/redmine-access.log combined
+
+    # These modules must be enabled : passenger
+    <IfModule passenger_module>
+        RailsEnv production
+        # create a link in /var/lib/redmine/default/passenger to /usr/share/redmine
+        PassengerAppRoot /var/lib/redmine/default/passenger
+        SetEnv X_DEBIAN_SITEID "default"
+
+        <Directory "/usr/share/redmine/public">
+            #AuthType Kerberos
+            #Require valid-user
+
+            Options +FollowSymLinks
+            Order allow,deny
+            Allow from all
+        </Directory>
+    </IfModule>
+
+    # These modules must be enabled : rewrite, fcgid
+    <IfModule !passenger_module>
+        FcgidInitialEnv RAILS_RELATIVE_URL_ROOT ""
+        FcgidInitialEnv X_DEBIAN_SITEID "default"
+        AddHandler  fcgid-script    .fcgi
+
+        <Directory "/usr/share/redmine/public">
+            #AuthType Kerberos
+            #Require valid-user
+
+            Options +FollowSymLinks +ExecCGI
+            Order allow,deny
+            Allow from all
+            RewriteEngine On
+            RewriteRule ^$ index.html [QSA]
+            RewriteRule ^([^.]+)$ $1.html [QSA]
+            RewriteCond %{REQUEST_FILENAME} !-f [OR]
+            RewriteCond %{REQUEST_FILENAME} dispatch.fcgi$
+            RewriteRule ^(.*)$ dispatch.fcgi [QSA,L]
+        </Directory>
+    </IfModule>
+
+    Alias "/plugin_assets/" /var/cache/redmine/default/plugin_assets/
+</VirtualHost>
+

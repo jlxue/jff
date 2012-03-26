@@ -105,6 +105,7 @@ i ssl-cert  # See /usr/share/doc/apache2.2-common/README.Debian.gz
 i libapache2-mod-bw libapache2-mod-evasive libapache2-mod-qos libapache2-modsecurity
 i libapache2-mod-encoding libapache2-mod-xsendfile
 i libapache2-mod-fcgid libapache2-mod-wsgi
+#i libapache2-mod-passenger
 
 
 # PHP
@@ -186,7 +187,7 @@ i trac trac-announcer trac-bitten trac-customfieldadmin \
   trac-wysiwyg
 
 # Redmine
-i redmine redmine-pgsql
+i redmine redmine-pgsql libfcgi-ruby1.8
 
 
 ###########################################################

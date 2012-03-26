@@ -27,6 +27,10 @@ set -x
 #########################################################################################
 
 
+# See /usr/share/doc/redmine/examples/apache2-passenger-host.conf
+[ -e /var/lib/redmine/default/passenger ] || ln -s /usr/share/redmine /var/lib/redmine/default/passenger
+
+
 cmp_dir $SCRIPT_DIR/etc/redmine /etc/redmine --exclude database.yml --exclude session.yml || {
     overwrite_dir $SCRIPT_DIR/etc/redmine /etc/redmine --exclude database.yml --exclude session.yml
     CONF_CHANGED=1
@@ -42,7 +46,14 @@ ensure_mode_user_group /etc/redmine                         755 root root
 ensure_mode_user_group /etc/redmine/default                 755 www-data www-data
 ensure_mode_user_group /etc/redmine/default/database.yml    640 root www-data
 ensure_mode_user_group /etc/redmine/default/session.yml     640 root www-data
+ensure_mode_user_group /etc/redmine/default/configuration.yml   640 root www-data
 
+ensure_mode_user_group /var/log/redmine             755 www-data www-data
+ensure_mode_user_group /var/log/redmine/default     750 www-data www-data
+ensure_mode_user_group /var/lib/redmine             755 www-data www-data
+ensure_mode_user_group /var/lib/redmine/default     750 www-data www-data
+ensure_mode_user_group /var/cache/redmine           755 www-data www-data
+ensure_mode_user_group /var/cache/redmine/default   750 www-data www-data
 
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
