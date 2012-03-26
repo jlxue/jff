@@ -1,0 +1,8 @@
+production:
+  adapter: postgresql
+  database: redmine_default
+  host: localhost
+  port: 
+  username: redmine
+  password: @@REDIMINE_DB_PASSWORD@@
+  encoding: utf8
