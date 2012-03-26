@@ -185,6 +185,9 @@ i trac trac-announcer trac-bitten trac-customfieldadmin \
   trac-subtickets trac-tags trac-wikiprint trac-wikirename \
   trac-wysiwyg
 
+# Redmine
+i redmine redmine-pgsql
+
 
 ###########################################################
 APT_LISTBUGS_FRONTEND=none

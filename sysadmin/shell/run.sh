@@ -13,7 +13,6 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 # blog.sh       wordpress
 # subversion.sh reviewboard, Rietveld
 # git.sh        gitweb/cgit, gitolite, git-http-backend, gerrit
-# redmine.sh
 # ci.sh         jenkins
 # backup.sh     bacula/amanda/burp/backuppc/obnam
 # vpn.sh        openvpn
@@ -54,6 +53,7 @@ ejabberd.sh
 samba.sh
 subversion.sh
 trac.sh
+redmine.sh
 END`
 
 for f in $SCRIPTS; do

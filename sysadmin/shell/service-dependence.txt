@@ -36,4 +36,5 @@ samba: firewall
 subversion: dns firewall kerberos
 
 trac: dns apache
+redmine: dns apache postgresql
 
