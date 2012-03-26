@@ -37,8 +37,8 @@ dns.sh
 dhcp.sh
 ntp.sh
 kerberos.sh
-ssh.sh
 ldap.sh
+ssh.sh
 imap.sh
 smtp.sh
 apache.sh
