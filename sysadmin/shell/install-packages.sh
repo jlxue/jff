@@ -12,6 +12,11 @@ i () {
 
 
 ###########################################################
+# Installation of RoudCube, Redmine require PostgreSQL service
+# to create database and tables.
+[ ! -e /etc/init.d/postgresql ] || ensure_service_started postgresql postgres
+
+###########################################################
 # ~pstandard includes exim4-daemon-light, but we want exim4-daemon-heavy
 #i "?or(~prequired,~pstandard,~pimportant)"
 
