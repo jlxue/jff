@@ -37,11 +37,24 @@ cmp_dir $SCRIPT_DIR/etc/redmine /etc/redmine --exclude database.yml --exclude se
 }
 
 # Custom authentication
-#   http://www.redmine.org/projects/redmine/wiki/Alternativecustom_authentication_HowTo
 #   http://www.redmine.org/issues/1131
 #   https://github.com/AdamLantos/redmine_http_auth
 #   https://github.com/edavis10/redmine_sso_client
 #   http://www.redmine.org/projects/redmine/wiki/Plugin_Tutorial
+#
+#   http://www.redmine.org/projects/redmine/wiki/Alternativecustom_authentication_HowTo
+cmp_file $SCRIPT_DIR/usr/share/redmine/app/models/auth_source_http.rb /usr/share/redmine/app/models/auth_source_http.rb || {
+    overwrite_file $SCRIPT_DIR/usr/share/redmine/app/models/auth_source_http.rb /usr/share/redmine/app/models/auth_source_http.rb
+    CONF_CHANGED=1
+}
+
+echo 'select * from auth_sources;' | su postgres -c 'psql -w -X -1 -f - redmine_default' |
+    grep -w -q 'AuthSourceHTTP' || {
+        echo "INSERT INTO auth_sources VALUES (DEFAULT, 'AuthSourceHTTP', 'HTTP', NULL, NULL,  NULL, NULL, NULL, 'name', 'firstName', 'lastName', 'email', TRUE, FALSE)" |
+            su postgres -c 'psql -w -X -1 -f - redmine_default'
+        CONF_CHANGED=1
+}
+
 
 ensure_mode_user_group /etc/dbconfig-common                 755 root root
 ensure_mode_user_group /etc/dbconfig-common/redmine         755 root root
@@ -60,6 +73,8 @@ ensure_mode_user_group /var/lib/redmine             755 www-data www-data
 ensure_mode_user_group /var/lib/redmine/default     750 www-data www-data
 ensure_mode_user_group /var/cache/redmine           755 www-data www-data
 ensure_mode_user_group /var/cache/redmine/default   750 www-data www-data
+
+ensure_mode_user_group /usr/share/redmine/app/models/auth_source_http.rb    644 root root
 
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
