@@ -21,8 +21,8 @@
         SetEnv X_DEBIAN_SITEID "default"
 
         <Directory "/usr/share/redmine/public">
-            #AuthType Kerberos
-            #Require valid-user
+            AuthType Kerberos
+            Require valid-user
 
             Options +FollowSymLinks
             Order allow,deny
@@ -37,8 +37,8 @@
         AddHandler  fcgid-script    .fcgi
 
         <Directory "/usr/share/redmine/public">
-            #AuthType Kerberos
-            #Require valid-user
+            AuthType Kerberos
+            Require valid-user
 
             Options +FollowSymLinks +ExecCGI
             Order allow,deny
