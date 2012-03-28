@@ -48,6 +48,12 @@ cmp_file $SCRIPT_DIR/usr/share/redmine/app/models/auth_source_http.rb /usr/share
     CONF_CHANGED=1
 }
 
+grep -wq 'REMOTE_USER' /usr/share/redmine/app/controllers/application_controller.rb || {
+    patch -bst /usr/share/redmine/app/controllers/application_controller.rb \
+        $SCRIPT_DIR/contrib/Redmine/application_controller.rb.patch
+    CONF_CHANGED=1
+}
+
 echo 'select * from auth_sources;' | su postgres -c 'psql -w -X -1 -f - redmine_default' |
     grep -w -q 'AuthSourceHTTP' || {
         echo "INSERT INTO auth_sources VALUES (DEFAULT, 'AuthSourceHTTP', 'HTTP', NULL, NULL,  NULL, NULL, NULL, 'name', 'firstName', 'lastName', 'email', TRUE, FALSE)" |

@@ -1,0 +1,13 @@
+--- a/application_controller.rb	2012-03-28 16:58:22.000000000 +0800
++++ b/application_controller.rb	2012-03-28 19:16:36.000000000 +0800
+@@ -67,7 +67,9 @@
+   # Returns the current user or nil if no user is logged in
+   # and starts a session if needed
+   def find_current_user
+-    if session[:user_id]
++    if request.env["REMOTE_USER"]
++      (User.try_to_login(request.env["REMOTE_USER"], "dummy") rescue nil)
++    elsif session[:user_id]
+       # existing session
+       (User.active.find(session[:user_id]) rescue nil)
+     elsif cookies[:autologin] && Setting.autologin?

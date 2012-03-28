@@ -1,6 +1,8 @@
 class AuthSourceHTTP < AuthSource
     def authenticate(login, password)
-        login = ENV["REMOTE_USER"]
+        logger.debug "AuthSourceHTTP.authenticate(#{login}, #{password})"
+
+        return nil if login.nil? || login.blank?
 
         i = login.index("@")
         if i
@@ -11,15 +13,18 @@ class AuthSourceHTTP < AuthSource
             mail = nil
         end
 
+        #logger.debug "AuthSourceHTTP.authenticate(): #{firstname}, #{mail}"
+        #logger.debug "AuthSourceHTTP.authenticate(): onthefly_register=#{onthefly_register}"
+
         if (onthefly_register?)
-            return [
+            return {
                 :firstname      => firstname,
-                :lastname       => nil,
+                :lastname       => "lastname",
                 :mail           => mail,
                 :auth_source_id => self.id
-            ]
+            }
         else
-            return firstname
+            return nil
         end
     end
 
