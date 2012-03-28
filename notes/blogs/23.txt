@@ -1,0 +1,21 @@
+Trac & Redmine
+
+
+玩了下这两个玲珑的项目管理工具，集 wiki、bts、source browser 于一身的 web 应用。
+
+Redmine 没出来的时候，Trac 一枝独秀，颇得小众欢心，我也曾经浅用过，做管理员比较悲催，干点嘛管理操作都是得命令行里操作，不知道作者出于什么考虑，另外 Trac 官网的 wiki 比较乱，过期的信息、不推荐的做法全都混在正文里；做 Trac 的用户是挺爽的，界面清爽，wiki 里能方便的使用 ticket 号码以及 svn 版本号，集成的感觉挺好，有点贪心不足的是觉得 wiki、ticket 功能少了些，没办法，全面之后难以独专一面。比较有意思的是 Trac 不支持访问远程 Subversion 库，这个问题已经悬着八年了，见 http://trac.edgewall.org/ticket/493 。
+
+时至今日，这个小众市场上 Redmine 分了很大一杯羹，颇有好评。跟 Trac 相比，Redmine 的管理功能有 Web UI 可操作，对管理员友好了很多，直接支持多种 VCS 比如 Subversion、Mercurial、GIT、Bazaar，不像 Trac 默认只支持 Subversion。除了跟 Trac 一样支持 wiki、ticket、timeline 特性之外， Redmine 还有 forrum、calendar、gantt，后两个特性很方便看项目进展情况，看起来挺实用的。要说缺点的话，Redmine 官方的文档、论坛信息也比较过时，插件比 Trac 少很多，冷启动很慢（重启动 Apache 后第一次访问，或者闲置一段时间后再访问，似乎 FastCGI 模式下 ruby 进程会过一段时间自动退出），得花个十来秒。
+
+给这俩配置 Kerberos 认证真是天上地下，Trac 嘛都不用管，直接支持，Redmine 就郁闷大发了，由于我是 Perl fan，不懂 Ruby 也提不起兴趣学，网上搜索了下，让 Redmine 支持 HTTP Auth 的办法倒是颇有几个：
+
+    http://www.redmine.org/issues/1131 这个办法是三年前的，经测试，不好用
+    http://www.redmine.org/projects/redmine/wiki/Alternativecustom_authentication_HowTo 这个算是最靠谱的文档了，也有快两年历史了，有些地方也是需要修改的，而且这个文档说的不详细（或者我没看明白），伊没说明是不是写成 Redmine plugin，害我钻研了下怎么写 Redmine 插件。这个文档里那段直接往 Redmine 数据库里 auth_sources 表格里插记录的方式很恶搞，丫就不能整个脚本或者 Web UI 啥的封装这个内部细节么？
+    https://github.com/AdamLantos/redmine_http_auth  看起来这个正是我要的，可惜试验过后发现不好用，毕竟也有两年没更新了，后来大致扫了下实现，伊是玩了个技巧，实际也是利用上面第一个办法的思路，只是利用 Ruby 动态语言特性覆写了一些  Redmine 的代码。
+    https://github.com/edavis10/redmine_sso_client 没试验这玩意，伊还整了个 sso server，鬼才用呢。。。
+
+没办法，只好自己摸索着鼓捣，Ruby 的语法糖真多，看得我这个 Perl 中高段选手都一愣一愣的，好不容易摸出门道，结合上面第一个办法和第二个办法，让 Redmine 支持 HTTP auth 了，本来想给 Redmine 官方提个补丁，结果发现伊连邮件列表都没有，我懒得在它网站注册帐号，你看 Trac 的开发者就没那么二，人家就有邮件列表——你以为你 Redmine 搞个 forum 用户就纷纷来注册啊。。。
+
+有兴趣索取补丁的同学请联系 Dieken at newsmth——没水木帐号就注册个吧，哈哈……
+
+
