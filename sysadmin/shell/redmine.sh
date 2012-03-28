@@ -37,17 +37,12 @@ cmp_dir $SCRIPT_DIR/etc/redmine /etc/redmine --exclude database.yml --exclude se
 }
 
 # Custom authentication
-#   http://www.redmine.org/projects/redmine/wiki/Alternativecustom_authentication_HowTo
+#   http://www.redmine.org/issues/1131
 #   https://github.com/AdamLantos/redmine_http_auth
 #   https://github.com/edavis10/redmine_sso_client
 #   http://www.redmine.org/projects/redmine/wiki/Plugin_Tutorial
 #
-#   http://www.redmine.org/issues/1131
-grep -wq 'REMOTE_USER' /usr/share/redmine/app/controllers/application_controller.rb || {
-    patch -bs /usr/share/redmine/app/controllers/application_controller.rb \
-        $SCRIPT_DIR/contrib/Redmine/application_controller.rb.patch
-    CONF_CHANGED=1
-}
+#   http://www.redmine.org/projects/redmine/wiki/Alternativecustom_authentication_HowTo
 
 
 ensure_mode_user_group /etc/dbconfig-common                 755 root root
