@@ -124,7 +124,7 @@ Optional:
 
 ++ DAViCal Configuration ++
 
-9) Turn off "Require valid-user" in /etc/apache2/sites-enabled/davical
+9) Turn off Kerberos authentication in /etc/apache2/sites-enabled/davical
 and restart Apache, then run this command as root user to find out
 admin's default password:
     # su postgres -c "psql davical -c 'select username, password from usr;'"
@@ -133,7 +133,7 @@ admin's default password:
 Login http://cal.corp.example.com/ with "admin" account, create a user
 for your Kerberos account, for example, dieken@CORP.EXAMPLE.COM
 
-Turn on "Require valid-user" again, restart Apache, use Firefox to
+Turn on Kerberos authentication now, restart Apache, use Firefox to
 access http://cal.corp.example.com/, if you have setup Negotiate
 authentication for your Firefox browser, you will find you can login
 without password.
@@ -153,8 +153,8 @@ See http://php.net/manual/en/function.date-default-timezone-set.php
 
 10.2) Create a new admin account "dieken@CORP.EXAMPLE.COM" on Mantis management page,
 uncomment "$g_login_method = BASIC_AUTH" in /srv/www/mantis/config_inc.php,
-and uncomment "AuthType Kerberos", "Require valid-user" in
-/etc/apache2/sites-available/mantisbt, then restart Apache.
+and turn on Kerberos authentication in /etc/apache2/sites-enabled/mantisbt,
+then restart Apache.
 
 10.3) Access dieken's email, Mantis will send an activation email,
 click the link in it to activate the account.
@@ -243,7 +243,18 @@ Restart Apache, access http://wiki.corp.example.com/bin/configure .
 
 ++ Redmine Configuration ++
 
-18) Default admin login name and password: admin/admin
+18) Access "http://redmine.corp.example.com/" after you obtain Kerberos
+    ticket, this will automatically add your Kerberos account into
+    Redmine's internal user table.
+
+    Turn off Kerberos authentication in /etc/apache2/sites-enabled/redmine,
+    then restart Apache2, access "http://redmine.corp.example.com/" again,
+    login with admin role(login name and default password: admin/admin),
+    in the "Administration" page, set the normal user automatically
+    created above administrator role.
+
+    Turn on Kerberos authentication in /etc/apache2/sites-enabled/redmine,
+    now you can throw away the default "admin" account in Redmine.
 
 
 =============================================================
