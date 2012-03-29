@@ -14,8 +14,8 @@
     DirectoryIndex index.php index.html
 
     <Directory /srv/www/mantisbt/>
-        #AuthType Kerberos
-        #Require valid-user
+        AuthType Kerberos
+        Require valid-user
 
         AllowOverride None
         Order allow,deny
