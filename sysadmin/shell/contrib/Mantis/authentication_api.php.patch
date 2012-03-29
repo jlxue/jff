@@ -1,0 +1,26 @@
+diff -u a/authentication_api.php b/authentication_api.php
+--- a/authentication_api.php	2012-03-29 15:43:02.000000000 +0800
++++ b/authentication_api.php	2012-03-29 16:27:03.000000000 +0800
+@@ -192,7 +192,12 @@
+ 
+ 		if ( $t_auto_create ) {
+ 			# attempt to create the user
+-			$t_cookie_string = user_create( $p_username, md5( $p_password ) );
++			$t_email = $p_username;
++			$t_i = strpos($t_email, '@');
++			if ($t_i) {
++				$t_email = substr($t_email, 0, $t_i) . strtolower(substr($t_email, $t_i, strlen($t_email)));
++			}
++			$t_cookie_string = user_create( $p_username, md5( $p_password ), $t_email );
+ 
+ 			if ( false === $t_cookie_string ) {
+ 				# it didn't work
+@@ -226,7 +231,7 @@
+ 	if( !user_is_anonymous( $t_user_id ) ) {
+ 		# anonymous login didn't work, so check the password
+ 
+-		if( !auth_does_password_match( $t_user_id, $p_password ) ) {
++		if( BASIC_AUTH != $t_login_method && !auth_does_password_match( $t_user_id, $p_password ) ) {
+ 			user_increment_failed_login_count( $t_user_id );
+ 			return false;
+ 		}

@@ -56,6 +56,13 @@ substitude_template "$tmpl" "$f" 640 root:www-data CONF_CHANGED -e "s/$dummy/$ma
 set -x
 
 
+fgrep -q 'if( BASIC_AUTH != $t_login_method && !auth_does_password_match( $t_user_id, $p_password ) ) {' \
+        /srv/www/mantisbt/core/authentication_api.php || {
+    patch -bst /srv/www/mantisbt/core/authentication_api.php \
+        $SCRIPT_DIR/contrib/Mantis/authentication_api.php.patch
+    CONF_CHANGED=1
+}
+
 ensure_mode_user_group /srv/www/mantisbt                750 root www-data
 ensure_mode_user_group /srv/www/mantisbt/config_inc.php 640 root www-data
 

@@ -133,15 +133,18 @@ admin's default password:
 Login http://cal.corp.example.com/ with "admin" account, create a user
 for your Kerberos account, for example, dieken@CORP.EXAMPLE.COM
 
-Turn on Kerberos authentication now, restart Apache, use Firefox to
-access http://cal.corp.example.com/, if you have setup Negotiate
-authentication for your Firefox browser, you will find you can login
-without password.
+Turn on Kerberos authentication now, and use "kinit" to obtain Kerberos
+ticket, then restart Apache, use Firefox to access http://cal.corp.example.com/,
+if you have setup Negotiate authentication for your Firefox browser, you will
+find you can login without password.
 
 
 ++ Mantis Configuration ++
 
-10.1) Access "http://bug.corp.example.com/admin/install.php" to finish
+10.1) Comment "$g_login_method = BASIC_AUTH" in /srv/www/mantis/config_inc.php
+      then restart Apache2.
+
+10.2) Access "http://bug.corp.example.com/admin/install.php" to finish
 installation, you don't have to input anything in the input fields,
 just click the "Install/Upgrade Database" button.
 
@@ -151,13 +154,19 @@ You may need to adjust default timezone in /etc/php5/cgi/php.ini:
     date.timezone = Asia/Chongqing
 See http://php.net/manual/en/function.date-default-timezone-set.php
 
-10.2) Create a new admin account "dieken@CORP.EXAMPLE.COM" on Mantis management page,
-uncomment "$g_login_method = BASIC_AUTH" in /srv/www/mantis/config_inc.php,
-and turn on Kerberos authentication in /etc/apache2/sites-enabled/mantisbt,
-then restart Apache.
+10.3) Create a new admin account "dieken@CORP.EXAMPLE.COM" on Mantis management page,
 
-10.3) Access dieken's email, Mantis will send an activation email,
-click the link in it to activate the account.
+10.4) Access dieken's email, Mantis will send an activation email,
+click the link in it to activate the account. You don't have to
+input anything or click any button on the activation page.
+
+10.5) DO FINISH STEP 10.4, OR you CAN'T login with both two accounts!
+
+Uncomment "$g_login_method = BASIC_AUTH" in /srv/www/mantis/config_inc.php,
+then restart Apache, use "kinit" to obtain Kerberos ticket, if you have
+setup Negotiate authentication for your Firefox browser, you will find
+you can login without password(If the login page shows, just click the
+"login" button).
 
 
 ++ Bugzilla Configuration ++
