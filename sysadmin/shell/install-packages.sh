@@ -196,28 +196,33 @@ i redmine redmine-pgsql libfcgi-ruby1.8
 
 
 ###########################################################
-APT_LISTBUGS_FRONTEND=none
-APT_LISTCHANGES_FRONTEND=none
-DEBIAN_FRONTEND=noninteractive
-export APT_LISTBUGS_FRONTEND APT_LISTCHANGES_FRONTEND DEBIAN_FRONTEND
+if [ -z "$interactive" ]; then
+    APT_LISTBUGS_FRONTEND=none
+    APT_LISTCHANGES_FRONTEND=none
+    DEBIAN_FRONTEND=noninteractive
+    export APT_LISTBUGS_FRONTEND APT_LISTCHANGES_FRONTEND DEBIAN_FRONTEND
 
-# See debconf(7) in package debconf-doc
-# The file must be absolute file path!
-DEBCONF_DB_FALLBACK="File{filename:$SCRIPT_DIR/debconf-db.fallback}"
-export DEBCONF_DB_FALLBACK
+    # See debconf(7) in package debconf-doc
+    # The file must be absolute file path!
+    DEBCONF_DB_FALLBACK="File{filename:$SCRIPT_DIR/debconf-db.fallback}"
+    export DEBCONF_DB_FALLBACK
+
+    update_options=-q
+    install_options="-q -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --assume-yes"
+else
+    update_options=
+    install_options=
+fi
 
 
-aptitude -q update
+aptitude $update_options update
 
-aptitude -q safe-upgrade -o Dpkg::Options::=--force-confold \
-    -o Dpkg::Options::=--force-confdef --assume-yes
+aptitude $install_options safe-upgrade
 
-aptitude -q install -o Dpkg::Options::=--force-confold \
-    -o Dpkg::Options::=--force-confdef --assume-yes -s $PACKAGES |
+aptitude $install_options -s install $PACKAGES |
         grep -q 'No packages will be installed' || {
 
-    aptitude -q install -o Dpkg::Options::=--force-confold \
-        -o Dpkg::Options::=--force-confdef --assume-yes $PACKAGES
+    aptitude $install_options install $PACKAGES
 }
 
 

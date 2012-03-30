@@ -107,6 +107,7 @@ set -x
 
 
 [ -e /srv/www/bugzilla/data/params ] || {
+    [ -d /srv/www/bugzilla/data ] || mkdir -m 770 /srv/www/bugzilla/data
     cp $SCRIPT_DIR/srv/www/bugzilla/data/params /srv/www/bugzilla/data/params
     CONF_CHANGED=1
 }
@@ -114,6 +115,7 @@ set -x
 
 ensure_mode_user_group /srv/www/bugzilla                750 root www-data
 ensure_mode_user_group /srv/www/bugzilla/localconfig    640 root www-data
+ensure_mode_user_group /srv/www/bugzilla/data           770 root www-data
 ensure_mode_user_group /srv/www/bugzilla/data/params    660 www-data www-data
 
 
