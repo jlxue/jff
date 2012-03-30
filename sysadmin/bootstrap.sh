@@ -6,6 +6,7 @@ if [ -z "$1" ] || [ -e "$1" -a ! -d "$1" ]; then
     echo "Usage: $0 /path/to/directory [umount]" >&2
     exit 1
 fi
+
 ROOT="$1"; ROOT=${ROOT%/}
 SCRIPT_DIR=`dirname "$0"`
 
@@ -17,7 +18,7 @@ elif [ "$2" ]; then
     exit 1
 fi
 
-[ -d $ROOT/bin ] || sudo multistrap -d "$ROOT" -f "$SCRIPT_DIR/multistrap-wheezy.conf"
+[ -d $ROOT/bin ] || sudo multistrap -d "$ROOT" -f "$SCRIPT_DIR/multistrap.conf"
 
 do_mount () {
     mount | fgrep -q "$1" || return 0
