@@ -92,7 +92,8 @@ certificates for Exim if you can't get CA issued certificates, the
 
 ++ Mailman Configuration ++
 
-7.1) Run "newlist mailman" as root
+7.1) Run "newlist mailman" as root, it will ask you to set admin email
+address and password for the "mailman" mailing list.
 
 Optional:
     You may want to fix broken mailing list url if you have lists created before:
@@ -171,9 +172,9 @@ you can login without password(If the login page shows, just click the
 
 ++ Bugzilla Configuration ++
 
-11) Run these commands as root:
+11) Run these commands as root to setup Bugzilla database and configuration:
     # cd /srv/www/bugzilla
-    # ./checkinstall.pl
+    # ./checksetup.pl
 
 
 ++ Foswiki Configuration ++
@@ -308,6 +309,20 @@ Client settings:
 
 5) Subversion client: access "svn://svn.corp.example.com/REPOS_NAME/"
    it uses GSSAPI SASL mechansim to do authentication.
+
+=============================================================
+Passwords:
+
+1) Password for local user "root" and "dieken"
+2) Password for Kerberos principal "dieken", "dieken/ldap", "jack"
+3) admin email and password for "mailman" mailing list
+4) site password for mailman
+5) Default admin account for Mantis: administrator/root
+6) Bugzilla administrator password set by ./checksetup.pl
+7) ejabberd account password set by "ejabberdctl register"
+8) Samba user passwords
+9) Default admin account for Redmine: admin/admin
+
 
 =============================================================
 Issues:
