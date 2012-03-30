@@ -1,4 +1,9 @@
-How to use:
+                                CONTACT:    yubao.liu at gmail.com
+                                            Dieken at newsmth BBS
+
+
++ HOW TO USE +
+
 
 ++ OS Installation ++
 
@@ -30,10 +35,19 @@ iface eth0 inet static
 
 Setup /etc/resolv.conf:
 $ cat /etc/resolv.conf
-nameserver 8.8.8.8
-nameserver 8.8.4.4
+search corp.example.com
+nameserver 127.0.0.1
 
-NOTICE: If you DON'T use 10.0.0.10 for the "gold" server, adjust ./etc/bind/db.{corp,10}.
+NOTICE: If you DON'T use 10.0.0.10 for the "gold" server, adjust ./etc/bind/db.{corp,10}
+and ./etc/bind/zones.rfc1918, then run ./dns.sh to sync configuration to
+/etc/bind/ directory.
+
+Make sure "nslookup 10.0.0.10" returns "gold.corp.example.com".
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! YOU MUST configure the network as described above, or you probably
+!!! CAN'T access services below from outside of the server itself.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 ++ Service Installation ++
@@ -214,7 +228,7 @@ Restart Apache, access http://wiki.corp.example.com/bin/configure .
 ++ MoinMoin Configuration ++
 
 13) Access http://moin.corp.example.com/LanguageSetup to install
-    language pack, then restart Apache service.
+    language pack, then RESTART Apache service.
 
 
 ++ ejabberd Configuration ++
@@ -228,6 +242,9 @@ Restart Apache, access http://wiki.corp.example.com/bin/configure .
     "dieken@corp.example.com" and the password above to manage this
     ejabberd service, notice some options are cleared by
     /etc/ejabberd/ejabberd.cfg due to "override_*" directives.
+
+NOTICE GSSAPI SASL authentication is included in ejabberd 3.0 which
+isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
 
 
 ++ Samba Configuration ++
@@ -258,7 +275,7 @@ Restart Apache, access http://wiki.corp.example.com/bin/configure .
     Redmine's internal user table.
 
     Turn off Kerberos authentication in /etc/apache2/sites-enabled/redmine,
-    then restart Apache2, access "http://redmine.corp.example.com/" again,
+    then RESTART Apache2, access "http://redmine.corp.example.com/" again,
     login with admin role(login name and default password: admin/admin),
     in the "Administration" page, set the normal user automatically
     created above administrator role.
@@ -319,9 +336,10 @@ Passwords:
 4) site password for mailman
 5) Default admin account for Mantis: administrator/root
 6) Bugzilla administrator password set by ./checksetup.pl
-7) ejabberd account password set by "ejabberdctl register"
-8) Samba user passwords
-9) Default admin account for Redmine: admin/admin
+7) Foswiki admin password to save configuration on http://wiki.corp.example.com/bin/configure .
+8) ejabberd account password set by "ejabberdctl register"
+9) Samba user passwords
+10) Default admin account for Redmine: admin/admin
 
 
 =============================================================
@@ -340,6 +358,16 @@ If Kerberos authentication fails, check:
   (2) Is xxx.keytab readable?
   (3) Has the service been restarted after xxx.keytab is changed?
 
+
+Kerberos for Windows(KFW) may not be able to save preference on Win 7,
+use "Properties" menu item in popup menu to grant yourself write
+permission on C:\Windows\krb5.ini, then KFW will create the file
+under C:\Users\YOU-ACCOUNT\AppData\Local\VirtualStore\Windows\krb5.ini.
+
+
+Notice the line length of C:\Windows\System32\Drivers\etc\hosts is
+limited, seems no more than 9 host names in single line, you can
+use one line for one hostname.
 
 =============================================================
 Reference:
