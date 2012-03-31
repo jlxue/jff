@@ -1,0 +1,144 @@
+MyServer User Guide
+===================
+
+    For administrator, please read README first, especially the
+    "Passwords" section.
+
+
+++ DNS ++
+
+Set DNS server to IP of the server, or adjust /etc/hosts or
+C:\Windows\System32\Drivers\etc\hosts according to ./etc/hosts.
+
+
+++ Kerberos ++
+
+Use KFW(Kerberos for Windows) or command line, realm is
+"CORP.EXAMPLE.COM", domain is "corp.example.com", Kerberos
+server is "kerberos.corp.example.com", you may need to
+adjust /etc/krb5.conf if you don't use the DNS server above.
+
+$ kinit dieken
+
+Configure Firefox and Thunderbird to enable HTTP Negotiate authentication.
+
+   Thunderbird: Edit -> Preferences -> Advanced -> Config Editor
+            or  Tools -> Options -> Advanced -> Config Editor
+   Firefox: input "about:config" in URL box and press Enter key
+
+    network.negotiate-auth.trusted-uris: corp.example.com
+
+All services below use HTTP Negotiate/GSSAPI authentication if not explictly state.
+If you get unauthorized error message in your web browser, make sure you
+have obtained Kerberos ticket and setup Negotiate authentication in Firefox.
+
+
+++ SSH ++
+
+Putty on Windows support GSSAPI authentication, KFW is required.
+Only pubkey and GSSAPI authentication is allowed for SSH service.
+
+Host is "gold.corp.example.com".
+
+
+++ IMAP ++
+
+        Server Name: imap.corp.example.com
+        Port: 143
+        User Name: dieken
+        Connection security: STARTTLS
+        Authentication method: Kerberos / GSSAPI
+
+
+++ SMTP ++
+
+        Server Name: smtp.corp.example.com
+        Port: 25
+        User Name: dieken
+        Connection security: STARTTLS
+        Authentication method: Kerberos / GSSAPI
+
+
+++ Mailing list ++
+
+http://list.corp.example.com/
+
+It doesn't support GSSAPI authentication yet.
+
+
+++ Web mail ++
+
+http://mail.corp.example.com/
+
+
+++ Calendar ++
+
+Use ThunderBird + Lightning extension.
+
+  Darwin CalendarServer:
+    http://calendar.corp.example.com/calendars/users/dieken/calendar/
+
+  DAViCal:
+    http://cal.corp.example.com/caldav.php/dieken@CORP.EXAMPLE.COM/calendar/
+
+The DAViCal service doesn't support automatic account creation, its
+web administration page: http://cal.corp.example.com/ .
+
+
+++ Bug Tracking System ++
+
+Mantis:     http://bug.corp.example.com/
+            If it asks username and password, just click the "login" button.
+
+Bugzilla:   http://bug.corp.example.com/
+
+
+++ Wiki ++
+
+Foswiki:    http://wiki.corp.example.com
+MoinMoin:   http://moin.corp.example.com
+
+
+++ XMPP Instant Messaging ++
+
+For multiple user chat log, access http://xmpp.corp.example.com/ .
+
+Create XMPP account in Pidgin:
+    "Basic" tab page:
+        Protocol:   XMPP
+        Username:   dieken
+        Domain:     corp.example.com
+    "Advanced" tab page:
+        Connection security:    Require encryption
+        Connect port:           5222
+        Connect server:         xmpp.corp.example.com
+
+
+++ Samba ++
+
+Administrator has to use "pdbedit" to add users explictly. No GSSAPI
+authentication.  $HOME/samba directory is shared.
+
+
+++ Subversion ++
+
+svn://svn.corp.example.com/REPOS_NAME/
+
+It uses GSSAPI SASL mechanism to authenticate. TortoiseSVN + KFW is OK.
+
+
+++ GIT ++
+
+The service is setup with Gitolite, it uses ssh protocol, host
+is "git.corp.example.com".
+
+
+++ Trac ++
+
+http://trac.corp.example.com/
+
+
+++ Redmine ++
+
+http://redmine.corp.example.com/
+
