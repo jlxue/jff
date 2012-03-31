@@ -13,10 +13,26 @@ C:\Windows\System32\Drivers\etc\hosts according to ./etc/hosts.
 
 ++ Kerberos ++
 
-Use KFW(Kerberos for Windows) or command line, realm is
+Use KFW(Kerberos for Windows) on Windows and krb5-user on Linux, realm is
 "CORP.EXAMPLE.COM", domain is "corp.example.com", Kerberos
-server is "kerberos.corp.example.com", you may need to
-adjust /etc/krb5.conf if you don't use the DNS server above.
+server is "kerberos.corp.example.com", you MUST adjust /etc/krb5.conf
+or krb5.ini if you don't use the DNS server above.
+
+    KFW Options menu -> Network Identity Manager Configuration
+        Kerberos v5:    Default Realm: CORP.EXAMPLE.COM
+            Realms:     Create new realm "CORP.EXAMPLE.COM";
+                        Server is "kerberos.corp.example.com", admin "yes", master "yes";
+                        Domain is "corp.example.com".
+
+    In the main window, after you obtain Kerberos ticket, remeber to right
+    click on your credential and select "Set as default".
+
+    KFW on 64bit Win7 can't write to C:\Windows\krb5.ini and
+    C:\Program Files (x86)\MIT\Kerberos\bin\krb5.ini, you need
+    to grant write perm to C:\Windows\krb5.ini, then KFW will
+    delete it and write to C:\Users\YOUR-ACCOUNT\AppData\Local\
+    VirtualStore\Windows\krb5.ini, you need to copy it to
+    C:\Program Files....\bin\krb5.ini.
 
 $ kinit dieken
 
@@ -27,6 +43,8 @@ Configure Firefox and Thunderbird to enable HTTP Negotiate authentication.
    Firefox: input "about:config" in URL box and press Enter key
 
     network.negotiate-auth.trusted-uris: corp.example.com
+    network.negotiate-auth.using-native-gsslib: true
+    network.auth.use-sspi: false
 
 All services below use HTTP Negotiate/GSSAPI authentication if not explictly state.
 If you get unauthorized error message in your web browser, make sure you

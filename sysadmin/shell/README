@@ -285,49 +285,6 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
 
 
 =============================================================
-Client settings:
-
-1) Thunderbird: Edit -> Preferences -> Advanced -> Config Editor
-            or  Tools -> Options -> Advanced -> Config Editor
-   Firefox: input "about:config" in URL box and press Enter key
-
-    network.negotiate-auth.trusted-uris: corp.example.com
-
-2) Thunderbird
-    IMAP:
-        Server Name: imap.corp.example.com
-        Port: 143
-        User Name: dieken
-        Connection security: STARTTLS
-        Authentication method: Kerberos / GSSAPI
-    SMTP:
-        Server Name: smtp.corp.example.com
-        Port: 25
-        User Name: dieken
-        Connection security: STARTTLS
-        Authentication method: Kerberos / GSSAPI
-
-3) Lightning
-  Darwin CalendarServer:
-    http://calendar.corp.example.com/calendars/users/dieken/calendar/
-  DAViCal:
-    http://cal.corp.example.com/caldav.php/dieken@CORP.EXAMPLE.COM/calendar/
-
-
-4) Create XMPP account in Pidgin
-    "Basic" tab page:
-        Protocol:   XMPP
-        Username:   dieken
-        Domain:     corp.example.com
-    "Advanced" tab page:
-        Connection security:    Require encryption
-        Connect port:           5222
-        Connect server:         xmpp.corp.example.com
-
-5) Subversion client: access "svn://svn.corp.example.com/REPOS_NAME/"
-   it uses GSSAPI SASL mechansim to do authentication.
-
-=============================================================
 Passwords:
 
 1) Password for local user "root" and "dieken"
@@ -357,6 +314,15 @@ If Kerberos authentication fails, check:
   (1) Is service key in xxx.keytab?
   (2) Is xxx.keytab readable?
   (3) Has the service been restarted after xxx.keytab is changed?
+
+
+Debug Firefox:
+    export NSPR_LOG_MODULES=negotiateauth:5
+    export NSPR_LOG_FILE=`pwd`/firefox.log
+    firefox -console
+
+    export NSPR_LOG_MODULES=all:5
+    ...
 
 
 Kerberos for Windows(KFW) may not be able to save preference on Win 7,
