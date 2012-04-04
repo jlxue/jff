@@ -13,8 +13,8 @@ C:\Windows\System32\Drivers\etc\hosts according to ./etc/hosts.
 
 ++ Kerberos ++
 
-Use KFW(Kerberos for Windows) on Windows and krb5-user on Linux, realm is
-"CORP.EXAMPLE.COM", domain is "corp.example.com", Kerberos
+Use KFW-3.2.2(Kerberos for Windows) on Windows and krb5-user on Linux,
+realm is "CORP.EXAMPLE.COM", domain is "corp.example.com", Kerberos
 server is "kerberos.corp.example.com", you MUST adjust /etc/krb5.conf
 or krb5.ini if you don't use the DNS server above.
 
@@ -24,17 +24,32 @@ or krb5.ini if you don't use the DNS server above.
                         Server is "kerberos.corp.example.com", admin "yes", master "yes";
                         Domain is "corp.example.com".
 
-    In the main window, after you obtain Kerberos ticket, remeber to right
-    click on your credential and select "Set as default".
+In the main window, after you obtain Kerberos ticket, remeber to right
+click on your credential and select "Set as default".
 
-    KFW on 64bit Win7 can't write to C:\Windows\krb5.ini and
-    C:\Program Files (x86)\MIT\Kerberos\bin\krb5.ini, you need
-    to grant write perm to C:\Windows\krb5.ini, then KFW will
-    delete it and write to C:\Users\YOUR-ACCOUNT\AppData\Local\
-    VirtualStore\Windows\krb5.ini, you need to copy it to
-    C:\Program Files....\bin\krb5.ini.
+Notice for KFW-3.2.2 on 64bit Windows 7:
+    (1) KFW on 64bit Win7 may not be able to write to C:\Windows\krb5.ini,
+    you need to grant write perm to C:\Windows\krb5.ini, then after you
+    save preference, KFW will delete it and write to
+    C:\Users\YOUR-ACCOUNT\AppData\Local\VirtualStore\Windows\krb5.ini,
+    you'd better copy it to C:\Windows\krb5.ini.
 
-$ kinit dieken
+    (2) Use kfw-3-2-2.msi on http://web.mit.edu/kerberos/dist/#kfw-3.2,
+    this installer adds MIT\Kerberos\bin to PATH environment and writes
+    Windows registry, the former is important for Firefox/ThunderBird/TortoiseSVN,
+    the latter is important for Putty/TortoiseSVN, they use PATH or registry to
+    find gssapi32.dll or gssapi64.dll.
+
+    (3) 64bit TortoiseSVN requires gssapi64.dll, you need to extract
+    *64.dll files from kfw-3-2-3-amd64.zip on
+    http://web.mit.edu/kerberos/dist/testing.html#kfw-3.2.3 and copy
+    them to C:\Program Files\TortoiseSVN\bin, for 64bit Subversion command
+    line client, you need to set registry entry
+    HKLM\SOFTWARE\Carnegie Mellon\Project Cyrus\SASL Library:
+        SearchPath: C:\Program Files\TortoiseSVN\bin
+
+    Reference: http://svn.apache.org/repos/asf/subversion/trunk/notes/sasl.txt
+
 
 Configure Firefox and Thunderbird to enable HTTP Negotiate authentication.
 
@@ -44,7 +59,7 @@ Configure Firefox and Thunderbird to enable HTTP Negotiate authentication.
 
     network.negotiate-auth.trusted-uris: corp.example.com
     network.negotiate-auth.using-native-gsslib: true
-    network.auth.use-sspi: false
+    network.auth.use-sspi: false        (Only on Windows)
 
 All services below use HTTP Negotiate/GSSAPI authentication if not explictly state.
 If you get unauthorized error message in your web browser, make sure you

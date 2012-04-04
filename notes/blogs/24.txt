@@ -1,0 +1,45 @@
+Windows，KFW，SASL，GSSAPI， 迷一般的组合
+
+
+前几天发布 MyServer-scripts-2.1 时，发现 64 位Windows 7下 HTTP Negotiate 和 GSSAPI 认证不好使了，接下来几天很是折腾了一番，终于比较粗暴的搞定了，记录点笔记以备忘。
+
+问题一：  KFW (Kerberos for Windows 3.2.2)保存设置失败。
+原因： 用 Sysinternals Suite 的 Process Monitor 查看了下，KFW 写入 C:\Windows\krb5.ini 失败，原来是 Windows 7 对 C: 盘做了保护，不让普通用户写入，这个很好解决，右键选择这个文件，属性里赋予 users 组可写权限，再保存设置就可以了，KFW 保存设置时是先删除这个文件，再写一份新的。但是奇葩得是 Windows 7 对这个写入做了魔法般的重定向： 实际是写入到 C:\Users\YOUR-ACCOUNT\AppData\Local\VirtualStore\Windows\krb5.ini 下了。 KFW 的代码肯定不知道这个魔法，可见 Windows 的向后兼容是多么可怕的强大！ 从 ProcMon 的输出看，貌似 Putty/Firefox/ThunderBird 都不会去 VirtualStore/ 下找文件，稳妥起见，还是往  C:\Windows\ 下复制一份得了。
+
+KFW-3.2.2 只有 32 位版本，实验性的 3.2.3 倒是有 64 位版本，但 Putty 0.62、Firefox 11、ThunderBird 11 都是 32 位的，所以必须得安装 KFW-3.2.2。 Putty 和 KFW 配合良好，在  Putty 源码 putty-src\windows\wingss.c 中，Putty 通过注册表 HKLM\Software\MIT\Kerberos\InstallDir 得到 KFW 安装目录，默认是 C:\Program Files (x86)\MIT\Kerberos，拼接上 bin\gssapi32.dll 并加载得到重要的几个 GSSAPI 函数入口地址。 这个地方 64bit Windows 7 又搞了个魔法， Putty 的这次注册表读取被重定向到 HKLM\Software\Wow6432Node\MIT\Kerberos 了，Putty 的代码自然对这个也是一无所知，可怕的 Windows 兼容性！
+
+问题二： Firefox 以及 ThunderBird 均不做 HTTP Negotiate 认证，直接被 Apache 401 了。
+原因：
+
+    Firefox 和 ThunderBird 需要找到 gssapi32.dll， 它们的代码貌似是通过 PATH 找这个文件，没用注册表，还好 KFW-3.2.2 的 MSI 安装程序自动把 C:\Program Files (x86)\MIT\Kerberos\bin 加入 PATH 了，所以这一步是没有问题的（注意 Windows 7 自身也有 klist.exe 程序，命令行下调用时需要分清楚）。
+    KFW 的设置里默认 realm 没有设置成 CORP.EXAMPLE.COM，这会导致做 HTTP Negotiate 或者 GSSAPI 认证时非常缓慢，因为 KFW 跑去 MIT 的 kerberos 服务器上找用户了。貌似找不到后会 rollback 到 CORP.EXAMPLE.COM，可能是根据域名推断的。
+    Firefox 和 Thunderbird 的 Config Editor 里没有把 network.auth.use-sspi 设置成 false， 只设置 network.negotiate-auth.trusted-uris 为 corp.example.com 是不够的。前一个选项的意思是是否使用 Windows 的 security service provider interface，由于 Windows 的 Kerberos 实现夹带了私货，不能与 MIT Kerberos 服务互操作，所以必须设置成 false，否则根本不会去调用 gssapi32.dll。 由于这个选项在 Linux 版 Firefox 和 Thunderbird 里没有，我又很少在 Windows 下测试，所以早就忘记当初在 32bit WinXP 上给 Firefox 设置过这个选项……
+
+这个问题的一些参考资料：
+https://hg.mozilla.org/mozilla-central/file/fd2da289a3c1/extensions/auth
+https://hg.mozilla.org/mozilla-central/annotate/fd2da289a3c1/extensions/auth/nsAuthGSSAPI.cpp
+https://developer.mozilla.org/En/Integrated_Authentication
+https://developer.mozilla.org/en/Mozilla_Source_Code_Directory_Structure
+Firefox 的调试日志：
+
+set NSPR_LOG_MODULES=negotiateauth:5
+set NSPR_LOG_FILE=c:\firefox_in_domain_negotiateauth.log
+...\firefox.exe -console
+
+set NSPR_LOG_MODULES=all:5
+set NSPR_LOG_FILE=c:\firefox_in_domain_debug.log
+
+...\firefox.exe -console
+
+
+问题三： 64 bit TortoiseSVN 报告 Unable to negotiate authentication mechanism.
+原因： 64bit Windows 下安装不了 32bit TortoiseSVN， 而 64bit TortoiseSVN 又需要 gssapi64.dll，所以需要去 http://web.mit.edu/kerberos/dist/testing.html 下载 kfw-3-2-3-amd64.zip (没下载 MSI  版是因为担心干扰 32bit KFW-3.2.2)，解压缩后，把里头 amd64/ 目录下所有 *64.dll 复制到 C:\Program Files\TortoiseSVN\bin\ 下， 然后就可以让 TortoiseSVN 访问 svn://svn.corp.example.com/test 时使用 SASL GSSAPI 认证机制了。 如果还是失败，检查 32bit KFW-3.2.2 是否已经成功获得 Kerberos ticket 并且对应 Principal 是否是默认 Principal， 以及 C:\Windows\krb5.ini 是否存在，gssapi*.dll 会在 dll 所在目录以及 C:\Windows 下找寻这个文件——不过我在成功过一次后删除 C:\Windows\krb5.ini 伊还是可以成功认证，不解中。
+
+这个问题的调试过程中发现一个对调试有些许帮助的技巧： http://subversion.apache.org/docs/community-guide/debugging.html
+ $ socat -v TCP-LISTEN:9630,reuseaddr,fork TCP4:localhost:svn ，在 svnserve 运行所在机器执行这个命令，然后客户端访问 svn://....:9630/test，socat 就会把 svnserve 和 svn client 之间的通讯输出到屏幕上。
+
+问题四： 64bit TortoiseSVN 随带的 svn.exe 报告 Unable to negotiate authentication mechansim.
+原因： 命令行版本的 svn client 需要知道 sasl module library 所在路径，TortoiseSVN 大概是代码里设置了，svn.exe 就没这个好运气，这个问题调试过程中，ProcMon 又帮了大忙，可以看到 svn.exe  先查注册表HKLM\SOFTWARE\Carnegie Mellon\Project Cyrus\SASL Library，然后去找 c:\cmu\bin，放狗一搜，立马见到答案：http://svn.apache.org/repos/asf/subversion/trunk/notes/sasl.txt ，当初配置 svnserve 时就看过，可惜没注意看 Windows 相关章节。 这段文档里只有 SearchPath 对 svn client 是需要的，在我这个场景里，就是设置成 C:\Program Files\TortoiseSVN\bin。
+
+至此，64bit Windows 7 下 TortoiseSVN/svn/Firefox/ThunderBird/Putty 的 GSSAPI 认证搞定，加上以前 32bit WinXP 下的试验，Windows 下使用 MIT Kerberos server 还是相当凑合的 :-)
+
