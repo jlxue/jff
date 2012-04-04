@@ -6,21 +6,6 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 
-# resolv.conf
-#
-cmp_file $SCRIPT_DIR/etc/resolvconf/resolv.conf.d/head /etc/resolvconf/resolv.conf.d/head || {
-    overwrite_file $SCRIPT_DIR/etc/resolvconf/resolv.conf.d/head /etc/resolvconf/resolv.conf.d/head
-    RESOLVCONF_CHANGED=1
-}
-
-cmp_file $SCRIPT_DIR/etc/resolvconf/resolv.conf.d/tail /etc/resolvconf/resolv.conf.d/tail || {
-    overwrite_file $SCRIPT_DIR/etc/resolvconf/resolv.conf.d/tail /etc/resolvconf/resolv.conf.d/tail
-    RESOLVCONF_CHANGED=1
-}
-
-[ -z "$RESOLVCONF_CHANGED" ] || service resolvconf restart
-
-
 # Kerberos and LDAP are critical services, avoid resolving to Internet sites
 # by mistake in case internal DNS server is down.
 sync_file $SCRIPT_DIR/etc/hosts /etc/hosts
@@ -44,8 +29,6 @@ cmp_dir $SCRIPT_DIR/etc/bind /etc/bind --exclude rndc.key || {
 }
 
 
-ensure_mode_user_group /etc/resolvconf/resolv.conf.d/head   644 root root
-ensure_mode_user_group /etc/resolvconf/resolv.conf.d/tail   644 root root
 ensure_mode_user_group /etc/hosts           644 root root
 ensure_mode_user_group /etc/hostname        644 root root
 

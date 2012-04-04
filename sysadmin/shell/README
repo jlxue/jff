@@ -32,17 +32,22 @@ iface eth0 inet static
     address 10.0.0.10
     netmask 255.255.255.0
     gateway 10.0.0.1
+    dns-nameservers 127.0.0.1
+    dns-search corp.example.com
 
-Setup /etc/resolv.conf:
+Check /etc/resolv.conf, this should be setup properly by resolvconf
+and ifupdown packages:
 $ cat /etc/resolv.conf
 search corp.example.com
 nameserver 127.0.0.1
 
-NOTICE: If you DON'T use 10.0.0.10 for the "gold" server, adjust ./etc/bind/db.{corp,10}
-and ./etc/bind/zones.rfc1918, then run ./dns.sh to sync configuration to
+NOTICE: If you DON'T use 10.0.0.10 for the "gold" server, adjust
+./etc/bind/db.{corp,10} ./etc/bind/zones.rfc1918 and
+/etc/network/interfaces, then run ./dns.sh to sync configuration to
 /etc/bind/ directory.
 
-Make sure "nslookup 10.0.0.10" returns "gold.corp.example.com".
+Make sure "nslookup 10.0.0.10" returns "gold.corp.example.com"
+and "nslookup gold.corp.example.com" returns "10.0.0.10".
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! YOU MUST configure the network as described above, or you probably
