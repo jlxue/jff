@@ -32,7 +32,8 @@ Notice for KFW-3.2.2 on 64bit Windows 7:
     you need to grant write perm to C:\Windows\krb5.ini, then after you
     save preference, KFW will delete it and write to
     C:\Users\YOUR-ACCOUNT\AppData\Local\VirtualStore\Windows\krb5.ini,
-    you'd better copy it to C:\Windows\krb5.ini.
+    you MUST copy it to C:\Windows\krb5.ini because other kerberozied
+    applications don't know the VirtualStore\Windows\ directory.
 
     (2) Use kfw-3-2-2.msi on http://web.mit.edu/kerberos/dist/#kfw-3.2,
     this installer adds MIT\Kerberos\bin to PATH environment and writes
