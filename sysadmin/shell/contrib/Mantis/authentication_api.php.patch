@@ -1,6 +1,5 @@
-diff -u a/authentication_api.php b/authentication_api.php
---- a/authentication_api.php	2012-03-29 15:43:02.000000000 +0800
-+++ b/authentication_api.php	2012-03-29 16:27:03.000000000 +0800
+--- a/authentication_api.php	2012-04-05 00:18:42.000000000 +0800
++++ b/authentication_api.php	2012-04-05 00:19:52.000000000 +0800
 @@ -192,7 +192,12 @@
  
  		if ( $t_auto_create ) {
@@ -24,3 +23,11 @@ diff -u a/authentication_api.php b/authentication_api.php
  			user_increment_failed_login_count( $t_user_id );
  			return false;
  		}
+@@ -322,6 +327,7 @@
+  */
+ function auth_automatic_logon_bypass_form() {
+ 	switch( config_get( 'login_method' ) ) {
++		case BASIC_AUTH:
+ 		case HTTP_AUTH:
+ 			return true;
+ 	}

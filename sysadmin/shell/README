@@ -185,8 +185,7 @@ input anything or click any button on the activation page.
 Uncomment "$g_login_method = BASIC_AUTH" in /srv/www/mantis/config_inc.php,
 then restart Apache, use "kinit" to obtain Kerberos ticket, if you have
 setup Negotiate authentication for your Firefox browser, you will find
-you can login without password(If the login page shows, just click the
-"login" button).
+you can login without the "/login_page.php" page.
 
 
 ++ Bugzilla Configuration ++
