@@ -7,6 +7,7 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 
 
 mkdir -p -m 0755 /srv/svn
+mkdir -p -m 0755 /srv/viewvc
 
 sync_file $SCRIPT_DIR/etc/logrotate.d/svnserve /etc/logrotate.d/svnserve
 
@@ -35,6 +36,10 @@ cmp_file $SCRIPT_DIR/etc/sasl2/svn.conf /etc/sasl2/svn.conf || {
     CONF_CHANGED=1
 }
 
+# Currently we run ViewVC in CGI mode, so we don't have to restart
+# Apache if any configuration of ViewVC changes.
+sync_dir $SCRIPT_DIR/etc/viewvc /etc/viewvc
+
 
 ensure_mode_user_group /srv/svn                 750 svn svn
 ensure_mode_user_group /srv/svn/authz           640 svn svn
@@ -44,6 +49,8 @@ ensure_mode_user_group /etc/sasl2/svn.conf      644 root root
 ensure_mode_user_group /etc/default/svnserve    644 root root
 ensure_mode_user_group /etc/init.d/svnserve     755 root root
 ensure_mode_user_group /etc/logrotate.d/svnserve    644 root root
+ensure_mode_user_group /etc/viewvc              755 root root
+ensure_mode_user_group /srv/viewvc              750 viewvc viewvc
 
 
 update-rc.d svnserve defaults

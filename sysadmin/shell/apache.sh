@@ -8,6 +8,7 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 
 add_system_user_group "Trac account" /srv/trac trac trac svn
 add_system_user_group "MoinMoin account" /srv/www/moin moin moin
+add_system_user_group "ViewVC account" /srv/viewvc viewvc viewvc svn
 
 
 mkdir -p -m 0755 /srv/www
