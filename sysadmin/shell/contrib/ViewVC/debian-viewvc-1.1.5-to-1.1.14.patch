@@ -1,0 +1,89 @@
+diff --git a/debian/patches/90-viewvc-install-debian-paths b/debian/patches/90-viewvc-install-debian-paths
+index 6e4bcb8..d1cf0af 100644
+--- a/debian/patches/90-viewvc-install-debian-paths
++++ b/debian/patches/90-viewvc-install-debian-paths
+@@ -1,11 +1,11 @@
+-Index: trunk/viewvc-install
+-===================================================================
+---- trunk.orig/viewvc-install	2010-03-31 19:36:34.000000000 +1100
+-+++ trunk/viewvc-install	2010-03-31 20:00:56.000000000 +1100
+-@@ -49,10 +49,10 @@
+- FILE_INFO_LIST = [
+-     ("bin/cgi/viewvc.cgi",        "bin/cgi/viewvc.cgi",        0755, 1, 0, 0),
+-     ("bin/cgi/query.cgi",         "bin/cgi/query.cgi",         0755, 1, 0, 0),
++diff --git a/viewvc-install b/viewvc-install
++index 2d05204..6937d2e 100755
++--- a/viewvc-install
+++++ b/viewvc-install
++@@ -53,10 +53,10 @@ FILE_INFO_LIST = [
++     ("bin/wsgi/viewvc.fcgi",      "bin/wsgi/viewvc.fcgi",      0755, 1, 0, 0),
++     ("bin/wsgi/query.wsgi",       "bin/wsgi/query.wsgi",       0755, 1, 0, 0),
++     ("bin/wsgi/query.fcgi",       "bin/wsgi/query.fcgi",       0755, 1, 0, 0),
+ -    ("bin/mod_python/viewvc.py",  "bin/mod_python/viewvc.py",  0755, 1, 0, 0),
+ -    ("bin/mod_python/query.py",   "bin/mod_python/query.py",   0755, 1, 0, 0),
+ -    ("bin/mod_python/handler.py", "bin/mod_python/handler.py", 0755, 1, 0, 0),
+@@ -17,7 +17,7 @@ Index: trunk/viewvc-install
+      ("bin/standalone.py",         "bin/standalone.py",         0755, 1, 0, 0),
+      ("bin/loginfo-handler",       "bin/loginfo-handler",       0755, 1, 0, 0),
+      ("bin/cvsdbadmin",            "bin/cvsdbadmin",            0755, 1, 0, 0),
+-@@ -122,7 +122,7 @@
++@@ -126,7 +126,7 @@ def replace_var(contents, var, value):
+      """Replace instances of the variable VAR as found in file CONTENTS
+      with VALUE."""
+      pattern = re.compile('^' + var + r'\s*=\s*.*$', re.MULTILINE)
+@@ -26,7 +26,7 @@ Index: trunk/viewvc-install
+      return re.sub(pattern, _escape(repl), contents)
+  
+  
+-@@ -131,8 +131,8 @@
++@@ -135,8 +135,8 @@ def replace_paths(contents):
+      if contents[:2] == '#!':
+          shbang = '#!' + sys.executable
+          contents = re.sub('^#![^\n]*', _escape(shbang), contents)
+diff --git a/debian/patches/rev2369 b/debian/patches/rev2369
+deleted file mode 100644
+index e6e1df0..0000000
+--- a/debian/patches/rev2369
++++ /dev/null
+@@ -1,10 +0,0 @@
+---- a/lib/sapi.py
+-+++ b/lib/sapi.py
+-@@ -33,6 +33,7 @@ server = None
+- # that character as-is, and sometimes needs to embed escaped values
+- # into HTML attributes.
+- def escape(s):
+-+  s = str(s)
+-   s = string.replace(s, '&', '&amp;')
+-   s = string.replace(s, '>', '&gt;')
+-   s = string.replace(s, '<', '&lt;')
+diff --git a/debian/patches/series b/debian/patches/series
+index 9107357..5fccfd0 100644
+--- a/debian/patches/series
++++ b/debian/patches/series
+@@ -2,4 +2,3 @@
+ 90-viewvc-install-debian-paths
+ 91-viewvc-conf-debian-custom
+ 92-no_strings_in_raise
+-rev2369
+diff --git a/debian/viewvc-query.install b/debian/viewvc-query.install
+index f604e41..d46f403 100644
+--- a/debian/viewvc-query.install
++++ b/debian/viewvc-query.install
+@@ -3,4 +3,5 @@ usr/lib/viewvc/bin/loginfo-handler		/usr/lib/viewvc/bin
+ usr/lib/viewvc/bin/make-database		/usr/lib/viewvc/bin
+ usr/lib/viewvc/bin/svndbadmin			/usr/lib/viewvc/bin
+ usr/lib/viewvc/bin/cgi/query.cgi		/usr/lib/viewvc/cgi-bin
++usr/lib/viewvc/bin/wsgi/query.*			/usr/lib/viewvc/wsgi
+ usr/lib/viewvc/bin/mod_python/query.py		/usr/lib/viewvc/mod-python
+diff --git a/debian/viewvc.install b/debian/viewvc.install
+index f1aecfa..3837629 100644
+--- a/debian/viewvc.install
++++ b/debian/viewvc.install
+@@ -5,6 +5,7 @@ usr/lib/viewvc/bin/cgi/viewvc.cgi		/usr/lib/viewvc/cgi-bin
+ usr/lib/viewvc/bin/mod_python/.htaccess		/usr/lib/viewvc/mod-python
+ usr/lib/viewvc/bin/mod_python/handler.py	/usr/lib/viewvc/mod-python
+ usr/lib/viewvc/bin/mod_python/viewvc.py		/usr/lib/viewvc/mod-python
++usr/lib/viewvc/bin/wsgi/viewvc.*		/usr/lib/viewvc/wsgi
+ usr/lib/viewvc/lib/				/usr/lib/viewvc
+ usr/lib/viewvc/templates/			/etc/viewvc
+ usr/lib/viewvc/templates-contrib/		/usr/share/doc/viewvc/examples

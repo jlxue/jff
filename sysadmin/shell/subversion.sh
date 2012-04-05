@@ -36,9 +36,10 @@ cmp_file $SCRIPT_DIR/etc/sasl2/svn.conf /etc/sasl2/svn.conf || {
     CONF_CHANGED=1
 }
 
-# Currently we run ViewVC in CGI mode, so we don't have to restart
-# Apache if any configuration of ViewVC changes.
-sync_dir $SCRIPT_DIR/etc/viewvc /etc/viewvc
+cmp_dir $SCRIPT_DIR/etc/viewvc /etc/viewvc || {
+    overwrite_dir $SCRIPT_DIR/etc/viewvc /etc/viewvc
+    APACHE_CONF_CHANGED=1
+}
 
 
 ensure_mode_user_group /srv/svn                 750 svn svn
@@ -56,6 +57,7 @@ ensure_mode_user_group /srv/viewvc              750 viewvc viewvc
 update-rc.d svnserve defaults
 
 [ -z "$CONF_CHANGED" ] || service svnserve restart
+[ -z "$APACHE_CONF_CHANGED" ] || service apache2 restart
 
 ensure_service_started svnserve svnserve
 

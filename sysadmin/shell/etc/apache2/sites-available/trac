@@ -15,19 +15,17 @@
     WSGIScriptAlias /   /srv/www/trac/cgi-bin/trac.wsgi
 
     <Directory "/srv/www/trac/cgi-bin">
-        <Files "trac.wsgi">
-            AuthType Kerberos
-            Require  valid-user
+        AuthType Kerberos
+        Require  valid-user
 
-            AllowOverride None
-            Order allow,deny
-            Allow from all
+        AllowOverride None
+        Order allow,deny
+        Allow from all
 
-            WSGIProcessGroup trac-sites
-            WSGIApplicationGroup %{GLOBAL}
+        WSGIProcessGroup trac-sites
+        WSGIApplicationGroup %{GLOBAL}
 
-            SetEnv trac.env_parent_dir /srv/trac
-        </Files>
+        SetEnv trac.env_parent_dir /srv/trac
     </Directory>
 
     <Directory "/srv/www/trac/htdocs">
