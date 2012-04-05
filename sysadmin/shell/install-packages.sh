@@ -147,8 +147,9 @@ i calendarserver
 i gitolite
 
 # host svn repositories
-#   ViewVC isn't interesting enough...
 i subversion subversion-tools
+i viewvc
+# svnserve is preferred than svn apache module
 #i libapache2-svn
 
 # dependencies for bugzilla 4.2
