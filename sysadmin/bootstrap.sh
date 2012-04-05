@@ -11,6 +11,7 @@ ROOT="$1"; ROOT=${ROOT%/}
 SCRIPT_DIR=`dirname "$0"`
 
 if [ "$2" = "umount" ]; then
+    sudo lsof -t $ROOT | sudo xargs kill
     mount | fgrep $ROOT | awk '{print $3}' | xargs -n 1 sudo umount
     exit 0
 elif [ "$2" ]; then
