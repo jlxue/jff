@@ -159,7 +159,8 @@ authentication.  $HOME/samba directory is shared.
 
 ++ Subversion ++
 
-svn://svn.corp.example.com/REPOS_NAME/
+Source Code Browser:    http://svn.corp.example.com/
+Checkout:               svn://svn.corp.example.com/REPOS_NAME/
 
 It uses GSSAPI SASL mechanism to authenticate. TortoiseSVN + KFW is OK.
 

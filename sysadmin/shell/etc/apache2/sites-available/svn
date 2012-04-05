@@ -1,0 +1,31 @@
+<VirtualHost *:80>
+    ServerName svn.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /nonexistent
+
+
+    ErrorLog ${APACHE_LOG_DIR}/svn-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/svn-access.log combined
+
+    ScriptAlias /view       /usr/lib/viewvc/cgi-bin/viewvc.cgi
+    ScriptAlias /query      /usr/lib/viewvc/cgi-bin/query.cgi
+
+    RedirectMatch   ^/$     /view
+
+    <Directory /usr/lib/viewvc/cgi-bin/>
+        AuthType Kerberos
+        Require valid-user
+
+        AllowOverride None
+        Options ExecCGI
+        AddHandler cgi-script .cgi
+        Order allow,deny
+        Allow from all
+    </Directory>
+</VirtualHost>
+
