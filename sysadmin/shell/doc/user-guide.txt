@@ -77,6 +77,8 @@ Host is "gold.corp.example.com".
 
 ++ IMAP ++
 
+        Account: dieken@corp.example.com
+
         Server Name: imap.corp.example.com
         Port: 143
         User Name: dieken
@@ -85,6 +87,8 @@ Host is "gold.corp.example.com".
 
 
 ++ SMTP ++
+
+        Account: dieken@corp.example.com
 
         Server Name: smtp.corp.example.com
         Port: 25

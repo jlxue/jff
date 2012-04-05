@@ -34,6 +34,7 @@ ejabberd: dns firewall kerberos apache
 samba: firewall
 
 subversion: dns firewall kerberos
+git: dns firewall kerberos ssh
 
 trac: dns apache
 redmine: dns apache postgresql
