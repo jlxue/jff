@@ -88,6 +88,7 @@ i dovecot-antispam #crm114
 # Web SSO: http://webauth.stanford.edu/features.html
 i apache2 apache2-mpm-worker
 i ssl-cert  # See /usr/share/doc/apache2.2-common/README.Debian.gz
+i apache2-suexec-custom
 
     # GSSAPI SPNEGO
     i libapache2-mod-auth-kerb

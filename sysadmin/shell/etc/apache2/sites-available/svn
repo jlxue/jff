@@ -12,18 +12,19 @@
 
     CustomLog ${APACHE_LOG_DIR}/svn-access.log combined
 
-    ScriptAlias /view       /usr/lib/viewvc/cgi-bin/viewvc.cgi
-    ScriptAlias /query      /usr/lib/viewvc/cgi-bin/query.cgi
+    SuexecUserGroup viewvc viewvc
+
+    ScriptAlias /view       /usr/lib/cgi-bin/viewvc.cgi
+    #ScriptAlias /query      /usr/lib/cgi-bin/query.cgi
 
     RedirectMatch   ^/$     /view
 
-    <Directory /usr/lib/viewvc/cgi-bin/>
+    <Directory /usr/lib/cgi-bin/>
         AuthType Kerberos
         Require valid-user
 
         AllowOverride None
-        Options ExecCGI
-        AddHandler cgi-script .cgi
+        Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
         Order allow,deny
         Allow from all
     </Directory>
