@@ -12,17 +12,28 @@
 
     CustomLog ${APACHE_LOG_DIR}/svn-access.log combined
 
-    ScriptAlias /view       /usr/lib/cgi-bin/viewvc.cgi
-    #ScriptAlias /query      /usr/lib/cgi-bin/query.cgi
+    WSGIDaemonProcess viewvc-sites user=viewvc group=viewvc processes=4
+    WSGIScriptAlias /view   /usr/lib/viewvc/wsgi/viewvc.wsgi
+    WSGIScriptAlias /query  /usr/lib/viewvc/wsgi/query.wsgi
+
+    Alias /static   /usr/share/viewvc/docroot
 
     RedirectMatch   ^/$     /view
 
-    <Directory /usr/lib/cgi-bin/>
+    <Directory /usr/lib/viewvc/wsgi/>
         AuthType Kerberos
         Require valid-user
 
         AllowOverride None
-        Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+        Order allow,deny
+        Allow from all
+
+        WSGIProcessGroup viewvc-sites
+        WSGIApplicationGroup %{GLOBAL}
+    </Directory>
+
+    <Directory /usr/share/viewvc/docroot>
+        AllowOverride None
         Order allow,deny
         Allow from all
     </Directory>
