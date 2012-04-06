@@ -88,12 +88,17 @@ nameserver 127.0.0.1
 
 5.2) Suppose "dieken" is the first local normal user with uid=1000,
      "jack" is a user stored in OpenLDAP, run these commands as root
-     to create system user "jack"
+     to create user "jack":
+
+     Check /etc/krb5.conf, /etc/ldap/ldap.conf and /etc/ldapscripts/ldapscripts.conf
+     whether they are same with ./etc/krb5.conf, ./etc/ldap/ldap.conf and
+     ./etc/ldapscripts/ldapscripts.conf.
 
     # kinit dieken/ldap
     # /usr/sbin/ldapinit
-    # /usr/sbin/ldapaddgroup users
-    # /usr/sbin/ldapadduser jack users
+    # /usr/sbin/ldapaddgroup jack
+    # /usr/sbin/ldapadduser jack jack
+    # mkdir /home/jack; chown jack:jack /home/jack  # required by Dovecot
     # kdestroy
     # getent passwd | grep jack
 
@@ -151,7 +156,7 @@ admin's default password:
     (the password is the bit after the '**' in the 'password' field)
 
 Login http://cal.corp.example.com/ with "admin" account, create a user
-for your Kerberos account, for example, dieken@CORP.EXAMPLE.COM
+for your Kerberos account, for example, "dieken".
 
 Turn on Kerberos authentication now, and use "kinit" to obtain Kerberos
 ticket, then restart Apache, use Firefox to access http://cal.corp.example.com/,
@@ -174,7 +179,7 @@ You may need to adjust default timezone in /etc/php5/cgi/php.ini:
     date.timezone = Asia/Chongqing
 See http://php.net/manual/en/function.date-default-timezone-set.php
 
-10.3) Create a new admin account "dieken@CORP.EXAMPLE.COM" on Mantis management page,
+10.3) Create a new admin account "dieken" on Mantis management page,
 
 10.4) Access dieken's email, Mantis will send an activation email,
 click the link in it to activate the account. You don't have to
@@ -224,7 +229,7 @@ you can login without the "/login_page.php" page.
 
 12.3) add your user name to "admin" group in /srv/www/foswiki/data/admin-group:
 
-admin: dieken@CORP.EXAMPLE.COM
+admin: dieken
 
 Restart Apache, access http://wiki.corp.example.com/bin/configure .
 
