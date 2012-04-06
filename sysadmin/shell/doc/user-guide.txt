@@ -117,7 +117,7 @@ Use ThunderBird + Lightning extension.
     http://calendar.corp.example.com/calendars/users/dieken/calendar/
 
   DAViCal:
-    http://cal.corp.example.com/caldav.php/dieken@CORP.EXAMPLE.COM/calendar/
+    http://cal.corp.example.com/caldav.php/dieken/calendar/
 
 The DAViCal service doesn't support automatic account creation, its
 web administration page: http://cal.corp.example.com/ .
@@ -126,8 +126,7 @@ web administration page: http://cal.corp.example.com/ .
 ++ Bug Tracking System ++
 
 Mantis:     http://bug.corp.example.com/
-
-Bugzilla:   http://bug.corp.example.com/
+Bugzilla:   http://bugzilla.corp.example.com/
 
 
 ++ Wiki ++
