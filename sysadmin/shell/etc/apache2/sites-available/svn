@@ -14,7 +14,7 @@
 
     WSGIDaemonProcess viewvc-sites user=viewvc group=viewvc processes=4
     WSGIScriptAlias /view   /usr/lib/viewvc/wsgi/viewvc.wsgi
-    WSGIScriptAlias /query  /usr/lib/viewvc/wsgi/query.wsgi
+    #WSGIScriptAlias /query  /usr/lib/viewvc/wsgi/query.wsgi
 
     Alias /static   /usr/share/viewvc/docroot
 

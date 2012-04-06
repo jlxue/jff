@@ -1,0 +1,16 @@
+Index: lib/vcauth/svnauthz/__init__.py
+===================================================================
+--- lib/vcauth/svnauthz/__init__.py	(revision 2739)
++++ lib/vcauth/svnauthz/__init__.py	(working copy)
+@@ -31,6 +31,11 @@
+     if not os.path.exists(self.authz_file):
+       raise debug.ViewVCException("Configured authzfile file not found")
+ 
++    if username:
++        i = username.index("@")
++        if i:
++            username = username[0:i]
++
+     # See if the admin wants us to do case normalization of usernames.
+     self.force_username_case = params.get('force_username_case')
+     if self.force_username_case == "upper":
