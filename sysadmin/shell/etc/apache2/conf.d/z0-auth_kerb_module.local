@@ -6,8 +6,10 @@
   #KrbMethodK4Passwd     Off     # Seems latest version doesn't support it
   KrbAuthoritative      On
   KrbAuthRealms         CORP.EXAMPLE.COM
+  KrbLocalUserMapping   On      # strip the @REALM part in REMOTE_USER
   KrbVerifyKDC          On
   KrbSaveCredentials    Off
   KrbServiceName        HTTP
+  #KrbServiceName        Any     # deal with multiple keytab entries for various browsers
   Krb5Keytab            /etc/http.keytab
 </IfModule>

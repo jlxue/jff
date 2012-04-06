@@ -41,4 +41,6 @@
         AuthType Kerberos
         Require valid-user
     </Directory>
+
+    KrbLocalUserMapping Off # don't strip the @REALM part in REMOTE_USER
 </VirtualHost>

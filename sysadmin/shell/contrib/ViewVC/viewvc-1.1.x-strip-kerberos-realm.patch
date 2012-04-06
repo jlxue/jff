@@ -7,8 +7,8 @@ Index: lib/vcauth/svnauthz/__init__.py
        raise debug.ViewVCException("Configured authzfile file not found")
  
 +    if username:
-+        i = username.index("@")
-+        if i:
++        i = username.find("@")
++        if i >= 0:
 +            username = username[0:i]
 +
      # See if the admin wants us to do case normalization of usernames.

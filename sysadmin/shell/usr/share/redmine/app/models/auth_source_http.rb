@@ -10,7 +10,7 @@ class AuthSourceHTTP < AuthSource
             mail = firstname + login[i, login.length].downcase
         else
             firstname = login
-            mail = "your@mail"
+            mail = login + "@corp.example.com"
         end
 
         #logger.debug "AuthSourceHTTP.authenticate(): #{firstname}, #{mail}"

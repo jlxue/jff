@@ -58,16 +58,16 @@ dir=/srv/www/foswiki
     CONF_CHANGED=1
 }
 
-cmp_file $SCRIPT_DIR/contrib/Foswiki/NormalizeUserPlugin/lib/Foswiki/Plugins/NormalizeUserPlugin.pm /srv/www/foswiki/lib/Foswiki/Plugins/NormalizeUserPlugin.pm || {
-    overwrite_file $SCRIPT_DIR/contrib/Foswiki/NormalizeUserPlugin/lib/Foswiki/Plugins/NormalizeUserPlugin.pm /srv/www/foswiki/lib/Foswiki/Plugins/NormalizeUserPlugin.pm
-    CONF_CHANGED=1
-}
+#cmp_file $SCRIPT_DIR/contrib/Foswiki/NormalizeUserPlugin/lib/Foswiki/Plugins/NormalizeUserPlugin.pm /srv/www/foswiki/lib/Foswiki/Plugins/NormalizeUserPlugin.pm || {
+#    overwrite_file $SCRIPT_DIR/contrib/Foswiki/NormalizeUserPlugin/lib/Foswiki/Plugins/NormalizeUserPlugin.pm /srv/www/foswiki/lib/Foswiki/Plugins/NormalizeUserPlugin.pm
+#    CONF_CHANGED=1
+#}
 
 ensure_mode_user_group /srv/www/foswiki                     750 www-data www-data
 ensure_mode_user_group /srv/www/foswiki/data/.htpasswd      640 www-data www-data
 ensure_mode_user_group /srv/www/foswiki/data/admin-group    640 www-data www-data
 ensure_mode_user_group /srv/www/foswiki/lib/LocalSite.cfg   640 www-data www-data
-ensure_mode_user_group /srv/www/foswiki/lib/Foswiki/Plugins/NormalizeUserPlugin.pm  644 www-data www-data
+#ensure_mode_user_group /srv/www/foswiki/lib/Foswiki/Plugins/NormalizeUserPlugin.pm  644 www-data www-data
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 

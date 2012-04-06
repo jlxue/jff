@@ -1,6 +1,7 @@
---- a/authentication_api.php	2012-04-05 00:18:42.000000000 +0800
-+++ b/authentication_api.php	2012-04-05 00:19:52.000000000 +0800
-@@ -192,7 +192,12 @@
+diff -u a/authentication_api.php b/authentication_api.php
+--- a/authentication_api.php	2012-04-08 00:58:58.000000000 +0800
++++ b/authentication_api.php	2012-04-08 01:07:18.000000000 +0800
+@@ -192,7 +192,14 @@
  
  		if ( $t_auto_create ) {
  			# attempt to create the user
@@ -9,12 +10,14 @@
 +			$t_i = strpos($t_email, '@');
 +			if ($t_i) {
 +				$t_email = substr($t_email, 0, $t_i) . strtolower(substr($t_email, $t_i, strlen($t_email)));
++			} else {
++				$t_email = $t_email . "@corp.example.com";
 +			}
 +			$t_cookie_string = user_create( $p_username, md5( $p_password ), $t_email );
  
  			if ( false === $t_cookie_string ) {
  				# it didn't work
-@@ -226,7 +231,7 @@
+@@ -226,7 +233,7 @@
  	if( !user_is_anonymous( $t_user_id ) ) {
  		# anonymous login didn't work, so check the password
  
@@ -23,7 +26,7 @@
  			user_increment_failed_login_count( $t_user_id );
  			return false;
  		}
-@@ -322,6 +327,7 @@
+@@ -322,6 +329,7 @@
   */
  function auth_automatic_logon_bypass_form() {
  	switch( config_get( 'login_method' ) ) {
