@@ -9,7 +9,6 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 # fai.sh        fai-project.org
-# cms.sh        drupal
 # blog.sh       wordpress
 # subversion.sh reviewboard, Rietveld
 # git.sh        gitweb/cgit, gitolite, git-http-backend, gerrit
@@ -54,6 +53,7 @@ samba.sh
 subversion.sh
 trac.sh
 redmine.sh
+drupal.sh
 END`
 
 for f in $SCRIPTS; do
