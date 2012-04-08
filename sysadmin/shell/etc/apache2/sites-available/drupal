@@ -20,8 +20,8 @@
         Options +ExecCGI
         Include /etc/drupal/7/htaccess
 
-        AuthType Kerberos
-        Require valid-user
+        #AuthType Kerberos
+        #Require valid-user
 
         AllowOverride None
         Order allow,deny
