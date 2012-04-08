@@ -195,6 +195,9 @@ i trac trac-announcer trac-bitten trac-customfieldadmin \
 # Redmine
 i redmine redmine-pgsql libfcgi-ruby1.8
 
+# Drupal 7
+i drupal7
+
 
 ###########################################################
 if [ -z "$interactive" ]; then
