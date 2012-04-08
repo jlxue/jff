@@ -293,6 +293,11 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
     now you can throw away the default "admin" account in Redmine.
 
 
+++ Drupal Configuration ++
+
+19) Access "http://www.corp.example.com/install.php" to finish installation.
+
+
 =============================================================
 Passwords:
 
