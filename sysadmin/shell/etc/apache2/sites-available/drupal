@@ -1,0 +1,30 @@
+<VirtualHost *:80>
+    ServerName www.corp.example.com
+    ServerAlias corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /usr/share/drupal7
+
+    ErrorLog ${APACHE_LOG_DIR}/drupal-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/drupal-access.log combined
+
+    <IfModule mod_fcgid.c>
+        FcgidWrapper "/usr/bin/php5-cgi" .php
+    </IfModule>
+
+    <Directory /usr/share/drupal7>
+        Options +ExecCGI
+        Include /etc/drupal/7/htaccess
+
+        #AuthType Kerberos
+        #Require valid-user
+
+        AllowOverride None
+        Order allow,deny
+        allow from all
+    </Directory>
+</VirtualHost>
