@@ -7,8 +7,8 @@
 function webserver_auth_menu() {
   $items = array();
   $items['admin/settings/webserver_auth'] = array(
-    'title' => t('Webserver authentication'),
-    'description' => t('Configure a domain for generating email addresses. Optional.'),
+    'title' => 'Webserver authentication',
+    'description' => 'Configure a domain for generating email addresses. Optional.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('webserver_auth_settings'),
     'access arguments' => array('administer site configuration'),
@@ -37,8 +37,9 @@ function webserver_auth_init() {
   unset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
 
   // Retrieve user credentials
-  $result = db_query("SELECT uid FROM {authmap} WHERE authname = '%s' AND module = 'webserver_auth'", $authname);
-  $expected = db_fetch_array($result);
+  $result = db_query("SELECT uid FROM {authmap} WHERE authname = :authname AND module = 'webserver_auth'",
+    array(':authname' => $authname));
+  $expected = $result->fetchAssoc();
 
   if (isset($user) && $user->uid === $expected['uid']) {
     // Do nothing: user is already logged into Drupal with session data matching
@@ -60,10 +61,10 @@ function webserver_auth_init() {
 }
 
 /**
- * Implementation of hook_user().
+ * Implementation of hook_user_insert().
  */
-function webserver_auth_user($op, &$edit, &$account, $category = NULL) {
-  if ($op == 'insert' && $category = 'account') {
+function webserver_auth_user_insert(&$edit, $account, $category = NULL) {
+  if ($category == 'account') {
     $account->name = trim($account->name);
     // Pretty up the username for NTLM authentication (i.e. Windows)
     if (variable_get('webserver_auth_strip_prefix', TRUE)) {
@@ -74,23 +75,30 @@ function webserver_auth_user($op, &$edit, &$account, $category = NULL) {
       // Get 'foo' from 'foo@bar'
       $account->name = array_shift(explode('@', $account->name));
     }
-    db_query("UPDATE {users} SET name = '%s' WHERE uid = %d", $account->name, $account->uid);
+    db_update('users')->fields(array('name' => $account->name))
+      ->condition('uid', $account->uid, '=')->execute();
     // Generate an e-mail address automagically
     if ($domain = variable_get('webserver_auth_email_domain', '')) {
       if ($account->name) {
-        db_query("UPDATE {users} SET mail = '%s@%s' WHERE uid = %d", $account->name, $domain, $account->uid);
+        db_update('users')->fields(array('mail' => $account->name . '@' . $domain))
+          ->condition('uid', $account->uid, '=')->execute();
       }
     }
     // run some custom code to modify the user object at creation time
     if ($code = variable_get('webserver_auth_insert', '')) {
-      eval('?>'. $code);
+      php_eval('?>' . $code);
     }
   }
-  elseif ($op == 'logout') {
-    global $base_url;
-    // kick user out of a secure session so they aren't automatically logged back in
-    $base_url = str_replace('https://', 'http://', $base_url);
-  }
+}
+
+/**
+ * Implementation of hook_user_logout().
+ */
+
+function webserver_auth_user_logout($account) {
+  global $base_url;
+  // kick user out of a secure session so they aren't automatically logged back in
+  $base_url = str_replace('https://', 'http://', $base_url);
 }
 
 /**
@@ -100,7 +108,7 @@ function webserver_auth_settings() {
   $form['webserver_auth_email_domain'] = array(
     '#type' => 'textfield',
     '#title' => t('Email domain'),
-    '#default_value' => variable_get('webserver_auth_email_domain', ''),
+    '#default_value' => variable_get('webserver_auth_email_domain', 'corp.example.com'),
     '#size' => 30,
     '#maxlength' => 55,
     '#description' => t('Append this domain name to each new user in order generate his email address.'),
