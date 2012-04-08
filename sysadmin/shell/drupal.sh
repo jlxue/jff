@@ -6,6 +6,12 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 
+cmp_dir $SCRIPT_DIR/etc/drupal/7 /etc/drupal/7 --exclude dbconfig.php || {
+    overwrite_dir $SCRIPT_DIR/etc/drupal/7 /etc/drupal/7 --exclude dbconfig.php
+    CONF_CHANGED=1
+}
+
+
 ######################################################################################
 ensure_service_started postgresql postgres
 

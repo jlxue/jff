@@ -297,6 +297,8 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
 
 19) Access "http://www.corp.example.com/install.php" to finish installation.
 
+    Notice Drupal isn't protected by Kerberos authentication.
+
 
 =============================================================
 Passwords:

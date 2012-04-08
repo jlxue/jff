@@ -9,7 +9,6 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 # fai.sh        fai-project.org
-# blog.sh       wordpress
 # subversion.sh reviewboard, Rietveld
 # git.sh        gitweb/cgit, gitolite, git-http-backend, gerrit
 # ci.sh         jenkins
