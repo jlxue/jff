@@ -1,6 +1,23 @@
 <?php
 // $Id: webserver_auth.module,v 1.22.2.1 2008/08/07 16:38:49 weitzman Exp $
 
+function webserver_auth_normalize_name($name) {
+  $name = trim($name);
+
+  // Pretty up the username for NTLM authentication (i.e. Windows)
+  if (variable_get('webserver_auth_strip_prefix', TRUE)) {
+    // Get 'bar' from 'foo1\foo2\bar'
+    $name = array_pop(explode("\\", $name));
+  }
+
+  if (variable_get('webserver_auth_strip_domain', TRUE)) {
+    // Get 'foo' from 'foo@bar'
+    $name = array_shift(explode('@', $name));
+  }
+
+  return $name;
+}
+
 /**
  * Implementation of hook_menu().
  */
@@ -22,40 +39,37 @@ function webserver_auth_menu() {
 function webserver_auth_init() {
   global $user;
 
-  $authname = '';
-
   // Make sure we get the remote user whichever way it is available.
   if (isset($_SERVER['REDIRECT_REMOTE_USER'])) {
     $authname = $_SERVER['REDIRECT_REMOTE_USER'];
-  }
-  elseif (isset($_SERVER['REMOTE_USER'])) {
+  } elseif (isset($_SERVER['REMOTE_USER'])) {
     $authname = $_SERVER['REMOTE_USER'];
+  } else {
+    $authname = '';
   }
 
   // Perform some cleanup so plaintext passwords aren't available under
   // mod_auth_kerb.
   unset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
 
-  // Retrieve user credentials
-  $result = db_query("SELECT uid FROM {authmap} WHERE authname = :authname AND module = 'webserver_auth'",
-    array(':authname' => $authname));
-  $expected = $result->fetchAssoc();
-
-  if (isset($user) && $user->uid === $expected['uid']) {
-    // Do nothing: user is already logged into Drupal with session data matching
-    // HTTP authentication.
+  if (empty($authname)) {
+    return;
   }
-  else {
-    if (!empty($authname)) {
-      // User is logged into webserver via HTTP authentication.
-      // Try to log into Drupal. 
-      $user = user_external_load($authname);
 
-      if (!$user) {
-        // If unsuccessful, register the user. This will trigger
-        // webserver_auth_user() and any other _user() hooks.
-        user_external_login_register($authname, 'webserver_auth');
-      }
+  $external_user = user_external_load($authname);
+
+  if ($external_user) {
+    if (isset($user) && $user->uid === $external_user->uid) {
+      // Do nothing: user is already logged into Drupal with session data matching
+      // HTTP authentication.
+    } else {
+      $user = $external_user;
+    }
+  } else {
+    if (! user_load_by_name(webserver_auth_normalize_name($authname))) {
+      // If unsuccessful, register the user. This will trigger
+      // webserver_auth_user() and any other _user() hooks.
+      user_external_login_register($authname, 'webserver_auth');
     }
   }
 }
@@ -65,25 +79,19 @@ function webserver_auth_init() {
  */
 function webserver_auth_user_insert(&$edit, $account, $category = NULL) {
   if ($category == 'account') {
-    $account->name = trim($account->name);
-    // Pretty up the username for NTLM authentication (i.e. Windows)
-    if (variable_get('webserver_auth_strip_prefix', TRUE)) {
-      // Get 'bar' from 'foo1\foo2\bar'
-      $account->name = array_pop(explode("\\", $account->name));
-    }
-    if (variable_get('webserver_auth_strip_domain', TRUE)) {
-      // Get 'foo' from 'foo@bar'
-      $account->name = array_shift(explode('@', $account->name));
-    }
+    $account->name = webserver_auth_normalize_name($account->name);
+
     db_update('users')->fields(array('name' => $account->name))
       ->condition('uid', $account->uid, '=')->execute();
+
     // Generate an e-mail address automagically
-    if ($domain = variable_get('webserver_auth_email_domain', '')) {
+    if ($domain = variable_get('webserver_auth_email_domain', 'corp.example.com')) {
       if ($account->name) {
         db_update('users')->fields(array('mail' => $account->name . '@' . $domain))
           ->condition('uid', $account->uid, '=')->execute();
       }
     }
+
     // run some custom code to modify the user object at creation time
     if ($code = variable_get('webserver_auth_insert', '')) {
       php_eval('?>' . $code);
