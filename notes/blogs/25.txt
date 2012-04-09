@@ -1,0 +1,16 @@
+ViewVC 的配置
+
+之前给 svnserve 分配了 svn.corp.example.com 的域名，用于 svn:// 协议，空出 http://svn.corp.example.com 没用总觉的空了一块。本来是不想鼓捣 svn 一众的，考虑到不是所有人都甘心皈依 GIT，就配置了 svnserve，所以索性就再给 http://svn.corp.example.com/ 配上 ViewVC 得了。
+
+ViewVC 是用 Python 写的，其作者不满 Perl 写成的 CVSWeb (见 http://viewvc.org/who.html)。我大致了解下 ViewVC 的发展历史，伊其实也前后改动蛮大的，到现在恐怕也谈不上代码结构完美，这其中一方面是 VCS 工具特性各异，想抽象出统一的抽象层比较难，另一方面也是时间长了，掺和的人多了，需求多了，特性多了，必然是代码趋于混乱，颠扑不破的熵增原理。改成“优美”的语言写东西，真不见得代码就优美就易维护。BTW，本人 Perl fan。。。
+
+ViewVC 有个极好的特性，支持 svn 的 authz 文件，这样一份基于路径的授权文件，可以同时用于 svnserve 服务以及 ViewVC，相当赞！ 但这里有个小问题，svnserve + gssapi sasl 认证得到的用户名是不带 @REALM 后缀的，这是我期望的行为，因为我不想在 authz 文件里罗嗦的写 userA@CORP.EXAMPLE.COM、userB@CORP.EXAMPLE.COM，但是 apache2 + mod_auth_kerb 得到的 REMOTE_USER 是 user@REALM 的形式，导致 authz 里的设置 ViewVC 用不了。
+
+解决这个问题的第一思路自然是修改 ViewVC 的代码，让它判断 authz 时把 @REALM 去掉，很容易找到修改的地方，改动也就两三行代码，改完收工，试用了下果然有效，美了不到几分钟，无意间 Google 出 mod_auth_kerb 最新版有个秘密特性 KrbLocalUserMapping，设置成 On 的话 mod_auth_kerb 就会把 REMOTE_USER 设置成 user 而非 user@REALM，这个特性在配置文档里没提，代码里的 ChangeLog 提到了，汗。。。。
+
+于是小折腾了一番，打开这个特性，重新检查之前配置的所有 web app，中间经历莫名的 "gss_acquire_cred() failed: Unspecified GSS failure.  Minor code may provide more information (, )" 错误，重启机器后居然好了，最后除了 Bugzilla 要求用户名是邮件地址，其它 web app 都用了 KrbLocalUserMapping On 设置，可怜我之前还折腾 Foswiki 里如何写插件把 user@REALM 转成 user。。。还好结局是比较理想的，看着不带 @REALM 的用户名感觉还是清爽多了。
+
+Debian 打包的 ViewVC 版本太旧了，官方的 1.1.x 系列已经初步支持 WSGI 和 FastCGI 模式运行了，我配置成 WSGI 模式，以 viewvc 用户身份运行 WSGI daemon，这个用户处在 svn 组里，这样伊就可以读取 /srv/svn 下的代码库了。
+
+还有一个小问题是 ViewVC 的 query.cgi 脚本，在 Debian 里位于单独的 viewvc-query 软件包，这个包依赖 MySQL 数据库保存 svn 提交日志，在 ViewVC 的 bug 跟踪系统里有 PostgreSQL 的补丁，但是很暴力，直接把 MySQL 支持干掉了，所以至今 ViewVC 也没正式支持 PostgreSQL。我因为之前配置的 web app 都用的 PostgreSQL 数据库，不想再累赘添个 MySQL，而且同时装这两种数据库的话，一些 web app 的 Debian 安装脚本会优先选择 MySQL，从而破坏我那些自动安装配置脚本的逻辑，所以就放弃 query.cgi 了。貌似新版 ViewVC 里 viewvc.cgi 内置了 query 功能，viewvc.conf 里提到，我没找到对应代码什么地方，可能是指现在 viewvc 可以直接查询 svn log 了，缺少的只是搜索功能，这部分我打算用更强大的 OpenGrok 以及定制 Apache solr 代替。
+

@@ -1,0 +1,19 @@
+Drupal 浅试
+
+理论上有 Wiki 了，是没太大必要整花哨的 CMS 的，不过，肯定有用户不愿意皈依 Wiki，哪怕有所见即所得编辑特性。以前也搭过  Drupal，界面是相当清爽，不少同事表示很喜欢，Blog、Book、Forum、Poll，界面一致易用，也很实用。Debian 打包的 Drupal 最新版是 7.12，就单单一个包，安装很容易，deb 包安装时会自动配置好数据库。一个小问题是 PHP 版本太高，对语法要求更严格了，导致在 Drupal 的界面上经常显示长长的警告信息，Drupal 官方的问题列表有人提出补丁了，貌似也进了版本库，只是没发布新版本。
+
+接下来就是不变的主题了：如何支持 web server 的认证机制，也即让 Drupal 7 使用 REMOTE_USER 信息识别当前用户。Drupal 7  没有内置支持，有一个 Drupal 6.x 的插件 http://drupal.org/project/webserver_auth 支持这个特性，我拿过来借助 Drupal 的 Coder 模块自动升级功能以及慢慢摸索，成功移植到 Drupal 7.x 上了，Drupal 官方的文档做的还是挺不错的。移植过程中增加了一点小特性，或者说改正了一个小问题，就是在用 webserver_auth 注册用户前，先判断下有没有其它机制创建了同名用户，有的话就直接登录，不注册了，否则 Drupal 会报错说插入数据库时违反了唯一性。
+
+移植这个模块过程中，又发现 PHP 的一个很龊的地方：
+
+<?php
+
+error_reporting(E_ALL | E_STRICT);
+#echo array_pop(array(2, 3));
+$tmp = array(2, 3);
+echo array_pop($tmp);
+
+注释掉的那行是不行的写法，php 会抱怨： Only variables can be passed by reference，我没仔细看网上关于这个问题的解释，貌似是因为解释器实现的限制，会导致内存泄漏还是破坏来着。唉，怎么有这么矬的语言大家用的还挺 high。。。
+
+折腾完毕后测试了下，用 Kerberos 认证后，Drupal 确实给创建了个新用户，但是这个新用户不能在 Drupal 上新增任何内容，我还以为是那个 webserver_auth 模块移植的有问题呢，后来猜测是默认权限设置有问题，于是找在哪里设置权限， People、Configuration 页面都没有找到，最后发现在 Modules 页面里，真是蛋疼，对 Drupal UI 友好的感觉下降了一小截。Drupal 里用 Role 分配权限，其实 Role 就是 group，貌似是不支持直接针对 user 设置权限，非得放到某个 Role 里，这点不大方便，貌似也不能直接对某一篇文章设置权限，这在 wiki 里是很方便的事情。
+
