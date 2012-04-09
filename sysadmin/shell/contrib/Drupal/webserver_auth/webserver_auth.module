@@ -7,12 +7,14 @@ function webserver_auth_normalize_name($name) {
   // Pretty up the username for NTLM authentication (i.e. Windows)
   if (variable_get('webserver_auth_strip_prefix', TRUE)) {
     // Get 'bar' from 'foo1\foo2\bar'
-    $name = array_pop(explode("\\", $name));
+    $tmp = explode("\\", $name);
+    $name = array_pop($tmp);
   }
 
   if (variable_get('webserver_auth_strip_domain', TRUE)) {
     // Get 'foo' from 'foo@bar'
-    $name = array_shift(explode('@', $name));
+    $tmp = explode('@', $name);
+    $name = array_shift($tmp);
   }
 
   return $name;
@@ -66,7 +68,10 @@ function webserver_auth_init() {
       $user = $external_user;
     }
   } else {
-    if (! user_load_by_name(webserver_auth_normalize_name($authname))) {
+    $user2 = user_load_by_name(webserver_auth_normalize_name($authname));
+    if ($user2) {
+      $user = $user2;
+    } else {
       // If unsuccessful, register the user. This will trigger
       // webserver_auth_user() and any other _user() hooks.
       user_external_login_register($authname, 'webserver_auth');
@@ -84,7 +89,7 @@ function webserver_auth_user_insert(&$edit, $account, $category = NULL) {
     db_update('users')->fields(array('name' => $account->name))
       ->condition('uid', $account->uid, '=')->execute();
 
-    // Generate an e-mail address automagically
+    // Generate an e-mail address automatically
     if ($domain = variable_get('webserver_auth_email_domain', 'corp.example.com')) {
       if ($account->name) {
         db_update('users')->fields(array('mail' => $account->name . '@' . $domain))

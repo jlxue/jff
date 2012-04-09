@@ -1,5 +1,5 @@
 ; $Id: webserver_auth.info,v 1.2 2008/07/17 20:28:39 weitzman Exp $
-name = Webserver authentication
+name = WebserverAuth
 description = Rely on the web server authentication instead of Drupal.
 files[] = webserver_auth.module
 core = 7.x

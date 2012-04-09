@@ -295,9 +295,9 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
 
 ++ Drupal Configuration ++
 
-19) Access "http://www.corp.example.com/install.php" to finish installation.
+19.1) Access "http://www.corp.example.com/install.php" to finish installation.
 
-    Notice Drupal isn't protected by Kerberos authentication.
+19.2) Enable "WebserverAuth" module in administration panel after installation.
 
 
 =============================================================
