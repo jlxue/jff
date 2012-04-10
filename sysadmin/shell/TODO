@@ -1,4 +1,4 @@
-drupal7: kerberos authentication
+mailman: kerberos authentication
 vpn
 monitoring
 web conferencing
