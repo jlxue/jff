@@ -132,9 +132,44 @@ i postgresql
 i roundcube roundcube-plugins roundcube-plugins-extra
 i roundcube-pgsql
 
-# mailing list: sympa/mailman
-#i sympa
+# mailing list: sympa or mailman
 i mailman
+#i sympa
+# required modules for sympa, so we can install sympa from source tarball
+#i libarchive-zip-perl \
+#  libcgi-fast-perl \
+#  libcrypt-ciphersaber-perl \
+#  libdbd-pg-perl \
+#  libdbd-sqlite3-perl \
+#  libdbi-perl \
+#  libfcgi-perl \
+#  libfile-copy-recursive-perl \
+#  libfile-nfslock-perl \
+#  libhtml-format-perl \
+#  libhtml-stripscripts-parser-perl \
+#  libhtml-tree-perl \
+#  libintl-perl \
+#  libio-socket-ssl-perl \
+#  libio-stringy-perl \
+#  libmail-dkim-perl \
+#  libmailtools-perl \
+#  libmime-charset-perl \
+#  libmime-encwords-perl \
+#  libmime-lite-html-perl \
+#  libmime-tools-perl \
+#  libmsgcat-perl \
+#  libnet-ldap-perl \
+#  libnet-netmask-perl \
+#  libregexp-common-perl \
+#  libsoap-lite-perl \
+#  libtemplate-perl \
+#  libterm-progressbar-perl \
+#  libtext-wrap-perl \
+#  libunicode-linebreak-perl \
+#  libxml-libxml-perl \
+#  mhonarc \
+#  sqlite3
+
 
 # calendar service
 #   "davical" is powerful but a little tough to setup
