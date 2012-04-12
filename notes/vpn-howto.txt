@@ -16,7 +16,7 @@ pptpd       http://poptop.sourceforge.net/
 client:
     pptp-linux
 
-(4) IPSec
+(4) IPSec: http://wiki.debian.org/IPsec
 FreeS/WAN: 不再维护，派生出 OpenSWAN 和 StrongSWAN。
 
 Openswan
