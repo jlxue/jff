@@ -14,6 +14,7 @@ use Socket qw(:DEFAULT :crlf);
 my $g_sieve_server = 'smtp.corp.example.com';
 my $g_sieve_port = 4190;
 my $g_listen_port = 41900;
+my $g_user = 'dieken';
 
 parse_options();
 
@@ -27,6 +28,7 @@ sub parse_options {
         "server=s"   => \$g_sieve_server,
         "port=i"     => \$g_sieve_port,
         "listen=i"   => \$g_listen_port,
+        "user=s"     => \$g_user,
     );
 
     die "ERROR: sieve server name is empty!\n" unless $g_sieve_server;
@@ -123,27 +125,27 @@ sub destroy_handles {
 
 
 sub create_sieve_auth_callback {
-    my ($proxyclient) = @_;
-    my $auth_state = 0;
+    my ($proxy_client) = @_;
+    my $saslclient;
 
-    return sub {
+    my $auth_cb;
+    $auth_cb = sub {
         my ($handle, $line) = @_;
 
         AE::log debug => "[sieve client] $line";
 
-        if ($auth_state == 0) {
+        if (! defined($saslclient)) {
             if ($line eq '"STARTTLS"') {
                 AE::log debug => "[sieve client] -- discard STARTTLS from sieve server";
 
             } elsif ($line =~ /^OK\s/) {
-                $auth_state = 1;
-
                 my $sasl = Authen::SASL->new(
                     mechanism   => "GSSAPI",
+                    callback    => { authname => $g_user },
                     debug       => 8 | 4 | 1);
                 die "SASL object creation failed: $!\n" unless defined $sasl;
 
-                my $saslclient = $sasl->client_new("sieve", $g_sieve_server, "noanonymous noplaintext");
+                $saslclient = $sasl->client_new("sieve", $g_sieve_server, "noanonymous noplaintext");
                 die "SASL client object creation failed: $!\n" unless defined $saslclient;
 
                 #$saslclient->property(realm => "corp.example.com");
@@ -154,20 +156,36 @@ sub create_sieve_auth_callback {
                     die "SASL error: " . $saslclient->error();
                 }
 
-                $msg = 'Authenticate "GSSAPI" "' . encode_base64($msg) . '"';
+                $msg = 'Authenticate "GSSAPI" "' . encode_base64($msg, "") .  '"';
                 AE::log debug => "[sieve client] >> $msg";
 
                 $handle->push_write($msg . CRLF);
             } else {
-                $proxyclient->push_write($line . CRLF);
+                $proxy_client->push_write($line . CRLF);
             }
+        } else {
+            if ($line =~ /^"/) {
+                $line =~ s/^"|"$//g;
+                my $msg = $saslclient->client_step(decode_base64($line));
+                $msg = "" unless defined $msg;
 
-            return 0;
-        } elsif ($auth_state == 1) {
-            AE::log debug => "[sieve client] $line";
+                $msg = '"' . encode_base64($msg, "") . '"';
+                AE::log debug => "[sieve client] >> $msg";
+                $handle->push_write($msg . CRLF);
+            } else {
+                $proxy_client->push_write($line . CRLF);
 
-        } elsif ($auth_state == 2) {
+                if ($line !~ /^OK\s/) {
+                    destroy_handles($handle, $proxy_client);
+                }
+
+                return;
+            }
         }
+
+        $handle->push_read(line => $auth_cb);
     };
+
+    return $auth_cb;
 }
 
