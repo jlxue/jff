@@ -39,3 +39,7 @@ git: dns firewall kerberos ssh
 trac: dns apache
 redmine: dns apache postgresql
 
+viewvc: dns apache
+
+drupal: dns apache postgresql
+

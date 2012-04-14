@@ -11,9 +11,9 @@ use Socket qw(:DEFAULT :crlf);
 
 # Reference: sieve-connect libnet-managesieve-perl libnet-sieve-perl
 
-my $g_sieve_server = 'localhost';
+my $g_sieve_server = 'smtp.corp.example.com';
 my $g_sieve_port = 4190;
-my $g_listen_port = 44190;
+my $g_listen_port = 41900;
 
 parse_options();
 
@@ -56,17 +56,26 @@ sub accept_cb {
         fh          => $sock,
 
         on_error    => sub {
-            my ($hdl, $fatal, $msg) = @_;
+            my ($handle, $fatal, $msg) = @_;
 
             AE::log error => "[proxy client] got error $msg\n";
-            destroy_handles($hdl, $sieveclient);
+            destroy_handles($handle, $sieveclient);
         },
 
         on_eof      => sub {
-            my ($hdl) = @_;
+            my ($handle) = @_;
 
             AE::log error => "[proxy client] peer closed\n";
-            destroy_handles($hdl, $sieveclient);
+            destroy_handles($handle, $sieveclient);
+        },
+
+        on_read     => sub {
+            my ($handle) = @_;
+
+            AE::log debug => "[proxy client] $handle->{rbuf}";
+
+            $sieveclient->push_write($handle->{rbuf});
+            $handle->{rbuf} = '';
         },
     );
 
@@ -77,82 +86,88 @@ sub accept_cb {
             my ($handle, $host, $port) = @_;
             AE::log info => "Connected to $host:$port.";
 
-            $proxyclient->on_read(sub {
-                    my ($hdl) = @_;
-
-                    AE::log debug => "[proxy client] $hdl->{rbuf}";
-
-                    $sieveclient->push_write($hdl->{rbuf});
-                    $hdl->{rbuf} = '';
-                });
-
-            my $expect_end_of_server_announce;
-            $expect_end_of_server_announce = sub {
-                my ($handle, $line) = @_;
-
-                AE::log debug => "[sieve client] $line";
-
-                if ($line =~ /^OK\s/) {
-                    $handle->stop_read();
-
-                    my $sasl = Authen::SASL->new(
-                        mechansim   => "GSSAPI",
-                        debug       => 15,
-                    );
-                    die "SASL object creation failed: $!\n" unless defined $sasl;
-
-                    my $saslclient = $sasl->client_new("sieve", $g_sieve_server, "noanonymous noplaintext");
-                    die "SASL client object creation failed: $!\n" unless defined $saslclient;
-
-                    #$saslclient->property(realm => "corp.example.com");
-                    #$saslclient->property(externalssf => 56);
-
-                    my $sasl_tosend = $saslclient->client_start();
-                    if ($saslclient->code()) {
-                        die "SASL error: " . $saslclient->error();
-                    }
-                } else {
-                    if ($line eq '"STARTTLS"') {
-                        AE::log info => "[sieve client] discard STARTTLS from sieve server";
-                    } else {
-                        $proxyclient->push_write($line . CRLF);
-                    }
-
-                    $handle->push_read(line => $expect_end_of_server_announce);
-                }
-            };
-
-            $handle->push_read(line => $expect_end_of_server_announce);
+            $handle->push_read(line => create_sieve_auth_callback($proxyclient));
         },
 
         on_connect_error    => sub {
-            my ($hdl, $msg) = @_;
+            my ($handle, $msg) = @_;
 
             AE::log error => "Can't connect to $g_sieve_server:$g_sieve_port: $msg";
-            destroy_handles($hdl, $proxyclient);
+            destroy_handles($handle, $proxyclient);
         },
 
         on_error    => sub {
-            my ($hdl, $fatal, $msg) = @_;
+            my ($handle, $fatal, $msg) = @_;
 
             AE::log error => "[sieve client] got error $msg\n";
-            destroy_handles($hdl, $proxyclient);
+            destroy_handles($handle, $proxyclient);
         },
 
         on_read     => sub {
-            my ($hdl) = @_;
+            my ($handle) = @_;
 
-            AE::log debug => "[sieve client] $hdl->{rbuf}";
+            AE::log debug => "[sieve client] $handle->{rbuf}";
 
-            $proxyclient->push_write($hdl->{rbuf});
-            $hdl->{rbuf} = '';
+            $proxyclient->push_write($handle->{rbuf});
+            $handle->{rbuf} = '';
         },
     );
 }
+
 
 sub destroy_handles {
     for (@_) {
         $_->destroy if defined $_;
     }
+}
+
+
+sub create_sieve_auth_callback {
+    my ($proxyclient) = @_;
+    my $auth_state = 0;
+
+    return sub {
+        my ($handle, $line) = @_;
+
+        AE::log debug => "[sieve client] $line";
+
+        if ($auth_state == 0) {
+            if ($line eq '"STARTTLS"') {
+                AE::log debug => "[sieve client] -- discard STARTTLS from sieve server";
+
+            } elsif ($line =~ /^OK\s/) {
+                $auth_state = 1;
+
+                my $sasl = Authen::SASL->new(
+                    mechanism   => "GSSAPI",
+                    debug       => 8 | 4 | 1);
+                die "SASL object creation failed: $!\n" unless defined $sasl;
+
+                my $saslclient = $sasl->client_new("sieve", $g_sieve_server, "noanonymous noplaintext");
+                die "SASL client object creation failed: $!\n" unless defined $saslclient;
+
+                #$saslclient->property(realm => "corp.example.com");
+                #$saslclient->property(externalssf => 56);
+
+                my $msg = $saslclient->client_start();
+                if ($saslclient->code()) {
+                    die "SASL error: " . $saslclient->error();
+                }
+
+                $msg = 'Authenticate "GSSAPI" "' . encode_base64($msg) . '"';
+                AE::log debug => "[sieve client] >> $msg";
+
+                $handle->push_write($msg . CRLF);
+            } else {
+                $proxyclient->push_write($line . CRLF);
+            }
+
+            return 0;
+        } elsif ($auth_state == 1) {
+            AE::log debug => "[sieve client] $line";
+
+        } elsif ($auth_state == 2) {
+        }
+    };
 }
 
