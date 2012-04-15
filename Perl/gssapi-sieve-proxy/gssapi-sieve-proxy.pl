@@ -62,6 +62,7 @@ use AnyEvent::Handle;
 use AnyEvent::Log;
 use AnyEvent::Socket;
 use Authen::SASL;
+use Fcntl ":mode";
 use Getopt::Long;
 use MIME::Base64;
 use Socket qw(:DEFAULT :crlf);
@@ -97,6 +98,11 @@ sub parse_options {
 
     if (defined $g_conf) {
         my %conf;
+
+        my @st = stat($g_conf);
+        die "Can't stat $g_conf: $!\n" if @st == 0;
+        die "$g_conf can't be group/other readable or writable!" if
+            (S_IMODE($st[2]) & (S_IRWXG | S_IRWXO));
 
         open my $fh, $g_conf or die "Can't open $g_conf: $!\n";
         while (<$fh>) {
