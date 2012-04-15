@@ -86,6 +86,34 @@ Host is "gold.corp.example.com".
         Authentication method: Kerberos / GSSAPI
 
 
+    Sieve addon (xul-ext-sieve: http://sieve.mozdev.org/index.html)
+        $ kinit dieken
+        $ cat proxy.conf
+        server      imap.corp.example.com
+        port        4190
+        listen      41900
+        user        dieken
+        password    random-secret-shared-only-by-proxy-and-thunderbird
+        $ chmod 600 proxy.conf
+        $ ./gssapi-sieve-proxy.pl --conf proxy.conf --debug &
+
+    Tools -> Sieve Filter Settings...
+        select option "Yes, manage Sieve scripts for this account";
+        click button "Change Settings";
+
+        "Server" tab page:
+          Server Name:
+            Other Server: localhost
+          Server Port:
+            Other: 41900
+
+        "Security" tab page:
+          Connection Security:
+            NO TLS
+          Authentication:
+            Username and Password: dieken
+
+
 ++ SMTP ++
 
         Account: dieken@corp.example.com
