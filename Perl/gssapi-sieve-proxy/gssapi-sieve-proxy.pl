@@ -156,6 +156,7 @@ sub accept_cb {
     if (++$g_conn_times > CONNECT_LIMIT_PER_MIN) {
         AE::log warn => "Too much connections in a minute: $g_conn_times";
         shutdown($sock, 2);
+        return;
     }
 
     my ($proxyclient, $sieveclient);
