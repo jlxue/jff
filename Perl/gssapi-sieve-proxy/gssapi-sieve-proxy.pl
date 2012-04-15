@@ -102,21 +102,21 @@ sub accept_cb {
         on_error    => sub {
             my ($handle, $fatal, $msg) = @_;
 
-            AE::log error => "[proxy client] got error $msg\n";
+            AE::log error => "[C] got error $msg\n";
             destroy_handles($handle, $sieveclient);
         },
 
         on_eof      => sub {
             my ($handle) = @_;
 
-            AE::log error => "[proxy client] peer closed\n";
+            AE::log info => "[C] peer closed\n";
             destroy_handles($handle, $sieveclient);
         },
 
         on_read     => sub {
             my ($handle) = @_;
 
-            AE::log debug => "[proxy client] $handle->{rbuf}";
+            AE::log debug => "[P<C] $handle->{rbuf}";
 
             $sieveclient->push_write($handle->{rbuf});
             $handle->{rbuf} = '';
@@ -143,21 +143,21 @@ sub accept_cb {
         on_error    => sub {
             my ($handle, $fatal, $msg) = @_;
 
-            AE::log error => "[sieve client] got error $msg\n";
+            AE::log error => "[S] got error $msg\n";
             destroy_handles($handle, $proxyclient);
         },
 
         on_eof      => sub {
             my ($handle) = @_;
 
-            AE::log error => "[sieve client] peer closed\n";
+            AE::log info => "[S] peer closed\n";
             destroy_handles($handle, $proxyclient);
         },
 
         on_read     => sub {
             my ($handle) = @_;
 
-            AE::log debug => "[sieve client] $handle->{rbuf}";
+            AE::log debug => "[S>P] $handle->{rbuf}";
 
             $proxyclient->push_write($handle->{rbuf});
             $handle->{rbuf} = '';
@@ -193,14 +193,14 @@ sub create_sieve_auth_callback {
     $auth_cb = sub {
         my ($handle, $line) = @_;
 
-        AE::log debug => "[sieve client] $line";
+        AE::log debug => "[S>P] $line";
 
         if (! defined($saslclient)) {
             if ($line eq '"STARTTLS"') {
                 $starttls = 1;
 
             } elsif ($line =~ /^"SASL"\s/) {
-                AE::log debug => "[sieve client] -- discard SASL from sieve server";
+                AE::log debug => "discard SASL from sieve server";
 
                 $buffer .= '"SASL" "PLAIN"' . CRLF;
 
@@ -210,13 +210,13 @@ sub create_sieve_auth_callback {
                     $starttls = 0;
 
                     my $msg = 'STARTTLS';
-                    AE::log debug => "[sieve client] >> $msg";
+                    AE::log debug => "[S<P] $msg";
                     $handle->push_write($msg . CRLF);
 
                     $handle->push_read(line => sub {
                             my ($hdl, $line) = @_;
 
-                            AE::log debug => "[sieve client] $line";
+                            AE::log debug => "[S>P] $line";
 
                             if ($line !~ /^OK\s/) {
                                 die "Failed to starttls: $line\n";
@@ -227,7 +227,7 @@ sub create_sieve_auth_callback {
                         });
 
                 } else {
-                    AE::log info => "[sieve client] -- Sieve server ready, begin GSSAPI authentication";
+                    AE::log info => "Sieve server ready, begin GSSAPI authentication";
 
                     $buffer .= $line . CRLF;
 
@@ -249,8 +249,7 @@ sub create_sieve_auth_callback {
                     }
 
                     $msg = 'Authenticate "GSSAPI" "' . encode_base64($msg, "") .  '"';
-                    AE::log debug => "[sieve client] >> $msg";
-
+                    AE::log debug => "[S<P] $msg";
                     $handle->push_write($msg . CRLF);
                 }
 
@@ -264,13 +263,14 @@ sub create_sieve_auth_callback {
                 $msg = "" unless defined $msg;
 
                 $msg = '"' . encode_base64($msg, "") . '"';
-                AE::log debug => "[sieve client] >> $msg";
+                AE::log debug => "[S<P] $msg";
                 $handle->push_write($msg . CRLF);
             } else {
                 if ($line !~ /^OK\s/) {
                     die "Failed to authenticate against sieve server: $line";
                 }
 
+                AE::log debug => "[P>C] $buffer";
                 $proxy_client->push_write($buffer);
                 return;
             }
