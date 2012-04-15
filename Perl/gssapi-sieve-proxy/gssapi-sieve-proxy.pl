@@ -272,6 +272,35 @@ sub create_sieve_auth_callback {
 
                 AE::log debug => "[P>C] $buffer";
                 $proxy_client->push_write($buffer);
+
+                if ($g_password) {
+                    AE::log info => "begin authenticate proxy client";
+
+                    $proxy_client->push_read(line => sub {
+                            my ($hdl, $line) = @_;
+
+                            AE::log debug => "[P<C] $line";
+
+                            if ($line =~ /^AUTHENTICATE\s+"PLAIN"\s+"([^"]+)"\s*$/) {
+                                my @a = split /\000/, decode_base64($1);
+
+                                if ($a[2] && $g_password eq $a[2]) {
+                                    my $msg = 'OK "Logged in."';
+                                    AE::log debug => "[P>C] $msg";
+                                    $hdl->push_write($msg .  CRLF);
+                                    return;
+                                } else {
+                                    my $msg = 'NO "Bad credential."';
+                                    AE::log debug => "[P>C] $msg";
+                                    $hdl->push_write($msg .  CRLF);
+                                }
+                            }
+
+                            AE::log warn => "Failed to authenticate proxy client: $line";
+                            destroy_handles($hdl, $handle);
+                        });
+                }
+
                 return;
             }
         }
