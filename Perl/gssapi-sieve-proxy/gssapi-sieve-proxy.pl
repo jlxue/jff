@@ -196,7 +196,7 @@ sub create_sieve_connect_callback {
 
         AE::log debug => "[S>P] $line";
 
-        if ($line eq '"STARTTLS"') {
+        if ($line eq '"STARTTLS"' && ! exists $handle->{tls}) {
             $starttls = 1;
 
         } elsif ($line =~ /^"SASL"\s/) {
