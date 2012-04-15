@@ -3,11 +3,11 @@
 # Usage:
 #   Test against Sieve server:
 #   $ kinit dieken
-#   $ ./test-sieve-proxy.pl -s smtp.corp.example.com -p 4190 -u dieken
+#   $ ./test-sieve-proxy.pl -s imap.corp.example.com -p 4190 -u dieken
 #
 #   Test against Sieve proxy without authentication to the proxy:
 #   $ kinit dieken
-#   $ ./gssapi-sieve-proxy.pl -s smtp.corp.example.com -p 4190 -l 41900  -u dieken &
+#   $ ./gssapi-sieve-proxy.pl -s imap.corp.example.com -p 4190 -l 41900  -u dieken &
 #   $ ./test-sieve-proxy.pl -s localhost -p 41900
 #
 use strict;

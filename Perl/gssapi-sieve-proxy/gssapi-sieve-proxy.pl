@@ -1,4 +1,60 @@
 #!/usr/bin/env perl
+#
+# Purpose:
+#   xul-ext-sieve (http://sieve.mozdev.org/index.html) doesn't
+#   support GSSAPI authentication, this script acts as a proxy
+#   between Sieve server and ThunderBird, the proxy authenticates
+#   to Sieve server by GSSAPI SASL mechanism and listens on loopback
+#   network interface(127.0.0.1), then ThunderBird authenticates to
+#   the proxy by PLAIN SASL mechanism.
+#
+# Dependencies:
+#   On Debian: libanyevent-perl libnet-ssleay-perl libauthen-sasl-perl libgssapi-perl
+#
+# Usage:
+#   ./gssapi-sieve-proxy.pl [options]
+#       --server|-s SIEVE_SERVER_DOMAIN_NAME
+#           eg. -s imap.corp.example.com
+#
+#       --port|-p   SIEVE_SERVER_PORT
+#           eg. -p 4190
+#
+#       --listen|-l PROXY_LISTEN_PORT
+#           eg. -l 41900
+#
+#       --user|-u   SIEVE_USER
+#           eg. -u liuyb
+#
+#       --conf|-c   CONF_FILE
+#           eg. -c proxy.conf
+#
+#       --debug|-d
+#           Enable debug logs.
+#
+#       Password can only be specified in config file.
+#       Options set in command line have higher priority than config file.
+#
+#   For example:
+#       $ kinit liuyb
+#       $ ./gssapi-sieve-proxy.pl -c proxy.conf
+#   Then ThunderBird's Sieve addon can use "localhost:41900" as Sieve server.
+#
+#   Example proxy.conf:
+#   server      imap.corp.example.com
+#   port        4190
+#   listen      41900
+#   user        liuyb
+#   password    random-secret-shared-only-by-proxy-and-thunderbird
+#
+# Author:
+#   Yubao Liu <yubao.liu@gmail.com>
+#
+# License:
+#   GPL v3
+#
+# ChangeLog:
+#   * 2012-04-15    first release, v1.0
+#
 use strict;
 use warnings;
 use AnyEvent;
@@ -9,7 +65,7 @@ use Authen::SASL;
 use Getopt::Long;
 use MIME::Base64;
 use Socket qw(:DEFAULT :crlf);
-use constant FAILED_LOGIN_LIMIT_PER_MIN     => 5;
+use constant CONNECT_LIMIT_PER_MIN  => 12;
 
 # Reference: sieve-connect libnet-managesieve-perl libnet-sieve-perl
 
@@ -20,7 +76,7 @@ my $g_listen_port;
 my $g_user;
 my $g_password;
 my $g_debug = 0;
-my $g_failed_logins = 0;
+my $g_conn_times = 0;
 
 parse_options();
 
@@ -44,7 +100,7 @@ sub parse_options {
 
         open my $fh, $g_conf or die "Can't open $g_conf: $!\n";
         while (<$fh>) {
-            next if /^\s*#/;
+            next if /^\s*(?:#|$)/;
 
             s/^\s+|\s+$//g;
             my @a = split /\W+/, $_, 2;
@@ -59,7 +115,7 @@ sub parse_options {
         $g_password     ||= $conf{password};
     }
 
-    $g_sieve_server ||= "smtp.corp.example.com";
+    $g_sieve_server ||= "imap.corp.example.com";
     $g_sieve_port   ||= 4190;
     $g_listen_port  ||= 41900;
     $g_user         ||= $ENV{USER};
@@ -86,7 +142,8 @@ sub parse_options {
 
 
 sub enter_loop {
-    my $w = AnyEvent->condvar;
+    my $t = AE::timer 0, 60, sub { $g_conn_times = 0; };
+    my $w = AE::cv;
     $w->recv;
 }
 
@@ -95,6 +152,11 @@ sub accept_cb {
     my ($sock, $host, $port) = @_;
 
     AE::log info => "Got connection from $host:$port";
+
+    if (++$g_conn_times > CONNECT_LIMIT_PER_MIN) {
+        AE::log warn => "Too much connections in a minute: $g_conn_times";
+        shutdown($sock, 2);
+    }
 
     my ($proxyclient, $sieveclient);
 
