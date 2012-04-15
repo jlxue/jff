@@ -147,6 +147,13 @@ sub accept_cb {
             destroy_handles($handle, $proxyclient);
         },
 
+        on_eof      => sub {
+            my ($handle) = @_;
+
+            AE::log error => "[sieve client] peer closed\n";
+            destroy_handles($handle, $proxyclient);
+        },
+
         on_read     => sub {
             my ($handle) = @_;
 
