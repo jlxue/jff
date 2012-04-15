@@ -187,6 +187,7 @@ sub create_sieve_auth_callback {
     my ($proxy_client) = @_;
     my $buffer = "";
     my $saslclient;
+    my $starttls = 0;
 
     my $auth_cb;
     $auth_cb = sub {
@@ -196,26 +197,7 @@ sub create_sieve_auth_callback {
 
         if (! defined($saslclient)) {
             if ($line eq '"STARTTLS"') {
-                AE::log debug => "[sieve client] -- discard STARTTLS from sieve server";
-
-                $buffer = "";
-
-                my $msg = 'STARTTLS';
-                AE::log debug => "[sieve client] >> $msg";
-                $handle->push_write($msg . CRLF);
-
-                $handle->push_read(line => sub {
-                        my ($hdl, $line) = @_;
-
-                        AE::log debug => "[sieve client] $line";
-
-                        if ($line !~ /^OK\s/) {
-                            die "Failed to starttls: $line\n";
-                        }
-
-                        $hdl->{rbuf} = "";
-                        $hdl->starttls("connect");
-                    });
+                $starttls = 1;
 
             } elsif ($line =~ /^"SASL"\s/) {
                 AE::log debug => "[sieve client] -- discard SASL from sieve server";
@@ -223,31 +205,54 @@ sub create_sieve_auth_callback {
                 $buffer .= '"SASL" "PLAIN"' . CRLF;
 
             } elsif ($line =~ /^OK\s/) {
-                AE::log info => "[sieve client] -- Sieve server ready, begin GSSAPI authentication";
+                if ($starttls) {
+                    $buffer = "";
+                    $starttls = 0;
 
-                $buffer .= $line . CRLF;
+                    my $msg = 'STARTTLS';
+                    AE::log debug => "[sieve client] >> $msg";
+                    $handle->push_write($msg . CRLF);
 
-                my $sasl = Authen::SASL->new(
-                    mechanism   => "GSSAPI",
-                    callback    => { authname => $g_user },
-                    debug       => $g_debug ? (8 | 4 | 1) : 0);
-                die "SASL object creation failed: $!\n" unless defined $sasl;
+                    $handle->push_read(line => sub {
+                            my ($hdl, $line) = @_;
 
-                $saslclient = $sasl->client_new("sieve", $g_sieve_server, "noanonymous noplaintext");
-                die "SASL client object creation failed: $!\n" unless defined $saslclient;
+                            AE::log debug => "[sieve client] $line";
 
-                #$saslclient->property(realm => "corp.example.com");
-                #$saslclient->property(externalssf => 56);
+                            if ($line !~ /^OK\s/) {
+                                die "Failed to starttls: $line\n";
+                            }
 
-                my $msg = $saslclient->client_start();
-                if ($saslclient->code()) {
-                    die "SASL error: " . $saslclient->error();
+                            $hdl->{rbuf} = "";
+                            $hdl->starttls("connect");
+                        });
+
+                } else {
+                    AE::log info => "[sieve client] -- Sieve server ready, begin GSSAPI authentication";
+
+                    $buffer .= $line . CRLF;
+
+                    my $sasl = Authen::SASL->new(
+                        mechanism   => "GSSAPI",
+                        callback    => { authname => $g_user },
+                        debug       => $g_debug ? (8 | 4 | 1) : 0);
+                    die "SASL object creation failed: $!\n" unless defined $sasl;
+
+                    $saslclient = $sasl->client_new("sieve", $g_sieve_server, "noanonymous noplaintext");
+                    die "SASL client object creation failed: $!\n" unless defined $saslclient;
+
+                    #$saslclient->property(realm => "corp.example.com");
+                    #$saslclient->property(externalssf => 56);
+
+                    my $msg = $saslclient->client_start();
+                    if ($saslclient->code()) {
+                        die "SASL error: " . $saslclient->error();
+                    }
+
+                    $msg = 'Authenticate "GSSAPI" "' . encode_base64($msg, "") .  '"';
+                    AE::log debug => "[sieve client] >> $msg";
+
+                    $handle->push_write($msg . CRLF);
                 }
-
-                $msg = 'Authenticate "GSSAPI" "' . encode_base64($msg, "") .  '"';
-                AE::log debug => "[sieve client] >> $msg";
-
-                $handle->push_write($msg . CRLF);
 
             } else {
                 $buffer .= $line . CRLF;
