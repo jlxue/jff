@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use AnyEvent;
 use AnyEvent::Handle;
+use AnyEvent::Log;
 use AnyEvent::Socket;
 use Authen::SASL;
 use Getopt::Long;
@@ -11,10 +12,13 @@ use Socket qw(:DEFAULT :crlf);
 
 # Reference: sieve-connect libnet-managesieve-perl libnet-sieve-perl
 
-my $g_sieve_server = 'smtp.corp.example.com';
-my $g_sieve_port = 4190;
-my $g_listen_port = 41900;
-my $g_user = 'dieken';
+my $g_conf;
+my $g_sieve_server;
+my $g_sieve_port;
+my $g_listen_port;
+my $g_user;
+my $g_password;
+my $g_debug = 0;
 
 parse_options();
 
@@ -29,15 +33,53 @@ sub parse_options {
         "port=i"     => \$g_sieve_port,
         "listen=i"   => \$g_listen_port,
         "user=s"     => \$g_user,
+        "conf=s"     => \$g_conf,
+        "debug!"     => \$g_debug,
     );
 
-    die "ERROR: sieve server name is empty!\n" unless $g_sieve_server;
+    if (defined $g_conf) {
+        my %conf;
+
+        open my $fh, $g_conf or die "Can't open $g_conf: $!\n";
+        while (<$fh>) {
+            next if /^\s*#/;
+
+            s/^\s+|\s+$//g;
+            my @a = split /\W+/, $_, 2;
+            $conf{lc($a[0])} = $a[1];
+        }
+        close $fh;
+
+        $g_sieve_server ||= $conf{server};
+        $g_sieve_port   ||= $conf{port};
+        $g_listen_port  ||= $conf{listen};
+        $g_user         ||= $conf{user};
+        $g_password     ||= $conf{password};
+    }
+
+    $g_sieve_server ||= "smtp.corp.example.com";
+    $g_sieve_port   ||= 4190;
+    $g_listen_port  ||= 41900;
+    $g_user         ||= $ENV{USER};
+
+    if ($g_debug) {
+        $AnyEvent::Log::FILTER->level("trace");
+    } else {
+        $AnyEvent::Log::FILTER->level("info");
+    }
+
+    die "ERROR: sieve server domain name is empty!\n" unless $g_sieve_server;
     die "ERROR: sieve server port must be greater than 0 and not greater than 65535!\n"
         unless $g_sieve_port > 0 && $g_sieve_port <= 65535;
     die "ERROR: proxy listening port must be greater than 0 and not greater than 65535!\n"
         unless $g_listen_port > 0 && $g_listen_port <= 65535;
+    die "ERROR: user name for sieve server isn't specified!\n" unless $g_user;
 
-    AE::log info => "Listen on $g_listen_port and connect to $g_sieve_server:$g_sieve_port...";
+    AE::log info => "Listen on $g_listen_port and will connect to $g_user\@$g_sieve_server:$g_sieve_port...";
+
+    if (! $g_password) {
+        AE::log warn => "Password isn't specified, this proxy isn't protected!";
+    }
 }
 
 
