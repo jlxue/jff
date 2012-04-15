@@ -66,7 +66,7 @@ use Fcntl ":mode";
 use Getopt::Long;
 use MIME::Base64;
 use Socket qw(:DEFAULT :crlf);
-use constant CONNECT_LIMIT_PER_MIN  => 12;
+use constant CONNECT_LIMIT_PER_MIN  => 10;
 
 # Reference: sieve-connect libnet-managesieve-perl libnet-sieve-perl
 
@@ -280,16 +280,23 @@ sub create_sieve_connect_callback {
                 $buffer = "";
                 $starttls = 0;
 
-                starttls($handle);
+                starttls($handle, $proxy_client);
             } else {
                 AE::log info => "Sieve server ready, begin GSSAPI authentication";
 
                 $buffer .= $line . CRLF;
 
                 my $saslclient = create_sasl_client();
+                if (! defined $saslclient) {
+                    destroy_handles($handle, $proxy_client);
+                    return;
+                }
+
                 my $msg = $saslclient->client_start();
                 if ($saslclient->code()) {
-                    die "SASL error: " . $saslclient->error();
+                    AE::log error => "SASL error: " . $saslclient->error();
+                    destroy_handles($handle, $proxy_client);
+                    return;
                 }
 
                 $msg = 'Authenticate "GSSAPI" "' . encode_base64($msg, "") .  '"';
@@ -330,7 +337,9 @@ sub create_sieve_auth_callback {
             $handle->push_write($msg . CRLF);
         } else {
             if ($line !~ /^OK\s/) {
-                die "Failed to authenticate against sieve server: $line";
+                AE::log error => "Failed to authenticate against sieve server: $line";
+                destroy_handles($handle, $proxy_client);
+                return;
             }
 
             AE::log debug => "[P>C] $buffer";
@@ -351,23 +360,25 @@ sub create_sieve_auth_callback {
 
 
 sub starttls {
-    my ($handle) = @_;
+    my ($sieve_client, $proxy_client) = @_;
 
     my $msg = 'STARTTLS';
     AE::log debug => "[S<P] $msg";
-    $handle->push_write($msg . CRLF);
+    $sieve_client->push_write($msg . CRLF);
 
-    $handle->push_read(line => sub {
-            my ($hdl, $line) = @_;
+    $sieve_client->push_read(line => sub {
+            my ($handle, $line) = @_;
 
             AE::log debug => "[S>P] $line";
 
             if ($line !~ /^OK\s/) {
-                die "Failed to starttls: $line\n";
+                AE::log error => "Failed to starttls: $line\n";
+                destroy_handles($sieve_client, $proxy_client);
+                return;
             }
 
-            $hdl->{rbuf} = "";
-            $hdl->starttls("connect");
+            $handle->{rbuf} = "";
+            $handle->starttls("connect");
         });
 }
 
@@ -377,10 +388,17 @@ sub create_sasl_client {
         mechanism   => "GSSAPI",
         callback    => { authname => $g_user },
         debug       => $g_debug ? (8 | 4 | 1) : 0);
-    die "SASL object creation failed: $!\n" unless defined $sasl;
+
+    if (!defined $sasl) {
+        AE::log error => "SASL object creation failed: $!\n";
+        return;
+    }
 
     my $saslclient = $sasl->client_new("sieve", $g_sieve_server, "noanonymous noplaintext");
-    die "SASL client object creation failed: $!\n" unless defined $saslclient;
+    if (!defined $saslclient) {
+        AE::log error => "SASL client object creation failed: $!\n";
+        return;
+    }
 
     #$saslclient->property(realm => "corp.example.com");
     #$saslclient->property(externalssf => 56);
