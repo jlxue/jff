@@ -173,8 +173,19 @@ sub destroy_handles {
 }
 
 
+# Logic:
+#   * buffer messages from Sieve server, until got "OK ...", this means
+#     Sieve server is ready now.
+#   * if STARTTLS is found, send "STARTTLS" to Sieve server, expect
+#     it returns "OK ...".
+#      * Upgrade socket to SSL enabled socket, goto step 1;
+#   * Do GSSAPI authentication against Sieve server
+#   * Output buffered messages to proxy client
+#   * Do Plain authentication against proxy client
+#
 sub create_sieve_auth_callback {
     my ($proxy_client) = @_;
+    my $buffer = "";
     my $saslclient;
 
     my $auth_cb;
@@ -187,11 +198,39 @@ sub create_sieve_auth_callback {
             if ($line eq '"STARTTLS"') {
                 AE::log debug => "[sieve client] -- discard STARTTLS from sieve server";
 
+                $buffer = "";
+
+                my $msg = 'STARTTLS';
+                AE::log debug => "[sieve client] >> $msg";
+                $handle->push_write($msg . CRLF);
+
+                $handle->push_read(line => sub {
+                        my ($hdl, $line) = @_;
+
+                        AE::log debug => "[sieve client] $line";
+
+                        if ($line !~ /^OK\s/) {
+                            die "Failed to starttls: $line\n";
+                        }
+
+                        $hdl->{rbuf} = "";
+                        $hdl->starttls("connect");
+                    });
+
+            } elsif ($line =~ /^"SASL"\s/) {
+                AE::log debug => "[sieve client] -- discard SASL from sieve server";
+
+                $buffer .= '"SASL" "PLAIN"' . CRLF;
+
             } elsif ($line =~ /^OK\s/) {
+                AE::log info => "[sieve client] -- Sieve server ready, begin GSSAPI authentication";
+
+                $buffer .= $line . CRLF;
+
                 my $sasl = Authen::SASL->new(
                     mechanism   => "GSSAPI",
                     callback    => { authname => $g_user },
-                    debug       => 8 | 4 | 1);
+                    debug       => $g_debug ? (8 | 4 | 1) : 0);
                 die "SASL object creation failed: $!\n" unless defined $sasl;
 
                 $saslclient = $sasl->client_new("sieve", $g_sieve_server, "noanonymous noplaintext");
@@ -209,8 +248,9 @@ sub create_sieve_auth_callback {
                 AE::log debug => "[sieve client] >> $msg";
 
                 $handle->push_write($msg . CRLF);
+
             } else {
-                $proxy_client->push_write($line . CRLF);
+                $buffer .= $line . CRLF;
             }
         } else {
             if ($line =~ /^"/) {
@@ -222,12 +262,11 @@ sub create_sieve_auth_callback {
                 AE::log debug => "[sieve client] >> $msg";
                 $handle->push_write($msg . CRLF);
             } else {
-                $proxy_client->push_write($line . CRLF);
-
                 if ($line !~ /^OK\s/) {
-                    destroy_handles($handle, $proxy_client);
+                    die "Failed to authenticate against sieve server: $line";
                 }
 
+                $proxy_client->push_write($buffer);
                 return;
             }
         }
