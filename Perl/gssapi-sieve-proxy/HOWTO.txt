@@ -1,0 +1,40 @@
+How to use with ThunderBird + Sieve addon
+========================================
+
+Only tested on Debian Sid + Dovecot.
+
+
+(1) Install Sieve addon (http://sieve.mozdev.org/index.html)
+
+(2) Obtain Kerberos ticket and run the proxy
+
+        $ kinit liuyb
+        $ cat proxy.conf
+        server      imap.corp.example.com
+        port        4190
+        listen      41900
+        user        liuyb
+        password    random-secret-shared-only-by-proxy-and-thunderbird
+        $ chmod 600 proxy.conf
+        $ ./gssapi-sieve-proxy.pl --conf proxy.conf --debug &
+
+(3) Setup ThunderBird
+
+Select your email account in the left pane, then
+
+    Tools -> Sieve Filter Settings...
+        select option "Yes, manage Sieve scripts for this account";
+        click button "Change Settings";
+
+        "Server" tab page:
+          Server Name:
+            Other Server: localhost
+          Server Port:
+            Other: 41900
+
+        "Security" tab page:
+          Connection Security:
+            NO TLS
+          Authentication:
+            Username and Password: liuyb
+
