@@ -53,6 +53,7 @@ subversion.sh
 trac.sh
 redmine.sh
 drupal.sh
+monitoring.sh
 END`
 
 for f in $SCRIPTS; do
