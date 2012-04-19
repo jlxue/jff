@@ -234,7 +234,7 @@ i redmine redmine-pgsql libfcgi-ruby1.8
 i drupal7
 
 # Nagios
-i nagios3 nagios-plugins nagios-plugins-contrib \
+i nagios3 nagios-plugins nagios-plugins-contrib nagios3-doc \
   check-postgres nagvis
 i collectd collectd-utils
 

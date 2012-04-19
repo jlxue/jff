@@ -1,0 +1,28 @@
+<VirtualHost *:80>
+    ServerName monitor.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /srv/www/monitor
+
+
+    ErrorLog ${APACHE_LOG_DIR}/monitor-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/monitor-access.log combined
+
+    Include /etc/nagios3/apache2.conf
+
+    <Directory /srv/www/monitor>
+        AuthType Kerberos
+        Require valid-user
+
+        Options Indexes
+
+        AllowOverride None
+        Order Allow,Deny
+        Allow From All
+    </Directory>
+</VirtualHost>
+
