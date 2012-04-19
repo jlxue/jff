@@ -1,0 +1,52 @@
+Monitoring Systems
+
+
+* Nagios
+
+  Remote check:
+    * check_by_ssh
+    * NRPE
+    * nsclient
+    * check_snmp
+    * nsca
+    * check-mk
+    * nagios-statd-server
+
+  Web UI:
+    * Nagios CGI
+    * Centreon
+    * Ninja
+    * Nagvis
+    * Thruk
+    * Check-MK Multisite
+
+* Icinga
+
+Nagios 的派生版本，改进了 Web UI，使用了一些 HTML 5 特性。
+https://www.icinga.org/nagios/feature-comparison/ 并没有很重大的改进。
+
+http://robertogaloppini.net/2010/11/25/sos-open-source-reports-open-source-monitoring-icinga-vs-nagios/
+The "community" behind Icinga is the company Netways. Their business model was
+to hijack the Nagios brand until Ethan Galstad told them to stop selling
+Nagios as if it were their own.
+
+比较怀疑是一部分开发者被踢出局没分到好处。这个 netways 公司很奇怪，其
+主页上的产品列表把 Nagios/JasperReport/Puppet/MuleESB/RT/Bacula/TWiki
+全列上去(http://www.netways.de/en/de/produkte/products/)，产品图标
+换了，又没有明显链接到各自官方网站，确实颇有欺世盗名之嫌。
+
+
+* xymon
+
+UI 太 geeky 了，sourceforge 项目主页上有不少好评，貌似很容易安装。
+
+* munin
+
+Perl 编写。
+
+* Shinken
+
+http://www.shinken-monitoring.org/what-is-in-shinken-not-in-nagios-and-vice-versa/
+
+Python 编写，兼容 Nagios 的插件。没看出有什么本质改进。Web UI 信息量太少。
+

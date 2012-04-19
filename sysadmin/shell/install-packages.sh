@@ -233,10 +233,13 @@ i redmine redmine-pgsql libfcgi-ruby1.8
 # Drupal 7
 i drupal7
 
-# Nagios, nsclient, check_by_ssh, NRPE, check_snmp, nsca, check-mk
+# Nagios
 i nagios3 nagios-plugins nagios-plugins-contrib \
-  check-postgres collectd-utils nagios-statd-client \
-  nagvis
+  check-postgres nagvis
+i collectd collectd-utils
+
+# Munin
+i munin
 
 
 ###########################################################
