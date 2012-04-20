@@ -235,7 +235,7 @@ i drupal7
 
 # Nagios
 i nagios3 nagios-plugins nagios-plugins-contrib nagios3-doc \
-  check-postgres
+  nagiosgrapher check-postgres
 
 # Munin
 i munin
