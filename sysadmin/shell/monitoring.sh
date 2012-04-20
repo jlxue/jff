@@ -29,6 +29,10 @@ ensure_mode_user_group /etc/default/nagios3         644 root root
 ensure_mode_user_group /etc/nagios-plugins          755 root root
 ensure_mode_user_group /etc/nagios3                 755 root root
 ensure_mode_user_group /etc/nagios3/resource.cfg    640 root nagios
+ensure_mode_user_group /var/cache/nagios3           2750 nagios www-data
+ensure_mode_user_group /var/log/nagios3             2751 nagios adm
+ensure_mode_user_group /var/lib/nagios              755 nagios nagios
+ensure_mode_user_group /var/lib/nagios3             750 nagios nagios
 
 
 [ -z "$CONF_CHANGED" ] || service nagios3 restart
