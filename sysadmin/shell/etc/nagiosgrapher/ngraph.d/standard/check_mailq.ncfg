@@ -1,0 +1,28 @@
+#---
+#NagiosGrapherTemplateforcheck_mailq
+#---
+
+#Mailq
+define ngraph{
+	service_name		mailq
+	graph_perf_regex	mailq=(\d+)
+	graph_value		mailq
+	graph_units		mails
+	graph_legend		sizeofmailq
+	rrd_plottype		AREA
+	rrd_color		6699FF
+}
+
+define ngraph{
+	service_name		mailq
+	type			CDEF
+	graph_value		cdef_load
+	graph_units
+	graph_legend
+	graph_calc		mailq
+	rrd_plottype		LINE1
+	rrd_color		000000
+	hide			no
+}
+
+#[EOF]

@@ -1,0 +1,109 @@
+# ---
+# NagiosGrapher Template for Bacula-related checks
+# ---
+
+define ngraph{
+	service_name		backup-jobs
+	graph_perf_regex	jobs=(\d+)
+	graph_value		Jobs
+	graph_units		Jobs   
+	graph_legend		Jobs
+	rrd_plottype		AREA
+	rrd_color		000000
+	page			Jobs
+	step			7200
+	heartbeat		14400
+}
+
+define ngraph{
+	service_name		backup-jobs
+	graph_perf_regex	jobfiles=(\d+)
+	graph_value		Files
+	graph_units		Files   
+	graph_legend		Files per Job
+	rrd_plottype		AREA
+	rrd_color		0000ff
+	page			JobFiles
+	step			7200
+	heartbeat		14400
+}
+
+define ngraph{
+	service_name		backup-jobs
+	graph_perf_regex	jobbytes=(\d+)
+	graph_value		Bytes
+	graph_units		Bytes   
+	graph_legend		Bytes per Job
+	rrd_plottype		AREA
+	rrd_color		00ff00
+	page			JobBytes
+	step			7200
+	heartbeat		14400
+}
+
+define ngraph{
+	service_name		backup-jobs
+	graph_perf_regex	joberrors=(\d+)
+	graph_value		Errors
+	graph_units		Errors   
+	graph_legend		Errors per Job
+	rrd_plottype		AREA
+	rrd_color		ff0000
+	page			JobErrors
+	step			7200
+	heartbeat		14400
+}
+
+define ngraph{
+	service_name		backup-jobs
+	graph_perf_regex	jobmissingfiles=(\d+)
+	graph_value		Missing
+	graph_units		Files
+	graph_legend		Missing Files per Job
+	rrd_plottype		AREA
+	rrd_color		ffff00
+	page			JobMissingFiles
+	step			7200
+	heartbeat		14400
+}
+
+define ngraph{
+	service_name		backup-status
+	graph_perf_regex	transfer=(\d+)
+	graph_value		GBytes
+	graph_units		GBytes   
+	graph_legend		GBytes in 24h
+	rrd_plottype		AREA
+	rrd_color		00ff00
+	page			Transfer24
+	step			7200
+	heartbeat		14400
+}
+
+define ngraph{
+	service_name		backup-status
+	graph_perf_regex	errors=(\d+)
+	graph_value		Errors
+	graph_units		Errors   
+	graph_legend		Errors in 24h
+	rrd_plottype		AREA
+	rrd_color		ff0000
+	page			Errors24
+	step			7200
+	heartbeat		14400
+}
+
+define ngraph{
+	service_name		backup-status
+	graph_perf_regex	jobs=(\d+)
+	graph_value		Jobs
+	graph_units		Jobs
+	graph_legend		Jobs in 24h
+	rrd_plottype		AREA
+	rrd_color		ffff00
+	page			Jobs24
+	step			7200
+	heartbeat		14400
+}
+
+# [EOF]

@@ -1,0 +1,16 @@
+#---
+#NagiosGrapherTemplateforcheck_ntp
+#---
+
+#ntp
+define ngraph{
+	service_name		NTP
+	graph_log_regex		([-+]*\d+[\.,]\d+e[-|+]\d+|[-+]*\d+[\.,]\d+)
+	graph_value		difference
+	graph_units		seconds
+	graph_legend		difference in seconds
+	rrd_plottype		AREA
+	rrd_color		EACC00
+}
+
+#[EOF]

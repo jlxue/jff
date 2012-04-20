@@ -1,0 +1,16 @@
+# ---
+# NagiosGrapher Template for check_imap
+# ---
+
+# imap
+define ngraph{
+	service_name		IMAP
+	graph_perf_regex	time=\s*([0-9.]+)
+	graph_value		sec
+	graph_units		seconds
+	graph_legend		response time
+	rrd_plottype		LINE2
+	rrd_color		00a000
+}
+
+# [EOF]

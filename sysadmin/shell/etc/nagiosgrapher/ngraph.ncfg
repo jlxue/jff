@@ -1,0 +1,107 @@
+# tabspace: 8
+
+# ---
+# Nagios Grapher Main Configuration
+# ---
+
+define config {
+
+    port                    5667
+    buffer                  1024
+    interface               pipe
+    pipe                  /var/lib/nagiosgrapher/ngraph.pipe
+    perffile_path           /var/lib/nagiosgrapher/
+
+    # please use subfolder
+    pidfile                 /var/run/nagiosgrapher/nagiosgrapher.pid
+    user                    nagios
+    group                   nagios
+
+    # disable reading of Nagios-object cache
+    skip_object_cache       false
+
+    # normal_check_interval
+    step                    300
+
+    # VALUE (e.g. 600 for 5 minutes ) or AUTO
+    heartbeat               AUTO
+
+    rrdpath                 /var/lib/nagiosgrapher/rrd/
+    tmppath                 /tmp/nagiosgrapher
+
+    fontfile                /usr/share/fonts/truetype/ttf-dejavu/DejaVuSansCondensed.ttf
+
+    serviceext_type         MULTIPLE
+    serviceextinfo          /etc/nagios3/serviceextinfo.cfg
+    serviceext_path         /etc/nagiosgrapher/nagios3/serviceext
+
+    url                     /cgi-bin/nagios3/graphs.cgi
+    # notes_url              /wiki/index.php/$HOSTNAME$#$SERVICEDESC$
+    notes_url               ""
+
+    nagios_config           /etc/nagios3/nagios.cfg
+    cgi_config              /etc/nagios3/cgi.cfg
+
+    icon_image_tag          ' dot.png' alt="___ALT___" border="0"></a><A TARGET="_blank" HREF="graphs.cgi?___URL___"><img src="___IMAGESRC___" '
+    icon_image_src          /nagios3/images/logos/graph.png
+    icon_image_script       /nagios3/cgi-bin/rrd2-system.cgi?___URL___&start=-5400&end=now&title=Actual&width=20&height=20&type=AVERAGE&only-graph=true
+    icon_image_static       false
+
+    log_file                /var/log/nagiosgrapher/ngraph.log
+    log_level               63
+
+    rrd_color_background    ffffff
+    rrd_color_font          333333
+    rrd_color_arrow         ff0000
+    rrd_color_frame         ffffff
+    rrd_color_grid
+    rrd_color_canvas        ffffff
+    rrd_color_shadea        c0c0c0
+    rrd_color_shadeb        c0c0c0
+
+    rrd_show_vlines         true
+
+    fe_use_browser_all      false
+    fe_use_browser_for      nagiosadmin
+    fe_use_browser_url      false
+
+    fe_use_timefilter       true
+
+    use_authentication      true
+
+    # define default host and default service for your start page
+    # values (host name and service name)are supposed to be exactly the same as
+    # defined in your nagios configuration or as found in your NG-drop-down boxes
+    #
+    # default_host            some_host_name
+    # default_service         * All Services
+
+    #
+    # HOOKS: Comma seperated list of perl modules ...
+
+    # All hooks before an srvext entry is created
+    # hooks_serviceext        NagiosGrapher::Hooks::SrvExtTest
+
+    # Hooks before RRD is updated
+    # hooks_rrdupdate         NagiosGrapher::Hooks::RRDUpdateTest
+
+    # Example hook for writing a hostextinfo
+    # With the action=hostgraph example ... 
+    # The module runs under hooks_serviceext too ...
+    # hooks_rrdupdate         NagiosGrapher::Hooks::SrvExtWriteHostextInfo
+
+
+    # Bevor Multi- and Singlegraphs, but different types.
+    # Hooks before an image is displayed
+    # hooks_imagegraph        NagiosGrapher::Hooks::ImageGraphTest
+
+    # Example for invoking multiple hooks ...
+    # hooks_imagegraph        NagiosGrapher::Hooks::ImageGraphTest,NagiosGrapher::Hooks::ImageGraphTest
+
+}
+
+# Includes
+cfg_dir=/etc/nagiosgrapher/ngraph.d
+
+# [EOF] (Don't remove this line ...)
+

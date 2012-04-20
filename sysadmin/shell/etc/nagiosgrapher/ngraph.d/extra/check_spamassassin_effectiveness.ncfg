@@ -1,0 +1,58 @@
+# ---
+# NagiosGrapher Template for SpamAssassin-related checks
+# ---
+
+define ngraph{
+	service_name		spamassassin effectiveness
+	graph_perf_regex	total=(\d+)
+	graph_value		total
+	graph_units		mails
+	graph_legend		Totals mails
+	rrd_plottype		LINE2
+	rrd_color		00ff00
+	hide			yes
+}
+
+define ngraph{
+	service_name		spamassassin effectiveness
+	graph_perf_regex	spam=(\d+)
+	graph_value		spam
+	graph_units		mails
+	graph_legend		recognized spam mails
+	rrd_plottype		AREA
+	rrd_color		005400
+}
+
+define ngraph{
+	service_name		spamassassin effectiveness
+	graph_perf_regex	learn=(\d+)
+	graph_value		learn
+	graph_units		mails
+	graph_legend		not recognized spam emails
+	rrd_plottype		STACK
+	rrd_color		009E3B
+}
+
+define ngraph{
+	service_name		spamassassin effectiveness
+	type			CDEF
+	graph_calc		total,spam,-,learn,-
+	graph_value		diff
+	graph_units		mails
+	graph_legend		total emails
+	rrd_plottype		STACK
+	rrd_color		0059A8
+}
+
+define ngraph{
+	service_name		spamassassin effectiveness
+	type			VDEF
+	graph_calc		diff,AVERAGE
+	graph_value		diff_avg
+	graph_units		mails
+	graph_legend		avg not regonized emails
+	rrd_plottype		LINE1
+	rrd_color		0083FF
+}
+
+# [EOF]

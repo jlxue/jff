@@ -1,0 +1,39 @@
+#---
+#NagiosGrapherTemplateforcheck_nagios
+#---
+
+define ngraph{
+	service_name		nagios check
+	graph_log_regex		(\d+) proc
+	graph_value		procs
+	graph_units		num
+	graph_legend		number of nagios processes
+	rrd_plottype		LINE2
+	rrd_color		ff0000
+	page			Procs
+}
+
+define ngraph{
+	service_name		nagios check
+	graph_log_regex		(\d+) seconds
+	graph_value		sec
+	graph_units		seconds
+	graph_legend		last status log update
+	rrd_plottype		AREA
+	rrd_color		00A348
+	page			Last Update
+}
+
+define ngraph{
+	service_name		nagios latency
+	graph_perf_regex	latency=(\d+)
+	graph_value		sec
+	graph_units		seconds
+	graph_legend		how is nagios' latency
+	rrd_plottype		LINE2
+	rrd_color		ff0000
+	page			Latency
+	step			300
+}
+
+#[EOF]

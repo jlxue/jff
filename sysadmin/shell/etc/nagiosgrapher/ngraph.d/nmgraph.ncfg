@@ -1,0 +1,55 @@
+# Multi Graphs #########################################
+
+define nmgraph{
+	host_name		* Multigraphen
+	service_name		nethq-dev Services
+	# RegEX
+	hosts			nethq-dev
+	# RegEX
+	services		.*?
+	# line or stack or area
+	graph_type		line
+}
+
+
+define nmgraph{
+	host_name		* Multigraphen
+	service_name		all ping
+	# RegEX
+	hosts			.*?
+	# RegEX
+	services		PING
+	# line or stack or area
+	graph_type		stack
+	# normal or reverse or leave blank
+	order			reverse
+	colors			ff8000, 00ff00, 0000ff
+}
+
+define nmgraph{
+	host_name		* Multigraphen
+	service_name		all http
+	# RegEX
+	hosts			.*?
+	# RegEX
+	services		HTTP.*?
+	# line or stack or area
+	graph_type		stack
+	# normal or reverse or leave blank
+	order			reverse
+	colors			ff8000, 00ff00, 0000ff
+}
+
+define nmgraph{
+	host_name		* Multigraphen
+	service_name		all services
+	# RegEX
+	hosts			.*?
+	# RegEX
+	services		.*?
+	# line or stack or area
+	graph_type		area
+	# normal or reverse or leave blank
+	# order			normal
+	# colors		ff8000, 00ff00, 0000ff
+}
