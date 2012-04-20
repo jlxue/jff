@@ -1,0 +1,29 @@
+# ---
+# NagiosGrapher Template for hardware-related checks
+# ---
+
+# CPU
+define ngraph{
+	service_name		cpu
+	graph_log_regex		- (\d+)
+	graph_value		CPU
+	graph_units		%
+	graph_legend		CPU usage
+	rrd_plottype		AREA
+	rrd_color		00A348
+	page			CPU
+}
+
+# MEM
+define ngraph{
+	service_name		mem
+	graph_log_regex		- (\d+)
+	graph_value		MEM
+	graph_units		bytes 
+	graph_legend		MEM usage
+	rrd_plottype		AREA
+	rrd_color		00A348
+	page			MEM 
+}
+
+# [EOF]

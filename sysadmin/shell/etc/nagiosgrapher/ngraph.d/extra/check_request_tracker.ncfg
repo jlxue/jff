@@ -1,0 +1,159 @@
+# ---
+# NagiosGrapher Template for RequestTracker-related checks
+# ---
+
+# rt2
+define ngraph{
+	service_name		rt2-tickets
+	graph_log_regex		(\d+) Tickets
+	graph_value		tickets
+	graph_units		tickets
+	graph_legend		Tickets
+	graph_legend_max	15
+	rrd_plottype		AREA
+	rrd_color		ff0000
+}
+
+define ngraph{
+	service_name		rt2-tickets
+	type			GPRINT
+	print_source		tickets
+	print_description	Latest:
+	print_function		LAST
+	print_format		%2.0lf
+}
+
+define ngraph{
+	service_name		rt2-tickets
+	type			GPRINT
+	print_source		tickets
+	print_description	Maximum:
+	print_function		MAX
+	print_format		%2.0lf
+}
+
+define ngraph{
+	service_name		rt2-tickets
+	type			GPRINT
+	print_source		tickets
+	print_description	Average:
+	print_function		AVERAGE
+	print_format		%2.0lf
+	print_eol		left
+}
+
+define ngraph{
+	service_name		rt2-tickets
+	type			COMMENT
+	print_description
+	print_eol		justify
+}
+
+define ngraph{
+	service_name		rt2-tickets
+	type			VDEF
+	graph_value		tickets_vdef
+	graph_units
+	graph_calc		tickets,AVERAGE
+	graph_legend		AVG Tickets
+	rrd_plottype		LINE1
+	rrd_color		0000ff
+}
+
+# rt3
+define ngraph{
+	service_name		rt3-tickets
+	graph_log_regex		(\d+) Tickets
+	graph_value		tickets
+	graph_units		tickets
+	graph_legend		Tickets
+	graph_legend_max	15
+	rrd_plottype		AREA
+	rrd_color		ff0000
+}
+
+define ngraph{
+	service_name		rt3-tickets
+	type			GPRINT
+	print_source		tickets
+	print_description	Latest:
+	print_function		LAST
+	print_format		%2.0lf
+}
+
+define ngraph{
+	service_name		rt3-tickets
+	type			GPRINT
+	print_source		tickets
+	print_description	Maximum:
+	print_function		MAX
+	print_format		%2.0lf
+}
+
+define ngraph{
+	service_name		rt3-tickets
+	type			GPRINT
+	print_source		tickets
+	print_description	Average:
+	print_function		AVERAGE
+	print_format		%2.0lf
+	print_eol		left
+}
+
+define ngraph{
+	service_name		rt3-tickets
+	type			COMMENT
+	print_description
+	print_eol		justify
+}
+
+define ngraph{
+	service_name		rt3-tickets
+	type			VDEF
+	graph_value		tickets_vdef
+	graph_units
+	graph_calc		tickets,AVERAGE
+	graph_legend		AVG Tickets
+	rrd_plottype		LINE1
+	rrd_color		0000ff
+}
+
+# RT Login time
+define ngraph{
+	service_name		cap-rt-login
+	graph_perf_regex	=(\d+[\.,]\d+)
+	graph_value		seconds
+	graph_units		seconds
+	graph_legend		time needed
+	rrd_plottype		AREA
+	rrd_color		6699FF
+}
+
+define ngraph{
+	service_name		cap-rt-login
+	type			GPRINT
+	print_source		seconds
+	print_description	latest
+	print_function		LAST
+	print_format		%.2lf s
+}
+
+define ngraph{
+	service_name		cap-rt-login
+	type			GPRINT
+	print_source		seconds
+	print_description	maximal
+	print_function		MAX
+	print_format		%0.2lf s
+}
+
+define ngraph{
+	service_name		cap-rt-login
+	type			GPRINT
+	print_source		seconds
+	print_description	average
+	print_function		AVERAGE
+	print_format		%0.2lf s
+}
+
+# [EOF]

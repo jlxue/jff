@@ -1,0 +1,258 @@
+#---
+#NagiosGrapherTemplateforcheck_mysql
+#---
+
+#MySQL
+define ngraph{
+	service_name		mysql
+	graph_perf_regex	diff=(\d+)
+	graph_value		diff
+	graph_units		positions
+	graph_legend		binlog positions
+	rrd_plottype		AREA
+	rrd_color		6699FF
+}
+
+define ngraph{
+	service_name		mysql
+	type			CDEF
+	graph_value		cdef_total
+	graph_units
+	graph_legend
+	graph_calc		diff
+	rrd_plottype		LINE1
+	rrd_color		000000
+}
+
+#Threads
+define ngraph{
+	service_name		'mysql-info'
+	graph_log_regex		Threads:\s*(\d+)
+	graph_value		used
+	graph_units		Threads
+	graph_legend		Threads
+	rrd_plottype		AREA
+	rrd_color		EACC00
+	page			Threads
+}
+
+define ngraph{
+	service_name		'mysql-info'
+	type			CDEF
+	graph_value		cdef_used
+	graph_calc		used
+	rrd_plottype		LINE1
+	rrd_color		ff0000
+	page			Threads
+}
+
+define ngraph{
+	service_name		'mysql-info'
+	type			VDEF
+	graph_value		used_vdef
+	graph_calc		used,AVERAGE
+	graph_legend		AVG Threads
+	rrd_plottype		LINE1
+	rrd_color		000000
+	page			Threads
+}
+
+#Questions
+define ngraph{
+	service_name		'mysql-info'
+	graph_log_regex		Questions:\s*(\d+)
+	graph_value		questions
+	graph_units		Questions
+	graph_legend		Questions
+	rrd_plottype		AREA
+	rrd_color		EACC00
+	page			Questions
+}
+
+define ngraph{
+	service_name		'mysql-info'
+	type			CDEF
+	graph_value		cdef_questions
+	graph_calc		questions
+	rrd_plottype		LINE1
+	rrd_color		ff0000
+	page			Questions
+}
+
+define ngraph{
+	service_name		'mysql-info'
+	type			VDEF
+	graph_value		questions_vdef
+	graph_calc		questions,AVERAGE
+	graph_legend		AVG Questions
+	rrd_plottype		LINE1
+	rrd_color		000000
+	page			Questions
+}
+
+#Queries
+define ngraph{
+	service_name		'mysql-info'
+	graph_log_regex		queries:\s*(\d+)
+	graph_value		queries
+	graph_units		Slowqueries
+	graph_legend		Slowqueries
+	rrd_plottype		AREA
+	rrd_color		EACC00
+	page			Queries
+}
+
+define ngraph{
+	service_name		'mysql-info'
+	type			CDEF
+	graph_value		cdef_queries
+	graph_calc		queries
+	rrd_plottype		LINE1
+	rrd_color		ff0000
+	page			Queries
+}
+
+define ngraph{
+	service_name		'mysql-info'
+	type			VDEF
+	graph_value		queries_vdef
+	graph_calc		queries,AVERAGE
+	graph_legend		AVG Queries
+	rrd_plottype		LINE1
+	rrd_color		000000
+	page			Queries
+}
+
+#Opens
+define ngraph{
+	service_name		'mysql-info'
+	graph_log_regex		Opens:\s*(\d+)
+	graph_value		opens
+	graph_units		Opens
+	graph_legend		Opens
+	rrd_plottype		AREA
+	rrd_color		EACC00
+	page			Opens
+}
+
+define ngraph{
+	service_name		'mysql-info'
+	type			CDEF
+	graph_value		cdef_opens
+	graph_calc		opens
+	rrd_plottype		LINE1
+	rrd_color		ff0000
+	page			Opens
+}
+
+define ngraph{
+	service_name		'mysql-info'
+	type			VDEF
+	graph_value		opens_vdef
+	graph_calc		opens,AVERAGE
+	graph_legend		AVG Opens
+	rrd_plottype		LINE1
+	rrd_color		000000
+	page			Opens
+}
+
+#FlushTables
+define ngraph{
+	service_name		'mysql-info'
+	graph_log_regex		Flushtables:\s*(\d+)
+	graph_value		flush_tables
+	graph_units		Flushtables
+	graph_legend		Flushtables
+	rrd_plottype		AREA
+	rrd_color		EACC00
+	page			Flush_Tables
+}
+
+define ngraph{
+	service_name		'mysql-info'
+	type			CDEF
+	graph_value		cdef_flush_tables
+	graph_calc		flush_tables
+	rrd_plottype		LINE1
+	rrd_color		ff0000
+	page			Flush_Tables
+}
+
+define ngraph{
+	service_name		'mysql-info'
+	type			VDEF
+	graph_value		flush_tables_vdef
+	graph_calc		flush_tables,AVERAGE
+	graph_legend		AVG Flush Tables
+	rrd_plottype		LINE1
+	rrd_color		000000
+	page			Flush_Tables
+}
+
+#OpenTables
+define ngraph{
+	service_name		'mysql-info'
+	graph_log_regex		Opentables:\s*(\d+)
+	graph_value		open_tables
+	graph_units		Open tables
+	graph_legend		Open tables
+	rrd_plottype		AREA
+	rrd_color		EACC00
+	page			Open_Tables
+}
+
+define ngraph{
+	service_name		'mysql-info'
+	type			CDEF
+	graph_value		cdef_open_tables
+	graph_calc		open_tables
+	rrd_plottype		LINE1
+	rrd_color		ff0000
+	page			Open_Tables
+}
+
+define ngraph{
+	service_name		'mysql-info'
+	type			VDEF
+	graph_value		open_tables_vdef
+	graph_calc		open_tables,AVERAGE
+	graph_legend		AVG Open Tables
+	rrd_plottype		LINE1
+	rrd_color		000000
+	page			Open_Tables
+}
+
+#AVGQueries
+define ngraph{
+	service_name		'mysql-info'
+	graph_log_regex		avg:\s*(\d+[\.,]\d+)
+	graph_value		avg
+	graph_units		Oueries per second avg
+	graph_legend		Oueries per second avg
+	rrd_plottype		AREA
+	rrd_color		EACC00
+	page			AVG
+}
+
+define ngraph{
+	service_name		'mysql-info'
+	type			CDEF
+	graph_value		cdef_avg
+	graph_calc		avg
+	rrd_plottype		LINE1
+	rrd_color		ff0000
+	page			AVG
+}
+
+define ngraph{
+	service_name		'mysql-info'
+	type			VDEF
+	graph_value		avg_vdef
+	graph_calc		avg,AVERAGE
+	graph_legend		AVG Oueries per second
+	rrd_plottype		LINE1
+	rrd_color		000000
+	page			AVG
+}
+
+#[EOF]

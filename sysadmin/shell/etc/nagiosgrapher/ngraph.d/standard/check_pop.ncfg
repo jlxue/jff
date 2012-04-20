@@ -1,0 +1,29 @@
+#---
+#NagiosGrapherTemplateforcheck_pop
+#Author:MariusHein
+#---
+
+define ngraph{
+		service_name		pop3
+		step			120
+		heartbeat		2000
+		graph_perf_regex	time=\s*([0-9\.,]+)
+		graph_value		pop_time
+		graph_units		s
+		graph_legend		seconds POP3 response
+		rrd_plottype		AREA
+		rrd_color		ff8000
+}
+
+define ngraph{
+		service_name		pop3
+		type			CDEF
+		graph_value		pop_time_cdef
+		graph_units
+		graph_legend
+		graph_calc		pop_time
+		rrd_plottype		LINE1
+		rrd_color		000000
+}
+
+#[EOF]

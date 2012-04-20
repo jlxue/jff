@@ -1,0 +1,110 @@
+# ---
+# NagiosGrapher Template for GSM-related checks
+# ---
+
+# sms
+define ngraph{
+	service_name		sms
+	graph_perf_regex	count=(\d+)
+	graph_value		lines
+	graph_units		lines
+	graph_legend		sms
+	rrd_plottype		AREA
+	rrd_color		004BA5
+}
+
+define ngraph{
+	service_name		sms
+	type			CDEF
+	graph_value		cdef_total
+	graph_units
+	graph_legend
+	graph_calc		lines
+	rrd_plottype		LINE1
+	rrd_color		000000
+}
+
+define ngraph{
+	service_name		gsm signalstrength
+	graph_perf_regex	=(\d+[\.,]\d+)
+	graph_value		signalstrength
+	graph_units		signalstrength in %
+	graph_legend		signalstrength 
+	rrd_plottype		AREA
+	rrd_color		009E3B
+	graph_upper_limit	100
+	graph_lower_limit	0
+}
+
+define ngraph{
+	service_name		gsm signalstrength
+	type			GPRINT
+	print_source		signalstrength
+	print_function		LAST
+	print_format		%2.2lf %%
+	print_description
+}
+	
+define ngraph{
+	service_name		gsm signalstrength
+	graph_perf_regex	;(\d+);
+	graph_value		warning
+	graph_legend		warning strength
+	rrd_plottype		LINE2
+	rrd_color		FFFF00
+}
+
+define ngraph{
+	service_name		gsm signalstrength
+	type			GPRINT
+	print_source		warning
+	print_function		LAST
+	print_format		%2.2lf %%
+}
+	
+define ngraph{
+	service_name		gsm signalstrength
+	graph_perf_regex	;(\d+);;
+	graph_value		critical
+	graph_legend		critical strength
+	rrd_plottype		LINE2
+	rrd_color			FF0000
+}
+	
+define ngraph{
+	service_name		gsm signalstrength
+	type			GPRINT
+	print_source		critical
+	print_function		LAST
+	print_format		%2.2lf %%
+}
+	
+define ngraph{
+	service_name		gsm signalstrength
+	type			CDEF
+	graph_value		cdef_total
+	graph_calc		signalstrength
+	rrd_plottype		LINE1
+	rrd_color		000000
+}
+
+define ngraph{
+	service_name		gsm signalstrength
+	type			VDEF
+	graph_value		vdef_total
+	graph_calc		signalstrength,AVERAGE
+	rrd_plottype		LINE2
+	rrd_color		006CFF
+	graph_legend		average strength
+}
+
+define ngraph{
+	service_name		gsm signalstrength
+	type			GPRINT
+	print_source		signalstrength
+	print_function	 	AVERAGE	
+	print_format		%2.2lf %%
+	print_eol		left
+}
+
+# [EOF]

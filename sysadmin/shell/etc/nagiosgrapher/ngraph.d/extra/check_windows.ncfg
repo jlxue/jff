@@ -1,0 +1,170 @@
+# ---
+# NagiosGrapher Template for MS-Windows-related checks
+# ---
+
+# CPU load
+define ngraph{
+	service_name		NT-CPU
+	graph_log_regex		([0-9]+)%\)
+	graph_value		load
+	graph_units		percent
+	graph_legend		avg. 3min load
+	rrd_plottype		AREA
+	rrd_color		00a000
+}
+
+# CPU load
+define ngraph{
+	service_name		nt-load
+	graph_log_regex		([0-9]+)%\)
+	graph_value		load
+	graph_units		percent
+	graph_legend		avg. 3min load
+	rrd_plottype		AREA
+	rrd_color		00a000
+}
+
+# nt-disk	
+define ngraph{
+	service_name		nt-disk
+	graph_log_regex		(\d+)%\)\s+-
+	graph_value		used
+	graph_units		percent
+	graph_legend		used space
+	rrd_plottype		AREA
+	rrd_color		ff0000
+}
+	
+define ngraph{
+	service_name		nt-disk
+	graph_log_regex		free\s+\d+[\.,]\d+\s+\w+\s+\((\d+)
+	graph_value		free
+	graph_units		percent
+	graph_legend		free space
+	rrd_plottype		STACK
+	rrd_color		00a000
+}
+
+
+# nt-memory
+define ngraph{
+	service_name		nt-memory
+	graph_log_regex		free: \d+[\.,]\d+ \w+ \((\d+)%\)
+	graph_value		used
+	graph_units		percent
+	graph_legend		free memory
+	rrd_plottype		AREA
+	rrd_color		00a000
+}
+
+define ngraph{
+	service_name		nt-memory
+	graph_log_regex		(\d+)%\) - free
+	graph_value		free
+	graph_units		percent
+	graph_legend		used memory
+	rrd_plottype		STACK
+	rrd_color		ff0000
+}
+
+# nt-memsql
+define ngraph{
+	service_name		nt-memsql
+	graph_log_regex		(\d+)
+	graph_value		used
+	graph_units		Bytes
+	graph_legend		used memory
+	rrd_plottype		AREA
+	rrd_color		FF0000
+}
+
+
+# nt-pagefile
+define ngraph{
+	service_name		nt-pagefile
+	graph_log_regex		(\d+[\.,]\d+)
+	graph_value		pagefile
+	graph_units		percent
+	graph_legend		usesd pagefile
+	rrd_plottype		AREA
+	rrd_color		00a000
+}
+
+# nt-procs
+define ngraph{
+	service_name		nt-procs
+	graph_log_regex		(\d+)
+	graph_value		procs
+	graph_units		amount
+	graph_legend		runing processes
+	rrd_plottype		AREA
+	rrd_color		00a000
+}
+
+# nt-sessions
+define ngraph{
+	service_name		nt-sessions
+	graph_log_regex		(\d+)
+	graph_value		sessions
+	graph_units		amount
+	graph_legend		terminal sessions
+	rrd_plottype		AREA
+	rrd_color		00a000
+}
+
+# http-sessions
+define ngraph{
+	service_name		current-connections
+	graph_log_regex		Sessions: (\d+)
+	graph_value		conn
+	graph_units		connections
+	graph_legend		http connections
+	rrd_plottype		AREA
+	rrd_color		00a000
+}
+
+# 404 errors
+define ngraph{
+	service_name		404
+	graph_log_regex		404: (\d+)
+	graph_value		404
+	graph_units		404
+	graph_legend		404 errors
+	rrd_plottype		AREA
+	rrd_color		00a000
+}
+
+# incoming msgs / sec
+define ngraph{
+	service_name		messages-in
+	graph_log_regex		Msgs in: (\d+)
+	graph_value		msgs
+	graph_units		messages
+	graph_legend		incoming messages
+	rrd_plottype		AREA
+	rrd_color		00a000
+}
+
+# incoming msgs / sec
+define ngraph{
+	service_name		messages-out
+	graph_log_regex		Msgs out: (\d+)
+	graph_value		msgs
+	graph_units		messages
+	graph_legend		outgoing messages
+	rrd_plottype		AREA
+	rrd_color		00a000
+}
+
+# SQL DB size
+define ngraph{
+	service_name		nt-sql-dbsize
+	graph_log_regex		DB size: (\d+)
+	graph_value		kb
+	graph_units		KB
+	graph_legend		DB size in KB
+	rrd_plottype		AREA
+	rrd_color		00a000
+}
+
+# [EOF]

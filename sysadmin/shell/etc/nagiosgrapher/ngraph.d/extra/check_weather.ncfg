@@ -1,0 +1,68 @@
+# ---
+# NagiosGrapher Template for check_weather
+# Author: Marius Hein
+# ---
+
+define ngraph{
+        service_name		Temp Airport Nuernberg
+        graph_log_regex		is\s+(-*[0-9.,]+)\s+C
+        graph_value		eddn_temp
+        graph_units		C
+        graph_legend		Temperatur
+	graph_legend_max	15
+        rrd_plottype		AREA
+        rrd_color		c0c0ff
+}
+
+define ngraph{
+        service_name		Temp Airport Nuernberg
+        type			GPRINT
+        print_source		eddn_tmp_cdef
+        print_description	Latest: 
+        print_function		LAST
+        print_format		%2.2lf%s
+}
+
+define ngraph{
+        service_name		Temp Airport Nuernberg
+        type			GPRINT
+        print_source		eddn_tmp_cdef
+        print_description	Maximum: 
+        print_function		MAX
+        print_format		%2.2lf%s
+}
+
+define ngraph{
+        service_name		Temp Airport Nuernberg
+        type			GPRINT
+        print_source		eddn_tmp_cdef
+        print_description	Average: 
+        print_function		AVERAGE
+        print_format		%2.2lf%s
+	print_eol		LEFT
+}
+
+define ngraph{
+        service_name		Temp Airport Nuernberg
+        type			CDEF
+        graph_value		eddn_tmp_cdef
+        graph_units
+        graph_legend
+        graph_calc		eddn_temp
+        rrd_plottype		LINE1
+        rrd_color		000000
+}
+
+define ngraph{
+        service_name		Temp Airport Nuernberg
+        type			VDEF
+        graph_value		vdef_eddn_average
+        graph_units
+        graph_legend		Average values
+        graph_calc		eddn_tmp_cdef,AVERAGE
+        rrd_plottype		LINE1
+        rrd_color		009033
+        hide			no
+}
+
+# [EOF]

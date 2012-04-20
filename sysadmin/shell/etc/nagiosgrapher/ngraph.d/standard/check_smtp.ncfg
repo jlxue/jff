@@ -1,0 +1,16 @@
+#---
+#NagiosGrapherTemplateforcheck_smtp
+#---
+
+#SMTP
+define ngraph{
+	service_name		SMTP
+	graph_log_regex		([0-9\.]+) sec
+	graph_value		response
+	graph_units		sec
+	graph_legend		Response time
+	rrd_plottype		LINE2
+	rrd_color		00a000
+}
+
+#[EOF]

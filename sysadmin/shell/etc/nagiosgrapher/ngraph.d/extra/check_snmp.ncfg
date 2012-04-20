@@ -1,0 +1,334 @@
+# ---
+# NagiosGrapher Template for SNMP-related checks
+# ---
+
+# snmp-iferrors 
+define ngraph{
+	service_name		snmp-iferrors
+	graph_log_regex		in Errors: (\d+)
+	graph_value		in
+	graph_units		percent
+	graph_legend		errors (in)
+	rrd_plottype		LINE2
+	rrd_color		00D000
+}
+	
+define ngraph{
+	service_name		snmp-iferrors
+	graph_log_regex		out Errors: (\d+)
+	graph_value		out
+	graph_units		percent
+	graph_legend		errors (out)
+	rrd_plottype		LINE2
+	rrd_color		0000D0
+}
+
+# snmp-bandwidth
+define ngraph{
+	service_name		snmp-bandwidth
+	graph_perf_regex	outAbsolut=(\d+)
+	graph_value		out
+	graph_units
+	graph_legend		bandwidth usage (out)
+	rrd_plottype		AREA
+	rrd_color		C4F5E7
+	rrd_type		COUNTER
+	hide			yes
+}
+
+define ngraph{
+	service_name		snmp-bandwidth
+	type			CDEF
+	graph_value		outnice
+	graph_calc		out,8,*,-1,*
+	graph_units		Bits/s
+	graph_legend		bandwidth usage (out)
+	rrd_plottype		AREA
+	rrd_color		C4F5E7
+	page			1 bandwidth
+}
+	
+define ngraph{
+	service_name		snmp-bandwidth
+	graph_perf_regex	inAbsolut=(\d+)
+	graph_value		in
+	graph_units
+	graph_legend		bandwidth usage (in)
+	rrd_plottype		AREA
+	rrd_color		C2BBFF
+	rrd_type		COUNTER
+	hide			yes
+}
+	
+define ngraph{
+	service_name		snmp-bandwidth
+	type			CDEF
+	graph_value		innice
+	graph_calc		in,8,*
+	graph_units		Bits/s
+	graph_legend		bandwidth usage (in)
+	rrd_plottype		AREA
+	rrd_color		C2BBFF
+	print_eol		left
+	page			1 bandwidth
+}
+	
+define ngraph{
+	service_name		snmp-bandwidth
+	type			CDEF
+	graph_value		cdef_out
+	graph_units
+	graph_legend
+	graph_calc		outnice
+	rrd_plottype		LINE1
+	rrd_color		3F6800
+	page			1 bandwidth
+}
+	
+define ngraph{
+	service_name		snmp-bandwidth
+	type			CDEF
+	graph_value		cdef_in
+	graph_units
+	graph_legend
+	graph_calc		innice
+	rrd_plottype		LINE1
+	rrd_color		3650C9
+	page			1 bandwidth
+}
+
+define ngraph{
+	service_name		snmp-bandwidth
+	type			HRULE
+	hrule_value		0
+	rrd_color		000000
+	page			1 bandwidth
+}
+
+define ngraph{
+	service_name		snmp-bandwidth
+	type			CDEF
+	graph_value		mysum
+	graph_calc		out,in,+,8,*
+	graph_units
+	graph_legend		bandwidth usage (total)
+	rrd_plottype		AREA
+	rrd_color		C4F5E7
+	hide			yes
+	page			2 traffic
+}
+
+define ngraph{
+	service_name		snmp-bandwidth
+	type			CDEF
+	graph_value		all30nice
+	graph_calc		mysum,172800,SUM	
+	graph_units	 	Bytes	
+	graph_legend		traffic over the last hour
+	rrd_plottype		AREA
+	rrd_color		2748A0
+	page			2 traffic
+}
+
+# snmp-ifload
+define ngraph{
+	service_name		if-load
+	graph_perf_regex	'output octets'=(\d+)c
+	graph_value		out
+	graph_units
+	graph_legend		bandwidth usage (out)
+	rrd_plottype		AREA
+	rrd_color		0000FF
+	rrd_type		COUNTER
+	hide			yes
+}
+
+define ngraph{
+	service_name		if-load
+	type			CDEF
+	graph_value		outnice
+	graph_calc		out,8,-1,*,*
+	graph_units		Bits/s
+	graph_legend		bandwidth usage (out)
+	rrd_plottype		AREA
+	rrd_color		00FF00
+	page			1 bandwidth
+}
+	
+define ngraph{
+	service_name		if-load
+	graph_perf_regex	'input octets'=(\d+)c
+	graph_value		in
+	graph_units
+	graph_legend		bandwidth usage (in)
+	rrd_plottype		AREA
+	rrd_color		C2BBFF
+	rrd_type		COUNTER
+	hide			yes
+}
+	
+define ngraph{
+	service_name		if-load
+	type			CDEF
+	graph_value		innice
+	graph_calc		in,8,*
+	graph_units		Bits/s
+	graph_legend		bandwidth usage (in)
+	rrd_plottype		AREA
+	rrd_color		0000FF
+	print_eol		left
+	page			1 bandwidth
+}
+	
+define ngraph{
+	service_name		if-load
+	type			CDEF
+	graph_value		cdef_out
+	graph_units
+	graph_legend
+	graph_calc		outnice
+	rrd_plottype		LINE1
+	rrd_color		000000
+	page			1 bandwidth
+}
+
+define ngraph{
+	service_name		if-load
+	type			CDEF
+	graph_value		cdef_in
+	graph_units
+	graph_legend
+	graph_calc		innice
+	rrd_plottype		LINE1
+	rrd_color		000000
+	page			1 bandwidth
+}
+
+define ngraph{
+	service_name		if-load
+	type			HRULE
+	hrule_value		0
+	rrd_color		000000
+	page			1 bandwidth
+}
+
+# snmp-traffic
+define ngraph{
+	service_name		snmp-traffic
+	graph_log_regex		(\d+[\.,]\d+)%\) out
+	graph_value		out
+	graph_units		percent
+	graph_legend		bandwidth usage (out)
+	rrd_plottype		AREA
+	rrd_color		C4F5E7
+	hide			yes
+}
+
+define ngraph{
+	service_name		snmp-traffic
+	type			CDEF
+	graph_value		outnice
+	graph_calc		out,100,LE,out,0,IF,-1,*
+	graph_units		percent
+	graph_legend		bandwidth usage (out)
+	rrd_plottype		AREA
+	rrd_color		C4F5E7
+}
+	
+define ngraph{
+	service_name		snmp-traffic
+	graph_log_regex		(\d+[\.,]\d+)%\) in
+	graph_value		in
+	graph_units		percent
+	graph_legend		bandwidth usage (in)
+	rrd_plottype		AREA
+	rrd_color		C2BBFF
+	hide			yes
+}
+	
+define ngraph{
+	service_name		snmp-traffic
+	type			CDEF
+	graph_value		innice
+	graph_calc		in,100,LE,in,0,IF
+	graph_units		percent
+	graph_legend		bandwidth usage (in)
+	rrd_plottype		AREA
+	rrd_color		C2BBFF
+}
+	
+define ngraph{
+	service_name		snmp-traffic
+	type			CDEF
+	graph_value		cdef_out
+	graph_units
+	graph_legend
+	graph_calc		outnice
+	rrd_plottype		LINE1
+	rrd_color		3F6800
+}
+	
+define ngraph{
+	service_name		snmp-traffic
+	type			CDEF
+	graph_value		cdef_in
+	graph_units
+	graph_legend
+	graph_calc		innice
+	rrd_plottype		LINE1
+	rrd_color		3650C9
+}
+
+define ngraph{
+	service_name		snmp-traffic
+	type			HRULE
+	hrule_value		0
+	rrd_color		000000
+}
+
+# check_snmp_traps
+define ngraph{
+	service_name		snmp-traps
+	graph_perf_regex	ok=(\d+)
+	graph_value		ok
+	graph_units		traps
+	graph_legend		ok traps in database
+	rrd_plottype		LINE2
+	rrd_color		00ff00
+	page			Latency
+}
+
+define ngraph{
+	service_name		snmp-traps
+	graph_perf_regex	warning=(\d+)
+	graph_value		warning
+	graph_units		traps
+	graph_legend		warning traps in database
+	rrd_plottype		LINE2
+	rrd_color		ffff00
+	page			Latency
+}
+
+define ngraph{
+	service_name		snmp-traps
+	graph_perf_regex	critical=(\d+)
+	graph_value		critical
+	graph_units		traps
+	graph_legend		critical traps in database
+	rrd_plottype		LINE2
+	rrd_color		ff0000
+	page			Latency
+}
+
+# normal traps
+define ngraph{
+	service_name		traps normal
+	graph_perf_regex	matches=(\d+)
+	graph_value		matches
+	graph_units		matches
+	graph_legend		matches in syslog database
+	rrd_plottype		LINE2
+	rrd_color		00ff00
+}
+
+# [EOF]
