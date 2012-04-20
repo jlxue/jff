@@ -8,6 +8,7 @@ Monitoring Systems
     * NRPE
     * nsclient
     * check_snmp
+    * nrdp: replacement of nsca
     * nsca
     * check-mk
     * nagios-statd-server
@@ -40,13 +41,21 @@ Nagios as if it were their own.
 
 UI 太 geeky 了，sourceforge 项目主页上有不少好评，貌似很容易安装。
 
+
 * munin
 
 Perl 编写。
+
 
 * Shinken
 
 http://www.shinken-monitoring.org/what-is-in-shinken-not-in-nagios-and-vice-versa/
 
 Python 编写，兼容 Nagios 的插件。没看出有什么本质改进。Web UI 信息量太少。
+
+
+* collectd
+
+收集 cpu/ram/disk/network/irq/processes 信息写入 rrd 文件，没有直接支持
+画图功能，报警特性还处于初级阶段。
 
