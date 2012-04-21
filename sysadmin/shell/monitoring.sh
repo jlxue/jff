@@ -55,6 +55,13 @@ cmp_dir $SCRIPT_DIR/etc/pnp4nagios /etc/pnp4nagios || {
 }
 
 ######################################################################
+cmp_dir $SCRIPT_DIR/etc/munin /etc/munin || {
+    overwrite_dir $SCRIPT_DIR/etc/munin /etc/munin
+    MUNIN_CONF_CHANGED=1
+    APACHE_CONF_CHANGED=1
+}
+
+######################################################################
 
 ensure_mode_user_group /etc/default/nagios3         644 root root
 ensure_mode_user_group /etc/nagios-plugins          755 root root
@@ -67,6 +74,16 @@ ensure_mode_user_group /var/log/nagios3             2751 nagios adm
 ensure_mode_user_group /var/lib/nagios              755 nagios nagios
 ensure_mode_user_group /var/lib/nagios3             750 nagios nagios
 
+ensure_mode_user_group /etc/munin                   755 root root
+ensure_mode_user_group /etc/munin/plugin-conf.d     750 root munin
+
+######################################################################
+
+[ -z "$MUNIN_CONF_CHANGED" ] || {
+    service munin restart
+    service munin-async restart
+    service munin-node restart
+}
 
 [ -z "$NPCD_CONF_CHANGED" ] || service npcd restart
 #[ -z "$PNP_GEARMAN_WORKER_CONF_CHANGED" ] || service pnp_gearman_worker restart
@@ -74,6 +91,11 @@ ensure_mode_user_group /var/lib/nagios3             750 nagios nagios
 [ -z "$CONF_CHANGED" ] || service nagios3 restart
 [ -z "$APACHE_CONF_CHANGED" ] || service apache2 restart
 
+
+######################################################################
+
+ensure_service_started munin-async munin-async-server
+ensure_service_started munin-node munin-node
 
 ensure_service_started npcd npcd
 #[ "`pgrep pgrep process_perfdat`" ] || service pnp_gearman_worker start
