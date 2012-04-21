@@ -216,4 +216,5 @@ http://www.corp.example.com/
 ++ Nagios3 ++
 
 http://monitor.corp.example.com/nagios3/
+http://monitor.corp.example.com/pnp4nagios/
 
