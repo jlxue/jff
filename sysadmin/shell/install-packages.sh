@@ -238,7 +238,7 @@ i nagios3 nagios-plugins nagios-plugins-contrib nagios3-doc \
   nagiosgrapher pnp4nagios check-postgres
 
 # Munin
-i munin
+i munin munin-async munin-plugins-extra
 
 
 ###########################################################
