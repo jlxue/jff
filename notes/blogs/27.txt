@@ -44,7 +44,7 @@ UI 太 geeky 了，sourceforge 项目主页上有不少好评，貌似很容易�
 
 * munin
 
-Perl 编写。
+Perl 编写，插件丰富，插件自动激活很好用。
 
 
 * Shinken

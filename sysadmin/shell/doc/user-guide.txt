@@ -218,3 +218,6 @@ http://www.corp.example.com/
 http://monitor.corp.example.com/nagios3/
 http://monitor.corp.example.com/pnp4nagios/
 
+http://monitor.corp.example.com/munin-cgi/  (on demand generated html pages)
+http://monitor.corp.example.com/munin/  (batch generated html pages)
+
