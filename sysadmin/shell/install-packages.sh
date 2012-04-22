@@ -240,6 +240,12 @@ i nagios3 nagios-plugins nagios-plugins-contrib nagios3-doc \
 # Munin
 i munin munin-async munin-plugins-extra
 
+# Ganglia
+i ganglia-monitor ganglia-monitor-python ganglia-webfrontend
+
+# Zabbix
+i zabbix-agent zabbix-frontend-php zabbix-server-pgsql
+
 
 ###########################################################
 if [ -z "$interactive" ]; then

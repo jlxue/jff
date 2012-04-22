@@ -1,7 +1,22 @@
 Monitoring Systems
 
 
+http://en.wikipedia.org/wiki/Comparison_of_network_monitoring_systems
+
+监控系统必不可少的三个部分：
+    * 数据采集：如 SNMP 方式，TCP/IP 主动探测服务方式，采集系统内存、负载信息；
+    * 数据存储：使用 rrdtool 保存到 rrd 数据文件里，或者保存到关系数据库里；
+    * 数据展现：常用 rrdtool 绘制时间序列图。
+
+数据采集部分如果能支持自动服务发现会方便很多，不用一项项基础服务都手动配置一遍；
+数据采集完后送给数据存储时，可以根据预定义的条件触发警报；
+在数据展现层面可以做一些数据分析，如服务状态的预测。
+
+
 * Nagios
+
+标配不支持服务自动发现，配置繁琐。长于数据收集和预警，预警的逻辑考虑周全。
+标配的数据展现比较弱。
 
   Remote check:
     * check_by_ssh
@@ -37,25 +52,74 @@ Nagios as if it were their own.
 换了，又没有明显链接到各自官方网站，确实颇有欺世盗名之嫌。
 
 
-* xymon
-
-UI 太 geeky 了，sourceforge 项目主页上有不少好评，貌似很容易安装。
-
-
-* munin
-
-Perl 编写，插件丰富，插件自动激活很好用。
-
-
 * Shinken
 
 http://www.shinken-monitoring.org/what-is-in-shinken-not-in-nagios-and-vice-versa/
 
-Python 编写，兼容 Nagios 的插件。没看出有什么本质改进。Web UI 信息量太少。
+Python 编写，基本是重新实现 Nagios，兼容 Nagios 的插件，独立执行的组件之间分工很明确。
+
+
+* OpsView
+
+打包 Nagios + NagVis + NagiosGraph + MRTG + NMIS.
+
+
+* isyVmon (http://www.isyvmon.com/)
+
+打包 Nagios + Centreon.
+
+
+* munin
+
+数据收集、存储和展现，后两者都依赖 rrdtool。Perl 编写，数据采集插件丰富，
+尤其插件自动激活很好用，达到服务自动发现的效果，很省事。
+
+
+* ganglia
+
+收集信息并使用 rrdtools 存储、画图。
 
 
 * collectd
 
 收集 cpu/ram/disk/network/irq/processes 信息写入 rrd 文件，没有直接支持
 画图功能，报警特性还处于初级阶段。
+
+
+* cacti
+
+专注于数据展现，基本是 RRDTool 的 Web 前端，用于展示各种性能图表，依赖 MySQL 数据库。
+
+
+* zabbix
+
+* zenoss
+
+* Pandora FMS
+
+* OpenNMS
+
+Written in Java.
+
+* NetXMS
+
+* MRTG
+
+使用 SNMP 收集信息，并使用 rrdtools 画图。
+
+* cricket (http://cricket.sourceforge.net)
+
+收集信息并使用 rrdtools 存储、画图。
+
+* xymon
+
+UI 太 geeky 了，sourceforge 项目主页上有不少好评，貌似很容易安装。
+
+* ntop
+
+网络性能监控。
+
+* argus (argus-client, argus-server)
+
+网络性能监控。
 
