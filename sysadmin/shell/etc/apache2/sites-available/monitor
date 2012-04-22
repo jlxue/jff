@@ -14,6 +14,7 @@
 
     Include /etc/nagios3/apache2.conf
     Include /etc/pnp4nagios/apache.conf
+    Include /etc/munin/apache.conf
 
     <Directory /srv/www/monitor>
         AuthType Kerberos

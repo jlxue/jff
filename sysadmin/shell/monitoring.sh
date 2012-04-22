@@ -19,7 +19,9 @@ cmp_dir $SCRIPT_DIR/etc/nagios-plugins /etc/nagios-plugins || {
     CONF_CHANGED=1
 }
 
-cmp_dir $SCRIPT_DIR/etc/nagios3 /etc/nagios3 || {
+# /etc/nagios3/conf.d/ngraph is a symlink to ../../nagiosgrapher/nagios3
+# which contains generated files in serviceext directory.
+cmp_dir $SCRIPT_DIR/etc/nagios3 /etc/nagios3 --exclude serviceext || {
     overwrite_dir $SCRIPT_DIR/etc/nagios3 /etc/nagios3
     CONF_CHANGED=1
     APACHE_CONF_CHANGED=1
@@ -33,7 +35,6 @@ cmp_dir $SCRIPT_DIR/etc/nagiosgrapher /etc/nagiosgrapher --exclude serviceext ||
     NG_CONF_CHANGED=1
     CONF_CHANGED=1
 }
-[ -d /etc/nagiosgrapher/ngraph.d/templates ] || mkdir -m 0755 /etc/nagiosgrapher/ngraph.d/templates
 
 ######################################################################
 cmp_file $SCRIPT_DIR/etc/default/npcd /etc/default/npcd || {
@@ -102,4 +103,5 @@ ensure_service_started npcd npcd
 [ "`pgrep nagiosgrapher`" ] || service nagiosgrapher start
 ensure_service_started nagios3 nagios3
 ensure_service_started apache2 apache2
+ensure_service_started cron cron
 
