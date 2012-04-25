@@ -61,6 +61,7 @@ cmp_dir $SCRIPT_DIR/etc/munin /etc/munin || {
     MUNIN_CONF_CHANGED=1
     APACHE_CONF_CHANGED=1
 }
+[ -d /etc/munin/munin-conf.d ] || mkdir -m 0755 /etc/munin/munin-conf.d
 
 ######################################################################
 
