@@ -64,6 +64,18 @@ cmp_dir $SCRIPT_DIR/etc/munin /etc/munin || {
 [ -d /etc/munin/munin-conf.d ] || mkdir -m 0755 /etc/munin/munin-conf.d
 
 ######################################################################
+cmp_dir $SCRIPT_DIR/etc/ganglia /etc/ganglia || {
+    overwrite_dir $SCRIPT_DIR/etc/ganglia /etc/ganglia
+    GANGLIA_CONF_CHANGED=1
+}
+
+cmp_dir $SCRIPT_DIR/etc/ganglia-webfrontend /etc/ganglia-webfrontend || {
+    overwrite_dir $SCRIPT_DIR/etc/ganglia-webfrontend /etc/ganglia-webfrontend
+    APACHE_CONF_CHANGED=1
+}
+
+
+######################################################################
 
 ensure_mode_user_group /etc/default/nagios3         644 root root
 ensure_mode_user_group /etc/nagios-plugins          755 root root
@@ -79,7 +91,15 @@ ensure_mode_user_group /var/lib/nagios3             750 nagios nagios
 ensure_mode_user_group /etc/munin                   755 root root
 ensure_mode_user_group /etc/munin/plugin-conf.d     750 root munin
 
+ensure_mode_user_group /etc/ganglia                 755 root root
+ensure_mode_user_group /etc/ganglia-webfrontend     755 root root
+
 ######################################################################
+
+[ -z "$GANGLIA_CONF_CHANGED" ] || {
+    service ganglia-monitor restart
+    service gmetad restart
+}
 
 [ -z "$MUNIN_CONF_CHANGED" ] || {
     service munin restart
@@ -91,10 +111,14 @@ ensure_mode_user_group /etc/munin/plugin-conf.d     750 root munin
 #[ -z "$PNP_GEARMAN_WORKER_CONF_CHANGED" ] || service pnp_gearman_worker restart
 [ -z "$NG_CONF_CHANGED" ] || service nagiosgrapher restart
 [ -z "$CONF_CHANGED" ] || service nagios3 restart
+
 [ -z "$APACHE_CONF_CHANGED" ] || service apache2 restart
 
 
 ######################################################################
+
+ensure_service_started ganglia-monitor gmond
+ensure_service_started gmetad gmetad
 
 ensure_service_started munin-async munin-async-server
 ensure_service_started munin-node munin-node

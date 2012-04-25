@@ -221,3 +221,5 @@ http://monitor.corp.example.com/pnp4nagios/
 http://monitor.corp.example.com/munin-cgi/  (on demand generated html pages)
 http://monitor.corp.example.com/munin/  (batch generated html pages)
 
+http://monitor.corp.example.com/ganglia/
+
