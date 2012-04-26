@@ -26,3 +26,6 @@ cmp_dir $SCRIPT_DIR/etc/shorewall6 /etc/shorewall6 || {
     service shorewall6 restart
 }
 
+shorewall status | grep -q running || service shorewall start
+shorewall6 status | grep -q running || service shorewall6 start
+
