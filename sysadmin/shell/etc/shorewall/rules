@@ -39,4 +39,10 @@ ACCEPT		net		$FW		tcp	464
 ACCEPT		net		$FW		udp	464
 ACCEPT		net		$FW		tcp	749
 
+# for Ganglia gmond in udp_recv_channel configuration directive.
+# XXX: IGMP may also require to be enabled if there is router
+# transfering multicast traffic, the router uses IGMP to detect
+# whether a member is alive.
+ACCEPT		all		$FW		udp	8649
+
 # vi:noet ts=8 sts=8 sw=8
