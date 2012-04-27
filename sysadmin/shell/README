@@ -303,8 +303,11 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
 ++ Zabbix Configuration ++
 
 20.1) Access "http://monitor.corp.example.com/zabbix/", login with
-      default admin account: Admin/zabbix, enable the zabbix server to
-      be monitored: Configuration -> Hosts.
+      default admin account: Admin/zabbix.
+
+      Configuration -> Hosts:
+      Enable the zabbix server to be monitored and change its name to short
+      hostname obtained by "hostname" command: Configuration -> Hosts.
 
 20.2) Change Admin account's password or create new admin account.
 
