@@ -94,6 +94,23 @@ ensure_mode_user_group /etc/munin/plugin-conf.d     750 root munin
 ensure_mode_user_group /etc/ganglia                 755 root root
 ensure_mode_user_group /etc/ganglia-webfrontend     755 root root
 
+
+ensure_mode_user_group /etc/dbconfig-common/zabbix-frontend-php.conf    600 root root
+ensure_mode_user_group /etc/dbconfig-common/zabbix-server-pgsql.conf    600 root root
+ensure_mode_user_group /etc/zabbix                  755 root root
+ensure_mode_user_group /etc/zabbix/alert.d          755 root root
+ensure_mode_user_group /etc/zabbix/apache.conf      644 root root
+ensure_mode_user_group /etc/zabbix/dbconfig.php     640 root www-data
+ensure_mode_user_group /etc/zabbix/zabbix_agentd.conf   644 root root
+ensure_mode_user_group /etc/zabbix/zabbix_agentd.conf.d 755 root root
+ensure_mode_user_group /etc/zabbix/zabbix_server.conf   640 root root
+
+ensure_mode_user_group /etc/snmp                    755 root root
+ensure_mode_user_group /etc/snmp/snmp.conf          644 root root
+ensure_mode_user_group /etc/snmp/snmpd.conf         600 root root
+ensure_mode_user_group /etc/snmp/snmptrapd.conf     600 root root
+
+
 ######################################################################
 
 [ -z "$GANGLIA_CONF_CHANGED" ] || {
@@ -116,6 +133,11 @@ ensure_mode_user_group /etc/ganglia-webfrontend     755 root root
 
 
 ######################################################################
+
+ensure_service_started postgresql postgres
+ensure_service_started snmpd snmpd
+ensure_service_started zabbix-server zabbix_server
+ensure_service_started zabbix-agent zabbix_agentd
 
 ensure_service_started ganglia-monitor gmond
 ensure_service_started gmetad gmetad
