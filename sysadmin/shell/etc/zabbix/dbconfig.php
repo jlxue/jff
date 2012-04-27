@@ -12,7 +12,7 @@ $DB["SERVER"]    = "localhost";
 $DB["PORT"]      = "0";
 $DB["DATABASE"]  = "zabbix";
 $DB["USER"]      = "zabbix";
-$DB["PASSWORD"]  = "";
+$DB["PASSWORD"]  = "@@ZABBIX_DB_PASSWORD@@";
 $ZBX_SERVER      = "127.0.0.1";
 $ZBX_SERVER_PORT = "10051";
 

@@ -74,6 +74,47 @@ cmp_dir $SCRIPT_DIR/etc/ganglia-webfrontend /etc/ganglia-webfrontend || {
     APACHE_CONF_CHANGED=1
 }
 
+######################################################################
+ensure_service_started postgresql postgres
+
+cmp_file $SCRIPT_DIR/etc/default/snmpd /etc/default/snmpd || {
+    overwrite_file $SCRIPT_DIR/etc/default/snmpd /etc/default/snmpd
+    SNMPD_CONF_CHANGED=1
+}
+
+cmp_dir $SCRIPT_DIR/etc/snmp /etc/snmp || {
+    overwrite_dir $SCRIPT_DIR/etc/snmp /etc/snmp
+    SNMPD_CONF_CHANGED=1
+}
+
+cmp_dir $SCRIPT_DIR/etc/zabbix /etc/zabbix --exclude dbconfig.php --exclude zabbix_server.conf || {
+    overwrite_dir $SCRIPT_DIR/etc/zabbix /etc/zabbix --exclude dbconfig.php --exclude zabbix_server.conf
+    ZABBIX_CONF_CHANGED=1
+    APACHE_CONF_CHANGED=1
+}
+
+f=/etc/dbconfig-common/zabbix-server-pgsql.conf
+tmpl=$SCRIPT_DIR$f
+dummy='@@ZABBIX_DB_PASSWORD@@'
+isnew=
+set +x
+parse_password_by_pattern "dbc_dbpass\\s*=\\s*['\"]([^'\"]+)" $f $dummy db_passwd isnew
+[ ! "$isnew" ] || pg_set_role_password zabbix "$db_passwd"
+
+substitude_template "$tmpl" "$f" 600 root:root ZABBIX_CONF_CHANGED -e "s/$dummy/$db_passwd/"
+
+f=/etc/dbconfig-common/zabbix-frontend-php.conf
+tmpl=$SCRIPT_DIR$f
+substitude_template "$tmpl" "$f" 600 root:root ZABBIX_CONF_CHANGED -e "s/$dummy/$db_passwd/"
+
+f=/etc/zabbix/dbconfig.php
+tmpl=$SCRIPT_DIR$f
+substitude_template "$tmpl" "$f" 640 root:www-data ZABBIX_CONF_CHANGED -e "s/$dummy/$db_passwd/"
+
+f=/etc/zabbix/zabbix_server.conf
+tmpl=$SCRIPT_DIR$f
+substitude_template "$tmpl" "$f" 640 root:root ZABBIX_CONF_CHANGED -e "s/$dummy/$db_passwd/"
+set -x
 
 ######################################################################
 
@@ -105,6 +146,7 @@ ensure_mode_user_group /etc/zabbix/zabbix_agentd.conf   644 root root
 ensure_mode_user_group /etc/zabbix/zabbix_agentd.conf.d 755 root root
 ensure_mode_user_group /etc/zabbix/zabbix_server.conf   640 root root
 
+ensure_mode_user_group /etc/default/snmpd           644 root root
 ensure_mode_user_group /etc/snmp                    755 root root
 ensure_mode_user_group /etc/snmp/snmp.conf          644 root root
 ensure_mode_user_group /etc/snmp/snmpd.conf         600 root root
@@ -112,6 +154,12 @@ ensure_mode_user_group /etc/snmp/snmptrapd.conf     600 root root
 
 
 ######################################################################
+
+[ -z "$SNMPD_CONF_CHANGED" ] || service snmpd restart
+[ -z "$ZABBIX_CONF_CHANGED" ] || {
+    service zabbix-server restart
+    service zabbix-agent restart
+}
 
 [ -z "$GANGLIA_CONF_CHANGED" ] || {
     service ganglia-monitor restart
@@ -134,7 +182,6 @@ ensure_mode_user_group /etc/snmp/snmptrapd.conf     600 root root
 
 ######################################################################
 
-ensure_service_started postgresql postgres
 ensure_service_started snmpd snmpd
 ensure_service_started zabbix-server zabbix_server
 ensure_service_started zabbix-agent zabbix_agentd

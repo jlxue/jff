@@ -16,6 +16,7 @@
     Include /etc/pnp4nagios/apache.conf
     Include /etc/munin/apache.conf
     Include /etc/ganglia-webfrontend/apache.conf
+    Include /etc/zabbix/apache.conf
 
     <Directory /srv/www/monitor>
         AuthType Kerberos
