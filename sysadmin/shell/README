@@ -300,6 +300,15 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
 19.2) Enable "WebserverAuth" module in administration panel after installation.
 
 
+++ Zabbix Configuration ++
+
+20.1) Access "http://monitor.corp.example.com/zabbix/", login with
+      default admin account: Admin/zabbix, enable the zabbix server to
+      be monitored: Configuration -> Hosts.
+
+20.2) Change Admin account's password or create new admin account.
+
+
 =============================================================
 Passwords:
 
@@ -313,6 +322,7 @@ Passwords:
 8) ejabberd account password set by "ejabberdctl register"
 9) Samba user passwords
 10) Default admin account for Redmine: admin/admin
+11) Default admin account for Zabbix: Admin/zabbix
 
 
 =============================================================
