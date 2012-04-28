@@ -77,7 +77,9 @@ Python 编写，基本是重新实现 Nagios，兼容 Nagios 的插件，独立�
 
 * ganglia
 
-收集信息并使用 rrdtools 存储、画图，漂亮，高效。
+收集信息并使用 rrdtools 存储、画图，漂亮，高效，扩展大多用 C 编写，
+以动态库形式载入 ganglia monitor 服务进程，虽然高效，但感觉耦合太大，
+崩溃的风险比较大。
 
 
 * collectd
@@ -94,7 +96,26 @@ Python 编写，基本是重新实现 Nagios，兼容 Nagios 的插件，独立�
 * zabbix
 
 依赖 SQL 数据库， 服务进程会派生很多子进程，网页响应很慢，比较重量级。
-支持监控和报警，功能比较丰富，有企业级派头。
+支持监控和报警，文档和功能都比较丰富，有企业级派头。zabbix proxy 的
+设计很适合企业监管地理隔离的多个机房。
+
+zabbix 的 web 界面支持 HTTP 认证，但是是用 PHP 的内置 http 认证特性做的，不支持
+web 服务器的 http 认证，糙快猛的修改很容易，grep -nr ZBX_AUTH_HTTP /usr/share/zabbix，
+给 HTTP 认证加上对 REMOTE_USER 的判断就差不多了。
+
+Debian 对 Zabbix 的打包有两个坑人的地方，zabbix_agentd.conf 里 Server
+选项官方设置的是 127.0.0.1，Debian 改成 localhost 了，结果可能是
+zabbix 不再解析主机名或者域名了，导致 zabbix-agent 阻止了来自 127.0.0.1
+的连接请求，zabbix web 界面的 Graphs 部分显示不了图形，这个问题在
+zabbix_agentd.log 里显示：
+Listener error: Connection from [127.0.0.1] rejected. Allowed server is [localhost]
+
+另一个问题是官方的 zabbix_agentd.conf 里 Hostname 是 "Zabbix server",
+这个是跟 zabbix web UI 里的 hosts 设置对应的，zabbix-agent 靠这个名字
+找它的配置，但 Debian 打包的这个文件设置是空的，默认是主机名，跟
+zabbix Web UI 里的 "Zabbix server" 不匹配，导致 Zabbix Web UI 里
+报错说 Zabbix server unreachable，在 Zabbix agent 日志里显示：
+No active checks on server: host [gold] not found
 
 * zenoss
 
@@ -116,7 +137,9 @@ Written in Java.
 
 * xymon
 
-UI 太 geeky 了，sourceforge 项目主页上有不少好评，貌似很容易安装。
+UI 太 geeky 了，sourceforge 项目主页上有不少好评，貌似很容易安装。粗略看
+起 Web UI 的输出，看起来检测都是用 shell 脚本分析的，比如分析 df、
+netstat 输出，连 web 的 CGI 脚本都是用 shell 写的。
 
 * ntop
 
