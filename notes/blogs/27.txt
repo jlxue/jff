@@ -1,5 +1,13 @@
 Monitoring Systems
 
+摘要：
+    * 如果只是做监控，不注重各种性能图表，Nagios 或者 Icinga 无疑是
+      这方面事实上的王者。
+    * 如果想要漂亮的性能图表，可以自行搭配 Nagios 的各种 Web UI 以及 Cacti，
+      或者使用 OpsView、isyVmon 那样的集成包；
+    * 如果懒得配置各种性能图标的数据源，不在乎额外的 CPU 消耗，munin 很有意思。
+    * Ganglia
+    * Zabbix
 
 http://en.wikipedia.org/wiki/Comparison_of_network_monitoring_systems
 
@@ -16,7 +24,7 @@ http://en.wikipedia.org/wiki/Comparison_of_network_monitoring_systems
 * Nagios
 
 标配不支持服务自动发现，配置繁琐。长于数据收集和预警，预警的逻辑考虑周全。
-标配的数据展现比较弱。
+标配的数据展现非常弱。
 
   Remote check:
     * check_by_ssh
@@ -74,6 +82,13 @@ Python 编写，基本是重新实现 Nagios，兼容 Nagios 的插件，独立�
 数据收集、存储和展现，后两者都依赖 rrdtool。Perl 编写，数据采集插件丰富，
 尤其插件自动激活很好用，达到服务自动发现的效果，很省事。CPU 消耗较大。
 
+munin 从 monitor agent 收集信息存入 rrd 文件以及生成 html 页面供
+web 界面使用，这有两种方式实现，默认是用每五分钟执行的 cron 任务，
+这个任务以 munin 用户身份执行，写入 /var/cache/munin 和 /var/lib/munin
+下，另一种方式是让 munin cgi 程序被调用时实时生成，这种方式耗费资源更多，
+但实时性强。注意第二种方式是以 apache 用户身份执行，也就是 www-data
+用户，切换执行方式时需要注意上面提到的两个目录里文件权限，权限不对
+会导致 munin 无法更新 rrd 文件，各种性能图不会更新。
 
 * ganglia
 
@@ -104,7 +119,7 @@ web 服务器的 http 认证，糙快猛的修改很容易，grep -nr ZBX_AUTH_H
 给 HTTP 认证加上对 REMOTE_USER 的判断就差不多了。
 
 Debian 对 Zabbix 的打包有两个坑人的地方，zabbix_agentd.conf 里 Server
-选项官方设置的是 127.0.0.1，Debian 改成 localhost 了，结果可能是
+选项官方设置的是 127.0.0.1，Debian 改成 localhost 了，可能是新版
 zabbix 不再解析主机名或者域名了，导致 zabbix-agent 阻止了来自 127.0.0.1
 的连接请求，zabbix web 界面的 Graphs 部分显示不了图形，这个问题在
 zabbix_agentd.log 里显示：
@@ -112,10 +127,11 @@ Listener error: Connection from [127.0.0.1] rejected. Allowed server is [localho
 
 另一个问题是官方的 zabbix_agentd.conf 里 Hostname 是 "Zabbix server",
 这个是跟 zabbix web UI 里的 hosts 设置对应的，zabbix-agent 靠这个名字
-找它的配置，但 Debian 打包的这个文件设置是空的，默认是主机名，跟
+找它的配置，但 Debian 打包的这个文件里此设置是空的，默认是主机名，跟
 zabbix Web UI 里的 "Zabbix server" 不匹配，导致 Zabbix Web UI 里
 报错说 Zabbix server unreachable，在 Zabbix agent 日志里显示：
 No active checks on server: host [gold] not found
+
 
 * zenoss
 
@@ -143,7 +159,7 @@ netstat 输出，连 web 的 CGI 脚本都是用 shell 写的。
 
 * ntop
 
-网络性能监控。
+网络性能监控，依赖网卡混杂模式嗅探数据包，能检测到局域网中每台机器的流量。
 
 * argus (argus-client, argus-server)
 
