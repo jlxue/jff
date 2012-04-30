@@ -8,13 +8,22 @@ QPS、latency、CPU、memory、disk、network 等等，得知系统运行是否�
 利用是否充分；另一个重要需求是在性能超出预定范围时及时通知管理员，比如
 内存不足、CPU 占用太高、磁盘剩余空间不够。
 
-    * 警报: Nagios 或者 Icinga 无疑是这方面事实上的王者。
-    * 性能图表：
+    * 警报(alerting): Nagios 或者 Icinga 无疑是这方面事实上的王者。
+    * 性能图表(performance graph)：
         * 有了 Nagios/Icinga 后可以重用它们收集的性能数据，自行搭配Nagios的各种
           Web UI 以及 Cacti，或者使用 OpsView、isyVmon 那样的集成包；
         * 或者再单独用其它系统收集性能数据并展现，这方面推荐 Ganglia，其实
           Ganglia 收集的数据也可以送给 Nagios 来判断是否发出警报，这样就
           不用 Nagios 收集数据了。
+
+对于系统管理员来说，警报比起性能图表有用的多，谁有精力整天盯着漂亮的图表看？
+这也就解释了 Nagios 在 LinuxQuestions.org Members Choice 中占据了约 65% 的
+票数：
+http://www.linuxquestions.org/questions/2011-linuxquestions-org-members-choice-awards-95/network-monitoring-application-of-the-year-919908/
+http://www.linuxquestions.org/questions/2011mca.php
+
+想尝试商业支持力度大的非 Nagios 衍生的开源产品，可以试试 Pandora FMS、Zabbix、
+NetXMS、Zenoss，注意它们各自的收费版本相比其开源版本，功能更强大。
 
 
 http://en.wikipedia.org/wiki/Comparison_of_network_monitoring_systems
@@ -29,7 +38,7 @@ http://en.wikipedia.org/wiki/Comparison_of_network_monitoring_systems
 在数据展现层面可以做一些数据分析，如服务状态的预测。
 
 
-* Nagios
+* Nagios Core
 
 标配不支持服务自动发现，配置繁琐。长于数据收集和预警，预警的逻辑考虑周全。
 标配的数据展现非常弱。
@@ -86,7 +95,7 @@ Python 编写，基本是重新实现 Nagios，兼容 Nagios 的插件，独立�
 打包 Nagios + Centreon.
 
 
-* munin
+* Munin
 
 数据收集、存储和展现，后两者都依赖 rrdtool。Perl 编写，数据采集插件丰富，
 尤其插件自动激活很好用，达到服务自动发现的效果，很省事。可能是因为 Perl
@@ -102,32 +111,37 @@ web 界面使用，这有两种方式实现，默认是用每五分钟执行的 
 用户，切换执行方式时需要注意上面提到的两个目录里文件权限，权限不对
 会导致 munin 无法更新 rrd 文件，各种性能图不会更新。
 
-Munin 的最大亮点是其丰富而且自动配置的插件，munin 也支持报警以及
-通过 Nagios 报警: http://munin-monitoring.org/wiki/HowToContact
+Munin 的最大亮点是其丰富而且自动配置的插件，munin 也支持基本的报警，但
+太嫩，推荐通过 Nagios 报警:
+http://munin-monitoring.org/wiki/HowToContact
+http://waste.mandragor.org/munin_tutorial/munin.html#alerting
 
 
-* ganglia
+* Ganglia
 
 收集信息并使用 rrdtools 存储、画图，漂亮，高效，扩展大多用 C 编写，
-以动态库形式载入 ganglia monitor 服务进程，虽然高效，但感觉耦合太大，
+以动态库形式载入 Ganglia monitor 服务进程，虽然高效，但感觉耦合太大，
 崩溃的风险比较大。
 
 不知道是不是错觉，虽然也是用 rrdtools 画图，我觉得 Ganglia 画出来
 的图表就是要漂亮的多，貌似跟用色、线条有关系。
 
+Ganglia 默认使用 UDP 多播通信，可能需要路由以及防火墙的额外配置，如果没
+这个条件的话可以用 UDP 单播。
 
-* collectd
+
+* Collectd
 
 收集 cpu/ram/disk/network/irq/processes 信息写入 rrd 文件，没有直接支持
 画图功能，报警特性还处于初级阶段。
 
 
-* cacti
+* Cacti
 
 专注于数据展现，基本是 RRDTool 的 Web 前端，用于展示各种性能图表，依赖 MySQL 数据库。
 
 
-* zabbix
+* Zabbix
 
 依赖 SQL 数据库， 服务进程会派生很多子进程，网页响应很慢，比较重量级。
 支持性能监控和报警，文档和功能都比较丰富，有企业级派头。zabbix proxy 的
@@ -155,15 +169,45 @@ No active checks on server: host [gold] not found
 数据库里的做法，不便于版本跟踪（真是难伺候啊，没有 Web UI 抱怨不友好，
 有 Web UI 又抱怨没有控制感）。
 
-* zenoss
+
+* Zenoss
+
+使用 Python 编写，依赖 MySQL 数据库，官方有提供给 Debian 用的 Zenoss Core
+deb 包。Web UI 很强大，支持部分 Nagios 插件，号称不需要 agent（猜测是用
+ssh 远程运行探测脚本)。
+
 
 * Pandora FMS
 
+被其 Web UI 抓图震住了，很漂亮，很强大的样子。
+
+Pandora agent 和 server 采用 Perl 编写，使用 MySQL 存储数据，Web UI
+使用 PHP。
+
+
 * OpenNMS
 
-Written in Java.
+使用 Java 编写，我觉得监控的东西应该耗资源越少越好，所以一看是 Java
+的我就没兴趣了，伊还依赖关系数据库(PostgreSQL)，Web 服务器(Tomcat or Jetty)。
+
+伊还是颇占了一小块市场份额，猜测是因为强大的 Web 界面以及通过 NRPE、NSClient
+使用 Nagios 的插件。
+
 
 * NetXMS
+
+官网 http://www.netxms.org/ 有适用于 Debian 的 deb 包，控制台原来是个
+Win32 GUI 做的，现在基于 Eclipse 了，看抓图很强大的样子。
+
+NetXMS 跟很多监控系统一样，分 agent/server/console 三大块，agent 很小，
+运行在被监控机上；server 存储监控数据，NetXMS server 依赖关系数据库；
+console 用来查看监控数据。
+
+NetXMS 可以收集数据、展现并报警，有意思的是它可以使用大部分 nagios
+插件，并且拥有自己的脚本语言。
+
+我没有试用这东西，有兴趣的同学可以试试，官方文档做的不错。
+
 
 * MRTG
 
