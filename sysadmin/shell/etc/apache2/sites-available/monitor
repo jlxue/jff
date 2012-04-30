@@ -13,10 +13,10 @@
     CustomLog ${APACHE_LOG_DIR}/monitor-access.log combined
 
     Include /etc/nagios3/apache2.conf
-    Include /etc/pnp4nagios/apache.conf
+    #Include /etc/pnp4nagios/apache.conf
     Include /etc/munin/apache.conf
     Include /etc/ganglia-webfrontend/apache.conf
-    Include /etc/zabbix/apache.conf
+    #Include /etc/zabbix/apache.conf
 
     <Directory /srv/www/monitor>
         AuthType Kerberos

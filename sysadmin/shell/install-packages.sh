@@ -233,18 +233,21 @@ i redmine redmine-pgsql libfcgi-ruby1.8
 # Drupal 7
 i drupal7
 
+## Monitoring systems: Nagios/Icinga, Ganglia, Munin, Zabbix
+
 # Nagios
 i nagios3 nagios-plugins nagios-plugins-contrib nagios3-doc \
-  nagiosgrapher pnp4nagios check-postgres
-
-# Munin
-i munin munin-async munin-plugins-extra
+  nagiosgrapher check-postgres
+#i pnp4nagios
 
 # Ganglia
 i ganglia-monitor ganglia-monitor-python ganglia-webfrontend ganglia-modules-linux
 
+# Munin
+i munin munin-async munin-plugins-extra
+
 # Zabbix
-i zabbix-agent zabbix-frontend-php zabbix-server-pgsql
+#i zabbix-agent zabbix-frontend-php zabbix-server-pgsql
 
 
 ###########################################################

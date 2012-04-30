@@ -1,7 +1,7 @@
 Monitoring Systems
 
 
-在正文之前的总结：
+浅尝辄止的一点笔记。在正文之前的总结：
 
 监控一个系统，无非是两种需求： 持续的监视各个组件的表现(performance)，比如
 QPS、latency、CPU、memory、disk、network 等等，得知系统运行是否顺畅，资源
