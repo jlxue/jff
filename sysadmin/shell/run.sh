@@ -26,9 +26,11 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 #   http://ekiga.org
 #   http://moodle.org
 
+# postgresql installation script requires correct locale setting,
+# so "locale.sh" is the first.
 SCRIPTS=`cat<<END
-install-packages.sh
 locale.sh
+install-packages.sh
 firewall.sh
 dns.sh
 dhcp.sh
