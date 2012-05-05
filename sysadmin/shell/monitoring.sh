@@ -29,7 +29,7 @@ cmp_dir $SCRIPT_DIR/etc/nagios-plugins /etc/nagios-plugins || {
 
 # /etc/nagios3/conf.d/ngraph is a symlink to ../../nagiosgrapher/nagios3
 # which contains generated files in serviceext directory.
-[ "$ENABLE_PNP4NAGIOS" = yes ] && exclude_pnp4nagios="--exclude pnp4nagios.cfg" || exclude_pnp4nagios=
+[ "$ENABLE_PNP4NAGIOS" = yes ] && exclude_pnp4nagios= || exclude_pnp4nagios="--exclude pnp4nagios.cfg"
 cmp_dir $SCRIPT_DIR/etc/nagios3 /etc/nagios3 --exclude serviceext $exclude_pnp4nagios || {
     overwrite_dir $SCRIPT_DIR/etc/nagios3 /etc/nagios3
     CONF_CHANGED=1
