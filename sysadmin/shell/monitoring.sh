@@ -12,7 +12,7 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 #   * enable or disable pnp4nagios broker module in etc/nagios3/nagios.cfg
 ENABLE_PNP4NAGIOS=no
 ENABLE_ZABBIX=no
-ENABLE_MUNIN=yes
+ENABLE_MUNIN=no
 
 ######################################################################
 mkdir -p -m 0755 /srv/www/monitor

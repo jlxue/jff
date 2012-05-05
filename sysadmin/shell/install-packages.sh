@@ -244,7 +244,7 @@ i nagios3 nagios-plugins nagios-plugins-contrib nagios3-doc \
 i ganglia-monitor ganglia-monitor-python ganglia-webfrontend ganglia-modules-linux
 
 # Munin
-i munin munin-async munin-plugins-extra
+#i munin munin-async munin-plugins-extra
 
 # Zabbix
 #i zabbix-agent zabbix-frontend-php zabbix-server-pgsql
