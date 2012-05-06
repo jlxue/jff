@@ -207,27 +207,7 @@ you can login without the "/login_page.php" page.
     # ../tools/dependencies_installer.pl
     # chown -R www-data:www-data /srv/www/foswiki
 
-12.2) Optional, the formal way to install NormalizeUserPlugin, this
-      will install NormalizeUserPlugin.txt to data/ too.
-
-    Build NormalizeUserPlugin:
-        $ wget ..../Foswiki-1.1.4.tgz
-        $ wget ..../BuildContrib.tgz
-        $ tar xf Foswiki-1.1.4.tgz
-        $ cd Foswiki-1.1.4
-        $ ln -s . core
-        $ tar xf ../BuildContrib.tgz
-        $ cp -a ../contrib/NormalizeUserPlugin .
-        $ perl build.pl NormalizeUserPlugin release
-
-    Install NormalizeUserPlugin:
-        $ cp NormalizeUserPlugin/NormalizeUserPlugin_installer /tmp
-        $ cp NormalizeUserPlugin/NormalizeUserPlugin.tgz /tmp
-        $ su www-data
-        $ cd /srv/www/foswiki
-        $ /tmp/NormalizeUserPlugin_installer -a -r -c install
-
-12.3) add your user name to "admin" group in /srv/www/foswiki/data/admin-group:
+12.2) add your user name to "admin" group in /srv/www/foswiki/data/admin-group:
 
 admin: dieken
 
