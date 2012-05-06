@@ -249,6 +249,10 @@ i ganglia-monitor ganglia-monitor-python ganglia-webfrontend ganglia-modules-lin
 # Zabbix
 #i zabbix-agent zabbix-frontend-php zabbix-server-pgsql
 
+# For ReviewBoard
+i python-setuptools python-dev memcached python-memcache patch \
+  python-psycopg2
+
 
 ###########################################################
 if [ -z "$interactive" ]; then
