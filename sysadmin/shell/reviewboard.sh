@@ -48,10 +48,13 @@ ensure_mode_user_group /srv/www/ReviewBoard/htdocs  755 root root
 ensure_mode_user_group /srv/www/ReviewBoard/logs    755 root root
 ensure_mode_user_group /srv/www/ReviewBoard/tmp     755 root root
 
+# Actually www-data shouldn't have right to these directory, but
+# seems ReviewBoard checks permission as www-data user, not expected
+# reviewboard user.
 ensure_mode_user_group /srv/www/ReviewBoard/conf/settings_local.py  750 reviewboard www-data
 ensure_mode_user_group /srv/www/ReviewBoard/conf/settings_local.pyc 750 reviewboard www-data
-ensure_mode_user_group /srv/www/ReviewBoard/data                    750 reviewboard reviewboard
-ensure_mode_user_group /srv/www/ReviewBoard/htdocs/media/uploaded   750 reviewboard reviewboard
+ensure_mode_user_group /srv/www/ReviewBoard/data                    770 www-data reviewboard
+ensure_mode_user_group /srv/www/ReviewBoard/htdocs/media/uploaded   750 reviewboard www-data
 ensure_mode_user_group /srv/www/ReviewBoard/search-index            750 reviewboard reviewboard
 
 
