@@ -17,17 +17,20 @@
     ErrorDocument 500 /errordocs/500.html
 
     WSGIPassAuthorization On
-    WSGIScriptAlias "/" "/srv/www/ReviewBoard/htdocs/reviewboard.wsgi/"
     WSGIDaemonProcess reviewboard-sites user=reviewboard group=reviewboard processes=4
+    WSGIScriptAlias "/" "/srv/www/ReviewBoard/htdocs/reviewboard.wsgi/"
 
     <Directory "/srv/www/ReviewBoard/htdocs">
         AuthType Kerberos
         Require valid-user
 
         AllowOverride All
-        Options -Indexes FollowSymLinks
         Order allow,deny
         Allow from all
+
+        Options -Indexes FollowSymLinks
+
+        WSGIProcessGroup reviewboard-sites
     </Directory>
 
     # Alias static media requests to filesystem
