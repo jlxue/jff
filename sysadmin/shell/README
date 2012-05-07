@@ -292,6 +292,16 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
 20.2) Change Admin account's password or create new admin account.
 
 
+++ ReviewBoard Configuration ++
+
+21.1) Run this command to change password for 'dieken' super user:
+    # rb-site manage /srv/www/ReviewBoard/ changepassword dieken
+
+21.2) Login http://codereview.corp.example.com/ with user 'dieken'.
+      Check its 'Admin' link to configure the site, especially about
+      Email and Repositories.
+
+
 =============================================================
 Passwords:
 
@@ -306,6 +316,8 @@ Passwords:
 9) Samba user passwords
 10) Default admin account for Redmine: admin/admin
 11) Default admin account for Zabbix: Admin/zabbix
+12) Account passwords for ReviewBoard, currently its official code
+    doesn't support REMOTE_USER yet.
 
 
 =============================================================

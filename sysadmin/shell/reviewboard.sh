@@ -45,16 +45,17 @@ pg_create_db        reviewboard reviewboard
 ensure_mode_user_group /srv/www/ReviewBoard         755 root root
 ensure_mode_user_group /srv/www/ReviewBoard/conf    755 root root
 ensure_mode_user_group /srv/www/ReviewBoard/htdocs  755 root root
-ensure_mode_user_group /srv/www/ReviewBoard/logs    755 root root
-ensure_mode_user_group /srv/www/ReviewBoard/tmp     755 root root
+ensure_mode_user_group /srv/www/ReviewBoard/data    750 reviewboard reviewboard
+ensure_mode_user_group /srv/www/ReviewBoard/logs    750 reviewboard reviewboard
+ensure_mode_user_group /srv/www/ReviewBoard/tmp     750 reviewboard reviewboard
+ensure_mode_user_group /srv/www/ReviewBoard/search-index            750 reviewboard reviewboard
 
 ensure_mode_user_group /srv/www/ReviewBoard/conf/settings_local.py  750 reviewboard reviewboard
 ensure_mode_user_group /srv/www/ReviewBoard/conf/settings_local.pyc 750 reviewboard reviewboard
-ensure_mode_user_group /srv/www/ReviewBoard/data                    750 reviewboard reviewboard
 ensure_mode_user_group /srv/www/ReviewBoard/htdocs/media/uploaded   750 reviewboard reviewboard
-ensure_mode_user_group /srv/www/ReviewBoard/search-index            750 reviewboard reviewboard
 
 
 ensure_service_started memcached memcached
 ensure_service_started apache2 apache2
+ensure_service_started cron cron
 
