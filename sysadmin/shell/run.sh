@@ -56,6 +56,7 @@ trac.sh
 redmine.sh
 drupal.sh
 monitoring.sh
+reviewboard.sh
 END`
 
 for f in $SCRIPTS; do

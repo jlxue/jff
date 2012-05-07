@@ -1,0 +1,12 @@
+# Modified from /srv/www/ReviewBoard/conf/search-cron.conf
+
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# m   h  dom mon dow user  command
+
+# Incremental indices every 10 minutes
+*/10  *  *   *   *   reviewboard "/usr/bin/python" "/usr/local/bin/rb-site" manage "/srv/www/ReviewBoard" index
+
+# Do a full index once a week on Sunday at 2am
+  0   2  *   *   0   reviewboard "/usr/bin/python" "/usr/local/bin/rb-site" manage "/srv/www/ReviewBoard" index -- --full

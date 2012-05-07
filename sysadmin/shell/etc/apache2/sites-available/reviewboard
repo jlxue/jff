@@ -1,0 +1,37 @@
+# Modified from /srv/www/ReviewBoard/conf/apache-wsgi.conf
+
+<VirtualHost *:80>
+    ServerName codereview.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot "/srv/www/ReviewBoard/htdocs"
+
+    ErrorLog ${APACHE_LOG_DIR}/reviewboard-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/reviewboard-access.log combined
+
+    # Error handlers
+    ErrorDocument 500 /errordocs/500.html
+
+    WSGIPassAuthorization On
+    WSGIScriptAlias "/" "/srv/www/ReviewBoard/htdocs/reviewboard.wsgi/"
+    WSGIDaemonProcess reviewboard-sites user=reviewboard group=reviewboard processes=4
+
+    <Directory "/srv/www/ReviewBoard/htdocs">
+        AuthType Kerberos
+        Require valid-user
+
+        AllowOverride All
+        Options -Indexes FollowSymLinks
+        Order allow,deny
+        Allow from all
+    </Directory>
+
+    # Alias static media requests to filesystem
+    Alias /media "/srv/www/ReviewBoard/htdocs/media"
+    Alias /errordocs "/srv/www/ReviewBoard/htdocs/errordocs"
+    Alias /favicon.ico "/srv/www/ReviewBoard/htdocs/media/rbcommons/images/favicon.png"
+</VirtualHost>
