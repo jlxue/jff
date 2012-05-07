@@ -613,7 +613,7 @@
     <key>Memcached</key>
     <dict>
       <key>ServerEnabled</key>
-      <true/>
+      <false/>
     </dict>
 
   </dict>
