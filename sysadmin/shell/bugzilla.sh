@@ -13,15 +13,15 @@ my_etckeeper () {
 }
 
 
-pkg=bugzilla-4.2
+pkg=bugzilla-4.2.1
 dir=/srv/www/bugzilla
 
 [ -d $dir ] || {
     [ ! -e /srv/www/$pkg ] || mv /srv/www/$pkg /srv/www/$pkg-`date +%Y%m%d-%H%M%S`
     rm -f /tmp/$pkg.tar.gz
-    wget -O /tmp/$pkg.tar.gz 'http://ftp.mozilla.org/pub/mozilla.org/webtools/bugzilla-4.2.tar.gz'
-    [ 7c712b26fbf7d8684f57c2e89caff422 = `md5sum /tmp/$pkg.tar.gz` ] &&
-        [ 9ecde503712de41f90d84cdb5bf892841ad16840 = `sha1sum /tmp/$pkg.tar.gz` ]
+    wget -O /tmp/$pkg.tar.gz 'http://ftp.mozilla.org/pub/mozilla.org/webtools/bugzilla-4.2.1.tar.gz'
+    [ de5f0fdcbb02de5dae2f54b3af30bff9 = `md5sum /tmp/$pkg.tar.gz` ] &&
+        [ dbc1d8c0abeed67ced4a54390e0fd8ae3d0b234d = `sha1sum /tmp/$pkg.tar.gz` ]
 
     tar --no-same-owner -C /srv/www -zxvf /tmp/$pkg.tar.gz || {
         /bin/rm -rf /srv/www/$pkg
