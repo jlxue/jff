@@ -295,7 +295,7 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
 ++ ReviewBoard Configuration ++
 
 21.1) Run this command to change password for 'dieken' super user:
-    # rb-site manage /srv/www/ReviewBoard/ changepassword dieken
+    # /usr/local/bin/rb-site manage /srv/www/ReviewBoard/ changepassword dieken
 
 21.2) Login http://codereview.corp.example.com/ with user 'dieken'.
       Check its 'Admin' link to configure the site, especially about
