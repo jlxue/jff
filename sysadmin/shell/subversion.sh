@@ -45,7 +45,7 @@ cmp_dir $SCRIPT_DIR/etc/viewvc /etc/viewvc || {
 ensure_mode_user_group /srv/svn                 750 svn svn
 ensure_mode_user_group /srv/svn/authz           640 svn svn
 ensure_mode_user_group /srv/svn/svnserve.conf   640 svn svn
-ensure_mode_user_group /srv/svn/sasldb2         600 svn svn
+ensure_mode_user_group /srv/svn/sasldb2         400 svn svn
 ensure_mode_user_group /etc/sasl2               755 root root
 ensure_mode_user_group /etc/sasl2/svn.conf      644 root root
 ensure_mode_user_group /etc/default/svnserve    644 root root
