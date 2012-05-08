@@ -43,3 +43,8 @@ viewvc: dns apache
 
 drupal: dns apache postgresql
 
+nagios: dns apache
+ganglia: dns apache firewall
+
+reviewboard: dns apache postgresql
+
