@@ -302,15 +302,15 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
       Email and Repositories:
 
       Admin -> Settings -> E-Mail:
-        Send e-mails for review requests and reviews
-        Send e-mails when new users register an account
+        Select "Send e-mails for review requests and reviews"
+        Select "Send e-mails when new users register an account"
 
         Mail Server: smtp.corp.example.com
         Port       : 25
         Username   : reviewboard
         Password   : [[ check with "db_dump -p /etc/exim4/sasldb2" ]]
 
-        Use TLS for authentication
+        DON'T select "Use TLS for authentication"  (This option means direct TLS connection, no STARTTLS negotiation)
 
 
       Admin -> Dashboard -> Repositories: (click "Add" on right)
