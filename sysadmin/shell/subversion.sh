@@ -41,6 +41,12 @@ cmp_dir $SCRIPT_DIR/etc/viewvc /etc/viewvc || {
     APACHE_CONF_CHANGED=1
 }
 
+set +x
+# For reviewboard.sh
+realm=$(sed -ne 's/^\s*realm\s*=\s*//p' $SCRIPT_DIR/srv/svn/svnserve.conf)
+realm=$(echo "$realm" | sed -e 's/\s//g')
+get_or_generate_passwd_in_sasldb /srv/svn/sasldb2 reviewboard $realm
+set -x
 
 ensure_mode_user_group /srv/svn                 750 svn svn
 ensure_mode_user_group /srv/svn/authz           640 svn svn

@@ -299,7 +299,34 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
 
 21.2) Login http://codereview.corp.example.com/ with user 'dieken'.
       Check its 'Admin' link to configure the site, especially about
-      Email and Repositories.
+      Email and Repositories:
+
+      Admin -> Settings -> E-Mail:
+        Send e-mails for review requests and reviews
+        Send e-mails when new users register an account
+
+        Mail Server: smtp.corp.example.com
+        Port       : 25
+        Username   : reviewboard
+        Password   : [[ check with "db_dump -p /etc/exim4/sasldb2" ]]
+
+        Use TLS for authentication
+
+
+      Admin -> Dashboard -> Repositories: (click "Add" on right)
+        Name:               svn://svn.corp.example.com/test
+        Hosting service:    Custom
+        Repository type:    Subversion
+        Path:               svn://svn.corp.example.com/test
+        Username:           reviewboard
+        Password:           [[ check with "db_dump -p /srv/svn/sasldb2" ]]
+
+        Bug Tracker:
+            Type:   Bugzilla
+            URL:    http://bugzilla.corp.example.com
+
+            (Trac: http://trac.corp.example.com/PROJECT_NAME)
+            (Redmine: http://redmine.corp.example.com)
 
 
 =============================================================

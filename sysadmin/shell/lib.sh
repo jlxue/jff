@@ -186,3 +186,22 @@ add_system_user_group () {
     done
 }
 
+get_or_generate_passwd_in_sasldb () {
+    local sasldb="$1" user="$2" realm="$3" passwd="$4" result
+
+    [ "$realm" ] || {
+        echo "get_or_generate_passwd_in_sasldb(): realm must be specified" >&2
+        exit 1
+    }
+
+    sasldblistusers2 -f "$sasldb" 2>/dev/null | grep -q "^$user@$realm:" && {
+        result=$(perl -we 'use DB_File; tie %h, "DB_File", $ARGV[0], O_RDONLY or die "$!"; print $h{"$ARGV[1]\0$ARGV[2]\0userPassword"}, "\n"' "$sasldb" "$user" "$realm")
+        [ -n "$result" ]
+    } || {
+        [ "$passwd" ] && result="$passwd" || result=`pwgen -cnys 24 1`
+        echo "$result" | saslpasswd2 -p -c -u "$realm" -f "$sasldb" "$user"
+    }
+
+    echo "$result"
+}
+

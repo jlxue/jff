@@ -49,6 +49,10 @@ cmp_dir $SCRIPT_DIR/etc/exim4 /etc/exim4 --exclude passwd.client \
     CONF_CHANGED=1
 }
 
+set +x
+# For reviewboard.sh
+get_or_generate_passwd_in_sasldb /etc/exim4/sasldb2 reviewboard corp.example.com
+set -x
 
 ensure_mode_user_group /etc/sasl2                   755 root root
 ensure_mode_user_group /etc/sasl2/exim.conf         644 root root

@@ -79,17 +79,9 @@ set -x
 ## setup Exim user account for Roundcube
 ##
 sasldb=/etc/exim4/sasldb2
-smtp_passwd=
 set +x
-sasldblistusers2 -f $sasldb 2>/dev/null | grep -q '^webmail@corp.example.com:' && {
-    smtp_passwd=$(perl -we 'use DB_File; tie %h, "DB_File", $ARGV[0], O_RDONLY or die "$!"; print $h{"webmail\0corp.example.com\0userPassword"}, "\n"' $sasldb)
-    [ -n "$smtp_passwd" ]
-} || {
-    smtp_passwd=`pwgen -cnys 24 1`
-    echo "$smtp_passwd" | saslpasswd2 -p -c -u corp.example.com -f $sasldb webmail
-    chmod 640 $sasldb
-    chown root:Debian-exim $sasldb
-}
+smtp_passwd=$(get_or_generate_passwd_in_sasldb $sasldb webmail corp.example.com)
+
 f=/etc/roundcube/main.inc.php
 tmpl=$SCRIPT_DIR$f
 dummy='@@SMTP_PASS@@'
@@ -138,6 +130,8 @@ ensure_mode_user_group /etc/roundcube/plugins/http_auth_autologin/config.inc.php
 ensure_mode_user_group /etc/roundcube/plugins/managesieve/config.inc.php    640 root www-data
 ensure_mode_user_group /etc/roundcube/plugins/sieverules/config.inc.php     640 root www-data
 ensure_mode_user_group /etc/dovecot/master-users            640 root dovecot
+# The get_or_generate_passwd_in_sasldb() above may create this file if it doesn't exist.
+ensure_mode_user_group /etc/exim4/sasldb2                   640 root Debian-exim
 #ensure_mode_user_group /srv/www/mail                        755 root root
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
