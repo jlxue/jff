@@ -7,6 +7,12 @@
 # accepted or denied.
 #
 acl_check_mail:
+  require
+    message = no AUTH given before MAIL command
+    authenticated = *
+    message = no STARTTLS given before MAIL command
+    encrypted = *
+
   .ifdef CHECK_MAIL_HELO_ISSUED
   deny
     message = no HELO given before MAIL command
