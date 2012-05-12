@@ -41,6 +41,8 @@ Example:
 #
 # This was modified from the Python 1.5 library HTTP lib.
 
+from binascii import hexlify
+import random
 import socket
 import re
 import email.utils
@@ -562,12 +564,82 @@ class SMTP:
             response = user + " " + hmac.HMAC(password, challenge).hexdigest()
             return encode_base64(response, eol="")
 
+        def digest_md5_decode_challenge(challenge):
+            # Challenge is formed with these pairs separated by comma.
+            #   realm="hostname" (multiple allowed)
+            #   nonce="randomized data, at least 64bit"
+            #   qop="auth,auth-int,auth-conf"
+            #   maxbuf=number (with auth-int, auth-conf, defaults to 64k)
+            #   charset="utf-8" (iso-8859-1 if it doesn't exist)
+            #   algorithm="md5-sess"
+            #   cipher="3des,des,rc4-40,rc4,rc4-56" (with auth-conf)
+            #
+            # XXX: multiple realms are not supported
+            c = {}
+            for e in challenge.split(','):
+                off = e.index('=')
+                v = e[off + 1:].strip()
+                if v[0] == '"':
+                    v = v[1:-1]
+                c[e[:off].strip()] = v
+            return c
+
+        def generate_cnonce():
+            s = ""
+            for i in range(16):
+                s = s + chr(random.randint(0, 0xff))
+            return encode_base64(s, eol="")
+
+        def md5(indata):
+            try:
+                import hashlib
+                md5 = hashlib.md5(indata)
+            except ImportError:
+                import md5
+                md5 = md5.new(indata)
+            return md5.digest()
+
+        def encode_digest_md5(challenge, user, password):
+            challenge = base64.decodestring(challenge)
+            c = digest_md5_decode_challenge(challenge)
+
+            realm = c["realm"]
+            nonce = c["nonce"]
+            qop = c["qop"]
+            cnonce = generate_cnonce()
+            if "realm" in c:
+                digest_uri = "smtp/%s" % realm
+                realmPair = ',realm="%s"' % realm
+            else:
+                digest_uri = "smtp/localhost"
+                realmPair = ""
+
+            credential = md5("%s:%s:%s" % (user, realm, password))
+            # XXX: not support authorization ID
+            a1 = "%s:%s:%s" % (credential, nonce, cnonce)
+            if qop == "auth":
+                a2 = "AUTHENTICATE:%s" % digest_uri
+            else:
+                # XXX: most servers and clients don't implement auth-int/auth-conf,
+                # they use dummy MD5 digest for body.
+                a2 = "AUTHENTICATE:%s:00000000000000000000000000000000" % digest_uri
+
+            a1 = hexlify(md5(a1))
+            a2 = hexlify(md5(a2))
+            response = hexlify(md5("%s:%s:00000001:%s:%s:%s" %
+                (a1, nonce, cnonce, qop, a2)))
+            response = ( 'username="%s"%s,nonce="%s",cnonce="%s",'
+                'nc=00000001,qop=%s,digest-uri="%s",response=%s' %
+                (user, realmPair, nonce, cnonce, qop, digest_uri, response))
+            return encode_base64(response, eol="")
+
         def encode_plain(user, password):
             return encode_base64("\0%s\0%s" % (user, password), eol="")
 
 
         AUTH_PLAIN = "PLAIN"
         AUTH_CRAM_MD5 = "CRAM-MD5"
+        AUTH_DIGEST_MD5 = "DIGEST-MD5"
         AUTH_LOGIN = "LOGIN"
 
         self.ehlo_or_helo_if_needed()
@@ -581,7 +653,7 @@ class SMTP:
         # List of authentication methods we support: from preferred to
         # less preferred methods. Except for the purpose of testing the weaker
         # ones, we prefer stronger methods like CRAM-MD5:
-        preferred_auths = [AUTH_CRAM_MD5, AUTH_PLAIN, AUTH_LOGIN]
+        preferred_auths = [AUTH_DIGEST_MD5, AUTH_CRAM_MD5, AUTH_PLAIN, AUTH_LOGIN]
 
         # Determine the authentication method we'll use
         authmethod = None
@@ -590,7 +662,16 @@ class SMTP:
                 authmethod = method
                 break
 
-        if authmethod == AUTH_CRAM_MD5:
+        if authmethod == AUTH_DIGEST_MD5:
+            (code, resp) = self.docmd("AUTH", AUTH_DIGEST_MD5)
+            if code == 503:
+                # 503 == 'Error: already authenticated'
+                return (code, resp)
+            (code, resp) = self.docmd(encode_digest_md5(resp, user, password))
+            if code == 334:
+                # XXX: need validate "resp"?
+                (code, resp) = self.docmd("");
+        elif authmethod == AUTH_CRAM_MD5:
             (code, resp) = self.docmd("AUTH", AUTH_CRAM_MD5)
             if code == 503:
                 # 503 == 'Error: already authenticated'
