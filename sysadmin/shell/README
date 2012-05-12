@@ -305,12 +305,12 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
         Select "Send e-mails for review requests and reviews"
         Select "Send e-mails when new users register an account"
 
-        Mail Server: smtp.corp.example.com
+        Mail Server: smtp.corp.example.com  (This is using STARTTLS + CRAM-MD5 authentication mechanism)
         Port       : 25
-        Username   : reviewboard
+        Username   : reviewboard@corp.example.com
         Password   : [[ check with "db_dump -p /etc/exim4/sasldb2" ]]
 
-        DON'T select "Use TLS for authentication"  (This option means direct TLS connection, no STARTTLS negotiation)
+        Select "Use TLS for authentication"
 
 
       Admin -> Dashboard -> Repositories: (click "Add" on right)

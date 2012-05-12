@@ -19,6 +19,15 @@ digest_md5_dovecot:
   server_advertise_condition = ${if eq{$tls_cipher}{}{}{*}}
   .endif
 
+cram_md5_dovecot:
+  driver = dovecot
+  public_name = CRAM-MD5
+  server_socket = /var/run/dovecot/auth-client
+  server_set_id = $auth1
+  .ifndef AUTH_SERVER_ALLOW_NOTLS_PASSWORDS
+  server_advertise_condition = ${if eq{$tls_cipher}{}{}{*}}
+  .endif
+
 .else
 
 gssapi_cyrus_sasl:
@@ -30,6 +39,14 @@ digest_md5_cyrus_sasl:
   driver = cyrus_sasl
   public_name = DIGEST-MD5
   server_realm = corp.example.com
+  server_set_id = $auth1
+  .ifndef AUTH_SERVER_ALLOW_NOTLS_PASSWORDS
+  server_advertise_condition = ${if eq{$tls_cipher}{}{}{*}}
+  .endif
+
+cram_md5_cyrus_sasl:
+  driver = cyrus_sasl
+  public_name = CRAM-MD5
   server_set_id = $auth1
   .ifndef AUTH_SERVER_ALLOW_NOTLS_PASSWORDS
   server_advertise_condition = ${if eq{$tls_cipher}{}{}{*}}
