@@ -1,0 +1,17 @@
+autotools: http://www.lrde.epita.fr/~adl/autotools.html
+cmake
+scons
+waf
+gyp:    http://code.google.com/p/gyp/
+
+Anjuta
+Code::Blocks
+Code::Lite
+Geany
+KDevelop
+Qt Creator
+Eclipse + CDT
+NetBeans
+Ultimate++    http://www.ultimatepp.org/
+
+KScope
