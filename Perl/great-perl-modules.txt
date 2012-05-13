@@ -231,7 +231,6 @@ IPC
     Perlbrew: http://www.perlbrew.pl/
 
     Devel::Cover
-    Devel::DProf
     Devel::DumpSizes
     Devel::Hide
     Devel::LineTrace
