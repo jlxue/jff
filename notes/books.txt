@@ -1,0 +1,15 @@
+模式分类, Richard O. Duda, Peter E. Hart, David G. Stork
+模式识别与机器学习, Christopher M. Bishop
+模式识别, Sergios Theodoridis, Konstantinos Koutroumbas
+数据挖掘:概念与技术, Jiawei Han, Micheline Kamber 
+数据挖掘导论, Pang-Ning Tan, Michael Steinbach, Vipin Kumar
+Machine Learning, Tom Mitchell
+Neural Networks for Pattern Recognition, Christopher M. Bishop
+
+Manhout in Action
+Programming Collective Intelligence
+
+自然语言学习
+
+http://www.quora.com/Machine-Learning/What-are-some-good-resources-for-learning-about-machine-learning-Why
+
