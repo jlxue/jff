@@ -1,0 +1,13 @@
+Redis
+MemcacheDB
+MongoDB
+CouchDB
+HBase
+TokyoTyrant
+HyperTable
+OrientDB
+
+Neo4J
+
+Affinity (http://affinity.cloudfoundry.com/ by VMware Inc.)
+

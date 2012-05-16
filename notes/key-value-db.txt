@@ -1,6 +1,0 @@
-Redis
-MemcacheDB
-MongoDB
-CouchDB
-HBase
-TokyoTyrant
