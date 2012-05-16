@@ -179,7 +179,8 @@ i davical php5-curl
 i calendarserver
 
 # host git repositories
-i gitolite
+# XXX: Debian doesn't package rewritten gitolite 3.x yet, I don't want 2.x.
+#i gitolite
 
 # host svn repositories
 i subversion subversion-tools

@@ -48,3 +48,5 @@ ganglia: dns apache firewall
 
 reviewboard: dns apache postgresql
 
+gitolite: dns apache ssh
+

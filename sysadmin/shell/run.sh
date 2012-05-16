@@ -57,6 +57,7 @@ redmine.sh
 drupal.sh
 monitoring.sh
 reviewboard.sh
+gitolite.sh
 END`
 
 for f in $SCRIPTS; do
