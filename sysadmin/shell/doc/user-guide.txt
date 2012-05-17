@@ -194,8 +194,23 @@ It uses GSSAPI SASL mechanism to authenticate. TortoiseSVN + KFW is OK.
 
 ++ GIT ++
 
-The service is setup with Gitolite, it uses ssh protocol, host
-is "git.corp.example.com".
+The service is built with Gitolite, it supports both ssh and http protocol.
+
+HTTP protocol:
+    $ kinit dieken
+    $ curl --negotiate -u : http://git.corp.example.com/git/info
+    $ git clone http://dieken@git.corp.example.com/git/testing
+
+SSH protocol:
+   Copy the ssh key files "dieken" and "dieken.pub" to ~/.ssh/;
+   Setup ~/.ssh/config:
+        Host git.corp.example.com
+            User git
+            IdentityFile ~/.ssh/dieken
+    $ ssh git.corp.example.com info
+    $ git clone git.corp.example.com:testing
+
+See "Usage" section at http://sitaramc.github.com/gitolite/http.html .
 
 
 ++ Trac ++
