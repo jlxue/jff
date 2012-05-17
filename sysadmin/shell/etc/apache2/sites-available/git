@@ -19,7 +19,6 @@
         AuthType Kerberos
         Require  valid-user
 
-        AllowOverride None
         Order allow,deny
         Allow from all
     </Location>
@@ -28,7 +27,6 @@
         AuthType Kerberos
         Require  valid-user
 
-        AllowOverride None
         Order allow,deny
         Allow from all
     </Location>
