@@ -1,4 +1,4 @@
-/var/www
+/srv/www
 public_html/cgi-bin
 # The first two lines contain the suexec document root and the suexec userdir
 # suffix. If one of them is disabled by prepending a # character, suexec will
