@@ -13,7 +13,7 @@
 
     SuexecUserGroup git git
 
-    ScriptAlias /git/ /srv/www/git/gitolite-shell-wrapper.sh/
+    ScriptAlias /git/ /srv/www/git/gitolite-shell-wrapper/
 
     <Location />
         AuthType Kerberos

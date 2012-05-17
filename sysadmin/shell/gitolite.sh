@@ -16,16 +16,16 @@ mkdir -m 755 -p /usr/local/share /usr/local/bin
 [ -e /usr/local/bin/gitolite ] || ln -s /usr/local/share/gitolite/gitolite /usr/local/bin
 
 mkdir -m 755 -p /srv/www/git
-sync_file $SCRIPT_DIR/srv/www/git/gitolite-shell-wrapper.sh /srv/www/git/gitolite-shell-wrapper.sh
+sync_file $SCRIPT_DIR/srv/www/git/gitolite-shell-wrapper /srv/www/git/gitolite-shell-wrapper
 
 
 ensure_mode_user_group /srv/git         700 git git
 
 # SuExec feature demands this file to be owned by "git" owner and "git"
-# group, and "www-data" user need check status info of # gitolite-shell-wrapper.sh,
+# group, and "www-data" user need check status info of # gitolite-shell-wrapper,
 # so this directory must be readable for other users.
 ensure_mode_user_group /srv/www/git     755 git git
-ensure_mode_user_group /srv/www/git/gitolite-shell-wrapper.sh   700 git git
+ensure_mode_user_group /srv/www/git/gitolite-shell-wrapper  700 git git
 
 
 ensure_service_started apache2 apache2
