@@ -329,6 +329,22 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
             (Redmine: http://redmine.corp.example.com)
 
 
+++ Gitolite Configuration ++
+
+22.1) If you *ONLY* want http access to the repositories:
+        # su git
+        $ gitolite setup --admin dieken
+
+      If you want SSH access, first generate the gitolite admin's ssh key:
+        $ ssh-keygen -t ecdsa -b 521 -f dieken
+      This generates two files, "dieken" is private key, "dieken.pub" is public key.
+
+      Then:
+
+        # su git
+        $ gitolite setup --pubkey /path/to/dieken.pub
+
+
 =============================================================
 Passwords:
 

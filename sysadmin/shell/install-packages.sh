@@ -87,6 +87,7 @@ i dovecot-antispam #crm114
 # apache2
 # Web SSO: http://webauth.stanford.edu/features.html
 i apache2 apache2-mpm-worker
+i apache2-suexec-custom # required by gitolite http-backend
 i ssl-cert  # See /usr/share/doc/apache2.2-common/README.Debian.gz
 
     # GSSAPI SPNEGO

@@ -1,0 +1,28 @@
+<VirtualHost *:80>
+    ServerName git.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /nonexistent
+
+    ErrorLog ${APACHE_LOG_DIR}/git-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/git-access.log combined
+
+    SuexecUserGroup git git
+
+    ScriptAlias /git/ /srv/www/gitolite-shell-wrapper.sh/
+    ScriptAlias /gitmob/ /srv/www/gitolite-shell-wrapper.sh/
+
+    <Location "/">
+        AuthType Kerberos
+        Require  valid-user
+
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+    </Location>
+
+</VirtualHost>
