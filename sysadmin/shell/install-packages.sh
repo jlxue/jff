@@ -254,7 +254,7 @@ i ganglia-monitor ganglia-monitor-python ganglia-webfrontend ganglia-modules-lin
 
 # For ReviewBoard
 i python-setuptools python-dev memcached python-memcache patch \
-  python-svn python-psycopg2 pylucene
+  python-svn python-psycopg2 python-lucene
 
 
 ###########################################################
