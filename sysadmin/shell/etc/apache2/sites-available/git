@@ -18,18 +18,13 @@
     SetEnv GIT_HTTP_EXPORT_ALL
 
     ScriptAlias /git/ /srv/www/git/gitolite-shell-wrapper/
-    Alias /gitweb /usr/share/gitweb
+    ScriptAlias /gitweb /srv/www/git/gitweb.cgi
+    Alias /static /usr/share/gitweb/static
 
-    <Directory /usr/share/gitweb>
-        AuthType Kerberos
-        Require  valid-user
-
+    <Directory /usr/share/gitweb/static>
         AllowOverride None
         Order allow,deny
         Allow from all
-
-        Options FollowSymLinks ExecCGI
-        AddHandler cgi-script .cgi
     </Directory>
 
     <Location />
@@ -41,6 +36,14 @@
     </Location>
 
     <Location /git>
+        AuthType Kerberos
+        Require  valid-user
+
+        Order allow,deny
+        Allow from all
+    </Location>
+
+    <Location /gitweb>
         AuthType Kerberos
         Require  valid-user
 
