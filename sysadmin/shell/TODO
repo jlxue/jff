@@ -1,4 +1,34 @@
+exim4: check From name against login name, necessary??
+       incoming email by smtp may have faked "From" name.
+
+ReviewBoard: support auto user creation
 mailman: kerberos authentication
-vpn
-monitoring
-web conferencing
+
+RoundCube, ThunderBird: address book on OpenLDAP
+
+ejabberd: support auto user creation, package 3.0
+CalendarServer: package new version?
+
+DAViCal: support auto user creation     (doesn't matter much as CalendarServer can create user automatically)
+Zabbix: support auto user creation      (doesn't matter now)
+
+Check cron jobs that poll web pages which requires Kerberos authentication.
+
+RoundCube, Mantis:  sometimes they show login box
+
+Web apps: remove "register", "logout" and "find password" functions.
+
+Samba: don't support Kerberos authentication (I hope it uses password)
+
+security: aide samhain fail2ban snort...
+          SELinux, GrSecurity, AppArmor, Smack, TOMOYO
+
+Kerberos two-factor authentication: google-authenticator, Barada
+
+vpn: openvpn, openswan/strongswan
+opengrok
+jenkins
+gerrit
+backula
+
+Search: Apache solr, katta.sf.net

@@ -114,6 +114,7 @@ certificates for Exim if you can't get CA issued certificates, the
     ## http://hg.dovecot.org/dovecot-2.0/rev/525a179f324f auth: DIGEST-MD5 didn't read nonce-count parameter correctly.
     ## http://hg.dovecot.org/dovecot-2.0/rev/847ca219989d auth: DIGEST-MD5 supports authorization id now.
 
+
 ++ Mailman Configuration ++
 
 7.1) Run "newlist mailman" as root, it will ask you to set admin email
