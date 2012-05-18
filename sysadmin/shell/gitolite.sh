@@ -6,7 +6,6 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 
-add_system_user_group "git repository hosting" /srv/git git git
 [ "x/bin/bash" = x$(perl -le 'print ((getpwnam("git"))[8])') ] ||
     chsh -s /bin/bash git
 
@@ -22,7 +21,7 @@ sync_file $SCRIPT_DIR/srv/www/git/gitolite-shell-wrapper /srv/www/git/gitolite-s
 ensure_mode_user_group /srv/git         700 git git
 
 # SuExec feature demands this file to be owned by "git" owner and "git"
-# group, and "www-data" user need check status info of # gitolite-shell-wrapper,
+# group, and "www-data" user need check status info of gitolite-shell-wrapper,
 # so this directory must be readable for other users.
 ensure_mode_user_group /srv/www/git     755 git git
 ensure_mode_user_group /srv/www/git/gitolite-shell-wrapper  700 git git

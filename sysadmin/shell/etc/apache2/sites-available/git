@@ -13,6 +13,10 @@
 
     SuexecUserGroup git git
 
+    SetEnv GIT_PROJECT_ROOT         /srv/git/repositories
+    SetEnv GITOLITE_HTTP_HOME       /srv/git
+    SetEnv GIT_HTTP_EXPORT_ALL
+
     ScriptAlias /git/ /srv/www/git/gitolite-shell-wrapper/
 
     <Location />

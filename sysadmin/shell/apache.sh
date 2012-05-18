@@ -10,6 +10,7 @@ add_system_user_group "Trac account" /srv/trac trac trac svn
 add_system_user_group "MoinMoin account" /srv/www/moin moin moin
 add_system_user_group "ViewVC account" /srv/viewvc viewvc viewvc svn
 add_system_user_group "ReviewBoard account" /srv/www/ReviewBoard reviewboard reviewboard
+add_system_user_group "git repository hosting" /srv/git git git
 
 
 mkdir -p -m 0755 /srv/www
