@@ -1,6 +1,8 @@
 #!/bin/sh
 #
-# Suexec wrapper for gitolite-shell, suexec doesn't allow symlink.
+# Suexec wrapper for gitolite-shell, suexec doesn't allow symlink,
+# and it will clear those GIT or Gitolite environment variables
+# before executing this script.
 #
 
 export GIT_PROJECT_ROOT=${GIT_PROJECT_ROOT:-/srv/git/repositories}

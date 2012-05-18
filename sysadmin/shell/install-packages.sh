@@ -182,7 +182,7 @@ i calendarserver
 # host git repositories
 # XXX: Debian doesn't package rewritten gitolite 3.x yet, I don't want 2.x.
 #i gitolite
-i gitweb
+i gitweb highlight
 
 # host svn repositories
 i subversion subversion-tools

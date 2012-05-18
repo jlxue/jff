@@ -344,6 +344,27 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
         # su git
         $ gitolite setup --pubkey /path/to/dieken.pub
 
+22.2) Add this line to conf/gitolite.conf for all gitweb visible
+      repositories in gitolite-admin repository:
+
+      R = gitweb daemon
+
+      For example:
+      $ git clone git.corp.example.com:gitolite-admin
+      $ cd gitolite-admin
+      $ vim conf/gitolite.conf
+      $ cat conf/gitolite.conf
+        repo gitolite-admin
+            RW+     =   dieken
+
+        repo testing
+            RW+     =   @all
+
+        repo myserver
+            RW+     =   dieken
+            R       =   daemon gitweb
+      $ git commit -a -m "make repository \"myserver\" visible on gitweb"
+
 
 =============================================================
 Passwords:
