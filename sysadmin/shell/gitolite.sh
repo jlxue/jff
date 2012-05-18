@@ -19,6 +19,8 @@ sync_file $SCRIPT_DIR/srv/www/git/gitolite-shell-wrapper /srv/www/git/gitolite-s
 
 sync_file $SCRIPT_DIR/srv/git/gitolite.rc /srv/git/.gitolite.rc
 
+sync_file $SCRIPT_DIR/etc/gitweb.conf /etc/gitweb.conf
+
 
 ensure_mode_user_group /srv/git                 750 git git
 ensure_mode_user_group /srv/git/.gitolite       755 git git
@@ -34,6 +36,7 @@ ensure_mode_user_group /srv/git/.ssh            700 git git
 ensure_mode_user_group /srv/www/git     755 git git
 ensure_mode_user_group /srv/www/git/gitolite-shell-wrapper  700 git git
 
+ensure_mode_user_group /etc/gitweb.conf         644 root root
 
 ensure_service_started apache2 apache2
 ensure_service_started ssh sshd
