@@ -1,0 +1,234 @@
+Gitolite 3 的配置
+
+
+本来以为这厮很容易配置的，因为两三年前简单用了下 Gitolite 2，只用 ssh 方式访问，相当简单，没想到折腾 ssh + http + gitweb 还是很费了番力气。
+
+Gitolite 是干嘛的就不宣传了，只说一句，Gitosis 现在是废弃的东西，关于这俩的介绍请各位参考《Pro Git》一书。之前有在水木上吹水 Gitolite 宣称与 Gitweb 集成度高，有人问了句怎么就集成度高了，俺当时没细折腾，答不具体，这次可以说详细了：
+
+    Gitolite 自带的 git update hook 会根据 gitolite-admin/conf/gitolite.conf 中的权限配置更新 ~git/projects.list 文件，这个文件内容被 Gitweb 当作代码库列表。Gitolite 会根据某个 repo 是否可被 gitweb 读取或者是否有 gitweb 相关的 git config 决定要不要加入 projects.list 文件中，同时根据是否可被 daemon 用户读取决定要不要生成 REPO.git/git-daemon-export-ok 标记文件。
+    由于 Gitolite 是 Perl 编写的，所以其权限判断函数很容易被同是 Perl 写的 Gitweb 使用。
+
+众多开源版本控制工具里，本人对 GIT 最有好感（虽然伊也不是百分百让人满意），本着推广 Git 的精神，下面破例说说具体配置过程，各位看官参考的时候留神这篇小文写作的时间，以免信息过时被误导。另外这里是全新安装，从 2.x 升级的同学一定记得看官方文档，不能自动平滑升级的！
+
+Git 代码库的 Web 浏览，除了官方的 Gitweb，还有 cgit 被用的比较多，比如 http://cgit.freedesktop.org/，其特点是用 C 编写，链接了 Git 官方的 libgit.a 库，不用 fork 进程去执行 git 命令，所以效率很高，但是伊就不方便用 Gitolite 的权限控制功能了。另外还有个 git-browser 使用 JavaScript 在浏览器里绘制类似 gitk 展示的版本图，效果很炫，但是太费资源了，个人觉得也没必要，gitk 已经非常好用了，又跨平台，想围观的同学可以看看 http://repo.or.cz/git-browser/by-commit.html?r=git/repo.git ，警告，你的浏览器甚至整个桌面可能冻结住！
+
+一、安装 Gitolite、Gitweb 等。
+
+Gitolite 作者又闲又追求完美，重写了个 Gitolite 3 出来，使用上跟 2.x 很类似，据说内部代码整理的更干净高效了，目前 Debian 上还没引入 Gitolite 3.x，估计短期也不会引入，3.0 才出来一个月，而且 2.x 到 3.x 不能平滑升级。从源码安装相当简单的，git clone 把源码抓下来，git describe > src/VERSION，然后把 src/ 目录复制为 /usr/local/share/gitolite，然后
+
+# ln -s /usr/local/share/gitolite/gitolite /usr/local/bin
+
+ 就搞定了，clone 下来那份源码可以删掉。
+
+安装 gitweb 以及 gitweb 用来高亮代码的 highlight:
+
+# aptitude install gitweb highlight
+
+由于我想让 gitolite 也支持 http 方式 push，但让 www-data 用户可以写入 git 代码库总觉得不安全，所以我 apache 的 suexec 特性，用 apache2-suexec-custom 包是因为不想把 gitolite-shell-wrapper  放到 /var/www/ 这个垃圾场里，这个地方我保留给未受 Kerberos 保护的 default virtual host 了。但是这里有个意外的问题，Apache 的 SuexecUserGroup 指令是针对整个 virtualhost 生效的，而我配置的 gitolite http 访问和 gitweb http 访问都用 git.corp.example.com 域名，所以 gitweb 也得以 git 用户运行，如果 gitweb 有漏洞可以写入 /srv/git，那么事情就乱套了。理想状态是 gitweb 以 gitweb 用户运行，并在 git 组里所以得以访问 /srv/git/repositories。
+
+# aptitude install apache2-suexec-custom
+
+让 Gitolite 支持不那么正统的 http 访问方式是因为 Kerberos 统一认证，以及 Windows 下用 ssh 公钥什么的可能比较麻烦，不过还不清楚 msysgit 编译时用的 libcurl 支持 Kerberos 不，汗！ 让 Gitolite 支持 ssh 一是可以应付 Kerberos 服务当机的情况，二是一些需要访问 git 代码库的服务不用提供 Kerberos ticket 了（这个是需要用 k5start 定时刷新的），用 ssh-agent + ssh key 就行了，比如 ReviewBoard 就显式支持 ssh 方式。
+
+二、配置 Gitolite、Gitweb
+
+接下来创建 git 系统用户以及 git 系统组：
+
+# addgroup --system git
+# adduser --system --home /srv/git --shell /bin/bash --ingroup git \
+  --disable-password --disable-login --gecos "git repository hosting" git
+# chmod 700 /srv/git
+
+初始化 Gitolite：
+
+# ssh-keygen -t ecdsa -b 521 -f admin
+# cp admin.pub /srv/git
+$ su git
+$ gitolite setup --pubkey admin.pub
+$ rm admin.pub
+
+ssh-keygen 生成的 admin 和 admin.pub 需要复制到自己本机的 ~/.ssh 下，并设置 ~/.ssh/config:
+
+Host git.corp.example.com
+    User git
+    IdentifyFile ~/.ssh/admin
+
+这时可以用 ssh 方式访问 Gitolite 了：
+
+...检出 gitolite-admin 库，需要事先在 /etc/hosts 里设置 git.corp.example.com 和 IP 的对应关系...
+$ git clone git.corp.example.com:gitolite-admin
+...查看自己能访问哪些代码库
+$ ssh git.corp.example.com info
+
+布置 suexec 执行的  CGI 程序：（没有用 mod_perl 是因为 mod_perl 技术以及 git 本身都很耗内存，我是针对小站点，没必要很高效，另外 gitweb 的 FastCGI 方式不是很成熟，Gitolite 不清楚是否支持 FastCGI）
+
+# mkdir -m 755 -p /srv/www/git
+# cp gitolite-shell-wrapper /srv/www/git/gitolite-shell-wrapper
+# cp /usr/share/gitweb/gitweb.cgi /srv/www/git/gitweb.cgi
+# chown -R git git /srv/www/git
+# chmod 755 /srv/www/git
+# chmod 700 /srv/www/git/{gitweb.cgi,gitolite-shell-wrapper}
+
+比较悲催的是为了安全起见 suexec 不允许符号链接，所以这里只好拷贝文件了，属主、权限都必需按照上面的设置，否则 suexec 检查会失败。
+/srv/www/git/gitolite-shell-wrapper 的内容如下：
+
+#!/bin/sh
+#
+# Suexec wrapper for gitolite-shell, suexec doesn't allow symlink,
+# and it will clear those GIT or Gitolite environment variables
+# before executing this script.
+#
+
+export GIT_PROJECT_ROOT=${GIT_PROJECT_ROOT:-/srv/git/repositories}
+export GITOLITE_HTTP_HOME=${GITOLITE_HTTP_HOME:-/srv/git}
+export GIT_HTTP_EXPORT_ALL=1
+
+exec /usr/local/share/gitolite/gitolite-shell
+
+/etc/gitweb.conf（如果同一个机器上你想安装多份 gitweb，可以把这个内容复制到 /srv/www/git/gitweb_config.perl，参见 man gitweb.conf）:
+
+# path to git projects (<project>.git)
+# DON'T include trailing slash, it breaks $export_auth_hook below!
+$projectroot = "/srv/git/repositories";
+
+# directory to use for temp files
+$git_temp = "/tmp";
+
+# target of the home link on top of all pages
+#$home_link = $my_uri || "/";
+
+# html text to include at home page
+#$home_text = "indextext.html";
+
+# file with project list; by default, simply scan the projectroot dir.
+$projects_list = "/srv/git/projects.list";
+
+# stylesheet to use
+@stylesheets = ("/static/gitweb.css");
+
+# javascript code for gitweb
+$javascript = "/static/gitweb.js";
+
+# logo to use
+$logo = "/static/git-logo.png";
+
+# the 'favicon'
+$favicon = "/static/git-favicon.png";
+
+# git-diff-tree(1) options to use for generated patches
+#@diff_opts = ("-M");
+
+$prevent_xss = 1;
+$highlight_bin = "/usr/bin/highlight";
+$feature{'highlight'}{'default'} = [1];
+$feature{'timed'}{'default'} = [1];
+
+$strict_export = 1;
+$export_ok = "git-daemon-export-ok";
+
+BEGIN { $ENV{HOME} = "/srv/git"; }
+use lib '/usr/local/share/gitolite/lib';
+use Gitolite::Easy ();
+$export_auth_hook = sub {
+return unless $ENV{REMOTE_USER};
+    my $repo_path = $_[0];
+    my $repo_name = substr($repo_path, length($projectroot) + 1);
+
+    $ENV{GL_USER} = $ENV{REMOTE_USER};
+    $repo_name =~ s/\.git$//;
+    Gitolite::Easy::can_read($repo_name);
+};
+
+上面结尾的一段是调用 Gitolite 3 的权限判断函数，can_read() 貌似只能判断到库一级，更底层的函数 access() 貌似能判断更细，但是由于 GIT 的代码树不可分割以及这是为企业内部考虑，读权限粒度粗放一点一般也不是大问题。
+
+需要强调一下的是 $strict_export 和 $export_ok，默认两个是没定义的，在没有定义 $export_auth_hook 时，会导致 gitweb 首页没有列出的 project 在 URL 里直接输入是可以访问的，比如 http://git.corp.example.com/gitweb?p=gitolite-admin.git;a=log，我很晕这个默认设置，太不安全了，我甚至怀疑扫描互联网上公开的 gitweb，或许能扫出一片 gitolite-admin.git，从 conf/gitolite.conf 知道所有代码库列表，从而看到隐藏代码库的内容。。。。
+$strict_ok 的意思是不在 projects.list 中的代码库不显示在代码库列表里，也不能通过 URL 直接访问，这个选项需要 Gitolite 里给代码库权限加入  R = gitweb，或者这个代码库有 gitweb.xxx 的 git 配置(Gitolite 支持在 conf/gitolite.conf 里为每个代码库设置 git config 的配置）。
+$export_ok 的意思是只有 REPO.git/git-daemon-export-ok 存在时才放入 projects.list 并可以通过 URL 直接访问，这个选项需要 Gitolite 里给代码库加入 R = daemon 权限，加上 gitweb 的，就是 R = daemon gitweb 了，比如：
+
+...in working copy of gitolite-admin...
+$ cat conf/gitolite.conf
+...
+repo myserver
+    RW+ = dieken
+    R = daemon gitweb
+$ git comit -a -m "blah blah"
+$ git push # will trigger git update hook, /srv/git/projects.list will be generated from scratch
+
+最后一道工序，配置 Apache:
+
+$ cat /etc/apache2/suexec/www-data
+/srv/www
+public_html/cgi-bin
+$ cat /etc/apache2/sites-enabled/git
+<VirtualHost *:80>
+    ServerName git.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /nonexistent
+
+    ErrorLog ${APACHE_LOG_DIR}/git-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/git-access.log combined
+
+    SuexecUserGroup git git
+
+    # Actually, suexec will clear these environment variables...
+    SetEnv GIT_PROJECT_ROOT         /srv/git/repositories
+    SetEnv GITOLITE_HTTP_HOME       /srv/git
+    SetEnv GIT_HTTP_EXPORT_ALL
+
+    ScriptAlias /git/ /srv/www/git/gitolite-shell-wrapper/
+    ScriptAlias /gitweb /srv/www/git/gitweb.cgi
+    Alias /static /usr/share/gitweb/static
+
+    <Directory /usr/share/gitweb/static>
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+    </Directory>
+
+    <Location />
+        AuthType Kerberos
+        Require  valid-user
+
+        Order allow,deny
+        Allow from all
+    </Location>
+
+    <Location /git>
+        AuthType Kerberos
+        Require  valid-user
+
+        Order allow,deny
+        Allow from all
+    </Location>
+
+    <Location /gitweb>
+        AuthType Kerberos
+        Require  valid-user
+
+        Order allow,deny
+        Allow from all
+    </Location>
+
+    RedirectMatch   ^/$     /gitweb
+
+</VirtualHost>
+
+没有给 Apache 配置 Kerberos 认证的同学可以用 AuthType Basic，参考 http://sitaramc.github.com/gitolite/http.html 。
+
+HTTP 方式访问 Gitolite:
+
+$ kinit
+$ curl --negotiate -u : http://git.corp.example.com/git/info
+$ git clone http://dieken@git.corp.example.com/git/gitolite-admin
+
+"git clone" 命令里需要指定 "dieken@" 部分，否则 git 会提问密码，但是在 Kerberos 认证时，这两个问题都可以填入任意字符，如同上面那条 curl  命令似的，"-u :" 指定用户名为冒号，这是 curl 实现的问题，虽然 Kerberos ticket 提供了用户名，但是还是需要指定下。
+
+访问 Gitweb：http://git.corp.example.com/ 。
+
+Gitolite 这个奇技淫巧的东西还有许多特性有待钻研，以后再慢慢琢磨了。
+
