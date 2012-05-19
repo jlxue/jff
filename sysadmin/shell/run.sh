@@ -58,6 +58,7 @@ drupal.sh
 monitoring.sh
 reviewboard.sh
 gitolite.sh
+gerrit.sh
 END`
 
 for f in $SCRIPTS; do

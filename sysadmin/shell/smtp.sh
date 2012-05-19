@@ -52,6 +52,8 @@ cmp_dir $SCRIPT_DIR/etc/exim4 /etc/exim4 --exclude passwd.client \
 set +x
 # For reviewboard.sh
 get_or_generate_passwd_in_sasldb /etc/exim4/sasldb2 reviewboard corp.example.com
+# For gerrit.sh
+get_or_generate_passwd_in_sasldb /etc/exim4/sasldb2 gerrit corp.example.com
 set -x
 
 ensure_mode_user_group /etc/sasl2                   755 root root

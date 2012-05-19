@@ -11,6 +11,10 @@
 
     CustomLog ${APACHE_LOG_DIR}/calendar-access.log combined
 
+    ProxyRequests Off
+    ProxyVia Off
+    ProxyPreserveHost On
+
     ProxyPass 		/	http://localhost:8008/
     ProxyPassReverse 	/ 	http://localhost:8008/
 </VirtualHost>

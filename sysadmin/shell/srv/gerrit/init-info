@@ -1,0 +1,94 @@
+### Gerrit Code Review 2.3
+# Create '/srv/gerrit/site'      [Y/n]?
+y
+
+### Git Repositories
+# Location of Git repositories   [git]:
+git
+
+### SQL Database
+# Database server type           [H2/?]:
+postgresql
+
+# Server hostname                [localhost]:
+localhost
+
+# Server port                    [(POSTGRESQL default)]:
+5432
+
+# Database name                  [reviewdb]:
+gerrit
+
+# Database username              [gerrit]:
+gerrit
+
+# gerrit's password              :
+@@GERRIT_DB_PASSWORD@@
+
+#               confirm password :
+@@GERRIT_DB_PASSWORD@@
+
+### User Authentication
+# Authentication method          [OPENID/?]:
+http
+
+# Get username from custom HTTP header [y/N]?
+n
+
+# SSO logout URL                 :
+https://sso.corp.example.com/logout
+
+### Email Delivery
+# SMTP server hostname           [localhost]:
+smtp.corp.example.com
+
+# SMTP server port               [(default)]:
+25
+
+# SMTP encryption                [NONE/?]:
+tls
+
+# SMTP username                  [gerrit]:
+gerrit
+
+# gerrit's password              :
+@@GERRIT_SMTP_PASSWORD@@
+
+#               confirm password :
+@@GERRIT_SMTP_PASSWORD@@
+
+### Container Process
+# Run as                         [gerrit]:
+gerrit
+
+# Java runtime                   [/usr/lib/jvm/java-6-openjdk-i386/jre]:
+/usr/lib/jvm/default-java/jre
+
+# Copy gerrit.war to /srv/gerrit/site/bin/gerrit.war [Y/n]?
+y
+
+### SSH Daemon
+# Listen on address              [*]:
+*
+# Listen on port                 [29418]
+2022
+
+# Download and install it now [Y/n]?
+y
+
+### HTTP Daemon
+# Behind reverse proxy           [y/N]
+y
+
+# Proxy uses SSL (https://)      [y/N]?
+n
+
+# Subdirectory on proxy server   [/]:
+/
+
+# Listen on address              [*]:
+127.0.0.1
+
+# Listen on port                 [8081]:
+2080
+

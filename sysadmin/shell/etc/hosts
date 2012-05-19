@@ -1,5 +1,5 @@
 127.0.0.1   localhost
-127.0.1.1   gold.corp.example.com gold kerberos.corp.example.com ldap.corp.example.com smtp.corp.example.com imap.corp.example.com mail.corp.example.com www.corp.example.com corp.example.com list.corp.example.com calendar.corp.example.com cal.corp.example.com bug.corp.example.com bugzilla.corp.example.com wiki.corp.example.com moin.corp.example.com git.corp.example.com svn.corp.example.com xmpp.corp.example.com trac.corp.example.com redmine.corp.example.com monitor.corp.example.com codereview.corp.example.com
+127.0.1.1   gold.corp.example.com gold kerberos.corp.example.com ldap.corp.example.com smtp.corp.example.com imap.corp.example.com mail.corp.example.com www.corp.example.com corp.example.com list.corp.example.com calendar.corp.example.com cal.corp.example.com bug.corp.example.com bugzilla.corp.example.com wiki.corp.example.com moin.corp.example.com git.corp.example.com svn.corp.example.com xmpp.corp.example.com trac.corp.example.com redmine.corp.example.com monitor.corp.example.com codereview.corp.example.com gerrit.corp.example.com
 
 # The following lines are desirable for IPv6 capable hosts
 ::1     localhost ip6-localhost ip6-loopback

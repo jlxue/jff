@@ -1,0 +1,33 @@
+<VirtualHost *:80>
+    ServerName gerrit.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /nonexistent
+
+    ErrorLog ${APACHE_LOG_DIR}/gerrit-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/gerrit-access.log combined
+
+    ProxyRequests Off
+    ProxyVia Off
+    ProxyPreserveHost On
+
+    <Proxy *>
+        Order deny,allow
+        Allow from all
+    </Proxy>
+
+    <Location /login/>
+        AuthType Kerberos
+        Require valid-user
+
+        Order allow,deny
+        Allow from all
+    </Location>
+
+    ProxyPass 		/	http://127.0.0.1:2080/
+    ProxyPassReverse 	/ 	http://127.0.0.1:2080/
+</VirtualHost>

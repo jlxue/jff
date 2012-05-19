@@ -256,6 +256,9 @@ i ganglia-monitor ganglia-monitor-python ganglia-webfrontend ganglia-modules-lin
 i python-setuptools python-dev memcached python-memcache patch \
   python-svn python-psycopg2 python-lucene
 
+# For Gerrit
+i default-jre-headless
+
 
 ###########################################################
 if [ -z "$interactive" ]; then
