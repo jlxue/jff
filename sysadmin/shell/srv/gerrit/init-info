@@ -33,7 +33,10 @@ gerrit
 http
 
 # Get username from custom HTTP header [y/N]?
-n
+y
+
+# Username HTTP header           [SM_USER]:
+X-Forwarded-User
 
 # SSO logout URL                 :
 https://sso.corp.example.com/logout

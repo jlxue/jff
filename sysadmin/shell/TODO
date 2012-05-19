@@ -1,3 +1,5 @@
+https:// for all virtual hosts
+
 exim4: check From name against login name, necessary??
        incoming email by smtp may have faked "From" name.
 

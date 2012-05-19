@@ -26,6 +26,11 @@
 
         Order allow,deny
         Allow from all
+
+        RewriteEngine On
+        RewriteCond %{REMOTE_USER} (.+)
+        RewriteRule .* - [E=RU:%1]
+        RequestHeader set X-Forwarded-User %{RU}e
     </Location>
 
     ProxyPass 		/	http://127.0.0.1:2080/
