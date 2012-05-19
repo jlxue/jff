@@ -44,11 +44,11 @@ f2=/usr/share/davical/dba/create-database-my.sh
 
 sync_file $SCRIPT_DIR$f $f2
 
-su postgres -c 'psql -c "" davical' 2>/dev/null || {
+su postgres -c 'cd /; psql -c "" davical' 2>/dev/null || {
     set +x
     export pghost=localhost
     export pgpassword=$davical_dba_passwd
-    su postgres -c "$f2 davical `pwgen -cnys 24 1`"
+    su postgres -c "cd /; $f2 davical `pwgen -cnys 24 1`"
     set -x
 }
 
