@@ -52,7 +52,7 @@ smtp.corp.example.com
 tls
 
 # SMTP username                  [gerrit]:
-gerrit
+gerrit@corp.example.com
 
 # gerrit's password              :
 @@GERRIT_SMTP_PASSWORD@@
