@@ -245,3 +245,8 @@ http://monitor.corp.example.com/zabbix/ (Default admin account: Admin/zabbix)
 
 http://codereview.corp.example.com/
 
+
+++ Gerrit ++
+
+http://gerrit.corp.example.com/
+

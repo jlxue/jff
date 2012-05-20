@@ -51,12 +51,17 @@ war=gerrit-2.3.war
     set +x
     cat >&2 <<EOF
 ERROR: require manually action!
+
 Run these commands to initialize Gerrit:
     (root)# su gerrit
     (gerrit)$ cd
     (gerrit)$ java -jar gerrit.war init -d /srv/gerrit/site
+
 The last command will ask many questions, you can find the answers
 from /srv/gerrit/init-info.
+
+Don't access http://127.0.0.1:2080/#/admin/projects/, you should access
+http://gerrit.corp.example.com/#/admin/projects/ instead.
 
     !!! After that run this script again!
 EOF

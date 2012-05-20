@@ -1,0 +1,82 @@
+http://docs.oracle.com/javase/6/docs/technotes/guides/security/index.html
+
+(1) http://docs.oracle.com/javase/6/docs/technotes/guides/security/overview/jsoverview.html
+File Locations
+
+jre/security/java.security 是 Java 安全设置的默认属性文件
+
+$ ls -l /usr/lib/jvm/java-6-openjdk-i386/jre/lib/security/
+total 0
+lrwxrwxrwx 1 root root 27 Feb 28 10:56 cacerts -> /etc/ssl/certs/java/cacerts
+lrwxrwxrwx 1 root root 40 Feb 28 10:56 java.policy -> /etc/java-6-openjdk/security/java.policy
+lrwxrwxrwx 1 root root 42 Feb 28 10:56 java.security -> /etc/java-6-openjdk/security/java.security
+lrwxrwxrwx 1 root root 36 Feb 28 10:56 nss.cfg -> /etc/java-6-openjdk/security/nss.cfg
+
+ca-certificates-java 软件包设置了 hook 脚本： /etc/ca-certificates/update.d/jks-keystore
+这个脚本被 ca-certificates 的 /usr/sbin/update-ca-certificates 命令调用，
+使用 update-ca-certificates -f 可以强制重新导入。
+参考 /usr/share/doc/ca-certificates-java/README.Debian
+
+把证书放入 /etc/ssl/certs/exim4.pem 还是 /usr/share/ca-certificates/ 下???
+
+(2) http://docs.oracle.com/javase/6/docs/technotes/guides/security/spec/security-spec.doc3.html#20128
+3.3.1 Policy File Format
+
+policy 文件只能包含最多一个 keystore 项：
+keystore "some_keystore_url", "keystore_type";
+
+keystore_type 没指定的话默认是 keystore.type 属性的值，在
+java.security 中是 jks。
+some_keystore_url 可以是绝对路径，也可以是相对 policy.url.N
+的相对路径。
+
+3.3.5 Default System and User Policy Files
+
+在 jre/lib/security/java.security 中默认指定了两个 policy 文件：
+policy.url.1=file:${java.home}/lib/security/java.policy
+policy.url.2=file:${user.home}/.java.policy
+
+可以在命令行指定一个额外的 policy 文件：
+java -Djava.security.manager -Djava.security.policy=pURL SomeApp
+
+如果用两个等号，表示*只*读取指定 policy 文件：
+java -Djava.security.manager -Djava.security.policy==pURL SomeApp
+
+(3) http://docs.oracle.com/javase/6/docs/technotes/guides/security/crypto/CryptoSpec.html#Architecture
+Key Management
+
+user keystore 默认是 ${user.home}/.keystore。
+
+jre/lib/security/cacerts 是默认的系统 keystore，存放受信任的证书。
+
+(4) http://docs.oracle.com/javase/6/docs/technotes/guides/security/PolicyFiles.html
+Keystore Entry
+
+keystore "some_keystore_url", "keystore_type", "keystore_provider";
+keystorePasswordURL "some_password_url";
+
+(5) http://docs.oracle.com/javase/6/docs/technotes/guides/security/jsse/JSSERefGuide.html
+X509TrustManager Interface
+
+如果 javax.net.ssl.trustStore 指定一个路径名，则用这个
+文件作为 keystore，如果 javax.net.ssl.trustStorePassword
+指定则用这个密码检查 trustStore 的完整性；
+
+如果 javax.net.ssl.trustStore 没有指定，则使用
+jre/lib/security/jssecacerts；
+
+如果这个文件不存在，则使用 jre/lib/security/cacerts。
+
+Customization
+
+javax.net.ssl.keyStore
+javax.net.ssl.keyStorePassword
+
+keystore 被 KeyManager 类使用，包含私钥信息；
+truststore 被 TrustManager 类使用，仅包含公钥信息。
+
+
+Debugging Utilities
+
+java -Djavax.net.debug=help MyApp
+

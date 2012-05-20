@@ -367,6 +367,12 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
       $ git commit -a -m "make repository \"myserver\" visible on gitweb"
 
 
+++ Gerrit Configuration ++
+
+23.1) Access http://gerrit.corp.example.com/#/admin/projects/ to finish
+      administration settings.
+
+
 =============================================================
 Passwords:
 
