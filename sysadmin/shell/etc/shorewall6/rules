@@ -39,4 +39,7 @@ ACCEPT		net		$FW		tcp	464
 ACCEPT		net		$FW		udp	464
 ACCEPT		net		$FW		tcp	749
 
+# for Gerrit SSH Daemon
+ACCEPT		net		$FW		tcp	2022
+
 # vi:noet ts=8 sts=8 sw=8

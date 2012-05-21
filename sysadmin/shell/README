@@ -369,8 +369,19 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
 
 ++ Gerrit Configuration ++
 
-23.1) Access http://gerrit.corp.example.com/#/admin/projects/ to finish
-      administration settings.
+23.1) Access http://gerrit.corp.example.com/#/admin/projects/ to register
+      email for the first user, the first user is the administrator.
+      If Gerrit doesn't show you the Registration page, you can reach
+      it by clicking "settings" link in the top right corner and then
+      clicking "Contact Information" on the left. For example:
+
+        Full Name: Dieken
+        Preferred Email: dieken@corp.example.com
+
+      Then go to your email box, click the link contained in the
+      Gerrit email, this will activate the email address in Gerrit.
+      You need to fill your full name again in "Contact Information"
+      and save it, so the change will be reflected in the "Profile".
 
 
 =============================================================

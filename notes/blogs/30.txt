@@ -1,5 +1,7 @@
-代码评审系统 ReviewBoard 和 Gerrit
+代码评审系统 ReviewBoard 和 Gerrit (上)
 
+
+// 本来是打算把 ReviewBoard 和 Gerrit 放在一起写的，但是太长了，所以分成上下两篇。
 
 不论是公司里还是公司外，正经的多人合作开发最好要经常做代码评审，
 其必要性不用我多说，但是如何做代码评审确实个头大的事情，我个人
@@ -37,34 +39,32 @@ diff 格式很多人接受不了。
 更实时点，这方面开源的独立可运行产品最为知名的该属 ReviewBoard 和
 Gerrit 了。还有个 Rietveld，算是 Gerrit 的前辈，Python 之父
 针对 Subversion 做的，使用了 Google App Engine 的服务，有人
-给它打了补丁以支持在本地单机运行，但终是使用不广。
+给它打了补丁以支持在本地单机运行，但终是在 Google 之外使用不广。
 
 ReviewBoard 的界面简洁漂亮，我挺喜欢的，但我司用的 1.5 的版本
-频繁倒掉，不知道新的 1.6 好点没，界面上倒是又有改进的样子，
-特别是可以在 comment 里开 issue 的做法很有创意。注意这个并
-不是真的在 BUG 管理系统里开一个 BUG，而是在 ReviewBoard 里
-做一个类似 FIXME 的标记。
+频繁挂掉，不知道新的 1.6 好点没，界面上倒是又有改进，特别是
+可以在 comment 里开 issue 的做法很有创意。注意这个并不是真的
+在 BUG 管理系统里开一个 BUG，而是在 ReviewBoard 里做一个类似
+FIXME 的标记。
 
 ReviewBoard 的安装很容易，官方文档做的挺好，我在邮件配置里
 卡壳了下，我的 Exim 4 只给配置了 GSSAPI 和 DIGEST-MD5 认证
 方式，前者给用户，后者给需要发邮件的服务，比如 RoundCube、
 ReviewBoard、Gerrit，但是悲催的是 ReviewBoard 使用的 Python
 smtplib 库只支持 CRAM-MD5、LOGIN，俺折腾了好几天，最后在
-qunshan@newsmth 的大力帮助下，终于在 qunshan 的版本上修订了
-几行搞出一个凑合可用的支持 DIGEST-MD5 的 smtplib.py，代码
-见 https://gist.github.com/2679719 ，但最后我还是决定让
-Exim 4 支持 CRAM-MD5 认证得了，反正有 ssl 保护。
+qunshan@newsmth 的大力帮助下，终于搞出一个凑合可用的支持
+DIGEST-MD5 的 smtplib.py，代码见 https://gist.github.com/2679719 ，
+但最后我还是决定让 Exim 4 支持 CRAM-MD5 认证得了，反正有 SSL 保护。
 
 这个过程中有个小笑话，折腾 ReviewBoard 邮件发送时，我发现
-有时候可以成功，很是惊讶，最后发现是 smtp 密码没指定时可以
-发送成功，原来此时 ReviewBoard 压根不会向 Exim 发送 AUTH
-指令做认证，而 Exim4 居然也乐呵呵的同意发送了，惊了我半身
-冷汗！
+有时候可以成功，很是惊讶，最后发现 Web 界面保存 Email 设置
+时 smtp 密码有时保存为空，也就是 smtp 密码没指定时可以发送
+成功，原来此时 ReviewBoard 压根不会向 Exim 发送 AUTH
+指令做认证，而 Exim4 居然也乐呵呵的同意发送了，惊了我半身冷汗！
 
-Exim 这么做可能是 SMTP 历史上很开放，以及局域网内比较安全
-的缘故，但是我还是偏执的担心某个访客进公司后插个网线就
-可以利用 Exim 狂发邮件，所以就做了限制，必需 STARTTLS
-并且认证了才能发邮件：
+Exim 这么做可能是 SMTP 协议历史上很开放，以及局域网内比较安全
+的缘故，但是我还是偏执的担心某个访客进公司后插个网线就可以利用
+Exim 狂发邮件，所以就做了限制，必需 STARTTLS 并且认证了才能发邮件：
 
 $ cat /etc/exim4/conf.d/acl/30_exim4-config_check_mail
 
@@ -89,4 +89,10 @@ acl_check_mail:
   .endif
 
   accept
+
+ReviewBoard 另一个问题是不支持 HTTP 认证，原因是ReviewBoard 使用的 Django
+框架的旧版本对这个支持不力，新版 Django 貌似支持了，但 ReviewBoard 还需
+要做额外工作才能配合，比如自动创建 ReviewBoard 里的用户，比如去掉登录、
+注册、注销链接等等，有人提了补丁出来，还没收录，我也不清楚是不是改的完备，
+我不懂 Python，暂且不折腾了。
 

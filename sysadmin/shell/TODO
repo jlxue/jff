@@ -3,7 +3,7 @@ https:// for all virtual hosts
 exim4: check From name against login name, necessary??
        incoming email by smtp may have faked "From" name.
 
-ReviewBoard: support auto user creation
+ReviewBoard: support http auth and auto user creation
 mailman: kerberos authentication
 
 RoundCube, ThunderBird: address book on OpenLDAP
@@ -12,7 +12,7 @@ ejabberd: support auto user creation, package 3.0
 CalendarServer: package new version?
 
 DAViCal: support auto user creation     (doesn't matter much as CalendarServer can create user automatically)
-Zabbix: support auto user creation      (doesn't matter now)
+Zabbix: support auto user creation      (doesn't matter now, I don't use it)
 
 Check cron jobs that poll web pages which requires Kerberos authentication.
 

@@ -1,0 +1,9 @@
+# The pasword is required by keytool, but it's not necessary as the
+# truststore contains only certificate, no private keys.
+JAVA_OPTIONS="-Djavax.net.ssl.trustStore=/srv/gerrit/truststore -Djavax.net.ssl.trustStorePassword=changeit"
+
+GERRIT_SITE=/srv/gerrit/site
+
+GERRIT_WAR=$GERRIT_SITE/bin/gerrit.war
+
+#NO_START=1

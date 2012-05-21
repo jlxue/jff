@@ -17,8 +17,6 @@ add_system_user_group "Gerrit account" /srv/gerrit gerrit gerrit
         chsh -s /bin/bash gerrit
 
 
-## setup database password and email account
-
 ## download gerrit
 war=gerrit-2.3.war
 [ -e /srv/gerrit/$war ] || {
@@ -31,6 +29,24 @@ war=gerrit-2.3.war
 [ -e /srv/gerrit/gerrit.war ] || ln -s /srv/gerrit/$war /srv/gerrit/gerrit.war
 
 
+## prepare truststore for SSL certificate verification
+## -- MUST be done before creating a Gerrit site
+truststore=/srv/gerrit/truststore
+truststorepw=changeit
+keytool -list -alias exim -keystore $truststore -storepass $truststorepw || {
+    echo y | keytool -importcert -alias exim -file /etc/exim4/exim.crt -keystore $truststore -storepass $truststorepw
+    chown gerrit:gerrit $truststore
+    chmod 600 $truststore
+    CONF_CHANGED=1
+}
+
+cmp_file $SCRIPT_DIR/etc/default/gerritcodereview /etc/default/gerritcodereview || {
+    overwrite_file $SCRIPT_DIR/etc/default/gerritcodereview /etc/default/gerritcodereview
+    CONF_CHANGED=1
+}
+
+
+## create a Gerrit site
 [ -e /srv/gerrit/init-info ] || {
     set +x
     db_password=`pwgen -cnys 24 1`
@@ -69,13 +85,24 @@ EOF
     exit 1
 }
 
+
+###########################
+ensure_mode_user_group /etc/default/gerrit      600 gerrit gerrit
 ensure_mode_user_group /srv/gerrit              700 gerrit gerrit
 ensure_mode_user_group /srv/gerrit/init-info    600 gerrit gerrit
+ensure_mode_user_group /srv/gerrit/truststore   600 gerrit gerrit
 ensure_mode_user_group /srv/gerrit/site         700 gerrit gerrit
 ensure_mode_user_group /srv/gerrit/site/etc/secure.config       600 gerrit gerrit
 ensure_mode_user_group /srv/gerrit/site/etc/ssh_host_dsa_key    600 gerrit gerrit
 ensure_mode_user_group /srv/gerrit/site/etc/ssh_host_rsa_key    600 gerrit gerrit
 
+
+[ -z "$CONF_CHANGED" ] || {
+    /srv/gerrit/site/bin/gerrit.sh stop
+    /srv/gerrit/site/bin/gerrit.sh start
+}
+
+[ "`pidof GerritCodeReview`" ] || /srv/gerrit/site/bin/gerrit.sh start
 
 ensure_service_started apache2 apache2
 

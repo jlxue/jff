@@ -39,6 +39,9 @@ ACCEPT		net		$FW		tcp	464
 ACCEPT		net		$FW		udp	464
 ACCEPT		net		$FW		tcp	749
 
+# for Gerrit SSH Daemon
+ACCEPT		net		$FW		tcp	2022
+
 # for Ganglia gmond in udp_recv_channel configuration directive.
 # XXX: IGMP may also require to be enabled if there is router
 # transfering multicast traffic, the router uses IGMP to detect

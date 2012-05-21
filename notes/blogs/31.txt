@@ -1,0 +1,325 @@
+代码评审系统 ReviewBoard 和 Gerrit (下)
+
+
+接下来是把玩下 Gerrit，这厮的文档写的也很赞（开源的东西文档写的好的真不
+多见），安装是很简单了，早期的 Gerrit 据说是用 Python 写的，在 GIT 主力
+开发者以及 jgit 项目发起人 Shawn O. Pearce 加入 Google 后就改用 Java 写
+了，编译好的 Gerrit 就是一个 war 包，可以放入 Servlet 容器里运行，也可以
+java -jar gerrit.war 直接用内置的 Jetty，太贴心了。Shawn 是个很勤奋的人，
+用 Java 重新实现了 GIT 核心功能，Gerrit 内置 Web server、SSH server，
+还有一个 Prolog 语言解释器。。。。
+
+由于我想把安装过程自动化，所以在执行 java -jar gerrit.war init 时磕绊了
+下，这个 init 命令有个 --batch 选项，表示在非交互状态下时 init
+会用默认配置创建一个 Gerrit site，比如使用 H2 数据库，这不是我期望的，
+我希望它用 PostgreSQL 数据库，虽然创建完 site 后可以修改 SITE_DIR/etc/gerrit.config，
+但我担心 init 时会初始化数据库什么的，不是在 gerrit.config 简单改下
+配置就能切换数据库的。 于是我把 init 交互式运行时的答案写入文件里，
+想通过管道传给 java -jar gerrit.war init，没想到伊判断了输入是否
+终端，发现不是终端就直接走 --batch 模式了，真是自做聪明。。。
+折腾了会 empty (http://empty.sf.net)、expect、socat 后放弃了，
+还是老实交互式安装吧，反正不会频繁重装。 下面是我输入的问题答案，
+@@...@@ 标记处需要替换成真的密码，在执行 init 之前要先创建好
+gerrit 数据库以及 gerrit 系统账户、gerrit 邮件账户：
+
+
+### Gerrit Code Review 2.3
+# Create '/srv/gerrit/site'      [Y/n]?
+y
+
+### Git Repositories
+# Location of Git repositories   [git]:
+git
+
+### SQL Database
+# Database server type           [H2/?]:
+postgresql
+
+# Server hostname                [localhost]:
+localhost
+
+# Server port                    [(POSTGRESQL default)]:
+5432
+
+# Database name                  [reviewdb]:
+gerrit
+
+# Database username              [gerrit]:
+gerrit
+
+# gerrit's password              :
+@@GERRIT_DB_PASSWORD@@
+
+#               confirm password :
+@@GERRIT_DB_PASSWORD@@
+
+### User Authentication
+# Authentication method          [OPENID/?]:
+http
+
+# Get username from custom HTTP header [y/N]?
+y
+
+# Username HTTP header           [SM_USER]:
+X-Forwarded-User
+
+# SSO logout URL                 :
+https://sso.corp.example.com/logout
+
+### Email Delivery
+# SMTP server hostname           [localhost]:
+smtp.corp.example.com
+
+# SMTP server port               [(default)]:
+25
+
+# SMTP encryption                [NONE/?]:
+tls
+
+# SMTP username                  [gerrit]:
+gerrit@corp.example.com
+
+# gerrit's password              :
+@@GERRIT_SMTP_PASSWORD@@
+
+#               confirm password :
+@@GERRIT_SMTP_PASSWORD@@
+
+### Container Process
+# Run as                         [gerrit]:
+gerrit
+
+# Java runtime                   [/usr/lib/jvm/java-6-openjdk-i386/jre]:
+/usr/lib/jvm/default-java/jre
+
+# Copy gerrit.war to /srv/gerrit/site/bin/gerrit.war [Y/n]?
+y
+
+### SSH Daemon
+# Listen on address              [*]:
+*
+# Listen on port                 [29418]
+2022
+
+# Download and install it now [Y/n]?
+y
+
+### HTTP Daemon
+# Behind reverse proxy           [y/N]
+y
+
+# Proxy uses SSL (https://)      [y/N]?
+n
+
+# Subdirectory on proxy server   [/]:
+/
+
+# Listen on address              [*]:
+127.0.0.1
+
+# Listen on port                 [8081]:
+2080
+
+在这个回答里有几个地方是比较特殊的，一是用户认证方式，由于我是把
+Gerrit 放在 Apache 后面，Apache 使用 mod_auth_kerb 做用户认证，所以
+这里我给 Gerrit 选择了 http 认证方式，默认情况下 Gerrit http
+认证方式会使用前端 Web 服务器传过来的 Authorization HTTP 头部，
+比如 "Authorization: Basic xxxxxx" 或者 "Authorization: Digest xxxx"，
+可惜的是 Gerrit 代码没有处理 "Authorization: Negotiate xxxx" 的情况，
+所以需要在 Apache 里用 mod_rewrite 把 REMOTE_USER 变量作为
+X-Forwarded-User 头部传给 Gerrit，这个名字可以随便取，但根据 Gerrit
+文档说法，不要重用 Authorization 头部。
+
+第二个特殊的地方是 SMTP encryption，ssl 表示直接以 ssl 方式连接，
+tls 表示先以非 ssl 方式连接，然后用 STARTTLS 升级为 ssl 连接，
+后一种方式是现在 ssl 用法里推荐的。使用哪一种取决于你的 smtp 服务器
+配置，一般 ssl 会用独立端口，tls 的话直接用标准 SMTP 25 端口。
+
+第三个特殊的地方是反向代理，因为我要配置 Kerberos 统一登录，所以
+Gerrit 前面有个 Apache 做反向代理，这俩我配置在同一台机器上，所以
+不用 https。
+
+在 java -jar gerrit.war init -d /srv/gerrit/site 执行完之后，它会
+提示你访问 http://127.0.0.1:2080/#/admin/projects/，但你应该访问
+http://gerrit.corp.example.com/#/admin/projects/，这里
+gerrit.corp.example.com 是我给 gerrit 所在机器设置的 CNAME，
+这个请求会被 Apache 的 gerrit virtual host 截获，做完 HTTP Negotiate
+认证后转发给后台的 Gerrit，也就是 http://127.0.0.1:2080/...，
+直接请求 2080 端口这个地址的话，Gerrit 会报错说没有 Authorization 头部。
+
+下面是我的 Apache gerrit 虚拟主机配置：
+
+<VirtualHost *:80>
+    ServerName gerrit.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /nonexistent
+
+    ErrorLog ${APACHE_LOG_DIR}/gerrit-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/gerrit-access.log combined
+
+    ProxyRequests Off
+    ProxyVia Off
+    ProxyPreserveHost On
+
+    <Proxy *>
+        Order deny,allow
+        Allow from all
+    </Proxy>
+
+    <Location /login/>
+        AuthType Kerberos
+        Require valid-user
+
+        Order allow,deny
+        Allow from all
+
+        RewriteEngine On
+        RewriteCond %{REMOTE_USER} (.+)
+        RewriteRule .* - [E=RU:%1]
+        RequestHeader set X-Forwarded-User %{RU}e
+    </Location>
+
+    ProxyPass 		/	http://127.0.0.1:2080/
+    ProxyPassReverse 	/ 	http://127.0.0.1:2080/
+</VirtualHost>
+
+在请求 http://gerrit.corp.example.com/#/admin/projects/ 时，Gerrit
+可能报错说找不到 All-Projects，原因不明，解决办法是把 PostgreSQL
+里的 gerrit 数据库删除重建，再重新 java -jar gerrit.war init。
+
+没出其它问题的话，Gerrit 的 Web 界面就展现在你面前，它要求为
+当前用户注册一个 email 帐号，第一个登录的用户自动成为管理员，
+后续登录的其它用户是普通权限的。
+
+如果你用的 SMTP 服务器的 SSL 证书是自签名的，并且跟我一样 Gerrit
+使用 tls 方式连接 SMTP 服务器，到这里会卡壳一下。第一个问题是
+site/etc/gerrit.config 里默认没有 sendemail.sslverify，它的值默认
+是 true，这会导致 javax.net.ssl 检查 SMTP 服务器的 SSL 证书是否
+是 trusted 的，答案当然是否，于是 Gerrit 抛异常了：
+
+sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+
+解决办法有如下这些：
+
+1) 在 /srv/gerrit/site/etc/gerrit.config 里 [sendemail] 里添加
+   sslverify = false，虽然使用 openssl 的 client 大多是这个德行，
+   但我觉得不大舒服，所以没用这个办法。
+
+2) 把 SMTP 服务器的 SSL 证书导入 Java 的 truststore 里供 javax.net.ssl 使用。
+
+truststore 是只包含公钥的 keystore, keystore 是 Java 安全框架里
+用来保存证书、私钥等等的东西，最常用的是 JKS 格式的 keystore 文件，
+比如 $JAVA_HOME/jre/lib/security/cacerts, $HOME/.keystore。
+truststore 被 Java 类库里的 TrustManager 使用，keystore 被 Java 类库
+里的 KeyManager 使用，当然 TrustManager 也能用 keystore。
+
+在这个证书验证问题上，需要给 TrustManager 指定一个 truststore 或者
+keystore，有三种办法：
+
+1) 如果 javax.net.ssl.trustStore 系统属性指定了，就使用这个系统属性指定的那个
+   文件当作 truststore，truststore 的密码从 javax.net.ssl.trustStorePassword
+   系统属性获取。
+
+   网上有不少文章还提到 javax.net.ssl.keyStore 和 javax.net.ssl.keyStorePassword，
+   这个只在 ssl server 端或者 ssl client 端使用 client cert 向 ssl server
+   认证的情况下才需要。
+
+2) 如果 javax.net.ssl.trustStore 属性没指定或者文件没找到，则使用
+   $JAVA_HOME/jre/lib/security/jssecacerts
+
+3) 如果 jssecacerts 没找到，则使用 $JAVA_HOME/jre/lib/security/cacerts。
+
+网上有不少文章都说把证书直接加入 jssecacerts 或者 cacerts 中，我是半安全
+偏执狂，觉得把一个自己玩的证书加进去不太靠谱，另外担心 Debian 的软件包
+升级会自动更新 cacerts（伊其实是符号链接到 /etc/ssl/certs/java/cacerts
+了，ca-certificates 包的 /usr/sbin/update-ca-certificates 会通过
+ca-certificates-java 包的 /etc/ca-certificates/update.d/jks-keystore
+更新它，文档有提到 local cert 会依然保留，我没试验）。
+
+通过分析 /srv/gerrit/site/bin/gerrit.sh 启动脚本，伊使用了
+JAVA_OPTIONS 变量，并且读取 /etc/default/gerritcodereview 文件，所以
+可以在 /etc/default/gerritcodereview 里写入：
+JAVA_OPTIONS="-Djavax.net.ssl.trustStore=/srv/gerrit/truststore -Djavax.net.ssl.trustStorePassword=changeit"
+然后 /srv/gerrit/site/bin/gerrit.sh stop 再 start 重启 gerrit。
+
+/srv/gerrit/truststore 是这么生成的：
+gerrit$ keytool -importcert -alias exim -file /etc/exim4/exim.crt \
+            -keystore /srv/gerrit/truststore -storepass changeit
+
+这个 truststore 的密码是无所谓的，因为它里头没有私钥。 exim.crt 是用
+/usr/share/doc/exim4/examples/exim-gencert 生成的。
+
+重启 Gerrit 后，证书问题解决了，第一次登录要求注册邮箱的对话框也没了，
+这时可以点击右上角的 settings 链接，在 contact information 那一栏里。
+可惜的是问题没完，输入邮箱点击"Register New Email..."后，Gerrit 一直 Loading，
+/var/log/exim4/mainlog 以及 /srv/gerrit/site/logs/error_log 里没有
+错误信息，Gerrit Web 页面就那么一直挂着，直到 exim4 报告连接超时，把 Gerrit
+发起的 smtp 链接断掉。
+
+花费了三百脑细胞后，俺终于找到原因，是 Gerrit 的 AuthSMTPClient.startTLS()
+实现跟 SMTP 服务器配合有问题，这是一个 SMTP STARTTLS 会话：
+
+$ gsasl --smtp smtp.corp.example.com
+Trying `gold.corp.example.com'...
+220 gold.corp.example.com ESMTP Exim 4.77 Mon, 21 May 2012 14:46:43 +0800
+EHLO [127.0.0.1]
+250-gold.corp.example.com Hello localhost [127.0.0.1]
+250-SIZE 10485760
+250-PIPELINING
+250-AUTH GSSAPI
+250-STARTTLS
+250 HELP
+STARTTLS
+220 TLS go ahead
+EHLO [127.0.0.1]
+250-gold.corp.example.com Hello localhost [127.0.0.1]
+250-SIZE 10485760
+250-PIPELINING
+250-AUTH GSSAPI DIGEST-MD5 CRAM-MD5
+250 HELP
+AUTH GSSAPI
+....
+
+可以看到在 STARTTLS 之后，Exim 不会再次发送 banner 了：
+220 gold.corp.example.com ESMTP Exim 4.77 Mon, 21 May 2012 14:46:43 +0800
+
+下面是 Gerrit AuthSMTPClient 的代码，伊在 org.apache 的命名空间了
+插了个 AuthSMTPClient 类，试图给 apache commons-net 2.2 的 SMTPClient
+增加 STARTTLS 支持：
+
+http://code.google.com/p/gerrit/source/browse/gerrit-patch-commonsnet/src/main/java/org/apache/commons/net/smtp/AuthSMTPClient.java?name=stable-2.3
+  public boolean startTLS(final String hostname, final int port, final boolean verify)
+      throws SocketException, IOException {
+    if (sendCommand("STARTTLS") != 220) {
+      return false;
+    }
+
+    _socket_ = sslFactory(verify).createSocket(_socket_, hostname, port, true);
+    _connectAction_();
+    return true;
+  }
+
+事情坏在 _connectAction_() 里，这个在 AuthSMTPClient 的父类 SMTPClient
+的父类 SMTP 里会在去读取 SMTP 服务器的 banner 信息，于是 startTLS() 就
+挂在这个地方傻等直到 SMTP 服务器踢开它。。。。人生不如意事十之八九啊。。。
+
+http://www.rfc-editor.org/rfc/rfc2487.txt
+5.2 Result of the STARTTLS Command
+Upon completion of the TLS handshake, the SMTP protocol is reset to
+the initial state (the state in SMTP after a server issues a 220
+service ready greeting). 
+
+从这个描述看，SMTP server 是不应该再发一次 banner 的。在 AuthSMTPClient.startTLS()
+搭个补丁后(http://code.google.com/p/gerrit/issues/detail?id=1397)，STARTTLS 顺利完成，
+开始 SMTP 认证，注意 apache commons-net 2.2 只支持 CRAM-SHA1, CRAM-MD5, LOGIN, PLAIN
+这几种，不支持 DIGEST-MD5，还好我前面为了ReviewBoard打开了 Exim4 的 CRAM-MD5 认证支持。
+
+这块代码感觉比较龌龊，不知道是不是实现有缺陷，所以 apache commons-net
+网站上把 2.x 系列从下载页面删除了，只有 1.x 和 3.x 系列。。。不知道
+Google 那帮人为什么没转向标准的 JavaMail API。
+
