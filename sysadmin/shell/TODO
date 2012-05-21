@@ -1,7 +1,14 @@
+/etc/security/access.conf
+
 https:// for all virtual hosts
 
 exim4: check From name against login name, necessary??
-       incoming email by smtp may have faked "From" name.
+       foreign email by smtp may have faked "From" name.
+
+exim4: limit receiptors by domain for bot users, such as
+       bugzilla, reviewboard, wiki, to avoid information leak
+       because users register foreign email addresses on these services.
+
 
 ReviewBoard: support http auth and auto user creation
 mailman: kerberos authentication

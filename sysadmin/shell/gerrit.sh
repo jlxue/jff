@@ -86,6 +86,13 @@ EOF
 }
 
 
+# user's preferred email address when they first login
+git config --file /srv/gerrit/site/etc/gerrit.config auth.emailFormat >/dev/null || {
+    git config --file /srv/gerrit/site/etc/gerrit.config auth.emailFormat '{0}@corp.example.com'
+    CONF_CHANGED=1
+}
+
+
 ###########################
 ensure_mode_user_group /etc/default/gerrit      600 gerrit gerrit
 ensure_mode_user_group /srv/gerrit              700 gerrit gerrit
