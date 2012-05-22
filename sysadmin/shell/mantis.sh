@@ -65,6 +65,9 @@ fgrep -q 'if( BASIC_AUTH != $t_login_method && !auth_does_password_match( $t_use
 
 ensure_mode_user_group /srv/www/mantisbt                750 root www-data
 ensure_mode_user_group /srv/www/mantisbt/config_inc.php 640 root www-data
+ensure_mode_user_group /srv/www/mantisbt/.git           700 root root
+ensure_mode_user_group /srv/www/mantisbt/.gitignore     600 root root
+
 
 [ -z "$CONF_CHANGED" ] || {
     service apache2 restart

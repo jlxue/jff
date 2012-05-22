@@ -117,6 +117,8 @@ ensure_mode_user_group /srv/www/bugzilla                750 root www-data
 ensure_mode_user_group /srv/www/bugzilla/localconfig    640 root www-data
 ensure_mode_user_group /srv/www/bugzilla/data           770 root www-data
 ensure_mode_user_group /srv/www/bugzilla/data/params    660 www-data www-data
+ensure_mode_user_group /srv/www/bugzilla/.git           700 root root
+ensure_mode_user_group /srv/www/bugzilla/.gitignore     600 root root
 
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart

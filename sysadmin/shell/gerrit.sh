@@ -6,6 +6,23 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 
+my_etckeeper () {
+    local command="$1"
+
+    shift
+    etckeeper "$command" -d /srv/gerrit/site "$@"
+}
+
+init_git_config() {
+    local cfg=/srv/gerrit/site/etc/gerrit.config
+
+    git config --file $cfg "$1" >/dev/null || {
+        git config --file $cfg "$1" "$2"
+        CONF_CHANGED=1
+    }
+}
+
+
 ## create database user, database, system user
 ensure_service_started postgresql postgres
 
@@ -18,7 +35,8 @@ add_system_user_group "Gerrit account" /srv/gerrit gerrit gerrit
 
 
 ## download gerrit
-war=gerrit-2.3.war
+ver=2.3         # also used by "my_etckeeper commit/tag..." below
+war=gerrit-$ver.war
 [ -e /srv/gerrit/$war ] || {
     rm -f /tmp/$war
     wget -O /tmp/$war 'http://gerrit.googlecode.com/files/gerrit-2.3.war'
@@ -86,14 +104,24 @@ EOF
 }
 
 
-init_git_config() {
-    local cfg=/srv/gerrit/site/etc/gerrit.config
+## version control /srv/gerrit/site
+[ -e /srv/gerrit/site/.gitignore ] || {
+    echo cache/
+    echo git/
+    echo logs/
+} > /srv/gerrit/site/.gitignore
 
-    git config --file $cfg "$1" >/dev/null || {
-        git config --file $cfg "$1" "$2"
-        CONF_CHANGED=1
-    }
+[ -e /srv/gerrit/site/.git ] || {
+    my_etckeeper init
+    my_etckeeper commit "import Gerrit $ver site"
+    my_etckeeper vcs tag "v$ver"
 }
+
+! my_etckeeper unclean || my_etckeeper commit "save before configuring"
+[ "`my_etckeeper vcs config --get color.ui`" = auto ] || my_etckeeper vcs config color.ui auto
+
+
+## more settings for Gerrit
 
 # user's preferred email address when they first login
 init_git_config auth.emailFormat '{0}@corp.example.com'
@@ -127,6 +155,8 @@ ensure_mode_user_group /srv/gerrit/site/etc/gerrit.config       644 gerrit gerri
 ensure_mode_user_group /srv/gerrit/site/etc/secure.config       600 gerrit gerrit
 ensure_mode_user_group /srv/gerrit/site/etc/ssh_host_dsa_key    600 gerrit gerrit
 ensure_mode_user_group /srv/gerrit/site/etc/ssh_host_rsa_key    600 gerrit gerrit
+ensure_mode_user_group /srv/gerrit/site/.git            700 root root
+ensure_mode_user_group /srv/gerrit/site/.gitignore      600 root root
 
 
 [ -z "$CONF_CHANGED" ] || {
@@ -137,4 +167,6 @@ ensure_mode_user_group /srv/gerrit/site/etc/ssh_host_rsa_key    600 gerrit gerri
 [ "`pidof GerritCodeReview`" ] || /srv/gerrit/site/bin/gerrit.sh start
 
 ensure_service_started apache2 apache2
+
+! my_etckeeper unclean || my_etckeeper commit "save after configuring"
 

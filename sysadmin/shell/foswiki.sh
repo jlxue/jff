@@ -68,6 +68,9 @@ ensure_mode_user_group /srv/www/foswiki/data/.htpasswd      640 www-data www-dat
 ensure_mode_user_group /srv/www/foswiki/data/admin-group    640 www-data www-data
 ensure_mode_user_group /srv/www/foswiki/lib/LocalSite.cfg   640 www-data www-data
 #ensure_mode_user_group /srv/www/foswiki/lib/Foswiki/Plugins/NormalizeUserPlugin.pm  644 www-data www-data
+ensure_mode_user_group /srv/www/foswiki/.git                700 root root
+ensure_mode_user_group /srv/www/foswiki/.gitignore          600 root root
+
 
 [ -z "$CONF_CHANGED" ] || service apache2 restart
 
