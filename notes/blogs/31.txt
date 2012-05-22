@@ -12,7 +12,7 @@ java -jar gerrit.war 直接用内置的 Jetty，太贴心了。Shawn 是个很�
 Gerrit 里评审流程分三个阶段，可以分别让不同角色执行：
 
    * review: 人肉扫描代码有无问题
-   * verify: 编译、测试，可以用 Jenkins 的 Gerrit Trigger 插件自动出发
+   * verify: 编译、测试，可以用 Jenkins 的 Gerrit Trigger 插件自动触发
    * submit: 提交代码到正式分支上，貌似由人触发，Gerrit 来执行
 
 在使用 Gerrit 时，不要忘记把 commit-msg hook 装上：
@@ -348,6 +348,16 @@ Gerrit 还能通过 commentlink 和 trackingid 跟外部的 Bug 跟踪系统集�
 参考：http://gerrit-documentation.googlecode.com/svn/Documentation/2.3/config-gerrit.html
 
 
-一番配置、读文档下来，感觉 Gerrit 真是 GIT 用户居家办公必备良品，这么好
-的玩意居然是开源的，太赞了！
+Gerrit 直接使用 jgit 库直接管理代码库，如果有外部的 GIT 库，比如被
+Gitolite 管理的，有两个办法让提交到 Gerrit 的修改也散播到外部 GIT 库里：
+
+  * 使用 Gerrit 的 Git replication 特性，Gerrit 背地里把修改 git push 到外部库里，这个办法会有延迟。
+    参考：http://gerrit-documentation.googlecode.com/svn/Documentation/2.3/config-replication.html
+
+  * 创建外部库的符号链接到 /srv/gerrit/site/git/ 里，比如 ln -s /srv/git/repositories/testing.git /srv/gerrit/site/git/testing.git，需要注意文件权限。
+    参考：http://gerrit-documentation.googlecode.com/svn/Documentation/2.3/project-setup.html#_manual_creation，这个文档
+    不是说创建符号链接的，我只是猜测可行。
+
+
+一番配置、读文档下来，感觉 Gerrit 真是 GIT 用户居家办公必备良品，这么好的玩意居然是开源的，太赞了！
 
