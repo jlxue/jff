@@ -250,3 +250,33 @@ http://codereview.corp.example.com/
 
 http://gerrit.corp.example.com/
 
+Clone repository:
+
+    $ git clone ssh://dieken@gerrit.corp.example.com:2022/REPOSITORY_NAME.git
+    $ cd REPOSITORY_NAME
+    $ git config user.name Dieken
+    $ git config user.email dieken@corp.example.com
+
+Obtain client commands and hooks:
+
+    $ scp -p -P 2022 dieken@gerrit.corp.example.com:bin/gerrit-cherry-pick ~/bin/
+    $ scp -p -P 2022 dieken@gerrit.corp.example.com:hooks/commit-msg REPOS/.git/hooks/
+
+    Or
+    $ curl -O http://gerrit.corp.example.com/tools/bin/gerrit-cherry-pick
+    $ curl -O http://gerrit.corp.example.com/tools/hooks/commit-msg
+    $ chmod a+rx gerrit-cherry-pick commit-msg
+    $ mv gerrit-cherry-pick ~/bin/
+    $ mv commit-msg REPOS/.git/hooks/
+
+
+Bugzilla link in code review comments:
+    (BUG|Bug|bug|BUGZILLA|Bugzilla|bugzilla|BZ|Bz|bz|TICKET|Ticket|ticket|ISSUE|Issue|issue)\s*:?\s*#?(\d+)'
+
+    Such as:  This seems root cause of bug 33 too.
+
+Bugzilla tracking ids in commit messages, multiple bug numbers are allowed:
+    Ticket: \b\d{1,10}\b
+
+    Such as: Ticket: 33 34 45
+

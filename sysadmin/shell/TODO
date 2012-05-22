@@ -30,7 +30,7 @@ Web apps: remove "register", "logout" and "find password" functions.
 Samba: don't support Kerberos authentication (I hope it uses password)
 
 security: aide samhain fail2ban snort...
-          SELinux, GrSecurity, AppArmor, Smack, TOMOYO
+          SELinux, GrSecurity, AppArmor, Smack, TOMOYO, yama
 
 Kerberos two-factor authentication: google-authenticator, Barada
 

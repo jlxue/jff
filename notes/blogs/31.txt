@@ -9,6 +9,15 @@ java -jar gerrit.war 直接用内置的 Jetty，太贴心了。Shawn 是个很�
 用 Java 重新实现了 GIT 核心功能，Gerrit 内置 Web server、SSH server，
 还有一个 Prolog 语言解释器。。。。
 
+Gerrit 里评审流程分三个阶段，可以分别让不同角色执行：
+
+   * review: 人肉扫描代码有无问题
+   * verify: 编译、测试，可以用 Jenkins 的 Gerrit Trigger 插件自动出发
+   * submit: 提交代码到正式分支上，貌似由人触发，Gerrit 来执行
+
+在使用 Gerrit 时，不要忘记把 commit-msg hook 装上：
+http://gerrit-documentation.googlecode.com/svn/Documentation/2.3/user-changeid.html#_creation
+
 由于我想把安装过程自动化，所以在执行 java -jar gerrit.war init 时磕绊了
 下，这个 init 命令有个 --batch 选项，表示在非交互状态下时 init
 会用默认配置创建一个 Gerrit site，比如使用 H2 数据库，这不是我期望的，
@@ -246,6 +255,10 @@ JAVA_OPTIONS 变量，并且读取 /etc/default/gerritcodereview 文件，所以
 可以在 /etc/default/gerritcodereview 里写入：
 JAVA_OPTIONS="-Djavax.net.ssl.trustStore=/srv/gerrit/truststore -Djavax.net.ssl.trustStorePassword=changeit"
 然后 /srv/gerrit/site/bin/gerrit.sh stop 再 start 重启 gerrit。
+(也可以把这个选项放在 /srv/gerrit/site/etc/gerrit.config 的
+container.javaOptions 里：
+http://gerrit-documentation.googlecode.com/svn/Documentation/2.3/config-gerrit.html#_a_id_container_a_section_container
+)
 
 /srv/gerrit/truststore 是这么生成的：
 gerrit$ keytool -importcert -alias exim -file /etc/exim4/exim.crt \
@@ -322,4 +335,19 @@ service ready greeting).
 这块代码感觉比较龌龊，不知道是不是实现有缺陷，所以 apache commons-net
 网站上把 2.x 系列从下载页面删除了，只有 1.x 和 3.x 系列。。。不知道
 Google 那帮人为什么没转向标准的 JavaMail API。
+
+
+如果 Gitweb 已经安装了，那么 Gerrit 自动集成 Gitweb，标准安装情况下啥都
+不用配置，在 Gerrit Web UI 上每个补丁旁边有 gitweb 的链接，相当相当的好用。
+Gerrit 文档还声称能跟 cgit 集成，我没实验过。由于 Gerrit 会动态的在
+/srv/gerrit/.gerritcodereview/tmp/gerrit..../ 下生成 gitweb_config.perl，
+有这个文件后 /usr/lib/cgi-bin/gitweb.cgi 就不会读取 /etc/gitweb.conf 了。
+
+
+Gerrit 还能通过 commentlink 和 trackingid 跟外部的 Bug 跟踪系统集成，
+参考：http://gerrit-documentation.googlecode.com/svn/Documentation/2.3/config-gerrit.html
+
+
+一番配置、读文档下来，感觉 Gerrit 真是 GIT 用户居家办公必备良品，这么好
+的玩意居然是开源的，太赞了！
 

@@ -86,19 +86,44 @@ EOF
 }
 
 
-# user's preferred email address when they first login
-git config --file /srv/gerrit/site/etc/gerrit.config auth.emailFormat >/dev/null || {
-    git config --file /srv/gerrit/site/etc/gerrit.config auth.emailFormat '{0}@corp.example.com'
-    CONF_CHANGED=1
+init_git_config() {
+    local cfg=/srv/gerrit/site/etc/gerrit.config
+
+    git config --file $cfg "$1" >/dev/null || {
+        git config --file $cfg "$1" "$2"
+        CONF_CHANGED=1
+    }
 }
 
+# user's preferred email address when they first login
+init_git_config auth.emailFormat '{0}@corp.example.com'
 
-###########################
-ensure_mode_user_group /etc/default/gerrit      600 gerrit gerrit
-ensure_mode_user_group /srv/gerrit              700 gerrit gerrit
-ensure_mode_user_group /srv/gerrit/init-info    600 gerrit gerrit
-ensure_mode_user_group /srv/gerrit/truststore   600 gerrit gerrit
-ensure_mode_user_group /srv/gerrit/site         700 gerrit gerrit
+# comment links
+init_git_config commentlink.changeid.match '(I[0-9a-f]{8,40})'
+init_git_config commentlink.changeid.link '#q,$1,n,z'
+
+init_git_config commentlink.bugzilla.match '(BUG|Bug|bug|BUGZILLA|Bugzilla|bugzilla|BZ|Bz|bz|TICKET|Ticket|ticket|ISSUE|Issue|issue)\s*:?\s*#?(\d+)'
+init_git_config commentlink.bugzilla.link 'http://bugzilla.corp.example.com/show_bug.cgi?id=$2'
+
+# other good settings
+init_git_config gerrit.canonicalWebUrl 'http://gerrit.corp.example.com/'
+
+init_git_config sendemail.allowrcpt 'corp.example.com'
+
+init_git_config sshd.advertisedAddress 'gerrit.corp.example.com:2022'
+
+init_git_config trackingid.bugzilla.footer 'Ticket'
+init_git_config trackingid.bugzilla.match  '\b(\d{1,10})\b'
+init_git_config trackingid.bugzilla.system 'Bugzilla'
+
+
+#######################################################################
+ensure_mode_user_group /etc/default/gerritcodereview    600 gerrit gerrit
+ensure_mode_user_group /srv/gerrit                      700 gerrit gerrit
+ensure_mode_user_group /srv/gerrit/init-info            600 gerrit gerrit
+ensure_mode_user_group /srv/gerrit/truststore           600 gerrit gerrit
+ensure_mode_user_group /srv/gerrit/site                 700 gerrit gerrit
+ensure_mode_user_group /srv/gerrit/site/etc/gerrit.config       644 gerrit gerrit
 ensure_mode_user_group /srv/gerrit/site/etc/secure.config       600 gerrit gerrit
 ensure_mode_user_group /srv/gerrit/site/etc/ssh_host_dsa_key    600 gerrit gerrit
 ensure_mode_user_group /srv/gerrit/site/etc/ssh_host_rsa_key    600 gerrit gerrit
