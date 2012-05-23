@@ -63,6 +63,8 @@ cmp_file $SCRIPT_DIR/etc/default/gerritcodereview /etc/default/gerritcodereview 
     CONF_CHANGED=1
 }
 
+sync_file $SCRIPT_DIR/etc/init.d/gerrit /etc/init.d/gerrit
+
 
 ## create a Gerrit site
 [ -e /srv/gerrit/init-info ] || {
@@ -159,13 +161,13 @@ ensure_mode_user_group /srv/gerrit/site/.git            700 root root
 ensure_mode_user_group /srv/gerrit/site/.gitignore      600 root root
 
 
+update-rc.d gerrit defaults
+
 [ -z "$CONF_CHANGED" ] || {
-    /srv/gerrit/site/bin/gerrit.sh stop
-    /srv/gerrit/site/bin/gerrit.sh start
+    service gerrit restart
 }
 
-[ "`pidof GerritCodeReview`" ] || /srv/gerrit/site/bin/gerrit.sh start
-
+ensure_service_started gerrit GerritCodeReview
 ensure_service_started apache2 apache2
 
 ! my_etckeeper unclean || my_etckeeper commit "save after configuring"
