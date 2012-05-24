@@ -132,7 +132,9 @@ init_git_config auth.emailFormat '{0}@corp.example.com'
 init_git_config commentlink.changeid.match '(I[0-9a-f]{8,40})'
 init_git_config commentlink.changeid.link '#q,$1,n,z'
 
-init_git_config commentlink.bugzilla.match '(BUG|Bug|bug|BUGZILLA|Bugzilla|bugzilla|BZ|Bz|bz|TICKET|Ticket|ticket|ISSUE|Issue|issue)\s*:?\s*#?(\d+)'
+# /bug|bugzilla|bz|issue|ticket/i, Gerrit doesn't ignore case, I have to
+# write it in an ugly way...
+init_git_config commentlink.bugzilla.match '\b([bB][uU][gG]|[bB][uU][gG][zZ][iI][lL][lL][aA]|[bB][zZ]|[iI][sS][sS][uU][eE]|[tT][iI][cC][kK][eE][tT])\s*:?\s*#?(\d+)\b'
 init_git_config commentlink.bugzilla.link 'http://bugzilla.corp.example.com/show_bug.cgi?id=$2'
 
 # other good settings
