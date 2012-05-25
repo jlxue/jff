@@ -369,6 +369,9 @@ isn't released yet, see http://www.ejabberd.im/cyrsasl_gssapi .
 
 ++ Gerrit Configuration ++
 
+    NOTICE: Gerrit < 2.5 has a bug in STARTTLS which will make Gerrit
+            fail to send email. See http://code.google.com/p/gerrit/issues/detail?id=1397
+
 23.1) Access http://gerrit.corp.example.com/#/admin/projects/ to register
       email for the first user, the first user is the administrator.
       If Gerrit doesn't show you the Registration page, you can reach
