@@ -259,6 +259,10 @@ i python-setuptools python-dev memcached python-memcache patch \
 # For Gerrit
 i default-jre-headless
 
+# BackupPC
+#i backuppc rsync libfile-rsyncp-perl openssh-client rrdtool libio-dirent-perl
+#i libfilesys-smbclient-perl # http://backuppc.sourceforge.net/faq/limitations.html#incremental_backups_might_not_be_accurate
+
 
 ###########################################################
 if [ -z "$interactive" ]; then

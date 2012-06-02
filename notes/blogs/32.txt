@@ -1,0 +1,513 @@
+备份系统
+
+天有不测风云，虽然如今云计算风生水起，大家都把分布式啦、
+负载均衡啦、高可用啦、横着切竖着切斜着切啦挂在嘴边，悲剧的
+是 IT 基础设施往往没这个待遇，堆在角落积灰的服务器，ad hoc
+的几个 rsync 脚本，跑的好的时候大家玩命干活，崩溃了大家
+就闲着聊天等管理员恢复系统。站在被剥削阶级考虑，IT 基础设施
+崩了真没啥，正好休息下，对于剥削阶级就不是利好了：驴儿闲着
+也是白耗粮食啊。而处于被剥削阶级又正好处在管理员位置上的
+可怜虫来说，没比这时更蛋疼的时候了。
+
+调侃牢骚完毕，俺其实大多数时候是那个休息的一员，偶尔担惊一下
+也是略惊无险，哈哈。回归到技术本身，我个人觉得 IT 基础设施
+中的备份系统应该具备如下几个特性：
+
+   * C/S 架构：备份是每台机器都要做的事情，极为需要集中控制, 不支持 C/S 架构
+     的工具可以用 rsh/ssh/samba 等包装下凑合模拟成 C/S 架构；
+   * 跨 OS 支持：工作用 PC 也是需要备份的，不只是服务器;
+   * 快速定位备份所在位置，尤其能妥善处理分卷的情况，备份的一大窘境是
+     找不到需要的文件放哪里了;
+   * 支持不同种类数据的备份，如文件系统、数据库、代码库，不是所有情况
+     都能 rsync、tar 搞定的，应该可以容易的自定义插件以应对特定的数据。
+     这个需求可以写独立脚本做，导出完毕后再开始备份，但如果备份系统有
+     直接支持会更一致更方便;
+   * 稳妥应对备份存储可用空间耗尽的情况;
+
+有则更佳的特性：
+   * 支持多种存储设备：硬盘、磁带、光盘，这几种介质本身的特性决定了在写入时不能等同看待;
+     不支持的话需要额外写脚本，比如从硬盘转储到磁带、光盘;
+   * 支持分卷存储：备份的存储总有耗尽的时候，需要能够容易的切换存储位置继续写入;
+   * 支持增量备份或者差异备份，加快备份速度;
+   * 能定制策略决定完整、增量备份的频率和顺序，能定制备份轮转策略，或者直接
+     支持 GFS 轮转策略，不支持的话也可以写脚本包装下;
+
+提一句增量备份和差异备份的区别：incremental backup 指只复制上次备份以来更改的文件，
+differential backup 指只复制自上次完整备份以来更改的文件。
+
+备份的存储格式上，有一些流行的做法：
+   * 保存一份快照以及一系列补丁，这种做法对频繁修改的大文件很有利，比如 Outlook 的邮箱文件
+   * 保存多份快照，快照之间用硬链接共享相同内容的文件
+   * 打包存放，一般是完整备份加上多个增量备份或者差异备份
+有一些工具按数据块存放文件，以更大程度的避免重复数据，如果备份工具
+既没有按数据块去重，也没有使用补丁，那么需要特别考虑频繁修改的大文件
+如何转换成“备份友好”的，一般是将大文件导出成多个片段，大部分片段
+是不变的，比如按日期切分邮箱。 另外快照式备份虽然恢复文件时很方便，
+但会消耗大量 inode。
+
+
+对远程备份的实现，有两种办法，一种是 pull，备份服务器主动去其他服务器打包
+文件并传到备份存储里，一般用 rsh/ssh/samba 实现，好处是被备份的机器不需要
+装特别的东西，坏处是被备份的机器需要开一个特权帐号给备份服务器用，如果被
+备份机器是个人工作 PC，我觉得怪怪的，像被人安了后门，对于其他需要备份的
+服务器，这也是个安全隐患，一旦备份服务器被攻陷，其它服务器就都废了。
+
+另一种远程备份方式是 push，需要备份的服务器装一个代理服务程序，它收集
+文件传给备份存储服务器集中存放。我比较偏好这种方式，虽然部署要麻烦点。
+
+往往备份工具可以同时支持这两种模式，因为如果能 rsh/ssh/samba 访问被备份
+系统的文件，适当配置的话就可以让被备份机器往中心存储服务器上传备份。
+
+
+BTW，图形界面的桌面 PC 备份工具不在讨论范围内，这个主题是为系统管理员设定的。
+
+
+++ 备份策略 ++
+
+备份看起来是个很简单的事情，实际操作时是有讲究的，比如这个简单的增量备份策略：
+每周日做一次完整备份，随后每天备份前一天修改的文件。看起来很节约磁盘，但是它有两个问题：
+
+   * 这一个星期的备份，任意一次损坏，都会导致损坏的备份之后的恢复不完整
+   * 越往后恢复越麻烦，因为需要这一星期里之前的所有增量备份(想想如果你的备份是分卷存储的)
+
+为了缓解这两个问题，需要定制稍微复杂点的备份策略。先介绍一个术语"备份级别"(backup level):
+level 0 表示完整备份(full backup)，level n 表示备份上次 level n-1 备份以来修改过的文件，
+如果之前在 level 0 之后没有 level n-1 备份，则是 level n-2 备份以来，一直递归到
+level 0 以来。
+
+上面的简单策略就是周日 level 0 备份，周一 level 1，周二 level 2，
+周三 level 3，...，周六 level 6。 在 O'Reilly 的《Backup & Recovery》
+第二章中专门讲述了这个问题，这是其中推荐的两种策略：
+
+  * 周日做一次完整备份，周一到周六每天做一次 level-1 备份，也就是差异备份
+  * Hanoi 调度策略: 周日 level 0，接下来 level 3/2/5/4/7/6.
+
+Hanoi 调度策略的结果(假设所有备份在午夜十二点开始)：
+  * 周日 level 0;
+  * 周一 level 3，只备份周一修改的文件;
+  * 周二 level 2，因为 level 3 > level 2，所以用 level 0 参照，备份周一、周二修改的文件;
+  * 周三 level 5，以 level 2 参照(我有点奇怪为啥不参照 level 3)，备份周三修改的文件;
+  * 周四 level 4，参照 level 2 (同奇怪)，备份周三、周四修改的文件;
+  * 周五 level 7，参照 level 4，备份周五修改的文件;
+  * 周六 level 6，参照 level 4，备份周五、周六修改的文件;
+
+大部分时候文件备份了两次，比较可靠，大部分时候恢复时也不需要所有备份，比较快速方便，
+但不完美的是周二和周四修改的文件都只备份了一次。《Backup & Recovery》一书推荐
+了扩展到每月的 Hanoi 备份级别策略，就是把每月的第二、三、四周周日 level 0
+改成 level 1，我个人觉得如果时间和存储空间允许，还是每周周日一次 level 0 安全点。
+
+
+除了备份的级别有策略，备份存储空间有限需要重用的话，备份轮转(backup rotation) 
+也是需要考虑策略的，有三种常见做法(http://en.wikipedia.org/wiki/Backup_rotation_scheme)：
+
+   * FIFO(First-In-First-Out)，也就是新的备份总是占用最旧的备份所占空间。
+     这种做法并不是很恰当的，比如保留七次备份，每天备份一次，那么如果一个
+     备份错误一礼拜之内没发现，正确的备份就找不回来了。这种策略的问题是
+     保留的备份历史太短。
+
+   * GFS(Grandfather-father-son)，可能是最常用的备份轮转方案。这是一个分层次
+     的 FIFO，比如三个层次的备份：daily(son), weekly(father), monthly(grandfather),
+     daily backups 每天轮转一次，到周日时被挤出去那个备份升级到 weekly backups 里
+     (注意：这个新的 weekly backup 应该是一个 full backup，或者相对某个旧的
+     weekly backup 的 incremental/differential backup，而不是相对某个 daily
+     backup 的，因为一旦 daily backups 发生轮转，这个参照就无效了），
+     weekly backups 每周轮转一次，到月底时被挤出去那个备份升级到 monthly backups 里。
+     monthly backups 每月轮转一次。如果对备份时间要求更长，还可以建立 quaterly,
+     biannual, annual backups 或者将 grandfather 层挤出的备份转储以长期保存。
+     这种方案兼备了磁盘占用少以及备份周期长的优势，而且很容易理解。
+
+   * Towers of Hanoi，这个更复杂了，没有备份程序辅助，手工很容易出错。
+     这种策略在限制 n 个备份位置的条件下，每天备份一次，那么第一个位置
+     每两天重用一次，第二个位置每四天重用一次，第三个位置每八天重用
+     一次，在最后一个备份位置被重写前，能找回最早 2^(n-1) 天前的备份。
+
+
+++ 备份工具 ++
+
+罗列下 Debian 打包的备份工具，没耐心的同学可以直接跳到本文最末尾的总结。
+
+* rdiff-backup
+
+Python 编写，使用了 librsync，基本相当于一个支持多版本备份的、不支持
+rsync standalone server 的 rsync。
+
+rdiff-backup 对 Linux 文件系统的各种属性都支持很好，使用也很简单，
+定期执行 rdiff-backup dir dir.backup 就可以了。 rdiff-backup 的
+备份存储很简单，首先它把修改过的源文件复制到备份目录，同时做一个
+反向 diff 保存到目标目录下 rdiff-backup-data/increments/ 下对应
+路径，比如 a/b.txt 的修改保存到 rdiff-backup-data/increments/a/b.txt-yyyy-mm-ddThh:mm:ss+tz.diff.gz，
+这种方式带来如下特点：
+
+    * 最近的一次备份可以很容易查看，直接 less、cp 即可;
+    * 源目录不能有 rdiff-backup-data/ 目录;
+    * 找一个文件的历史版本很容易，因为 increments/ 下备份按照原始路径存放，
+      查看每一次备份的文件列表也很容易：rdiff-backup -l dir.backup，然后
+      rdiff-backup --list-at-time 'yyyy-mm-ddThh:mm:ss+tz' dir.backup;
+    * 备份不能存储在 Windows 上，因为文件名有冒号（没测试是否在 Windows 下有转义);
+    * 文件名不能太长，因为文件名包含时间戳(不是问题，一般文件名允许 256 字节);
+    * 由于 increments/ 下文件数目越来越多，对文件系统压力会比较大;
+
+貌似 rdiff-backup 在保存反向 diff 时会判断 diff 和源文件大小，如果 diff
+太大则直接保存一份此文件。这一定程度上减少了最新备份损坏导致旧的反向 diff
+失去意义的风险。
+
+总结： rdiff-backup 很适合文件备份，我自己把它放在定时任务里，
+两年下来备份所占磁盘空间依然很少，运行很稳定。如果担心持续增量
+备份而基准版本损坏，可以定期的恢复某个版本出来，打包单独存放。
+
+
+* rsnapshot
+
+Perl 编写，调用了 rsync， 这个工具在 《Backup and Recovery》、《BSD Hacks》
+中都提到过。rsnapshot 的创意很巧妙，它在第一次备份时把源目录复制一份，
+比如 hourly.0/，然后以后备份时，如果文件没改变，则为这个文件创建一个硬链接，
+比如在 hourly.1/ 里，共享之前的文件备份内容；如果改变了就复制源文件。这样每一个
+备份看起来都是一个完整的拷贝。
+
+这样做的结果是查找备份极为容易，占用磁盘也很少，文件名也没有额外的
+字符，但是跟 rdiff-backup 一样不支持备份级别，没有定期的完整备份，
+某个文件损坏的话它的所有硬链接指向的文件都失效。rsnapshot 没有考虑
+文件扩展属性比如 acl/xattr，备份所在文件系统不支持这些特殊属性
+就会丢失信息，而普通文件属性直接依赖文件系统，比如抵抗不了意外的
+chmod -R 之类的。
+
+rsnapshot 支持 GFS 备份轮转，但所有备份都是包含硬链接的快照，
+需要注意基准版本失效的风险。 rsnapshot 还支持触发外部脚本，比如一个
+导出 postgresql 数据库的脚本，然后对导出的数据文件做备份。
+
+总结： rsnapshot 适合文件 *内容* 备份，其最大的特点是备份的快照
+存储格式就像复制了一份目录树，可以用 find、grep、cp 等直接操作，不过
+rdiff-backup 有个 rdiff-backup-fs 工具为 rdiff-backup 创建一个 fuse
+文件系统，达到类似 rsnapshot 的效果。
+
+如果在乎文件的属性，而且有频繁修改的大文件，推荐用 rdiff-backup。
+
+
+* dirvish
+
+跟 rsnapshot 思路一样，比 rsnapshot 知名度小的多。
+
+
+* Flexbackup
+
+Perl 脚本，自 2003 年已经没更新了，陆续有一些增强性能的补丁被
+发行版收录，比如 Gentoo(http://sources.gentoo.org/cgi-bin/viewvc.cgi/gentoo-x86/app-backup/flexbackup/files/),
+Debian(http://patch-tracker.debian.org/package/flexbackup/1.2.1-6)。
+Flexbackup 整个程序只有一个脚本，很便携，使用也非常简单，就一个配置文件，
+可以备份本地文件，也可以通过rsh/ssh 备份远程服务器上的文件，输出可以是
+磁带、硬盘、文件夹，支持备份级别，每一次备份默认以 tar ball 格式保存。
+
+Flexbackup 没有特别记录文件在哪一个归档里，只记录了每个归档的备份级别
+以及备份日期，如果忘记归档文件名的意义，那么找文件只能逐个备份的
+flexbackup -list 了，其实就是 tar tvf 列出归档里的文件列表，在 tar ball
+很大时会很慢，因此可能需要额外包装下 Flexbackup 把每个归档里的文件
+列表提取出来存放以加快查询速度。
+
+在把玩时发现一个有意思的细节，Flexbackup 在备份结束时 touch 了一个
+时间戳，时间戳文件的 atime 和 mtime 都是备份开始时精确到分钟的时间，
+比如备份是 22:05:33 开始的，那么时间戳文件的 atime 和 mtime 都是
+22:05:00。这个策略会导致在 22:05:00 至 22:05:33 之间修改完毕的文件
+在随后的增量备份里又会被备份一次，更别提在 22:05:33开始到备份结束期间
+修改完毕的文件了。 后一种重复备份显然是必要的，前一种重复备份很可能
+是多余的，但考虑到 atime/mtime 更新有一定误差，为了避免竞态条件，
+将时间戳提前一点就保险多了（疑问：如果刚好在整秒开始备份呢？我觉得
+时间戳提前一分钟更保险)。
+
+细追究下来，不由感叹一下，有没有不经思索的管理员在备份结束后 touch
+一个文件作为时间戳了事呢？ 自己临时写的糙快猛的备份小脚本看起来容易，
+其实往往暗藏陷阱。
+
+Flexbackup 支持备份级别，因此自身就避免快照类备份工具隐含的
+唯一基准版本损坏的风险。
+
+总结：Flexbackup 很适合替换自己临时拼凑的备份小脚本，Flexbackup 的
+做法传统、直白、可靠，但对于数据库、版本库等需要用其它工具导出下再让
+Flexbackup 备份，文件的扩展属性如 acl、xattr 需要额外处理。另外难得
+的是 Flexbackup 考虑了磁带设备，后来的备份工具往往假定了备份存储是
+硬盘，需要管理员额外处理硬盘到磁带的转储。
+
+
+* backup2l
+
+backup2l 就像是 Flexbackup 的傻瓜版，Flexbackup 的功能是比较低级的，
+提供了做多级备份的功能，但多级备份时机、备份轮转策略都需要额外写
+脚本以及 cron job，而 backup2l 直接提供了这两个特性(当然就不能随意
+的制定多级备份策略了)，另一个优点是 backup2l 生成归档时顺带生成了
+一份文件列表，这样查找文件会快很多，不用每次都去 tar tf 归档文件查看了。
+backup2l 还生成了文件的 md5 摘要，可以用来校验备份是否损坏。
+
+backup2l 只考虑了备份到磁盘，没专门考虑磁带的情况，更需要注意的是
+backup2l 采用的 level 0, level 1, level 2 这样的逐级增量备份，前面
+讲过这其实是不大好的做法。
+
+总结：backup2l 牺牲了一点灵活性和可靠性，引入了更多特性，并且使用方便。
+
+
+* boxbackup
+
+C/S 架构的备份工具，号称支持 OpenBSD/Linux/NetBSD/FreeBSD/MacOS X/Windows/Solaris,
+在 http://www.boxbackup.org/wiki/Installation 提到 client 端删除旧文件时，
+服务端也会很快的清除这个文件的备份，我没大看明白这是在说什么，貌似是
+boxbackup 实现的局限导致可能丢老数据，需要用户手动绕过这个问题。
+
+boxbackup-client 有两种模式，一种是作为服务持续运行，可以快速持续的
+探测修改并备份到服务器上，另一种是作为定时任务运行，得到客户端被备份
+文件的快照。client 和 server 之间用 ssl 认证和通讯，客户端备份的文件
+可以被加密后再传给服务器。
+
+boxbackup 的安装过程官方文档在密钥管理那块语焉不详，dpkg-reconfigure 又报错，
+还好 /usr/share/doc/boxbackup-server/READ.Debian.gz 说的比较清楚。 下面是
+安装过程：
+
+Server:
+    # aptitude install boxbackup-server
+    # mkdir /backup
+    # chown bbstored:bbstored /backup
+
+    ### "dpkg-reconfigure boxbackup-server" fails, have to configure it manually.
+    # raidfile-config /etc/boxbackup 4096 /backup
+    # bbstored-config /etc/boxbackup gold.corp.example.com bbstored
+    # bbstored-certs /etc/boxbackup/ca init
+    # bbstored-certs /etc/boxbackup/ca sign-server /etc/boxbackup/bbstored/gold.corp.example.com-csr.pem
+    # cp -a /etc/boxbackup/ca/servers/gold.corp.example.com-cert.pem /etc/boxbackup/bbstored
+    # cp -a /etc/boxbackup/ca/roots/clientCA.pem /etc/boxbackup/bbstored
+    # service boxbackup-server restart
+    # bstoreaccounts create 1 0 1024M 1250M
+
+上面创建了帐号 1，帐号可以是八位十六进数。
+
+Client:
+    # aptitude install boxbackup-client
+    # bbackupd-config /etc/boxbackup lazy 1 gold.corp.example.com /var/lib/bbackupd /home
+
+    如果 lazy 改成 snapshot，那么需要把 /etc/cron.d/boxbackup-client 中的注释打开。
+
+    ### On server side:
+    # bbstored-certs /etc/boxbackup/ca sign /etc/boxbackup/bbackupd/1-csr.pem
+    ### in this case, server and client are in same box
+    # cp -a /etc/boxbackup/ca/clients/1-cert.pem /etc/boxbackup/bbackupd/
+    # cp -a /etc/boxbackup/ca/roots/serverCA.pem /etc/boxbackup/bbackupd/
+    # service boxbackup-client restart
+
+boxbackup 的这套 ssl 证书管理看起来挺赞的，很符合企业环境的需求。备份在服务端
+的存储有点像 GIT 的 object database，boxbackup 有自己的 RAID5 软件实现，提交文
+件存储的可靠性，也可以直接使用硬件 RAID 或者 Linux 的 device mapper 支持。 客
+户端的 bbackupquery 有交互模式，像是个 ftp 客户端，可以枚举文件、比较备份和本
+地的区别、恢复文件等等。
+
+但是，在我修改一个本地文件后，备份里的这个文件居然消失了，bbackupctl force-sync
+后依旧，太不稳定了！ box-backup server 的文件存储格式看起来比较复杂，没有 tar ball
+或者分散单文件存储可靠。
+
+
+总结：看起来特性很不错，可是有 bug。。。。
+
+
+* BackupPC
+
+在《Backup & Recovery》中谈到三个开源备份工具，Amanda, BackupPC, Bacula，
+但 BackupPC 的名气小的多，可能是 BackupPC 这个名字太弱了，怎么看都无法
+联想到企业级备份软件。BackupPC 对 Windows 支持不是很好，据说将来会有
+支持 Windows VSS 的 BackupPC windows 客户端。
+
+BackupPC 使用 Perl 编写，最大的特色一是文件去重，二是方便的 Web 界面。BackupPC
+以文件长度以及文件部分内容计算 MD5 摘要作为备份文件的文件名，所以可以跨目录树
+跨多次备份去重。 Web 界面可以修改配置选项，浏览各个被备份主机的情况，
+浏览备份内容，发起备份，恢复文件等等，不愧是企业级的派头。
+
+BackupPC 是 pull 模式的，可以使用 tar over rsh/ssh、rsync over rsh/ssh、rsyncd
+和 smbclient 备份文件，推荐使用 rsync or rsyncd，因为 tar 和 smbclient 方式使用
+文件的 mtime 判断是否需要备份，没考虑 ctime 以及其它文件属性，所以在 *增量备份*
+时可能会漏备份东西(关键是 mtime 是可以修改的)，比如 tar xf 出来的文件有很早的 mtime，
+还有删除和改名的文件。可以用 Filesys::SmbClient 替换 smbclient 程序判断 mtime
+之外的文件属性。
+
+BackupPC 对 Windows 支持不是太好，不能备份被锁定的文件，不能备份非 POSIX 的文件属性。
+对于文件锁定问题，BackupPC 会发邮件提醒用户某个文件长时间没被备份，提示用户
+退出锁定此文件的程序，并使用邮件里提到的链接触发备份。 BackupPC 备份 Windows
+主要用 samba 获取文件，在公司里可以由管理员建立一个域帐号，加入每台 Windows 机器的
+Backup operators 组里。另一个办法是用 BackupPC 作者打包的 cygwin-rsyncd
+(http://sourceforge.net/projects/backuppc/files/cygwin-rsyncd/2.6.8_0/)，
+不过有点老了，可以自己打包最新的 cygwin 里的 rsync。
+
+总结： 不想鼓捣复杂的 Amanda、Bacula 的话，BackupPC 是很值得尝试的。
+
+
+* Amanda
+
+
+* Bacula
+
+
+* Burp
+
+Burp 的作者在其主页数落了不少 Bacula 的缺点：http://burp.grke.net/why.html
+大致翻译过来，Bacula：
+   * 配置太复杂了，Bacula 分成四个独立服务，每个有自己的配置文件;
+   * 代码很复杂，难维护
+   * 主要为磁带备份设计，不适合磁盘存储
+   * 编目（某个文件在哪个归档中）和归档分开存放，导致维护麻烦
+   * 总是复制整个文件，哪怕只改了几个字节
+   * 非常依赖时钟精度
+   * 笔记本上备份难以调度（因为笔记本可能随时中止备份？)
+   * 不支持断点续备
+   * 备份轮转策略难以配置合理
+   * 不支持 Windows EFS 文件
+
+在 http://burp.grke.net/faq.html 中有 Burp 详细的特性清单，看起来相当诱人。
+在 Debian 上浅试了下，体验还是很愉悦的，安装完 burp 包后修改 /etc/default/burp
+启用它，然后 service burp start 启动之，这就完事了。默认 /etc/burp/burp.conf
+会备份 /home，此目录内容巨大的同学记得修改下再测试。/etc/cron.d/burp 这
+个客户端的定时任务默认是注释掉了，手动执行 burp -a b 会做一次完整备份。
+burp 服务端的备份默认放在 /var/spool/burp 下，按客户端的 cname 分目录存
+放，被备份的文件被 gzip 压缩后按照原来的目录布局存放，每一个备份是一个
+快照，可以选择是否用硬链接节约磁盘，另外每一个备份额外存放了文件清单、
+相对下一次备份的文件内容差异等信息。由于每个文件的信息是单独存放的，所以
+会消耗大量 inode。
+
+我觉得 burp 比较爽的地方：
+   * 客户端和服务端是同一个程序，部署简单;
+   * 服务端和客户端之间用 ssl 证书验证，而且证书是自动生成的;
+   * 不依赖数据库;
+   * 每一个备份是一个快照，方便查看;
+   * 查看备份列表、备份里的文件列表很方便，还支持文件路径的过滤;
+   * 客户端执行 burp -a t 时由服务端决定是否到时间点需要备份了;
+   * 执行时的日志输出挺清楚的，代码简单扫了下，整洁朴实;
+   * 支持 GFS 日志轮转策略;
+   * 服务端可以在 /var/spool/burp/xxx/ 下 touch 一个 backup 文件，这会让客户端
+     xxx 下次 burp -a t 时立马触发备份，间接达到了温和的 pull 备份效果;
+   * 保存了 sha1 摘要，可以校验备份;
+   * 支持 Windows
+   * 断点续备
+
+从 2011 年 1 月到几天前(2012-5-28) 发布 burp-1.3.6，虽然历史不久，但作者
+卯足了劲跟 Bacula 唱对台戏似的，相当活跃。
+
+Burp 不支持多级别，每一份快照默认不使用硬链接节约空间（猜测是传输
+时只传差异部分，写入磁盘时把旧备份拷贝一份再应用补丁，兼顾传输高效以及存储
+可靠)，如果使用硬链接的话又有基准版本损坏导致后续备份失效的风险，需要定期
+恢复一份出来单独存储。
+
+
+总结： 值得评估试用。
+
+
+* backupninja
+
+backupninja 基本是一个 shell 写成的备份框架，依靠插件（称为 handler)
+做具体的数据库导出、版本库导出、数据传输等操作，比如 mysql 导出、postgresql
+导出、rsync 传输、rdiff-backup 传输、duplicity 传输，backupninja 把它们
+的配置集中起来统一格式，然后调用各个插件。对于 tar 插件，备份每次都是
+完整备份，对于 rsync/rdiff-backup/duplicity，备份的存储是快照式的，
+貌似会使用硬链接以节约磁盘。backupninja 提供了一个 curses 的 ninjahelper
+生成配置文件，还挺好上手。
+
+个人觉得 backupninja 这层框架太鸡肋了，统一的配置文件格式虽好，但可能
+新增问题。可怜其作者从 2004 年开始持续开发这么个东西，今年(2012) 年
+马上就要发布正式的 1.0 了，汗！
+
+
+* obnam
+
+Python 编写，很新的备份工具，一些特点：
+   * 快照似的备份，每一个备份看起来都像是完整备份
+   * 跨备份、跨文件的去重
+   * 使用 GnuPG 做加密备份
+   * 支持 pull 和 push 模式的远程备份
+   * 断点续备
+
+安装使用了下，居然第一次备份都做不了，抛异常。。。看来相当不稳定。
+看错误信息，似乎存储格式用了什么 B-tree，再加上快照、去重，看起来
+备份出错导致数据丢失的可能性很大，作者有点玩弄技巧似的。
+
+总结：不稳定，不推荐。
+
+
+* duplicity
+
+跟 rdiff-backup 很像，Python 编写，也是基于 librsync。不同的是存储
+时用单个 tar 文件保存归档，而不是 rdiff-backup 那样分散在各自目录里，
+另外 duplicity 用 GnuPG 加密了文件列表以及归档内容，可以防止备份
+所在服务器查看或者修改归档。
+
+总结：使用没有 rdiff-backup 方便，没有特殊考虑文件的 acl 和 xattr 属性。
+
+
+* hdup
+
+hdup 作者声称不再维护这个工具了，他转向了 rdup。
+
+总结：忽略。
+
+
+* rdup
+
+rdup 只生成需要备份的文件列表，并不真的做备份，需要其它工具配合，
+以遵循小工具合作的哲学。
+
+总结：忽略。
+
+
+* vbackup
+
+一套 shell 脚本，很简陋的插件机制。
+
+总结：忽略之。
+
+
+* slbackup
+
+对 rdiff-backup 的简单封装，给一个基于 Debian 的教育用途发行版定制的
+定时备份任务。
+
+总结：忽略之。
+
+
+* backup-manager
+
+backup-manager 做的事情很简单，定期用 tar 做完整备份，或者做完整备份
+然后做增量备份，将生成的 tar ball 通过 ssh/ftp/rsync 等上传到备份
+服务器。backup-manager 支持导出 mysql 数据库以及 svn 代码库，以及用
+GnuPG 加密 tar ball。
+
+总结： 压根没考虑恢复这回事，不直接支持查询备份文件所在归档，基本就是
+个糙快猛的打包、上传集中存储脚本，远远不满足一个备份系统的需求。
+
+
+* chiark-backup
+
+chiark.greenend.org.uk 网站使用的备份脚本。
+
+
+++ 总结 ++
+
+简单点，用 rdiff-backup (快照式) 或者 Flexbackup、backup2l(传统多级别备份)，
+高级点，用 Burp(push 模式) or BackupPC(pull 模式)，更企业级点，用 Amanda or
+Bacula。
+
+Flexbackup、Bacula、Amanda 直接考虑了磁带备份，Amanda、Bacula、Burp 支持
+Windows 的VSS(Volume Shadow copy Service)，可以备份正被打开的文件。
+
+快照式备份最好定期转储一份完整备份出来，以免因基准版本损坏或者硬链接共同
+指向的文件内容损坏，哪怕使用硬件 RAID、软件 RAID，还是有可能文件系统损坏。
+
+只针对磁盘设计的备份工具，可以用自定义脚本定期转储到磁带、光盘上。
+
+
+rdiff-backup: 快照式的持续增量备份，最好加辅助脚本定期导出某个完整版本，
+             避免基准版本损坏。这个导出的备份需要额外脚本做 GFS 备份轮转。
+             如果不重视文件扩展属性，也没有频繁修改的大文件，可以用 rsnapshot。
+             两个都不支持多级别备份，都是针对以磁盘作为备份存储设计的。
+
+Flexbackup: 传统的多级别备份，支持磁带，需要额外编写备份轮转脚本，非常灵活。
+
+Backup2l: 传统的多级别备份，针对磁盘设计，支持备份轮转策略，不够灵活但简便。
+
+Burp: 快照式备份，针对磁盘设计。
+
+BackupPC: 快照式备份，针对磁盘设计。
+
+Bacula:
+
+Amanda:
+

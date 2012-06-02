@@ -1,0 +1,22 @@
+emacs + auctex + whizzytex
+vim + latexsuite
+Gummi
+TexWorks
+TexStudio (Fork of TexMaker)
+TexMaker
+
+TexShop (for Mac)
+Scribo (for Mac)
+TexPad (for Mac)
+
+Bakoma
+Scientifc WorkPlace (for Windows)
+
+WinEdt (for Windows)
+
+-----------------------------
+Actually not TeX editors:
+
+lyx
+texmacs
+

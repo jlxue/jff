@@ -9,22 +9,15 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 . $SCRIPT_DIR/lib.sh
 
 # fai.sh        fai-project.org
-# subversion.sh reviewboard, Rietveld
-# git.sh        gitweb/cgit, gitolite, git-http-backend, gerrit
 # ci.sh         jenkins
-# backup.sh     bacula/amanda/burp/backuppc/obnam
+# backup.sh     bacula/amanda/backuppc
 # vpn.sh        openvpn
 # grok.sh       opengrok
 # search.sh     apache solr, katta.sourceforge.net
 # monitor.sh    cacti, nagios, munin, SEC(Simple Event Correlator), logcheck, fluentd, scribe
 #               monit
 # sugarCRM?, groupware?, zimbra?, asterisk?
-# web conference:
-#   http://incubator.apache.org/openmeetings/
-#   http://code.google.com/p/bigbluebutton/
-#   https://www.webhuddle.com/
-#   http://ekiga.org
-#   http://moodle.org
+
 
 # postgresql installation script requires correct locale setting,
 # so "locale.sh" is the first.

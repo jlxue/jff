@@ -1,0 +1,5 @@
+Other sieve tools:
+
+sieveshell (in cyrus-admin-2.4 package)
+sieve-connect (in sieve-connect package)
+
