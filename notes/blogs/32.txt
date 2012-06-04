@@ -124,7 +124,9 @@ Hanoi 调度策略的结果(假设所有备份在午夜十二点开始)：
 
 ++ 备份工具 ++
 
-罗列下 Debian 打包的备份工具，没耐心的同学可以直接跳到本文最末尾的总结。
+罗列下 Debian 打包的备份工具，没耐心的同学可以直接跳到本文最末尾的总结，
+精力有限，没有亲自折腾 Amanda, Bacula, BackupPC。
+
 
 * rdiff-backup
 
@@ -335,11 +337,11 @@ Backup operators 组里。另一个办法是用 BackupPC 作者打包的 cygwin-
 
 * Amanda
 
-Amanda 是老牌开源备份软件了，专门针对备份存储介质为磁带设计的，连备份
-到磁盘时也是写入虚拟磁带。。。我好像在电影里见过自动换光盘的机器，但
-还从来没见过自动换磁带的机器，估摸着如果是用磁带备份文件的话，Amanda
-还是相当强大的。在如今这个硬盘涨价、容量增加但速度停滞不前的时代，
-磁带作为数据备份是个可以考虑的选择，参见
+Amanda 是老牌开源备份软件了，现在依然在发布新版本，专门针对备份存储介质为磁带
+设计的，连备份到磁盘时也是写入虚拟磁带。。。我好像在电影里见过自动换光盘的机器，
+但还从来没见过自动换磁带的机器，估摸着如果是用磁带备份文件的话，Amanda还是相
+当强大的。在如今这个硬盘涨价、容量增加但速度停滞不前的时代，磁带作为数据备份是
+个可以考虑的选择，参见
 http://hardware.solidot.org/article.pl?sid=12/05/25/0647205 和
 http://hardware.solidot.org/article.pl?sid=12/03/30/0515204 。
 
@@ -353,6 +355,19 @@ windows 客户端打包了一个 MySQL 服务器，感觉有点夸张。
 Bacula 比 Amanda 年轻，但感觉已然赶超了，据 Bacula 网站上说法，从
 sf.net 下载统计看，Bacula 是最受欢迎的备份工具。 没深入研究这东西，
 光从 Windows client 看，确实是这一堆里看起来最企业级的。
+
+Bacula 跟 Amanda 一样，也是一开始针对备份存储为磁带的情形设计的，
+虽然后来也支持备份到磁盘，但是也基本是把文件看成磁带管理的，早期
+版本连随机定位磁盘文件都不行。我没有深入研究 Bacula 在这方面的缺点，
+Burp 作者倒是批评了这个。
+
+Amanda 貌似没有文件去重一说，Bacula 有极为基本的文件去重：第一次备份
+可以指定为 base backup，之后备份中如果有文件属性、内容没改变的文件包含
+在 base backup 中，则会跳过此文件的备份。 这种做法可以使用于备份操作系统，
+因为操作系统一旦安装后系统文件大部分不会更改，但个人觉得这种去重的做法局限性
+太大了，伊不是按照文件 md5 or sha1 摘要去重的。
+
+Bacula 的配置相当复杂，参数、概念暴多。
 
 
 * Burp
@@ -501,12 +516,18 @@ chiark.greenend.org.uk 网站使用的备份脚本。
 
 ++ 总结 ++
 
-简单点，用 rdiff-backup (快照式) 或者 Flexbackup、backup2l(传统多级别备份)，
-高级点，用 Burp(push 模式) or BackupPC(pull 模式)，更企业级点，用 Amanda or
-Bacula。
+简单点，用 rdiff-backup (快照式) 或者 Flexbackup、backup2l(多级别备份)，
+高级点，用 Burp(push 模式) or BackupPC(pull 模式)，更企业级点，用 Amanda or Bacula。
 
-Flexbackup、Bacula、Amanda 直接考虑了磁带备份，Amanda、Bacula、Burp 支持
-Windows 的VSS(Volume Shadow copy Service)，可以备份正被打开的文件。
+Flexbackup、Bacula、Amanda 直接支持磁带备份，后两者能自动管理磁带。
+
+Amanda、Bacula、Burp 支持 Windows 的VSS(Volume Shadow copy Service)，可以备份正被打开的文件。
+
+如果有频繁重复的文件，只有 BackupPC 做的最好，可以跨目录树跨备份去重，
+其它基本都是两次备份之间同一文件名去重，最常见的是用硬链接。Amanda
+和 Bacula 这两个企业级备份软件基本可以说没有去重特性(磁带的去重天生
+就不容易搞，顺序读取加多磁带倒腾，会死人的)。
+
 
 快照式备份最好定期转储一份完整备份出来，以免因基准版本损坏或者硬链接共同
 指向的文件内容损坏，哪怕使用硬件 RAID、软件 RAID，还是有可能文件系统损坏。
@@ -519,15 +540,15 @@ rdiff-backup: 快照式的持续增量备份，最好加辅助脚本定期导出
              如果不重视文件扩展属性，也没有频繁修改的大文件，可以用 rsnapshot。
              两个都不支持多级别备份，都是针对以磁盘作为备份存储设计的。
 
-Flexbackup: 传统的多级别备份，支持磁带，需要额外编写备份轮转脚本，非常灵活。
+Flexbackup: 多级别备份，支持磁带，需要额外编写备份轮转脚本，非常灵活。
 
-Backup2l: 传统的多级别备份，针对磁盘设计，支持备份轮转策略，不够灵活但简便。
+Backup2l: 多级别备份，针对磁盘设计，支持备份轮转策略，不够灵活但简便。
 
 Burp: 快照式备份，针对磁盘设计。
 
 BackupPC: 快照式备份，针对磁盘设计。
 
-Bacula:
+Bacula: 多级别备份，针对磁带设计。
 
-Amanda: 传统的多级别备份，针对磁带设计。
+Amanda: 多级别备份，针对磁带设计。
 
