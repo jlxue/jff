@@ -8,6 +8,7 @@
  *  The "access.log" contains (user, url) pairs separated by "\t".
  */
 
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
 #include <map>
@@ -59,7 +60,7 @@ static void read_access_log(istream&    in,
         string line;
         getline(in, line);
 
-        if (line.length() == 0)
+        if (line.empty())
             continue;
 
         string::size_type pos = line.find('\t');
@@ -126,21 +127,59 @@ static void init_first_social(const UrlIdToUserIds& log,
 {
     UrlIdToUserIds::const_iterator it = log.begin();
     for (/* empty */; it != log.end(); ++it) {
-        set<UrlId>* urls = new set<UrlId>();
-        set<UserId>* users = new set<UserId>(*(it->second));
+        if (! it->second->empty()) {
+            set<UrlId>* urls = new set<UrlId>();
+            set<UserId>* users = new set<UserId>(*(it->second));
 
-        urls->insert(it->first);
-        social.push_back(SocialCircle(urls, users));
+            urls->insert(it->first);
+            social.push_back(SocialCircle(urls, users));
+        }
     }
 }
 
 
-static bool extend_social_circle(const Social& oldSocial,
+/**
+ * Fill a new social instance by extending social circles
+ * in old social instance to include one more url id for
+ * each circle, see the comment for "Social" type definition.
+ */
+static void extend_social_circle(const Social& oldSocial,
                                  Social& newSocial)
 {
-    bool extended = false;
+    Social::size_type oldCircleCount = oldSocial.size();
+    if (oldCircleCount < 2) {
+        // need at least two circles to make a bigger circle
+        return;
+    }
 
-    return extended;
+    for (Social::size_type i = 0; i < oldCircleCount - 1; ++i) {
+        SocialCircle circleA = oldSocial[i];
+
+        for (Social::size_type j = i + 1; j < oldCircleCount; ++j) {
+            SocialCircle circleB = oldSocial[j];
+
+            set<UserId>* users = new set<UserId>();
+            set_intersection(circleA.second->begin(),
+                             circleA.second->end(),
+                             circleB.second->begin(),
+                             circleB.second->end(),
+                             inserter(*users, users->begin()));
+
+            if (users->empty()) {
+                delete users;
+                continue;
+            }
+
+            set<UrlId>* urls = new set<UrlId>();
+            set_intersection(circleA.first->begin(),
+                             circleA.first->end(),
+                             circleB.first->begin(),
+                             circleB.first->end(),
+                             inserter(*urls, urls->begin()));
+
+            newSocial.push_back(SocialCircle(urls, users));
+        }
+    }
 }
 
 
@@ -161,6 +200,23 @@ int main(int argc, char** argv)
     init_first_social(log, *social);
     socials.push_back(social);
 
+    if (social->empty()) {
+        cerr << "First social has zero social circle.\n";
+    } else {
+        do {
+            Social* newSocial = new Social();
+            extend_social_circle(*social, *newSocial);
+            social = newSocial;
+
+            if (social->empty()) {
+                break;
+            } else {
+                cerr << "Social: urls " << (*social)[0].first->size() <<
+                    " circles " << social->size() << "\n";
+                socials.push_back(social);
+            }
+        } while (true);
+    }
 
     return EXIT_SUCCESS;
 }
