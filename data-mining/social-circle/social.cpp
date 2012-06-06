@@ -9,9 +9,11 @@
  */
 
 #include <algorithm>
+#include <cassert>
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <queue>
 #include <set>
 #include <vector>
 
@@ -27,7 +29,7 @@ typedef map<string, UrlId>      UrlToId;
 typedef map<UrlId, set<UserId>* >   UrlIdToUserIds;
 
 /**
- * The "Social" is a vector because it requires to be sorted for
+ * The "Social" is a vector because it requires to be ordered for
  * extend_social_circle().
  *
  *  social with small circles:
@@ -44,6 +46,23 @@ typedef map<UrlId, set<UserId>* >   UrlIdToUserIds;
  */
 typedef pair<set<UrlId>*, set<UserId>* > SocialCircle;
 typedef vector<SocialCircle> Social;
+
+
+template<typename T, typename Compare = std::less<T> >
+class TopN {
+public:
+    TopN(unsigned n) {
+        assert(n > 0);
+
+        this.n = n;
+        v.reserve(n);
+    }
+
+private:
+    unsigned    n;
+    vector<T>   v;
+    priority_queue<T> q;
+};
 
 
 static void read_access_log(istream&    in,
@@ -171,11 +190,11 @@ static void extend_social_circle(const Social& oldSocial,
             }
 
             set<UrlId>* urls = new set<UrlId>();
-            set_intersection(circleA.first->begin(),
-                             circleA.first->end(),
-                             circleB.first->begin(),
-                             circleB.first->end(),
-                             inserter(*urls, urls->begin()));
+            set_union(circleA.first->begin(),
+                      circleA.first->end(),
+                      circleB.first->begin(),
+                      circleB.first->end(),
+                      inserter(*urls, urls->begin()));
 
             newSocial.push_back(SocialCircle(urls, users));
         }
@@ -198,24 +217,25 @@ int main(int argc, char** argv)
 
     Social* social = new Social();
     init_first_social(log, *social);
-    socials.push_back(social);
 
     if (social->empty()) {
+        delete social;
         cerr << "First social has zero social circle.\n";
     } else {
-        do {
+        for (;;) {
+            socials.push_back(social);
+            cerr << "Social: urls " << (*social)[0].first->size() <<
+                ", circles " << social->size() << "\n";
+
             Social* newSocial = new Social();
             extend_social_circle(*social, *newSocial);
             social = newSocial;
 
             if (social->empty()) {
+                delete social;
                 break;
-            } else {
-                cerr << "Social: urls " << (*social)[0].first->size() <<
-                    " circles " << social->size() << "\n";
-                socials.push_back(social);
             }
-        } while (true);
+        }
     }
 
     return EXIT_SUCCESS;
