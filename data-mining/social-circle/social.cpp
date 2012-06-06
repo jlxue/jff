@@ -10,8 +10,9 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <set>
 #include <map>
+#include <set>
+#include <vector>
 
 using namespace std;
 
@@ -23,6 +24,25 @@ typedef map<string, UserId>     UserToId;
 typedef map<string, UrlId>      UrlToId;
 
 typedef map<UrlId, set<UserId>* >   UrlIdToUserIds;
+
+/**
+ * The "Social" is a vector because it requires to be sorted for
+ * extend_social_circle().
+ *
+ *  social with small circles:
+ *      [ <1> => <users...>, <2> => <users...>, ... ]
+ *
+ *  social with big circles:
+ *      [ <1,2> => <users...>,
+ *        <1,3> => <users...>,
+ *        ....
+ *        <2,3> => <users...>,
+ *        <2,4> => <users...>,
+ *        ....
+ *      ]
+ */
+typedef pair<set<UrlId>*, set<UserId>* > SocialCircle;
+typedef vector<SocialCircle> Social;
 
 
 static void read_access_log(istream&    in,
@@ -64,7 +84,7 @@ static void read_access_log(istream&    in,
             } else {
                 user_id = users_count;
                 users[user] = user_id;
-                ++users_count;
+                ++users_count;  // XXX: abort on overflow
             }
         }
 
@@ -79,7 +99,7 @@ static void read_access_log(istream&    in,
             } else {
                 url_id = urls_count;
                 urls[url] = url_id;
-                ++urls_count;
+                ++urls_count;   // XXX: abort on overflow
             }
         }
 
@@ -101,16 +121,46 @@ static void read_access_log(istream&    in,
 }
 
 
+static void init_first_social(const UrlIdToUserIds& log,
+                              Social& social)
+{
+    UrlIdToUserIds::const_iterator it = log.begin();
+    for (/* empty */; it != log.end(); ++it) {
+        set<UrlId>* urls = new set<UrlId>();
+        set<UserId>* users = new set<UserId>(*(it->second));
+
+        urls->insert(it->first);
+        social.push_back(SocialCircle(urls, users));
+    }
+}
+
+
+static bool extend_social_circle(const Social& oldSocial,
+                                 Social& newSocial)
+{
+    bool extended = false;
+
+    return extended;
+}
+
+
 int main(int argc, char** argv)
 {
     UserToId users;
     UrlToId urls;
     UrlIdToUserIds log;
+    vector<Social*> socials;
 
     read_access_log(cin, users, urls, log);
 
     cerr << "Unique users: " << users.size() <<
         ", unique urls: " << urls.size() << "\n";
+
+
+    Social* social = new Social();
+    init_first_social(log, *social);
+    socials.push_back(social);
+
 
     return EXIT_SUCCESS;
 }
