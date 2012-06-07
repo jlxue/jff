@@ -179,7 +179,9 @@ static void read_access_log(istream&    in,
 
 
 static void init_first_social(const UrlIdToUserIds& log,
-                              Social& social, unsigned maxCircleCount)
+                              Social& social,
+                              unsigned maxCircleCount,
+                              unsigned minUserCount)
 {
     if (maxCircleCount == 0)
         return;
@@ -188,7 +190,7 @@ static void init_first_social(const UrlIdToUserIds& log,
 
     UrlIdToUserIds::const_iterator it = log.begin();
     for (/* empty */; it != log.end(); ++it) {
-        if (! it->second->empty()) {
+        if (it->second->size() >= minUserCount) {
             set<UrlId>* urls = new set<UrlId>();
             set<UserId>* users = new set<UserId>(*(it->second));
 
@@ -268,6 +270,7 @@ static void extend_social_circle(const Social& oldSocial,
                         users->size() << ") circle due to limit " <<
                         maxCircleCount << "\n";
                 }
+
                 delete smallest.first;
                 delete smallest.second;
             }
@@ -293,7 +296,7 @@ int main(int argc, char** argv)
 
 
     Social* social = new Social();
-    init_first_social(log, *social, 1000);
+    init_first_social(log, *social, 1000, 10);
 
     if (social->empty()) {
         delete social;
