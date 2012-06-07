@@ -54,40 +54,36 @@ public:
     TopN(unsigned n) {
         assert(n > 0);
 
-        is_heap = false;
-        this.n = n;
+        this->n = n;
         v.reserve(n);
     }
 
-    void push(const T& e) {
+    T push(const T& e) {
         if (v.size() < n) {
             v.push_back(e);
-            return;
+            return T();
         }
 
-        if (! is_heap) {
-            make_heap(v.begin(), v.end(), Compare());
-            is_heap = true;
-        }
+        sort();
 
-        pop_heap(v.begin(), v.end(), Compare());
-        v[v.size() - 1] = e;
-        push_heap(v.begin(), v.end(), Compare());
+        T smallest = v[n - 1];
+        v[n - 1] = e;
+
+        return smallest;
     }
 
-    vector<T>& sorted_vector() const {
-        sort_heap(v.begin(), v.end());
-        is_heap = false;
+    void sort() {
+        std::sort(v.begin(), v.end(), Compare());
+    }
+
+    const vector<T>& content(bool doSort = true) const {
+        if (doSort)
+            sort();
+
         return v;
     }
 
-    vector<T> sorted_vector() const {
-        vector<T>& v2 = sorted_vector();
-        return v2;
-    }
-
 private:
-    bool        is_heap;
     unsigned    n;
     vector<T>   v;
 };
