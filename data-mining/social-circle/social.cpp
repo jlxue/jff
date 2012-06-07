@@ -48,20 +48,48 @@ typedef pair<set<UrlId>*, set<UserId>* > SocialCircle;
 typedef vector<SocialCircle> Social;
 
 
-template<typename T, typename Compare = std::less<T> >
+template<typename T, typename Compare = greater<T> >
 class TopN {
 public:
     TopN(unsigned n) {
         assert(n > 0);
 
+        is_heap = false;
         this.n = n;
         v.reserve(n);
     }
 
+    void push(const T& e) {
+        if (v.size() < n) {
+            v.push_back(e);
+            return;
+        }
+
+        if (! is_heap) {
+            make_heap(v.begin(), v.end(), Compare());
+            is_heap = true;
+        }
+
+        pop_heap(v.begin(), v.end(), Compare());
+        v[v.size() - 1] = e;
+        push_heap(v.begin(), v.end(), Compare());
+    }
+
+    vector<T>& sorted_vector() const {
+        sort_heap(v.begin(), v.end());
+        is_heap = false;
+        return v;
+    }
+
+    vector<T> sorted_vector() const {
+        vector<T>& v2 = sorted_vector();
+        return v2;
+    }
+
 private:
+    bool        is_heap;
     unsigned    n;
     vector<T>   v;
-    priority_queue<T> q;
 };
 
 
