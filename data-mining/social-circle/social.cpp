@@ -48,7 +48,17 @@ typedef pair<set<UrlId>*, set<UserId>* > SocialCircle;
 typedef vector<SocialCircle> Social;
 
 
-template<typename T, typename Compare = greater<T> >
+class SocialCircleUsersComparator
+{
+public:
+    bool operator()(const SocialCircle& a,
+                    const SocialCircle& b) const {
+        return a.second->size() > b.second->size();
+    }
+};
+
+
+template<typename T, typename Comparator = greater<T> >
 class TopN {
 public:
     TopN(unsigned n) {
@@ -67,16 +77,19 @@ public:
         sort();
 
         T smallest = v[n - 1];
-        v[n - 1] = e;
+        if (Comparator()(e, smallest)) {
+            v[n - 1] = e;
+            return smallest;
+        }
 
-        return smallest;
+        return T();
     }
 
     void sort() {
-        std::sort(v.begin(), v.end(), Compare());
+        std::sort(v.begin(), v.end(), Comparator());
     }
 
-    const vector<T>& content(bool doSort = true) const {
+    const vector<T>& content(bool doSort = true) {
         if (doSort)
             sort();
 
@@ -166,8 +179,13 @@ static void read_access_log(istream&    in,
 
 
 static void init_first_social(const UrlIdToUserIds& log,
-                              Social& social)
+                              Social& social, unsigned maxCircleCount)
 {
+    if (maxCircleCount == 0)
+        return;
+
+    TopN<SocialCircle, SocialCircleUsersComparator> topN(maxCircleCount);
+
     UrlIdToUserIds::const_iterator it = log.begin();
     for (/* empty */; it != log.end(); ++it) {
         if (! it->second->empty()) {
@@ -175,9 +193,24 @@ static void init_first_social(const UrlIdToUserIds& log,
             set<UserId>* users = new set<UserId>(*(it->second));
 
             urls->insert(it->first);
-            social.push_back(SocialCircle(urls, users));
+
+            SocialCircle c(urls, users);
+            SocialCircle smallest = topN.push(c);
+            if (smallest.second) {
+                if (smallest.second->size() == users->size()) {
+                    cerr << "WARN: " << urls->size() <<
+                        " degree circle drops same size(" <<
+                        users->size() << ") circle due to limit " <<
+                        maxCircleCount << "\n";
+                }
+                delete smallest.first;
+                delete smallest.second;
+            }
         }
     }
+
+    const Social& v = topN.content();
+    copy(v.begin(), v.end(), back_inserter(social));
 }
 
 
@@ -187,8 +220,14 @@ static void init_first_social(const UrlIdToUserIds& log,
  * each circle, see the comment for "Social" type definition.
  */
 static void extend_social_circle(const Social& oldSocial,
-                                 Social& newSocial)
+                                 Social& newSocial,
+                                 unsigned maxCircleCount)
 {
+    if (maxCircleCount == 0)
+        return;
+
+    TopN<SocialCircle, SocialCircleUsersComparator> topN(maxCircleCount);
+
     Social::size_type oldCircleCount = oldSocial.size();
     if (oldCircleCount < 2) {
         // need at least two circles to make a bigger circle
@@ -220,9 +259,23 @@ static void extend_social_circle(const Social& oldSocial,
                       circleB.first->end(),
                       inserter(*urls, urls->begin()));
 
-            newSocial.push_back(SocialCircle(urls, users));
+            SocialCircle c(urls, users);
+            SocialCircle smallest = topN.push(c);
+            if (smallest.second) {
+                if (smallest.second->size() == users->size()) {
+                    cerr << "WARN: " << urls->size() <<
+                        " degree circle drops same size(" <<
+                        users->size() << ") circle due to limit " <<
+                        maxCircleCount << "\n";
+                }
+                delete smallest.first;
+                delete smallest.second;
+            }
         }
     }
+
+    const Social& v = topN.content();
+    copy(v.begin(), v.end(), back_inserter(newSocial));
 }
 
 
@@ -240,7 +293,7 @@ int main(int argc, char** argv)
 
 
     Social* social = new Social();
-    init_first_social(log, *social);
+    init_first_social(log, *social, 1000);
 
     if (social->empty()) {
         delete social;
@@ -252,7 +305,7 @@ int main(int argc, char** argv)
                 ", circles " << social->size() << "\n";
 
             Social* newSocial = new Social();
-            extend_social_circle(*social, *newSocial);
+            extend_social_circle(*social, *newSocial, 1000);
             social = newSocial;
 
             if (social->empty()) {
