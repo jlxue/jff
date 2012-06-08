@@ -308,7 +308,7 @@ int main(int argc, char** argv)
                 ", circles " << social->size() << "\n";
 
             Social* newSocial = new Social();
-            extend_social_circle(*social, *newSocial, 1000);
+            extend_social_circle(*social, *newSocial, social->size());
             social = newSocial;
 
             if (social->empty()) {
