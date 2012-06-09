@@ -407,6 +407,40 @@ static void extend_social_circles(const Social& oldSocial,
 }
 
 
+static void dump_social(const Social& social,
+                 unsigned maxCircleCount,
+                 unsigned maxUrlCount,
+                 unsigned maxUserCount)
+{
+    unsigned circleCount = min(maxCircleCount, social.size());
+
+    for (unsigned i = 0; i < circleCount; ++i) {
+        const SocialCircle* c = social[i];
+
+        unsigned urlCount = min(maxUrlCount, c->urls.size());
+        unsigned userCount = min(maxUserCount, c->users.size());
+
+        cout << "circle[" << i << "] of " << social.size() <<
+            " circles, " << urlCount << " of " <<
+            c->urls.size() << " urls:";
+
+        for (unsigned j = 0; j < urlCount; ++j) {
+            cout << " " << c->urls[j];
+        }
+        cout << "\n";
+
+        cout << "circle[" << i << "] of " << social.size() <<
+            " circles, " << userCount << " of " <<
+            c->users.size() << " users:";
+
+        for (unsigned j = 0; j < userCount; ++j) {
+            cout << " " << c->users[j];
+        }
+        cout << "\n\n";
+    }
+}
+
+
 int main(int argc, char** argv)
 {
     (void)argc;
@@ -434,6 +468,8 @@ int main(int argc, char** argv)
         vector<Social*> socials;
 
         for (;;) {
+            dump_social(*social, 10, 10, 20);
+
             socials.push_back(social);
             cerr << "Social: urls " << (*social)[0]->urls.size() <<
                 ", circles " << social->size() << "\n";
