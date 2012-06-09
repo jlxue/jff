@@ -13,26 +13,43 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
-#include <queue>
 #include <set>
 #include <vector>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
+
 #include <boost/timer/timer.hpp>
+
 
 using namespace std;
 using namespace boost;
 
-
-typedef unsigned                UserId;
-typedef unsigned                UrlId;
+/*
+ * 32bit integer is enough, the IDs are stored in many data structures,
+ * so don't waste memory on 64bit integers.
+ */
+typedef uint32_t                UserId;
+typedef uint32_t                UrlId;
 
 typedef map<string, UserId>     UserToId;
 typedef map<string, UrlId>      UrlToId;
 
-typedef map<UrlId, set<UserId>* >   UrlIdToUserIds;
+/*
+ * Must be ordered map and set, because init_first_social() and
+ * SocialCircle structure below depend on that.
+ */
+typedef map<UrlId, set<UserId>* >   AccessLogByUrl;
 
-/**
+/*
+ * Actually both urls and users are "set" type with ordered and unique
+ * members, but to make set_union() and set_intersection() in
+ * extend_social_circle() more efficient on cpu and memory, "vector"
+ * type is chose.
+ */
+struct SocialCircle {
+    vector<UrlId>   urls;
+    vector<UserId>  users;
+};
+
+/*
  * The "Social" is a vector because it requires to be ordered for
  * extend_social_circle().
  *
@@ -48,21 +65,23 @@ typedef map<UrlId, set<UserId>* >   UrlIdToUserIds;
  *        ....
  *      ]
  */
-typedef pair<set<UrlId>*, set<UserId>* > SocialCircle;
-typedef vector<SocialCircle> Social;
+typedef vector<SocialCircle*> Social;
 
 
-class SocialCircleUsersComparator
+struct MoreUsers
 {
-public:
-    bool operator()(const SocialCircle& a,
-                    const SocialCircle& b) const {
-        return a.second->size() > b.second->size();
+    bool operator()(const SocialCircle* const& a,
+                    const SocialCircle* const& b) const {
+        return a->users.size() > b->users.size();
     }
 };
 
 
-template<typename T, typename Comparator = greater<T> >
+/**
+ * A top N container which allowes equal elements, actually it's a
+ * minimum heap.
+ */
+template<typename T, typename Greater = greater<T> >
 class TopN {
 public:
     TopN(unsigned n) {
@@ -70,27 +89,50 @@ public:
 
         this->n = n;
         v.reserve(n);
+        is_heap = false;
     }
 
-    T push(const T& e) {
+    /**
+     * e:           [in] the element to be pushed
+     * is_popped:   [out] whether a old item is popped
+     * popped_item: [out] the popped item if "popped" is true
+     * return:      whether the new item is pushed successfully
+     */
+    bool push(const T& e, bool& popped, T& old) {
         if (v.size() < n) {
             v.push_back(e);
-            return T();
+
+            popped = false;
+            return true;
         }
 
-        sort();
-
-        T smallest = v[n - 1];
-        if (Comparator()(e, smallest)) {
-            v[n - 1] = e;
-            return smallest;
-        } else {
-            return e;
+        if (! is_heap) {
+            make_heap(v.begin(), v.end(), Greater());
+            is_heap = true;
         }
+
+        T& smallest = v[0];
+        if (Greater()(e, smallest)) {
+            old = smallest;
+
+            smallest = e;
+            adjust_heap();
+
+            popped = true;
+            return true;
+        }
+
+        popped = false;
+        return false;
     }
 
     void sort() {
-        std::sort(v.begin(), v.end(), Comparator());
+        if (is_heap)
+            sort_heap(v.begin(), v.end(), Greater());
+        else
+            std::sort(v.begin(), v.end(), Greater());
+
+        is_heap = false;
     }
 
     const vector<T>& content(bool doSort = true) {
@@ -103,25 +145,52 @@ public:
 private:
     unsigned    n;
     vector<T>   v;
+    bool        is_heap;
+
+    // adjust heap from top to down
+    void adjust_heap() {
+        const Greater is_greater;
+
+        const unsigned start = 0;
+        const T top = v[start];
+        unsigned i = start;         // the start node
+        unsigned j = 2 * i + 1;     // left child of i
+        unsigned k;
+
+        while (j < n) {
+            k = j + 1;              // right child of i
+            if (k < n && is_greater(v[j], v[k]))
+                j = k;              // j points to the smaller child
+
+            if (is_greater(v[j], top)) {
+                break;
+            } else {
+                v[i] = v[j];        // move smaller up
+                i = j;
+                j = 2 * j + 1;
+            }
+        }
+
+        if (i != start)             // don't copy to itself
+            v[i] = top;
+    }
 };
 
 
-static void read_access_log(istream&    in,
-                            UserToId&   users,
-                            UrlToId&    urls,
-                            UrlIdToUserIds& log)
+static void read_access_log(istream&        in,
+                            UserToId&       users,
+                            UrlToId&        urls,
+                            AccessLogByUrl& log)
 {
     boost::timer::auto_cpu_timer t;
 
-    unsigned users_count = 0, urls_count = 0;
+    uint32_t users_count = 0, urls_count = 0;
+    string line;
 
-    while (in.good()) {
+    while (getline(in, line)) {
         /*
          * split line into (user, url) pair
          */
-        string line;
-        getline(in, line);
-
         if (line.empty())
             continue;
 
@@ -145,12 +214,18 @@ static void read_access_log(istream&    in,
             if (it != users.end()) {
                 user_id = it->second;
             } else {
+                // check integer overflow
+                if (users_count == 0 && users.size() > 0) {
+                    cerr << "Too many unique users, limit is " <<
+                        users.size() << "\n";
+                    exit(1);
+                }
+
                 user_id = users_count;
                 users[user] = user_id;
-                ++users_count;  // XXX: abort on overflow
+                ++users_count;
             }
         }
-
 
         /*
          * find id of this url
@@ -160,9 +235,16 @@ static void read_access_log(istream&    in,
             if (it != urls.end()) {
                 url_id = it->second;
             } else {
+                // check integer overflow
+                if (urls_count == 0 && urls.size() > 0) {
+                    cerr << "Too many unique urls, limit is " <<
+                        urls.size() << "\n";
+                    exit(1);
+                }
+
                 url_id = urls_count;
                 urls[url] = url_id;
-                ++urls_count;   // XXX: abort on overflow
+                ++urls_count;
             }
         }
 
@@ -170,7 +252,7 @@ static void read_access_log(istream&    in,
          * record this access: url_id => { user_id, ... }
          */
         {
-            UrlIdToUserIds::iterator it = log.find(url_id);
+            AccessLogByUrl::iterator it = log.find(url_id);
             if (it != log.end()) {
                 set<UserId>* users = it->second;
                 users->insert(user_id);
@@ -184,7 +266,7 @@ static void read_access_log(istream&    in,
 }
 
 
-static void init_first_social(const UrlIdToUserIds& log,
+static void init_first_social(const AccessLogByUrl& log,
                               Social& social,
                               unsigned maxCircleCount,
                               unsigned minUserCount)
@@ -194,34 +276,50 @@ static void init_first_social(const UrlIdToUserIds& log,
     if (maxCircleCount == 0)
         return;
 
-    TopN<SocialCircle, SocialCircleUsersComparator> topN(maxCircleCount);
+    TopN<SocialCircle*, MoreUsers> topN(maxCircleCount);
 
-    UrlIdToUserIds::const_iterator it = log.begin();
+    AccessLogByUrl::const_iterator it = log.begin();
     for (/* empty */; it != log.end(); ++it) {
-        if (it->second->size() >= minUserCount) {
-            set<UrlId>* urls = new set<UrlId>();
-            set<UserId>* users = new set<UserId>(*(it->second));
+        if (it->second->size() < minUserCount)
+            continue;
 
-            urls->insert(it->first);
+        SocialCircle* c = new SocialCircle();
 
-            SocialCircle c(urls, users);
-            SocialCircle smallest = topN.push(c);
-            if (smallest.second) {
-                if (smallest.second->size() == users->size()) {
-                    if (false) {
-                        cerr << "WARN: " << urls->size() <<
-                            " degree circle drops same size(" <<
-                            users->size() << ") circle due to limit " <<
-                            maxCircleCount << "\n";
-                    }
-                }
-                delete smallest.first;
-                delete smallest.second;
+        c->urls.push_back(it->first);
+        copy(it->second->begin(), it->second->end(),
+                back_inserter(c->users));
+
+        bool pushed, popped;
+        SocialCircle* smaller;
+
+        pushed = topN.push(c, popped, smaller);
+
+        if (! pushed) {
+            if (false) {
+                cerr << "WARN: circle(urls=" << c->urls.size() <<
+                    ", users=" << c->users.size() <<
+                    ") is thrown due to circle count limit(" <<
+                    maxCircleCount << ")\n";
             }
+
+            delete c;
+        }
+
+        if (popped) {
+            c = smaller;
+
+            if (false) {
+                cerr << "WARN: circle(urls=" << c->urls.size() <<
+                    ", users=" << c->users.size() <<
+                    ") is popped due to circle count limit(" <<
+                    maxCircleCount << ")\n";
+            }
+
+            delete smaller;
         }
     }
 
-    const Social& v = topN.content();
+    const vector<SocialCircle*>& v = topN.content();
     copy(v.begin(), v.end(), back_inserter(social));
 }
 
@@ -231,16 +329,16 @@ static void init_first_social(const UrlIdToUserIds& log,
  * in old social instance to include one more url id for
  * each circle, see the comment for "Social" type definition.
  */
-static void extend_social_circle(const Social& oldSocial,
-                                 Social& newSocial,
-                                 unsigned maxCircleCount)
+static void extend_social_circles(const Social& oldSocial,
+                                  Social& newSocial,
+                                  unsigned maxCircleCount)
 {
     boost::timer::auto_cpu_timer t;
 
     if (maxCircleCount == 0)
         return;
 
-    TopN<SocialCircle, SocialCircleUsersComparator> topN(maxCircleCount);
+    TopN<SocialCircle*, MoreUsers> topN(maxCircleCount);
 
     Social::size_type oldCircleCount = oldSocial.size();
     if (oldCircleCount < 2) {
@@ -249,49 +347,62 @@ static void extend_social_circle(const Social& oldSocial,
     }
 
     for (Social::size_type i = 0; i < oldCircleCount - 1; ++i) {
-        SocialCircle circleA = oldSocial[i];
+        const SocialCircle* circleA = oldSocial[i];
 
         for (Social::size_type j = i + 1; j < oldCircleCount; ++j) {
-            SocialCircle circleB = oldSocial[j];
+            const SocialCircle* circleB = oldSocial[j];
 
-            set<UserId>* users = new set<UserId>();
-            set_intersection(circleA.second->begin(),
-                             circleA.second->end(),
-                             circleB.second->begin(),
-                             circleB.second->end(),
-                             inserter(*users, users->begin()));
+            SocialCircle* c = new SocialCircle();
 
-            if (users->empty()) {
-                delete users;
+            set_intersection(circleA->users.begin(),
+                             circleA->users.end(),
+                             circleB->users.begin(),
+                             circleB->users.end(),
+                             back_inserter(c->users));
+
+            if (c->users.empty()) {
+                delete c;
                 continue;
             }
 
-            set<UrlId>* urls = new set<UrlId>();
-            set_union(circleA.first->begin(),
-                      circleA.first->end(),
-                      circleB.first->begin(),
-                      circleB.first->end(),
-                      inserter(*urls, urls->begin()));
+            set_union(circleA->urls.begin(),
+                      circleA->urls.end(),
+                      circleB->urls.begin(),
+                      circleB->urls.end(),
+                      back_inserter(c->urls));
 
-            SocialCircle c(urls, users);
-            SocialCircle smallest = topN.push(c);
-            if (smallest.second) {
-                if (smallest.second->size() == users->size()) {
-                    if (false) {
-                        cerr << "WARN: " << urls->size() <<
-                            " degree circle drops same size(" <<
-                            users->size() << ") circle due to limit " <<
-                            maxCircleCount << "\n";
-                    }
+            bool pushed, popped;
+            SocialCircle* smaller;
+
+            pushed = topN.push(c, popped, smaller);
+
+            if (! pushed) {
+                if (false) {
+                    cerr << "WARN: circle(urls=" << c->urls.size() <<
+                        ", users=" << c->users.size() <<
+                        ") is thrown due to circle count limit(" <<
+                        maxCircleCount << ")\n";
                 }
 
-                delete smallest.first;
-                delete smallest.second;
+                delete c;
+            }
+
+            if (popped) {
+                c = smaller;
+
+                if (false) {
+                    cerr << "WARN: circle(urls=" << c->urls.size() <<
+                        ", users=" << c->users.size() <<
+                        ") is popped due to circle count limit(" <<
+                        maxCircleCount << ")\n";
+                }
+
+                delete smaller;
             }
         }
     }
 
-    const Social& v = topN.content();
+    const vector<SocialCircle*>& v = topN.content();
     copy(v.begin(), v.end(), back_inserter(newSocial));
 }
 
@@ -305,8 +416,7 @@ int main(int argc, char** argv)
 
     UserToId users;
     UrlToId urls;
-    UrlIdToUserIds log;
-    vector<Social*> socials;
+    AccessLogByUrl log;
 
     read_access_log(cin, users, urls, log);
 
@@ -321,13 +431,15 @@ int main(int argc, char** argv)
         delete social;
         cerr << "First social has zero social circle.\n";
     } else {
+        vector<Social*> socials;
+
         for (;;) {
             socials.push_back(social);
-            cerr << "Social: urls " << (*social)[0].first->size() <<
+            cerr << "Social: urls " << (*social)[0]->urls.size() <<
                 ", circles " << social->size() << "\n";
 
             Social* newSocial = new Social();
-            extend_social_circle(*social, *newSocial, social->size());
+            extend_social_circles(*social, *newSocial, social->size());
             social = newSocial;
 
             if (social->empty()) {
