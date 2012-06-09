@@ -16,8 +16,12 @@
 #include <queue>
 #include <set>
 #include <vector>
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/timer/timer.hpp>
 
 using namespace std;
+using namespace boost;
 
 
 typedef unsigned                UserId;
@@ -80,9 +84,9 @@ public:
         if (Comparator()(e, smallest)) {
             v[n - 1] = e;
             return smallest;
+        } else {
+            return e;
         }
-
-        return T();
     }
 
     void sort() {
@@ -107,6 +111,8 @@ static void read_access_log(istream&    in,
                             UrlToId&    urls,
                             UrlIdToUserIds& log)
 {
+    boost::timer::auto_cpu_timer t;
+
     unsigned users_count = 0, urls_count = 0;
 
     while (in.good()) {
@@ -183,6 +189,8 @@ static void init_first_social(const UrlIdToUserIds& log,
                               unsigned maxCircleCount,
                               unsigned minUserCount)
 {
+    boost::timer::auto_cpu_timer t;
+
     if (maxCircleCount == 0)
         return;
 
@@ -200,10 +208,12 @@ static void init_first_social(const UrlIdToUserIds& log,
             SocialCircle smallest = topN.push(c);
             if (smallest.second) {
                 if (smallest.second->size() == users->size()) {
-                    cerr << "WARN: " << urls->size() <<
-                        " degree circle drops same size(" <<
-                        users->size() << ") circle due to limit " <<
-                        maxCircleCount << "\n";
+                    if (false) {
+                        cerr << "WARN: " << urls->size() <<
+                            " degree circle drops same size(" <<
+                            users->size() << ") circle due to limit " <<
+                            maxCircleCount << "\n";
+                    }
                 }
                 delete smallest.first;
                 delete smallest.second;
@@ -225,6 +235,8 @@ static void extend_social_circle(const Social& oldSocial,
                                  Social& newSocial,
                                  unsigned maxCircleCount)
 {
+    boost::timer::auto_cpu_timer t;
+
     if (maxCircleCount == 0)
         return;
 
@@ -265,10 +277,12 @@ static void extend_social_circle(const Social& oldSocial,
             SocialCircle smallest = topN.push(c);
             if (smallest.second) {
                 if (smallest.second->size() == users->size()) {
-                    cerr << "WARN: " << urls->size() <<
-                        " degree circle drops same size(" <<
-                        users->size() << ") circle due to limit " <<
-                        maxCircleCount << "\n";
+                    if (false) {
+                        cerr << "WARN: " << urls->size() <<
+                            " degree circle drops same size(" <<
+                            users->size() << ") circle due to limit " <<
+                            maxCircleCount << "\n";
+                    }
                 }
 
                 delete smallest.first;
@@ -284,6 +298,11 @@ static void extend_social_circle(const Social& oldSocial,
 
 int main(int argc, char** argv)
 {
+    (void)argc;
+    (void)argv;
+
+    boost::timer::auto_cpu_timer t;
+
     UserToId users;
     UrlToId urls;
     UrlIdToUserIds log;
