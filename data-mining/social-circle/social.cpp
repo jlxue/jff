@@ -14,6 +14,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <set>
 #include <vector>
@@ -146,7 +147,9 @@ typedef vector<SocialCircle*> Social;
 template<typename T, typename Greater = greater<T> >
 class TopN {
 public:
-    TopN(unsigned n) {
+    typedef typename vector<T>::size_type   size_type;
+
+    TopN(size_type n) {
         assert(n > 0);
 
         this->n = n;
@@ -204,12 +207,32 @@ public:
         return v;
     }
 
-    unsigned capacity() const {
+    size_type capacity() const {
         return n;
     }
 
+    size_type size() const {
+        return v.size();
+    }
+
+    bool is_full() const {
+        return v.size() == n;
+    }
+
+    // Get the smallest element when TopN is full
+    const T& smallest_when_full() {
+        assert(v.size() == n);
+
+        if (! is_heap) {
+            make_heap(v.begin(), v.end(), Greater());
+            is_heap = true;
+        }
+
+        return v.front();
+    }
+
 private:
-    unsigned    n;
+    size_type   n;
     vector<T>   v;
     bool        is_heap;
 
@@ -217,11 +240,11 @@ private:
     void adjust_heap() {
         const Greater is_greater;
 
-        const unsigned start = 0;
+        const size_type start = 0;
         const T top = v[start];
-        unsigned i = start;         // the start node
-        unsigned j = 2 * i + 1;     // left child of i
-        unsigned k;
+        size_type i = start;        // the start node
+        size_type j = 2 * i + 1;    // left child of i
+        size_type k;
 
         while (j < n) {
             k = j + 1;              // right child of i
@@ -332,10 +355,20 @@ static void init_first_social(const AccessLogByUrl& log,
         return;
 
     TopN<SocialCircle*, MoreUsers> topN(maxCircleCount);
+    vector<UserId>::size_type smallestUserCount = 0;
 
     AccessLogByUrl::const_iterator it = log.begin();
     for (/* empty */; it != log.end(); ++it) {
         if (it->second->size() < minUserCount)
+            continue;
+
+        if (topN.is_full()) {
+            SocialCircle* const& smallest = topN.smallest_when_full();
+            if (smallestUserCount < smallest->users.size())
+                smallestUserCount = smallest->users.size();
+        }
+
+        if (it->second->size() <= smallestUserCount)
             continue;
 
         SocialCircle* c = new SocialCircle();
@@ -364,7 +397,8 @@ static void init_first_social(const AccessLogByUrl& log,
 static void extend_social_circles(const Social& initialSocial,
                                   const Social& oldSocial,
                                   Social& newSocial,
-                                  unsigned maxCircleCount)
+                                  unsigned maxCircleCount,
+                                  unsigned minUserCount)
 {
     DECLARE_AUTO_CPU_TIMER(t);
 
@@ -372,6 +406,7 @@ static void extend_social_circles(const Social& initialSocial,
         return;
 
     TopN<SocialCircle*, MoreUsers> topN(maxCircleCount);
+    vector<UserId>::size_type smallestUserCount = 0;
 
     Social::size_type initialCircleCount = initialSocial.size();
     Social::size_type oldCircleCount = oldSocial.size();
@@ -388,6 +423,23 @@ static void extend_social_circles(const Social& initialSocial,
             // each initialCircle[j] has exactly one url
             const SocialCircle* circleB = initialSocial[j];
 
+            if (topN.is_full()) {
+                SocialCircle* const& smallest =
+                    topN.smallest_when_full();
+                if (smallestUserCount < smallest->users.size())
+                    smallestUserCount = smallest->users.size();
+            }
+
+            if (circleA->users.size() < minUserCount ||
+                    circleB->users.size() < minUserCount ||
+                    circleA->users.size() <= smallestUserCount ||
+                    circleB->users.size() <= smallestUserCount) {
+                // If one circle's user count is less than the limit,
+                // the user count of two circles's intersection must be
+                // also less than limit.
+                continue;
+            }
+
             SocialCircle* c = new SocialCircle();
 
             set_intersection(circleA->users.begin(),
@@ -396,8 +448,8 @@ static void extend_social_circles(const Social& initialSocial,
                              circleB->users.end(),
                              back_inserter(c->users));
 
-            if (c->users.size() < 2) {
-                // a common url set must be visited by at least 2 users
+            if (c->users.size() < minUserCount ||
+                    c->users.size() <= smallestUserCount) {
                 delete c;
                 continue;
             }
@@ -533,7 +585,7 @@ void cluster_social_circles(vector<Social*>& socials,
 
             Social* newSocial = new Social();
             extend_social_circles(*initialSocial, *social, *newSocial,
-                    circles_count);
+                    circles_count, 2);
 
             social = newSocial;
             if (social->empty()) {
