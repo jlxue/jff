@@ -5,7 +5,7 @@
  * Usage:
  *  ./social < access.log
  *
- *  The "access.log" contains (user, url) pairs separated by "\t".
+ *  The "access.log" contains (user, url) pairs separated by spaces.
  */
 
 #include <algorithm>
@@ -425,26 +425,17 @@ void read_access_log(istream&        in,
     DECLARE_AUTO_CPU_TIMER(t);
 
     uint32_t users_count = 0, urls_count = 0;
-    string line;
+    string user, url;
 
-    while (getline(in, line)) {
-        /*
-         * split line into (user, url) pair
-         */
-        if (line.empty())
-            continue;
+    user.reserve(32);
+    url.reserve(256);
 
-        string::size_type pos = line.find('\t');
-        if (pos == string::npos ||
-                pos == 0 || (pos + 1) == line.length())
-            continue;
-
-        string user = line.substr(0, pos);
-        string url = line.substr(pos + 1);
-
-
+    while (in >> user >> url) {
         UserId user_id;
         UrlId url_id;
+
+        if (user.empty() || url.empty())
+            continue;
 
         /*
          * find id of this user
@@ -562,6 +553,8 @@ int main(int argc, char** argv)
     UrlToId urls;
     AccessLogByUrl log;
 
+    users.reserve(50000);
+    urls.reserve(20000);
     read_access_log(cin, users, urls, log);
 
     cerr << "Unique users: " << users.size() <<
