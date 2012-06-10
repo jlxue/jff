@@ -16,11 +16,12 @@
 #include <set>
 #include <vector>
 
+#include <boost/cstdint.hpp>
+
+
+#ifdef  ENABLE_CPU_TIMER
+
 #include <boost/timer/timer.hpp>
-
-using namespace std;
-using namespace boost;
-
 
 #define DECLARE_AUTO_CPU_TIMER_WITH_NAME(name, t)   \
     boost::timer::auto_cpu_timer t(std::cerr, \
@@ -31,6 +32,16 @@ using namespace boost;
 #define DECLARE_AUTO_CPU_TIMER(t)   \
     DECLARE_AUTO_CPU_TIMER_WITH_NAME(__func__, t)
 
+#else
+
+#define DECLARE_AUTO_CPU_TIMER_WITH_NAME(name, t) (void)0
+#define DECLARE_AUTO_CPU_TIMER(t) (void)0
+
+#endif
+
+
+using namespace std;
+using namespace boost;
 
 
 /*
