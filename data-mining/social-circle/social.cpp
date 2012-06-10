@@ -77,7 +77,7 @@ typedef map<UrlId, set<UserId>* >   AccessLogByUrl;
 
 /*
  * Actually both urls and users are "set" type with ordered and unique
- * members, but to make set_union() and set_intersection() in
+ * members, but to make urls_union() and set_intersection() in
  * extend_social_circles() more efficient on cpu and memory, "vector"
  * type is chose.
  */
@@ -344,6 +344,21 @@ static void dump_social(ostream& out,
 }
 
 
+static void urls_union(vector<UrlId>& newUrls,
+                       const vector<UrlId>& oldUrls,
+                       const UrlId newUrl)
+{
+    newUrls.reserve(oldUrls.size() + 1);
+
+    vector<UrlId>::const_iterator upper =
+        upper_bound(oldUrls.begin(), oldUrls.end(), newUrl);
+
+    copy(oldUrls.begin(), upper, back_inserter(newUrls));
+    newUrls.push_back(newUrl);
+    copy(upper, oldUrls.end(), back_inserter(newUrls));
+}
+
+
 static void init_first_social(const AccessLogByUrl& log,
                               Social& social,
                               unsigned maxCircleCount,
@@ -422,6 +437,7 @@ static void extend_social_circles(const Social& initialSocial,
 
             // each initialCircle[j] has exactly one url
             const SocialCircle* circleB = initialSocial[j];
+            assert(circleB->urls.size() == 1);
 
             if (topN.is_full()) {
                 SocialCircle* const& smallest =
@@ -454,12 +470,9 @@ static void extend_social_circles(const Social& initialSocial,
                 continue;
             }
 
-            c->urls.reserve(circleA->urls.size() + 1);
-            set_union(circleA->urls.begin(),
-                      circleA->urls.end(),
-                      circleB->urls.begin(),
-                      circleB->urls.end(),
-                      back_inserter(c->urls));
+            // A specilized set_union() for merge circleA
+            // and circleB(single element) into c->urls
+            urls_union(c->urls, circleA->urls, circleB->urls[0]);
 
             c->intersect_start = circleB->intersect_start;
 
@@ -614,7 +627,7 @@ int main(int argc, char** argv)
     // See http://www.drdobbs.com/cpp/184401305
     // The Standard Librarian: IOStreams and Stdio
     std::ios_base::sync_with_stdio(false);  // make iostreams very fast
-    std::cin.tie(NULL);     // don't flush cout when read from cin
+    std::cin.tie(NULL);     // don't flush std::cout when read from cin
 
     read_access_log(cin, users, urls, log);
 
