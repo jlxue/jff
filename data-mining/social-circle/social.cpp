@@ -44,8 +44,8 @@ typedef map<string, UserId>     UserToId;
 typedef map<string, UrlId>      UrlToId;
 
 /*
- * Must be ordered map and set, because init_first_social() and
- * SocialCircle structure below depend on that.
+ * The value must be ordered set, because init_first_social() and
+ * member "users" in SocialCircle structure below depend on that.
  */
 typedef map<UrlId, set<UserId>* >   AccessLogByUrl;
 
@@ -59,7 +59,9 @@ struct SocialCircle {
     vector<UrlId>   urls;
     vector<UserId>  users;
 
-    // To avoid duplicated set intersections in extend_social_circles()
+    // To avoid duplicated set intersections in extend_social_circles(),
+    // can't reply on urlId because SocialCircles in a Social is ordered
+    // by users.size(), not by urlId.
     uint32_t        intersect_start;
 };
 
@@ -67,17 +69,47 @@ struct SocialCircle {
  * The "Social" is a vector because it requires to be ordered for
  * extend_social_circles().
  *
- *  social with small circles:
- *      [ <1> => <users...>, <2> => <users...>, ... ]
+ *  social with small circles: (sort by users.size)
+ *      [ <url0> => <users...>, <url1> => <users...>, ... ]
  *
- *  social with big circles:
- *      [ <1,2> => <users...>,
- *        <1,3> => <users...>,
- *        ....
- *        <2,3> => <users...>,
- *        <2,4> => <users...>,
- *        ....
+ *  social with big circles before being sorted:
+ *      [ <url0,url1> => <users...>,
+ *        <url0,url2> => <users...>,
+ *        ...
+ *        <url1,url2> => <users...>,
+ *        <url1,url3> => <users...>,
+ *        ...
  *      ]
+ *
+ *  social with big circles above after being sorted by users.size:
+ *
+ *      [ <url1,url3> => <users...>,
+ *        ...
+ *        <url0,url1> => <users...>,
+ *        ...
+ *        <url0,url2> => <users...>,
+ *        ...
+ *        <url1,url2> => <users...>,
+ *        ...
+ *      ]
+ *
+ *  social with bigger circles before being sorted:
+ *      [ <url1,url3,url4> => <users...>,
+ *        <url1,url3,url5> => <users...>,
+ *        ...
+ *        <url0,url1,url2> => <users...>,
+ *        <url0,url1,url3> => <users...>,
+ *        ...
+ *        <url0,url2,url3> => <users...>,
+ *        <url0,url2,url4> => <users...>,
+ *        ...
+ *        <url1,url2,url3> => <users...>,
+ *        <url1,url2,url4> => <users...>,
+ *        ...
+ *      ]
+ *
+ *  The member "intersect_start" of SocialCircles is "N" of urlN in
+ *  the first social.
  */
 typedef vector<SocialCircle*> Social;
 
