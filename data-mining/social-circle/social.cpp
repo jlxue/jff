@@ -125,15 +125,6 @@ struct SocialCircle {
 typedef vector<SocialCircle*> Social;
 
 
-struct MoreUsers
-{
-    bool operator()(const SocialCircle* const& a,
-                    const SocialCircle* const& b) const {
-        return a->users.size() > b->users.size();
-    }
-};
-
-
 /**
  * A top N container which allowes equal elements, actually it's a
  * minimum heap.
@@ -238,93 +229,13 @@ private:
 };
 
 
-static void read_access_log(istream&        in,
-                            UserToId&       users,
-                            UrlToId&        urls,
-                            AccessLogByUrl& log)
+struct MoreUsers
 {
-    DECLARE_AUTO_CPU_TIMER(t);
-
-    uint32_t users_count = 0, urls_count = 0;
-    string line;
-
-    while (getline(in, line)) {
-        /*
-         * split line into (user, url) pair
-         */
-        if (line.empty())
-            continue;
-
-        string::size_type pos = line.find('\t');
-        if (pos == string::npos ||
-                pos == 0 || (pos + 1) == line.length())
-            continue;
-
-        string user = line.substr(0, pos);
-        string url = line.substr(pos + 1);
-
-
-        UserId user_id;
-        UrlId url_id;
-
-        /*
-         * find id of this user
-         */
-        {
-            UserToId::iterator it = users.find(user);
-            if (it != users.end()) {
-                user_id = it->second;
-            } else {
-                // check integer overflow
-                if (users_count == 0 && users.size() > 0) {
-                    cerr << "Too many unique users, limit is " <<
-                        users.size() << "\n";
-                    exit(1);
-                }
-
-                user_id = users_count;
-                users[user] = user_id;
-                ++users_count;
-            }
-        }
-
-        /*
-         * find id of this url
-         */
-        {
-            UrlToId::iterator it = urls.find(url);
-            if (it != urls.end()) {
-                url_id = it->second;
-            } else {
-                // check integer overflow
-                if (urls_count == 0 && urls.size() > 0) {
-                    cerr << "Too many unique urls, limit is " <<
-                        urls.size() << "\n";
-                    exit(1);
-                }
-
-                url_id = urls_count;
-                urls[url] = url_id;
-                ++urls_count;
-            }
-        }
-
-        /*
-         * record this access: url_id => { user_id, ... }
-         */
-        {
-            AccessLogByUrl::iterator it = log.find(url_id);
-            if (it != log.end()) {
-                set<UserId>* users = it->second;
-                users->insert(user_id);
-            } else {
-                set<UserId>* users = new set<UserId>();
-                users->insert(user_id);
-                log[url_id] = users;
-            }
-        }
+    bool operator()(const SocialCircle* const& a,
+                    const SocialCircle* const& b) const {
+        return a->users.size() > b->users.size();
     }
-}
+};
 
 
 static void push_circle_to_topN(TopN<SocialCircle*, MoreUsers>& topN,
@@ -357,6 +268,40 @@ static void push_circle_to_topN(TopN<SocialCircle*, MoreUsers>& topN,
         }
 
         delete smaller;
+    }
+}
+
+
+static void dump_social(const Social& social,
+                 unsigned maxCircleCount,
+                 unsigned maxUrlCount,
+                 unsigned maxUserCount)
+{
+    unsigned circleCount = min(maxCircleCount, social.size());
+
+    for (unsigned i = 0; i < circleCount; ++i) {
+        const SocialCircle* c = social[i];
+
+        unsigned urlCount = min(maxUrlCount, c->urls.size());
+        unsigned userCount = min(maxUserCount, c->users.size());
+
+        cout << "circle[" << i << "] of " << social.size() <<
+            " circles, " << urlCount << " of " <<
+            c->urls.size() << " urls:";
+
+        for (unsigned j = 0; j < urlCount; ++j) {
+            cout << " " << c->urls[j];
+        }
+        cout << "\n";
+
+        cout << "circle[" << i << "] of " << social.size() <<
+            " circles, " << userCount << " of " <<
+            c->users.size() << " users:";
+
+        for (unsigned j = 0; j < userCount; ++j) {
+            cout << " " << c->users[j];
+        }
+        cout << "\n\n";
     }
 }
 
@@ -460,36 +405,91 @@ static void extend_social_circles(const Social& initialSocial,
 }
 
 
-static void dump_social(const Social& social,
-                 unsigned maxCircleCount,
-                 unsigned maxUrlCount,
-                 unsigned maxUserCount)
+void read_access_log(istream&        in,
+                     UserToId&       users,
+                     UrlToId&        urls,
+                     AccessLogByUrl& log)
 {
-    unsigned circleCount = min(maxCircleCount, social.size());
+    DECLARE_AUTO_CPU_TIMER(t);
 
-    for (unsigned i = 0; i < circleCount; ++i) {
-        const SocialCircle* c = social[i];
+    uint32_t users_count = 0, urls_count = 0;
+    string line;
 
-        unsigned urlCount = min(maxUrlCount, c->urls.size());
-        unsigned userCount = min(maxUserCount, c->users.size());
+    while (getline(in, line)) {
+        /*
+         * split line into (user, url) pair
+         */
+        if (line.empty())
+            continue;
 
-        cout << "circle[" << i << "] of " << social.size() <<
-            " circles, " << urlCount << " of " <<
-            c->urls.size() << " urls:";
+        string::size_type pos = line.find('\t');
+        if (pos == string::npos ||
+                pos == 0 || (pos + 1) == line.length())
+            continue;
 
-        for (unsigned j = 0; j < urlCount; ++j) {
-            cout << " " << c->urls[j];
+        string user = line.substr(0, pos);
+        string url = line.substr(pos + 1);
+
+
+        UserId user_id;
+        UrlId url_id;
+
+        /*
+         * find id of this user
+         */
+        {
+            UserToId::iterator it = users.find(user);
+            if (it != users.end()) {
+                user_id = it->second;
+            } else {
+                // check integer overflow
+                if (users_count == 0 && users.size() > 0) {
+                    cerr << "Too many unique users, limit is " <<
+                        users.size() << "\n";
+                    exit(1);
+                }
+
+                user_id = users_count;
+                users[user] = user_id;
+                ++users_count;
+            }
         }
-        cout << "\n";
 
-        cout << "circle[" << i << "] of " << social.size() <<
-            " circles, " << userCount << " of " <<
-            c->users.size() << " users:";
+        /*
+         * find id of this url
+         */
+        {
+            UrlToId::iterator it = urls.find(url);
+            if (it != urls.end()) {
+                url_id = it->second;
+            } else {
+                // check integer overflow
+                if (urls_count == 0 && urls.size() > 0) {
+                    cerr << "Too many unique urls, limit is " <<
+                        urls.size() << "\n";
+                    exit(1);
+                }
 
-        for (unsigned j = 0; j < userCount; ++j) {
-            cout << " " << c->users[j];
+                url_id = urls_count;
+                urls[url] = url_id;
+                ++urls_count;
+            }
         }
-        cout << "\n\n";
+
+        /*
+         * record this access: url_id => { user_id, ... }
+         */
+        {
+            AccessLogByUrl::iterator it = log.find(url_id);
+            if (it != log.end()) {
+                set<UserId>* users = it->second;
+                users->insert(user_id);
+            } else {
+                set<UserId>* users = new set<UserId>();
+                users->insert(user_id);
+                log[url_id] = users;
+            }
+        }
     }
 }
 
