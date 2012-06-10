@@ -18,9 +18,20 @@
 
 #include <boost/timer/timer.hpp>
 
-
 using namespace std;
 using namespace boost;
+
+
+#define DECLARE_AUTO_CPU_TIMER_WITH_NAME(name, t)   \
+    boost::timer::auto_cpu_timer t(std::cerr, \
+            boost::timer::default_places, \
+            "\n\t\t" + string(name) + \
+            ": %ws wall, %us user + %ss system = %ts CPU (%p%)\n\n")
+
+#define DECLARE_AUTO_CPU_TIMER(t)   \
+    DECLARE_AUTO_CPU_TIMER_WITH_NAME(__func__, t)
+
+
 
 /*
  * 32bit integer is enough, the IDs are stored in many data structures,
@@ -189,7 +200,7 @@ static void read_access_log(istream&        in,
                             UrlToId&        urls,
                             AccessLogByUrl& log)
 {
-    boost::timer::auto_cpu_timer t;
+    DECLARE_AUTO_CPU_TIMER(t);
 
     uint32_t users_count = 0, urls_count = 0;
     string line;
@@ -312,7 +323,7 @@ static void init_first_social(const AccessLogByUrl& log,
                               unsigned maxCircleCount,
                               unsigned minUserCount)
 {
-    boost::timer::auto_cpu_timer t;
+    DECLARE_AUTO_CPU_TIMER(t);
 
     if (maxCircleCount == 0)
         return;
@@ -352,7 +363,7 @@ static void extend_social_circles(const Social& initialSocial,
                                   Social& newSocial,
                                   unsigned maxCircleCount)
 {
-    boost::timer::auto_cpu_timer t;
+    DECLARE_AUTO_CPU_TIMER(t);
 
     if (maxCircleCount == 0)
         return;
@@ -445,7 +456,7 @@ int main(int argc, char** argv)
     (void)argc;
     (void)argv;
 
-    boost::timer::auto_cpu_timer t;
+    DECLARE_AUTO_CPU_TIMER(t);
 
     UserToId users;
     UrlToId urls;
@@ -478,8 +489,11 @@ int main(int argc, char** argv)
 
             cout << "Social: urls " << urls_count <<
                 ", circles " << circles_count << "\n";
-            dump_social(*social, 10, 50, 20);
-            cout << "\n\n";
+
+            if (false) {
+                dump_social(*social, 10, 50, 20);
+                cout << "\n\n";
+            }
 
             Social* newSocial = new Social();
             extend_social_circles(*initialSocial, *social, *newSocial,
