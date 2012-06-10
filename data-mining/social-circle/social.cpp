@@ -142,6 +142,10 @@ public:
         return v;
     }
 
+    unsigned capacity() const {
+        return n;
+    }
+
 private:
     unsigned    n;
     vector<T>   v;
@@ -266,6 +270,40 @@ static void read_access_log(istream&        in,
 }
 
 
+static void push_circle_to_topN(TopN<SocialCircle*, MoreUsers>& topN,
+                                SocialCircle* c)
+{
+    bool pushed, popped;
+    SocialCircle* smaller;
+
+    pushed = topN.push(c, popped, smaller);
+
+    if (! pushed) {
+        if (false) {
+            cerr << "WARN: circle(urls=" << c->urls.size() <<
+                ", users=" << c->users.size() <<
+                ") is thrown due to circle count limit(" <<
+                topN.capacity() << ")\n";
+        }
+
+        delete c;
+    }
+
+    if (popped) {
+        c = smaller;
+
+        if (false) {
+            cerr << "WARN: circle(urls=" << c->urls.size() <<
+                ", users=" << c->users.size() <<
+                ") is popped due to circle count limit(" <<
+                topN.capacity() << ")\n";
+        }
+
+        delete smaller;
+    }
+}
+
+
 static void init_first_social(const AccessLogByUrl& log,
                               Social& social,
                               unsigned maxCircleCount,
@@ -289,34 +327,7 @@ static void init_first_social(const AccessLogByUrl& log,
         copy(it->second->begin(), it->second->end(),
                 back_inserter(c->users));
 
-        bool pushed, popped;
-        SocialCircle* smaller;
-
-        pushed = topN.push(c, popped, smaller);
-
-        if (! pushed) {
-            if (false) {
-                cerr << "WARN: circle(urls=" << c->urls.size() <<
-                    ", users=" << c->users.size() <<
-                    ") is thrown due to circle count limit(" <<
-                    maxCircleCount << ")\n";
-            }
-
-            delete c;
-        }
-
-        if (popped) {
-            c = smaller;
-
-            if (false) {
-                cerr << "WARN: circle(urls=" << c->urls.size() <<
-                    ", users=" << c->users.size() <<
-                    ") is popped due to circle count limit(" <<
-                    maxCircleCount << ")\n";
-            }
-
-            delete smaller;
-        }
+        push_circle_to_topN(topN, c);
     }
 
     const vector<SocialCircle*>& v = topN.content();
@@ -371,34 +382,7 @@ static void extend_social_circles(const Social& oldSocial,
                       circleB->urls.end(),
                       back_inserter(c->urls));
 
-            bool pushed, popped;
-            SocialCircle* smaller;
-
-            pushed = topN.push(c, popped, smaller);
-
-            if (! pushed) {
-                if (false) {
-                    cerr << "WARN: circle(urls=" << c->urls.size() <<
-                        ", users=" << c->users.size() <<
-                        ") is thrown due to circle count limit(" <<
-                        maxCircleCount << ")\n";
-                }
-
-                delete c;
-            }
-
-            if (popped) {
-                c = smaller;
-
-                if (false) {
-                    cerr << "WARN: circle(urls=" << c->urls.size() <<
-                        ", users=" << c->users.size() <<
-                        ") is popped due to circle count limit(" <<
-                        maxCircleCount << ")\n";
-                }
-
-                delete smaller;
-            }
+            push_circle_to_topN(topN, c);
         }
     }
 
