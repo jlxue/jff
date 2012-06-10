@@ -348,14 +348,18 @@ static void urls_union(vector<UrlId>& newUrls,
                        const vector<UrlId>& oldUrls,
                        const UrlId newUrl)
 {
-    newUrls.reserve(oldUrls.size() + 1);
+    newUrls.resize(oldUrls.size() + 1);
 
     vector<UrlId>::const_iterator upper =
         upper_bound(oldUrls.begin(), oldUrls.end(), newUrl);
 
-    copy(oldUrls.begin(), upper, back_inserter(newUrls));
-    newUrls.push_back(newUrl);
-    copy(upper, oldUrls.end(), back_inserter(newUrls));
+    int n = upper - oldUrls.begin();
+
+    copy(oldUrls.begin(), upper, newUrls.begin());
+    newUrls[n] = newUrl;
+
+    ++n;
+    copy(upper, oldUrls.end(), newUrls.begin() + n);
 }
 
 
@@ -389,14 +393,15 @@ static void init_first_social(const AccessLogByUrl& log,
         SocialCircle* c = new SocialCircle();
 
         c->urls.push_back(it->first);
-        copy(it->second->begin(), it->second->end(),
-                back_inserter(c->users));
+        c->users.resize(it->second->size());
+        copy(it->second->begin(), it->second->end(), c->users.begin());
 
         push_circle_to_topN(topN, c);
     }
 
     const vector<SocialCircle*>& v = topN.content();
-    copy(v.begin(), v.end(), back_inserter(social));
+    social.resize(v.size());
+    copy(v.begin(), v.end(), social.begin());
 
     for (Social::size_type i = 0; i < social.size(); ++i) {
         social[i]->intersect_start = i + 1;
@@ -481,7 +486,8 @@ static void extend_social_circles(const Social& initialSocial,
     }
 
     const vector<SocialCircle*>& v = topN.content();
-    copy(v.begin(), v.end(), back_inserter(newSocial));
+    newSocial.resize(v.size());
+    copy(v.begin(), v.end(), newSocial.begin());
 }
 
 
