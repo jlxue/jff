@@ -41,7 +41,7 @@ typedef map<UrlId, set<UserId>* >   AccessLogByUrl;
 /*
  * Actually both urls and users are "set" type with ordered and unique
  * members, but to make set_union() and set_intersection() in
- * extend_social_circle() more efficient on cpu and memory, "vector"
+ * extend_social_circles() more efficient on cpu and memory, "vector"
  * type is chose.
  */
 struct SocialCircle {
@@ -51,7 +51,7 @@ struct SocialCircle {
 
 /*
  * The "Social" is a vector because it requires to be ordered for
- * extend_social_circle().
+ * extend_social_circles().
  *
  *  social with small circles:
  *      [ <1> => <users...>, <2> => <users...>, ... ]
@@ -111,7 +111,7 @@ public:
             is_heap = true;
         }
 
-        T& smallest = v[0];
+        T& smallest = v.front();
         if (Greater()(e, smallest)) {
             old = smallest;
 
@@ -340,7 +340,8 @@ static void init_first_social(const AccessLogByUrl& log,
  * in old social instance to include one more url id for
  * each circle, see the comment for "Social" type definition.
  */
-static void extend_social_circles(const Social& oldSocial,
+static void extend_social_circles(const Social& initialSocial,
+                                  const Social& oldSocial,
                                   Social& newSocial,
                                   unsigned maxCircleCount)
 {
@@ -351,17 +352,24 @@ static void extend_social_circles(const Social& oldSocial,
 
     TopN<SocialCircle*, MoreUsers> topN(maxCircleCount);
 
+    Social::size_type initialCircleCount = initialSocial.size();
     Social::size_type oldCircleCount = oldSocial.size();
-    if (oldCircleCount < 2) {
-        // need at least two circles to make a bigger circle
+    if (oldCircleCount == 0) {
         return;
     }
 
-    for (Social::size_type i = 0; i < oldCircleCount - 1; ++i) {
+    for (Social::size_type i = 0; i < oldCircleCount; ++i) {
         const SocialCircle* circleA = oldSocial[i];
 
-        for (Social::size_type j = i + 1; j < oldCircleCount; ++j) {
-            const SocialCircle* circleB = oldSocial[j];
+        for (Social::size_type j = 0; j < initialCircleCount; ++j) {
+            // each initialCircle[j] has exactly one url
+            const SocialCircle* circleB = initialSocial[j];
+
+            if (binary_search(circleA->urls.begin(),
+                        circleA->urls.end(), circleB->urls.front())) {
+                // already merged ago
+                continue;
+            }
 
             SocialCircle* c = new SocialCircle();
 
@@ -371,7 +379,8 @@ static void extend_social_circles(const Social& oldSocial,
                              circleB->users.end(),
                              back_inserter(c->users));
 
-            if (c->users.empty()) {
+            if (c->users.size() < 2) {
+                // a common url set must be visited by at least 2 users
                 delete c;
                 continue;
             }
@@ -449,19 +458,28 @@ int main(int argc, char** argv)
         delete social;
         cerr << "First social has zero social circle.\n";
     } else {
+        Social* initialSocial = social;
         vector<Social*> socials;
+        unsigned urls_count, circles_count;
 
         for (;;) {
-            dump_social(*social, 10, 10, 20);
+            dump_social(*social, 10, 50, 20);
 
             socials.push_back(social);
-            cerr << "Social: urls " << (*social)[0]->urls.size() <<
-                ", circles " << social->size() << "\n";
+
+            // socials[i] always stores social whose circles
+            // have i+1 urls
+            urls_count = socials.size();
+            circles_count = social->size();
+
+            cerr << "Social: urls " << urls_count <<
+                ", circles " << circles_count << "\n";
 
             Social* newSocial = new Social();
-            extend_social_circles(*social, *newSocial, social->size());
-            social = newSocial;
+            extend_social_circles(*initialSocial, *social, *newSocial,
+                    circles_count);
 
+            social = newSocial;
             if (social->empty()) {
                 delete social;
                 break;
