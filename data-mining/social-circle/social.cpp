@@ -494,22 +494,10 @@ void read_access_log(istream&        in,
 }
 
 
-int main(int argc, char** argv)
+void cluster_social_circles(vector<Social*>& socials,
+                            const AccessLogByUrl& log)
 {
-    (void)argc;
-    (void)argv;
-
     DECLARE_AUTO_CPU_TIMER(t);
-
-    UserToId users;
-    UrlToId urls;
-    AccessLogByUrl log;
-
-    read_access_log(cin, users, urls, log);
-
-    cerr << "Unique users: " << users.size() <<
-        ", unique urls: " << urls.size() << "\n";
-
 
     Social* social = new Social();
     init_first_social(log, *social, 1000, 10);
@@ -519,7 +507,6 @@ int main(int argc, char** argv)
         cerr << "First social has zero social circle.\n";
     } else {
         Social* initialSocial = social;
-        vector<Social*> socials;
         unsigned urls_count, circles_count;
 
         for (;;) {
@@ -549,6 +536,27 @@ int main(int argc, char** argv)
             }
         }
     }
+}
+
+
+int main(int argc, char** argv)
+{
+    (void)argc;
+    (void)argv;
+
+    DECLARE_AUTO_CPU_TIMER(t);
+
+    UserToId users;
+    UrlToId urls;
+    AccessLogByUrl log;
+
+    read_access_log(cin, users, urls, log);
+
+    cerr << "Unique users: " << users.size() <<
+        ", unique urls: " << urls.size() << "\n";
+
+    vector<Social*> socials;
+    cluster_social_circles(socials, log);
 
     return EXIT_SUCCESS;
 }
