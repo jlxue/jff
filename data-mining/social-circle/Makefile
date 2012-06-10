@@ -1,13 +1,22 @@
-all: social social-gp social-pg
+CXXFLAGS=-Wall -Wextra
+
+ifdef ENABLE_CPU_TIMER
+CXXFLAGS+=-DENABLE_CPU_TIMER
+LDFLAGS=-lboost_timer -lboost_system
+endif
+
+all: social social-pg
 
 social: social.cpp
-	g++ -Wall -Wextra -O2 -o $@ -lboost_timer -lboost_system $<
-
-social-gp: social.cpp
-	g++ -Wall -Wextra -O2 -o $@ -lboost_timer -lboost_system -lprofiler -ltcmalloc $<
+	g++ $(CXXFLAGS) -O2 -o $@ $(LDFLAGS) $<
 
 social-pg: social.cpp
-	g++ -Wall -Wextra -g -pg -o $@ -lboost_timer -lboost_system $<
+	g++ $(CXXFLAGS) -g -pg -o $@ $(LDFLAGS) $<
+
+# Requires google-perftools and libgoogle-perftools-dev
+social-gp: social.cpp
+	g++ $(CXXFLAGS) -O2 -o $@ $(LDFLAGS) -lprofiler -ltcmalloc $<
+
 
 clean:
 	rm -f social social-gp social-pg
