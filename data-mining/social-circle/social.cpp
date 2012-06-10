@@ -6,6 +6,8 @@
  *  ./social < access.log
  *
  *  The "access.log" contains (user, url) pairs separated by spaces.
+ *  DO sanitize the input, the "user" and "url" fields mustn't
+ *  contain white spaces.
  */
 
 #include <algorithm>
@@ -284,10 +286,11 @@ static void push_circle_to_topN(TopN<SocialCircle*, MoreUsers>& topN,
 }
 
 
-static void dump_social(const Social& social,
-                 unsigned maxCircleCount,
-                 unsigned maxUrlCount,
-                 unsigned maxUserCount)
+static void dump_social(ostream& out,
+                        const Social& social,
+                        unsigned maxCircleCount,
+                        unsigned maxUrlCount,
+                        unsigned maxUserCount)
 {
     unsigned circleCount = min(maxCircleCount, social.size());
 
@@ -297,23 +300,23 @@ static void dump_social(const Social& social,
         unsigned urlCount = min(maxUrlCount, c->urls.size());
         unsigned userCount = min(maxUserCount, c->users.size());
 
-        cout << "circle[" << i << "] of " << social.size() <<
+        out << "circle[" << i << "] of " << social.size() <<
             " circles, " << urlCount << " of " <<
             c->urls.size() << " urls:";
 
         for (unsigned j = 0; j < urlCount; ++j) {
-            cout << " " << c->urls[j];
+            out << " " << c->urls[j];
         }
-        cout << "\n";
+        out << "\n";
 
-        cout << "circle[" << i << "] of " << social.size() <<
+        out << "circle[" << i << "] of " << social.size() <<
             " circles, " << userCount << " of " <<
             c->users.size() << " users:";
 
         for (unsigned j = 0; j < userCount; ++j) {
-            cout << " " << c->users[j];
+            out << " " << c->users[j];
         }
-        cout << "\n\n";
+        out << "\n\n";
     }
 }
 
@@ -520,12 +523,12 @@ void cluster_social_circles(vector<Social*>& socials,
             urls_count = socials.size();
             circles_count = social->size();
 
-            cout << "Social: urls " << urls_count <<
+            cerr << "Social: urls " << urls_count <<
                 ", circles " << circles_count << "\n";
 
             if (false) {
-                dump_social(*social, 10, 50, 20);
-                cout << "\n\n";
+                dump_social(cerr, *social, 10, 50, 20);
+                cerr << "\n\n";
             }
 
             Social* newSocial = new Social();
@@ -555,6 +558,12 @@ int main(int argc, char** argv)
 
     users.reserve(50000);
     urls.reserve(20000);
+
+    // See http://www.drdobbs.com/cpp/184401305
+    // The Standard Librarian: IOStreams and Stdio
+    std::ios_base::sync_with_stdio(false);  // make iostreams very fast
+    std::cin.tie(NULL);     // don't flush cout when read from cin
+
     read_access_log(cin, users, urls, log);
 
     cerr << "Unique users: " << users.size() <<
