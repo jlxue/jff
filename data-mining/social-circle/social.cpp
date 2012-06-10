@@ -47,6 +47,9 @@ typedef map<UrlId, set<UserId>* >   AccessLogByUrl;
 struct SocialCircle {
     vector<UrlId>   urls;
     vector<UserId>  users;
+
+    // To avoid duplicated set intersections in extend_social_circles()
+    uint32_t        intersect_start;
 };
 
 /*
@@ -332,6 +335,10 @@ static void init_first_social(const AccessLogByUrl& log,
 
     const vector<SocialCircle*>& v = topN.content();
     copy(v.begin(), v.end(), back_inserter(social));
+
+    for (Social::size_type i = 0; i < social.size(); ++i) {
+        social[i]->intersect_start = i + 1;
+    }
 }
 
 
@@ -361,15 +368,11 @@ static void extend_social_circles(const Social& initialSocial,
     for (Social::size_type i = 0; i < oldCircleCount; ++i) {
         const SocialCircle* circleA = oldSocial[i];
 
-        for (Social::size_type j = 0; j < initialCircleCount; ++j) {
+        for (Social::size_type j = circleA->intersect_start;
+                j < initialCircleCount; ++j) {
+
             // each initialCircle[j] has exactly one url
             const SocialCircle* circleB = initialSocial[j];
-
-            if (binary_search(circleA->urls.begin(),
-                        circleA->urls.end(), circleB->urls.front())) {
-                // already merged ago
-                continue;
-            }
 
             SocialCircle* c = new SocialCircle();
 
@@ -385,11 +388,14 @@ static void extend_social_circles(const Social& initialSocial,
                 continue;
             }
 
+            c->urls.reserve(circleA->urls.size() + 1);
             set_union(circleA->urls.begin(),
                       circleA->urls.end(),
                       circleB->urls.begin(),
                       circleB->urls.end(),
                       back_inserter(c->urls));
+
+            c->intersect_start = circleB->intersect_start;
 
             push_circle_to_topN(topN, c);
         }
@@ -463,8 +469,6 @@ int main(int argc, char** argv)
         unsigned urls_count, circles_count;
 
         for (;;) {
-            dump_social(*social, 10, 50, 20);
-
             socials.push_back(social);
 
             // socials[i] always stores social whose circles
@@ -472,8 +476,10 @@ int main(int argc, char** argv)
             urls_count = socials.size();
             circles_count = social->size();
 
-            cerr << "Social: urls " << urls_count <<
+            cout << "Social: urls " << urls_count <<
                 ", circles " << circles_count << "\n";
+            dump_social(*social, 10, 50, 20);
+            cout << "\n\n";
 
             Social* newSocial = new Social();
             extend_social_circles(*initialSocial, *social, *newSocial,
