@@ -1,4 +1,4 @@
-CXXFLAGS=-Wall -Wextra
+CXXFLAGS=-Wall -Wextra -std=c++0x
 
 ifdef ENABLE_CPU_TIMER
 CXXFLAGS+=-DENABLE_CPU_TIMER

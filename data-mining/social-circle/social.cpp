@@ -16,7 +16,15 @@
 #include <set>
 #include <vector>
 
+// GCC < 4.7 defines __cplusplus to 1 not 201103L even -std=c++0x
+// is given: http://gcc.gnu.org/bugzilla/show_bug.cgi?id=1773
+#if __cplusplus >= 201103L || __GXX_EXPERIMENTAL_CXX0X__
+#include <cstdint>
+#include <unordered_map>
+#else
 #include <boost/cstdint.hpp>
+#include <boost/unordered_map.hpp>
+#endif
 
 
 #ifdef  ENABLE_CPU_TIMER
@@ -41,7 +49,6 @@
 
 
 using namespace std;
-using namespace boost;
 
 
 /*
@@ -51,8 +58,13 @@ using namespace boost;
 typedef uint32_t                UserId;
 typedef uint32_t                UrlId;
 
-typedef map<string, UserId>     UserToId;
-typedef map<string, UrlId>      UrlToId;
+#if __cplusplus >= 201103L || __GXX_EXPERIMENTAL_CXX0X__
+typedef unordered_map<string, UserId>   UserToId;
+typedef unordered_map<string, UrlId>    UrlToId;
+#else
+typedef boost::unordered_map<string, UserId>    UserToId;
+typedef boost::unordered_map<string, UrlId>     UrlToId;
+#endif
 
 /*
  * The value must be ordered set, because init_first_social() and
@@ -142,7 +154,7 @@ public:
 
     /**
      * e:           [in] the element to be pushed
-     * is_popped:   [out] whether a old item is popped
+     * is_popped:   [out] whether an old item is popped
      * popped_item: [out] the popped item if "popped" is true
      * return:      whether the new item is pushed successfully
      */

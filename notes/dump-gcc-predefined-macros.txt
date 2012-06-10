@@ -1,0 +1,5 @@
+http://stackoverflow.com/questions/2958398/gnu-c-how-to-check-when-std-c0x-is-in-effect
+
+$ g++ -E -dM -std=c++98 -x c++ /dev/null >a
+$ g++ -E -dM -std=c++0x -x c++ /dev/null >b
+$ diff -u a b
