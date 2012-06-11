@@ -311,17 +311,20 @@ static void push_circle_to_topN(TopN<SocialCircle*, MoreUsers>& topN,
 
 static void dump_social(ostream& out,
                         const Social& social,
-                        unsigned maxCircleCount,
-                        unsigned maxUrlCount,
-                        unsigned maxUserCount)
+                        Social::size_type maxCircleCount,
+                        vector<UrlId>::size_type maxUrlCount,
+                        vector<UserId>::size_type maxUserCount)
 {
-    unsigned circleCount = min(maxCircleCount, social.size());
+    Social::size_type circleCount = min(maxCircleCount,
+            social.size());
 
     for (unsigned i = 0; i < circleCount; ++i) {
         const SocialCircle* c = social[i];
 
-        unsigned urlCount = min(maxUrlCount, c->urls.size());
-        unsigned userCount = min(maxUserCount, c->users.size());
+        vector<UrlId>::size_type urlCount =
+            min(maxUrlCount, c->urls.size());
+        vector<UserId>::size_type userCount =
+            min(maxUserCount, c->users.size());
 
         out << "circle[" << i << "] of " << social.size() <<
             " circles, " << urlCount << " of " <<
