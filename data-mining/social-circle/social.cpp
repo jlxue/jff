@@ -85,9 +85,17 @@ struct SocialCircle {
     vector<UrlId>   urls;
     vector<UserId>  users;
 
+    // For example, in old social, (url1, url2) is visited by (userA,
+    // userB), in new social, (url1, url2, url3) is also visited by
+    // (userA, userB), then this field records the index of the smaller
+    // circle.
+    uint32_t        subCircleIndex;
+
     // To avoid duplicated set intersections in extend_social_circles(),
     // can't reply on urlId because SocialCircles in a Social is ordered
     // by users.size(), not by urlId.
+    //
+    // Only for internal implementation.
     uint32_t        intersect_start;
 };
 
@@ -406,8 +414,10 @@ static void init_first_social(const AccessLogByUrl& log,
     social.resize(v.size());
     copy(v.begin(), v.end(), social.begin());
 
-    for (Social::size_type i = 0; i < social.size(); ++i) {
+    uint32_t size = social.size();
+    for (Social::size_type i = 0; i < size; ++i) {
         social[i]->intersect_start = i + 1;
+        social[i]->subCircleIndex = size;   // no sub circle
     }
 }
 
@@ -418,10 +428,11 @@ static void init_first_social(const AccessLogByUrl& log,
  * each circle, see the comment for "Social" type definition.
  */
 static void extend_social_circles(const Social& initialSocial,
-                                  const Social& oldSocial,
+                                  Social& oldSocial,
                                   Social& newSocial,
                                   unsigned maxCircleCount,
-                                  unsigned minUserCount)
+                                  unsigned minUserCount,
+                                  bool dedup = false)
 {
     DECLARE_AUTO_CPU_TIMER(t);
 
@@ -478,11 +489,22 @@ static void extend_social_circles(const Social& initialSocial,
                 continue;
             }
 
-            // A specilized set_union() for merge circleA
+            // A specilized set_union() to merge circleA
             // and circleB(single element) into c->urls
             urls_union(c->urls, circleA->urls, circleB->urls[0]);
 
             c->intersect_start = circleB->intersect_start;
+
+            // If the same users visited the bigger url set, the
+            // smaller url set to same user set mapping in old social
+            // is duplicated, but the smaller circle(circleA here)
+            // can't be released because "c" may be thrown during
+            // top N election.
+            if (c->users.size() == circleA->users.size()) {
+                c->subCircleIndex = i;
+            } else {
+                c->subCircleIndex = oldCircleCount;
+            }
 
             push_circle_to_topN(topN, c);
         }
@@ -491,6 +513,33 @@ static void extend_social_circles(const Social& initialSocial,
     const vector<SocialCircle*>& v = topN.content();
     newSocial.resize(v.size());
     copy(v.begin(), v.end(), newSocial.begin());
+
+    // Don't dedup for initialSocial because it's used for every
+    // iterations of extend_social_circles().
+    if (dedup && oldSocial[0]->urls.size() > 1) {
+        bool found = false;
+
+        for (Social::size_type i = 0; i < newSocial.size(); ++i) {
+            uint32_t subCircleIndex = newSocial[i]->subCircleIndex;
+
+            if (subCircleIndex < oldCircleCount) {
+                found = true;
+                delete oldSocial[subCircleIndex];
+                oldSocial[subCircleIndex] = NULL;
+            }
+        }
+
+        if (found) {
+            Social::iterator end = remove(oldSocial.begin(),
+                    oldSocial.end(), (SocialCircle*)NULL);
+            oldSocial.resize(end - oldSocial.begin());
+
+            if (false) {
+                cerr << "Remove " << oldCircleCount - oldSocial.size()
+                    << " duplicated circles\n";
+            }
+        }
+    }
 }
 
 
@@ -607,7 +656,7 @@ void cluster_social_circles(vector<Social*>& socials,
 
             Social* newSocial = new Social();
             extend_social_circles(*initialSocial, *social, *newSocial,
-                    circles_count, 2);
+                    circles_count, 2, true);
 
             social = newSocial;
             if (social->empty()) {
