@@ -21,3 +21,14 @@ http://en.wikipedia.org/wiki/List_of_numerical_analysis_software
 
 http://www.quora.com/Machine-Learning/What-are-some-good-resources-for-learning-about-machine-learning-Why
 
+
+Data visulation:
+    http://en.wikipedia.org/wiki/Exploratory_data_analysis
+
+    http://gephi.org
+    http://www.ggobi.org/
+    http://orange.biolab.si/
+    http://www.openshapa.org/
+    http://www.rosuda.org/Mondrian/
+    http://www.socr.ucla.edu/
+
