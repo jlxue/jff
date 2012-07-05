@@ -14,6 +14,7 @@ http://www.cs.waikato.ac.nz/ml/weka/
 http://www.knime.org/
 http://elki.dbs.ifi.lmu.de/
 http://waffles.sourceforge.net/
+http://fst.utia.cz/
 
 http://en.wikipedia.org/wiki/List_of_numerical_analysis_software
 
@@ -25,10 +26,28 @@ http://www.quora.com/Machine-Learning/What-are-some-good-resources-for-learning-
 Data visulation:
     http://en.wikipedia.org/wiki/Exploratory_data_analysis
 
-    http://gephi.org
+    Gephi       http://gephi.org
+        自动布局，交互布局，图分析
+    yEd         http://www.yworks.com/en/products_yed_about.html
+        自动布局，交互布局
+
+    http://graphexploration.cond.org/
     http://www.ggobi.org/
     http://orange.biolab.si/
     http://www.openshapa.org/
     http://www.rosuda.org/Mondrian/
     http://www.socr.ucla.edu/
+    http://tulip.labri.fr/TulipDrupal/
+    http://networkx.lanl.gov/
+    http://www.algorithmic-solutions.com/leda/index.htm
+    http://www.algorithmic-solutions.info/leda_guide/GraphWin.html
+    http://nodexl.codeplex.com/
+    http://www.cytoscape.org/
+    http://igraph.sourceforge.net/
+    http://vlado.fmf.uni-lj.si/pub/networks/pajek/  (http://pajek.imfm.si/doku.php)
+    https://sites.google.com/site/ucinetsoftware/home
+    https://sites.google.com/site/netdrawsoftware/home
+    http://zvtm.sourceforge.net/zgrviewer.html
+
+    http://www.udemy.com/lectures/gephi1gephi-65918
 
