@@ -6,7 +6,7 @@
 Machine Learning, Tom Mitchell
 Neural Networks for Pattern Recognition, Christopher M. Bishop
 
-Manhout in Action
+Mahout in Action
 Programming Collective Intelligence
 
 http://sourceforge.net/projects/rapidminer/
