@@ -162,6 +162,7 @@ HTML 信息提取
     HTML::TreeBuilder
     HTML::TreeBuilder::XPath
     WWW::Mechanize
+    HTML::ExtractMain (Arc90's readability, Python decruft: http://code.google.com/p/decruft/)
 
 HTTP Client
 ===========
