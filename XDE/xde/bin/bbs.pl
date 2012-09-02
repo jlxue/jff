@@ -6,7 +6,7 @@ use warnings;
 use constant TIMEOUT => 10;
 
 if (@ARGV == 0) {
-    print "Usage: $0 ssh username\@newsmth.net\n";
+    print "Usage: $0 ssh username\@bbs.newsmth.net\n";
     exit;
 }
 
