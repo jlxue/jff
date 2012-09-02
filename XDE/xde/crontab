@@ -1,0 +1,4 @@
+SHELL=/bin/bash
+
+15 12 * * * [ -x $HOME/pkg/sbin/pkg_admin ] && $HOME/pkg/sbin/pkg_admin fetch-pkg-vulnerabilities >/dev/null 2>&1
+0  13 * * * [ -x $HOME/pkg/sbin/pkg_admin ] && $HOME/pkg/sbin/pkg_admin audit

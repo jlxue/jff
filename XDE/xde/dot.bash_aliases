@@ -21,6 +21,8 @@ export ACK_PAGER="less -R"
 which ack-grep >/dev/null 2>&1 && alias ack=ack-grep
 
 alias locallib="eval \`perl -I$HOME/perl5/lib/perl5 -Mlocal::lib\`"
+alias initfink=". /sw/bin/init.sh"
+alias initpkgsrc="export PATH=$HOME/pkg/bin:$HOME/pkg/sbin:$PATH"
 
 alias gb='git branch'
 alias gd='git diff'
@@ -29,7 +31,7 @@ alias gs='git status'
 alias gl='git log'
 alias gk='gitk --all'
 
-u () {
+function u () {
     if expr "$1" : "[1-9][0-9]*$" >/dev/null; then
         local arg="$1" s=..
         while [ $((--arg)) -gt 0 ]; do
@@ -50,7 +52,7 @@ u () {
 # for j() function
 . $HOME/bin/jump.sh
 
-function ranger-cd {
+function ranger-cd () {
     local before after
     before="$(pwd)"
     ranger --fail-unless-cd "$@" || return 0
