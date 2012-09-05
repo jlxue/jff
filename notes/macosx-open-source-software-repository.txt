@@ -1,0 +1,12 @@
+NetBSD's unofficial GIT mirror:
+    https://github.com/jsonn/pkgsrc
+    https://github.com/jsonn/src
+
+NetBSD's own pkgsrc git mirror:     (can't clone)
+    http://git.freebsd.your.org/cgit/pkgsrc/
+    git://git.freebsd.your.org/pkgsrc
+
+DragonFly BSD's pkgsrc GIT mirror:  (bad commit logs)
+    http://gitweb.dragonflybsd.org/pkgsrcv2.git
+    git://git.dragonflybsd.org/pkgsrcv2.git
+
