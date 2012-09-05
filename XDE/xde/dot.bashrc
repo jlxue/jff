@@ -4,6 +4,8 @@
 
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
+[ "$dot_bashrc_sourced" ] && return
+export dot_bashrc_sourced=yes
 
 # don't put duplicate lines in the history. See bash(1) for more options
 # don't overwrite GNU Midnight Commander's setting of `ignorespace'.
@@ -64,6 +66,8 @@ xterm*|rxvt*|screen*|mlterm*)
 *)
     ;;
 esac
+
+export PS1
 
 ## get colorful manual page
 ## http://nion.modprobe.de/blog/archives/572-less-colors-for-man-pages.html

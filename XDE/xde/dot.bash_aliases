@@ -1,5 +1,5 @@
 # enable color support of ls and also add handy aliases
-if which -s dircolors; then
+if which dircolors >/dev/null 2>&1; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
     alias ls='ls --color=auto'
     alias dir='dir --color=auto'
@@ -37,9 +37,9 @@ alias c=clear
 export ACK_PAGER="less -R"
 which ack-grep >/dev/null 2>&1 && alias ack=ack-grep
 
-alias locallib="eval \`perl -I$HOME/perl5/lib/perl5 -Mlocal::lib\`"
-alias initfink=". /sw/bin/init.sh"
-alias initpkgsrc="export PATH=$HOME/pkg/bin:$HOME/pkg/sbin:$PATH"
+alias locallib='eval `perl -I$HOME/perl5/lib/perl5 -Mlocal::lib`'
+alias initfink='which fink >/dev/null 2>&1 || { PS1="(fink) $PS1"; . /sw/bin/init.sh; }'
+alias initpkgsrc='which bmake >/dev/null 2>&1 || { PS1="(pkgsrc) $PS1"; export PATH=$HOME/pkg/bin:$HOME/pkg/sbin:$PATH; }'
 
 alias gb='git branch'
 alias gd='git diff'
