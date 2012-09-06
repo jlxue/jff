@@ -41,8 +41,8 @@ export ACK_PAGER="less -R"
 which ack-grep >/dev/null 2>&1 && alias ack=ack-grep
 
 alias locallib='eval `perl -I$HOME/perl5/lib/perl5 -Mlocal::lib`'
-alias initfink='which fink >/dev/null 2>&1 || { PS1="(fink) $PS1"; . /sw/bin/init.sh; check_color_support; }'
-alias initpkgsrc='which bmake >/dev/null 2>&1 || { PS1="(pkgsrc) $PS1"; export PATH=$HOME/pkg/gnu/bin:$HOME/pkg/bin:$HOME/pkg/sbin:$PATH; check_color_support; }'
+alias initfink='which fink >/dev/null 2>&1 || { export PROMPT_COMMAND="echo -n \(fink\)\ "; . /sw/bin/init.sh; check_color_support; }'
+alias initpkgsrc='which bmake >/dev/null 2>&1 || { export PROMPT_COMMAND="echo -n \(pkgsrc\)\ "; export PATH=$HOME/pkg/gnu/bin:$HOME/pkg/bin:$HOME/pkg/sbin:$PATH; check_color_support; }'
 
 alias gb='git branch'
 alias gd='git diff'
