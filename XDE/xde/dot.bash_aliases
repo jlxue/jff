@@ -1,14 +1,18 @@
 # enable color support of ls and also add handy aliases
-if which dircolors >/dev/null 2>&1; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-    alias dir='dir --color=auto'
-    alias vdir='vdir --color=auto'
+function check_color_support () {
+    if which dircolors >/dev/null 2>&1; then
+        test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+        alias ls='ls --color=auto'
+        alias dir='dir --color=auto'
+        alias vdir='vdir --color=auto'
 
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
-fi
+        alias grep='grep --color=auto'
+        alias fgrep='fgrep --color=auto'
+        alias egrep='egrep --color=auto'
+    fi
+}
+
+check_color_support
 
 # some more ls aliases
 alias ll='ls -l'
@@ -29,8 +33,7 @@ alias minicom='minicom -w'
 
 alias mv='mv -i'
 alias cp='cp -i'
-. $HOME/bin/safe_rm.sh
-alias rm=safe_rm
+[ -f $HOME/bin/safe_rm.sh ] && { . $HOME/bin/safe_rm.sh; alias rm=safe_rm; }
 
 alias c=clear
 
@@ -38,8 +41,8 @@ export ACK_PAGER="less -R"
 which ack-grep >/dev/null 2>&1 && alias ack=ack-grep
 
 alias locallib='eval `perl -I$HOME/perl5/lib/perl5 -Mlocal::lib`'
-alias initfink='which fink >/dev/null 2>&1 || { PS1="(fink) $PS1"; . /sw/bin/init.sh; }'
-alias initpkgsrc='which bmake >/dev/null 2>&1 || { PS1="(pkgsrc) $PS1"; export PATH=$HOME/pkg/bin:$HOME/pkg/sbin:$PATH; }'
+alias initfink='which fink >/dev/null 2>&1 || { PS1="(fink) $PS1"; . /sw/bin/init.sh; check_color_support; }'
+alias initpkgsrc='which bmake >/dev/null 2>&1 || { PS1="(pkgsrc) $PS1"; export PATH=$HOME/pkg/gnu/bin:$HOME/pkg/bin:$HOME/pkg/sbin:$PATH; check_color_support; }'
 
 alias gb='git branch'
 alias gd='git diff'
@@ -67,7 +70,7 @@ function u () {
 }
 
 # for j() function
-. $HOME/bin/jump.sh
+[ -f $HOME/bin/jump.sh ] && . $HOME/bin/jump.sh
 
 function ranger-cd () {
     local before after
