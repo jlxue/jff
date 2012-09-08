@@ -262,6 +262,7 @@ set nowrap
 set nowrapscan
 
 set more
+set mouse=nv
 
 " no beep or flash
 set vb t_vb=

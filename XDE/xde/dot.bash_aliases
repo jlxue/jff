@@ -43,6 +43,9 @@ which ack-grep >/dev/null 2>&1 && alias ack=ack-grep
 alias locallib='eval `perl -I$HOME/perl5/lib/perl5 -Mlocal::lib`'
 alias initfink='which fink >/dev/null 2>&1 || { export PROMPT_COMMAND="echo -n \(fink\)\ "; . /sw/bin/init.sh; check_color_support; }'
 alias initpkgsrc='which bmake >/dev/null 2>&1 || { export PROMPT_COMMAND="echo -n \(pkgsrc\)\ "; export PATH=$HOME/pkg/gnu/bin:$HOME/pkg/bin:$HOME/pkg/sbin:$PATH; check_color_support; }'
+alias initmacports='which port >/dev/null 2>&1 || { export PROMPT_COMMAND="echo -n \(macports\)\ "; export PATH=$HOME/macports/libexec/gnubin:$HOME/macports/bin:$HOME/macports/sbin:$PATH; check_color_support; }'
+alias inithomebrew='which brew >/dev/null 2>&1 || { export PROMPT_COMMAND="echo -n \(homebrew\)\ "; export PATH=$HOME/homebrew/bin:$HOME/homebrew/sbin:$PATH; brew --prefix coreutils >/dev/null 2>&1 && export PATH=$(brew --prefix coreutils)/libexec/gnubin:$PATH; check_color_support; }'
+alias initgentoo=~/gentoo/startprefix; which emerge >/dev/null 2>&1 && export PROMPT_COMMAND="echo -n \(gentoo\)\ ";
 
 alias gb='git branch'
 alias gd='git diff'

@@ -76,6 +76,7 @@ export LESS_TERMCAP_ue=$'\E[0m'
 export LESS_TERMCAP_us=$'\E[01;32m'
 
 export CVS_RSH=ssh
+export EDITOR=vim
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like

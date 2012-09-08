@@ -1,12 +1,108 @@
-NetBSD's unofficial GIT mirror:
-    https://github.com/jsonn/pkgsrc
-    https://github.com/jsonn/src
+fink: (bad, requires sudo or su to obtain root priviledge)
+    $ cd fink-0.34.2
+    $ ./bootstrap
+    $ fink selfupdate-rsync
+    $ fink index -f
 
-NetBSD's own pkgsrc git mirror:     (can't clone)
-    http://git.freebsd.your.org/cgit/pkgsrc/
-    git://git.freebsd.your.org/pkgsrc
+NetBSD pkgsrc:
+    $ cd pkgsrc/bootstrap
+    $ export FETCH_USING=curl PKG_RESUME_TRANSFERS=yes FAILOVER_FETCH=yes
+    $ ./bootstrap --unprivileged --prefer-pkgsrc yes
+        # "--abi 64" breaks some packages:
+        #   http://mail-index.netbsd.org/pkgsrc-users/2009/09/24/msg010804.html
+        #   http://mail-index.netbsd.org/pkgsrc-users/2009/09/24/msg010817.html
+        #   http://mail-index.netbsd.org/pkgsrc-changes/2009/09/24/msg030470.html
+        # ./bootstrap --abi 64 --unprivileged --prefer-pkgsrc yes
 
-DragonFly BSD's pkgsrc GIT mirror:  (bad commit logs)
-    http://gitweb.dragonflybsd.org/pkgsrcv2.git
-    git://git.dragonflybsd.org/pkgsrcv2.git
+    # See: pkgsrc/mk/defaults/mk.conf
+    #      pkgsrc/mk/fetch/sites.mk
+    Insert below before ".endif" in ~/pkg/etc/mk.conf:
+
+FETCH_USING=curl
+PKG_RESUME_TRANSFERS=yes
+FAILOVER_FETCH=yes
+
+MASTER_SORT=.cn .hk .jp .tw .kr .org .net .com .edu .au .de
+MASTER_SORT_REGEXP= \
+    ^http://(.+\.)?cn[0-9]*(\..+)?/     \
+    ^http://(.+\.)?hk[0-9]*(\..+)?/     \
+    ^http://(.+\.)?tw[0-9]*(\..+)?/     \
+    ^http://(.+\.)?jp[0-9]*(\..+)?/     \
+    ^http://(.+\.)?kr[0-9]*(\..+)?/     \
+    ^http://(.+\.)?us[0-9]*(\..+)?/     \
+    ^ftp://(.+\.)?cn[0-9]*(\..+)?/      \
+    ^ftp://(.+\.)?hk[0-9]*(\..+)?/      \
+    ^ftp://(.+\.)?tw[0-9]*(\..+)?/      \
+    ^ftp://(.+\.)?jp[0-9]*(\..+)?/      \
+    ^ftp://(.+\.)?kr[0-9]*(\..+)?/      \
+    ^ftp://(.+\.)?us[0-9]*(\..+)?/
+
+#MASTER_SITE_OVERRIDE=
+#MASTER_SITE_BACKUP=
+#MASTER_SITE_LOCAL=
+
+MASTER_SITE_GNU= \
+    http://mirror.bjtu.edu.cn/gnu/      \
+    http://mirrors.ustc.edu.cn/gnu/     \
+    ftp://mirrors.ustc.edu.cn/gnu/      \
+    http://core.ring.gr.jp/pub/GNU/     \
+    http://ftp.jaist.ac.jp/pub/GNU/     \
+    ftp://ftp.ring.gr.jp/pub/GNU/       \
+    http://mirror.yongbok.net/gnu/      \
+    ftp://mirror.yongbok.net/gnu/       \
+    http://ftp.kaist.ac.kr/gnu/gnu/     \
+    http://ftp.twaren.net/Unix/GNU/gnu/ \
+    ftp://ftp.twaren.net/Unix/GNU/gnu/  \
+    ftp://ftp.ntu.edu.tw/gnu/
+MASTER_SITE_PERL_CPAN=http://mirrors.163.com/cpan/modules/by-module/
+MASTER_SITE_TEX_CTAN= \
+    http://mirror.bjtu.edu.cn/CTAN/ \
+    http://mirror.neu.edu.cn/CTAN/ \
+    http://mirrors.ustc.edu.cn/CTAN/ \
+    http://ftp.ctex.org/mirrors/CTAN/
+#MASTER_SITE_CYGWIN=
+#MASTER_SITE_GNOME=
+#MASTER_SITE_MOZILLA=
+#MASTER_SITE_OPENOFFICE=
+#MASTER_SITE_SOURCEFORGE=
+#MASTER_SITE_SUNSITE=
+#MASTER_SITE_SUSE=
+#MASTER_SITE_XCONTRIB=
+#MASTER_SITE_XEMACS=
+
+
+        ----------------------------------------------
+        NetBSD's unofficial GIT mirror:
+            https://github.com/jsonn/pkgsrc
+            https://github.com/jsonn/src
+
+        NetBSD's own pkgsrc git mirror:     (can't clone)
+            http://git.freebsd.your.org/cgit/pkgsrc/
+            git://git.freebsd.your.org/pkgsrc
+
+        DragonFly BSD's pkgsrc GIT mirror:  (bad commit logs)
+            http://gitweb.dragonflybsd.org/pkgsrcv2.git
+            git://git.dragonflybsd.org/pkgsrcv2.git
+
+macports:
+    $ cd MacPorts-2.1.2
+    $ ./configure --prefix=$HOME/macports --with-applications-dir=$HOME/Applications/MacPorts --with-frameworks-dir=$HOME/Library/Frameworks --with-no-root-privileges
+    $ make && make install
+    $ ~/macports/bin/port -v selfupdate
+
+homebrew:
+    $ cd && mkdir homebrew && curl -L https://github.com/mxcl/homebrew/tarball/master | tar xz --strip 1 -C homebrew
+
+gentoo-prefix:
+    http://www.gentoo.org/proj/en/gentoo-alt/prefix/bootstrap.xml
+    ### only one gentoo mirror is allowed in bootstrap-prefix.sh, and it uses "$GENTOO_MIRRORS/xxx.tar.gz" to fetch file"
+    ### gentoo-prefix has its own gentoo-portage-prefix tree
+    ###     export EPREFIX=$HOME/gentoo GNU_URL=http://ftpmirror.gnu.org GENTOO_MIRRORS="http://mirrors.163.com/gentoo/ http://mirrors.sohu.com/gentoo/ http://mirrors.xmu.edu.cn/gentoo/" SYNC=rsync://mirrors.163.com/gentoo-portage
+
+    $ export EPREFIX=$HOME/gentoo GNU_URL=http://mirror.bjtu.edu.cn/gnu GENTOO_MIRRORS=http://mirrors.163.com/gentoo/
+    $ sed -i -e 's|\${GENTOO_MIRRORS}/\$|\${GENTOO_MIRRORS}/distfiles/\$|g' bootstrap-prefix.sh
+    $ ./bootstrap-prefix.sh
+
+rudix:
+    http://rudix.org/
 
