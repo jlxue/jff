@@ -7,8 +7,8 @@ fink: (bad, requires sudo or su to obtain root priviledge)
 NetBSD pkgsrc:
     $ cd pkgsrc/bootstrap
     $ export FETCH_USING=curl PKG_RESUME_TRANSFERS=yes FAILOVER_FETCH=yes
-    $ ./bootstrap --unprivileged --prefer-pkgsrc yes
-        # "--abi 64" breaks some packages:
+    $ ./bootstrap --unprivileged
+        # "--prefer-pkgsrc yes" and "--abi 64" break some packages:
         #   http://mail-index.netbsd.org/pkgsrc-users/2009/09/24/msg010804.html
         #   http://mail-index.netbsd.org/pkgsrc-users/2009/09/24/msg010817.html
         #   http://mail-index.netbsd.org/pkgsrc-changes/2009/09/24/msg030470.html
@@ -97,9 +97,9 @@ gentoo-prefix:
     http://www.gentoo.org/proj/en/gentoo-alt/prefix/bootstrap.xml
     ### only one gentoo mirror is allowed in bootstrap-prefix.sh, and it uses "$GENTOO_MIRRORS/xxx.tar.gz" to fetch file"
     ### gentoo-prefix has its own gentoo-portage-prefix tree
-    ###     export EPREFIX=$HOME/gentoo GNU_URL=http://ftpmirror.gnu.org GENTOO_MIRRORS="http://mirrors.163.com/gentoo/ http://mirrors.sohu.com/gentoo/ http://mirrors.xmu.edu.cn/gentoo/" SYNC=rsync://mirrors.163.com/gentoo-portage
+    ###     export EPREFIX=$HOME/gentoo GNU_URL=http://ftpmirror.gnu.org GENTOO_MIRRORS="http://mirrors.163.com/gentoo/ http://mirrors.sohu.com/gentoo/ http://mirrors.xmu.edu.cn/gentoo/ http://mirrors.tuna.tsinghua.edu.cn/gentoo/"
 
-    $ export EPREFIX=$HOME/gentoo GNU_URL=http://mirror.bjtu.edu.cn/gnu GENTOO_MIRRORS=http://mirrors.163.com/gentoo/
+    $ export EPREFIX=$HOME/gentoo GNU_URL=http://mirror.bjtu.edu.cn/gnu GENTOO_MIRRORS=http://mirrors.163.com/gentoo/ SYNC=rsync://mirrors.tuna.tsinghua.edu.cn/gentoo-portage-prefix
     $ sed -i -e 's|\${GENTOO_MIRRORS}/\$|\${GENTOO_MIRRORS}/distfiles/\$|g' bootstrap-prefix.sh
     $ ./bootstrap-prefix.sh
 
