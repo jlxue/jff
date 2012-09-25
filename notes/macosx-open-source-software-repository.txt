@@ -42,9 +42,9 @@ MASTER_SORT_REGEXP= \
 #MASTER_SITE_LOCAL=
 
 MASTER_SITE_GNU= \
-    http://mirror.bjtu.edu.cn/gnu/      \
     http://mirrors.ustc.edu.cn/gnu/     \
     ftp://mirrors.ustc.edu.cn/gnu/      \
+    http://mirror.bjtu.edu.cn/gnu/      \
     http://core.ring.gr.jp/pub/GNU/     \
     http://ftp.jaist.ac.jp/pub/GNU/     \
     ftp://ftp.ring.gr.jp/pub/GNU/       \
