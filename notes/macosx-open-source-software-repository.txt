@@ -7,12 +7,15 @@ fink: (bad, requires sudo or su to obtain root priviledge)
 NetBSD pkgsrc:
     $ cd pkgsrc/bootstrap
     $ export FETCH_USING=curl PKG_RESUME_TRANSFERS=yes FAILOVER_FETCH=yes
-    $ ./bootstrap --unprivileged
+    $ ./bootstrap --unprivileged --abi 64 --prefer-pkgsrc yes
         # "--prefer-pkgsrc yes" and "--abi 64" break some packages:
         #   http://mail-index.netbsd.org/pkgsrc-users/2009/09/24/msg010804.html
         #   http://mail-index.netbsd.org/pkgsrc-users/2009/09/24/msg010817.html
         #   http://mail-index.netbsd.org/pkgsrc-changes/2009/09/24/msg030470.html
-        # ./bootstrap --abi 64 --unprivileged --prefer-pkgsrc yes
+        #
+        #   Seems it's fixed:
+        #   https://github.com/jsonn/pkgsrc/commit/d239f8707a64cd2223f078e46ba5e55c69122338
+        #   by adam: Darwin always needs iconv hack
 
     # See: pkgsrc/mk/defaults/mk.conf
     #      pkgsrc/mk/fetch/sites.mk
