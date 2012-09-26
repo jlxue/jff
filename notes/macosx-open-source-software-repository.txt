@@ -13,6 +13,9 @@ NetBSD pkgsrc:
         #   http://mail-index.netbsd.org/pkgsrc-users/2009/09/24/msg010817.html
         #   http://mail-index.netbsd.org/pkgsrc-changes/2009/09/24/msg030470.html
 
+    Install pkgtools/lintpkgsrc, security/mozilla-rootcerts(follow its message!!!),
+    sysutils/coreutils, security/gnupg, security/gnupg2.
+
     # See: pkgsrc/mk/defaults/mk.conf
     #      pkgsrc/mk/fetch/sites.mk
     Insert below before ".endif" in ~/pkg/etc/mk.conf:
