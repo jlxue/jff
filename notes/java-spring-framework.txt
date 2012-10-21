@@ -1,0 +1,239 @@
+http://static.springsource.org/spring/docs/3.1.x/spring-framework-reference/html/beans.html
+
+org.springframework.beans.factory.BeanFactory
+    XmlBeanFactory
+org.springframework.context.ApplicationContext:
+    ClassPathXmlApplicationContext, FileSystemXmlApplicationContext
+
+    !!! ApplicationContext pre-instantiates all singleton beans.
+
+ApplicationContext.getBeanFactory() returns DefaultListableBeanFactory,
+use DefaultListableBeanFactory.registerSingleton(...) and
+registerBeanDefinition(...) to register existing objects that are
+created outside of the container.
+
+-------------
+
+Three configuration metadata: XML-based configuration, annotation-based
+configuration, Java-based configuration
+
+-------------
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <import resource="other.xml"/>
+
+    <bean id="..." name="xxx yyy"
+            class | factory-bean="..."
+            factory-method="..."
+            c:xxx="..."
+            c:xxx-ref="..."     // "name" need debug info or annotated with @ConstructorProperties
+            c:_0-ref="..."      // use index
+            p:xxx="..."
+            p:xxx-ref="..."
+            depends-on="other-bean other-bean2"
+            lazy-init="true"
+            autowire="no|byName|byType|constructor"
+            autowire-candidate="false"
+            scope="singleton|prototype|request|session|globalSession|thread"
+            init-method="..."
+            destroy-method="..."
+            abstract="true"
+            parent="otherBean"
+            >
+        <constructor-arg type | index | name="..."     // "name" need debug info or annotated with @ConstructorProperties
+                         ref | value="...." />
+        <property name="..." ref|value|idref="..."/>
+            //  <idref bean|local|parent="..."/>
+            //
+            //  <ref bean|local|parent="..." />
+            //
+            //  <props>
+            //      <prop key="...">....</prop>
+            //      ...
+            //  </props>
+            //
+            //  <list>
+            //      <value>....</value>
+            //      <ref bean="..."/>
+            //  </list>
+            //
+            //  <map>
+            //      <entry key="..." value="...."/>
+            //      <entry key="..." value-ref="..."/>
+            //  </map>
+            //
+            //  <set>
+            //      <value>...</value>
+            //      <ref bean="...."/>
+            //  </set>
+        <lookup-method name="someMethod" bean="someBean"/>      // requires cglib
+                // also see:  ServiceLocatorFactoryBean, ObjectFactoryCreatingFactoryBean
+
+        // "someBean" needs to implement MethodReplacer interface
+        <replaced-method name="someMethod" replacer="someBean">
+            <arg-type>...</arg-type>
+        </replaced-method>
+
+        // other singleton/prototype beans depend on this scoped-bean
+        <aop:scoped-proxy/>
+    </bean>
+
+    <alias name="fromName" alias="toName"/>
+</beans>
+
+-------------
+
+org.springframework.context.ApplicationContextAware
+
+<lookup-method ...>
+<replaced-method ...>
+
+-------------
+
+Order of lifecycle callbacks:
+
+    (1) @PostConstruct, @PreDestroy
+
+    (2) not recommend, Bean's init-method and destroy-method attributes are better
+        org.springframework.beans.factory.InitializingBean.afterPropertiesSet()
+        org.springframework.beans.factory.DisposableBean.destroy()
+
+    (3) init-method, destroy-method
+
+-------------
+
+Startup and shutdown callbacks
+
+public interface Lifecycle {
+      void start();
+      void stop();
+      boolean isRunning();
+}
+
+public interface LifecycleProcessor extends Lifecycle {
+    void onRefresh();
+    void onClose();
+}
+
+public interface Phased {
+    int getPhase();
+}
+
+public interface SmartLifecycle extends Lifecycle, Phased {
+    boolean isAutoStartup();
+    void stop(Runnable callback);
+}
+
+-------------
+
+ApplicationContext.registerShutdownHook()
+
+-------------
+
+org.springframework.context.ApplicationContextAware
+    Better: <Bean autowire="constructor|byType" ...>
+            @Autowired BeanFactory | ApplicationContext | Environment | ...
+
+org.springframework.beans.factory.BeanNameAware
+
+ApplicationEventPublisherAware
+BeanClassLoaderAware
+BeanFactoryAware
+BootstrapContextAware
+LoadTimeWeaverAware
+MessageSourceAware
+NotificationPublisherAware
+PortletConfigAware
+PortletContextAware
+ResourceLoaderAware
+ServletConfigAware
+ServletContextAware
+
+-------------
+
+4.8 Container Extension Points
+
+Ordered
+org.springframework.beans.factory.config.BeanPostProcessor
+org.springframework.beans.factory.config.BeanFactoryPostProcessor
+
+org.springframework.beans.factory.config.PropertyOverrideConfigurer
+org.springframework.beans.factory.config.PropertyPlaceholderConfigurer
+
+        <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+          <property name="locations" value="classpath:com/foo/jdbc.properties"/>
+        </bean>
+
+        <bean id="dataSource" destroy-method="close"
+            class="org.apache.commons.dbcp.BasicDataSource">
+          <property name="driverClassName" value="${jdbc.driverClassName}"/>
+          <property name="url" value="${jdbc.url}"/>
+          <property name="username" value="${jdbc.username}"/>
+          <property name="password" value="${jdbc.password}"/>
+        </bean>
+
+        Or use:
+        <context:property-placeholder location="classpath:com/foo/jdbc.properties,..."/>
+
+        <context:property-override location="classpath:override.properties"/>
+
+org.springframework.beans.factory.FactoryBean
+    "beanId" and "&beanId"
+
+-------------
+
+4.9 Annotation-based container configuration
+
+    <context:annotation-config/>
+
+@Required
+@Autowired, @Inject
+@Qualifier      is used to narrow down bean candidates after autowired
+
+@Resource       reference another bean by name
+
+-------------
+
+4.10 Classpath scanning and managed component
+
+@Component, @Repository, @Service, @Controller
+
+    <context:component-scan base-package="org.example,..."
+        <context:include-filter type="annotation | assignable | aspectj | regex | custom"
+            expression="..."/>
+        <context:exclude-filter .../>
+    <context::component-scan/>
+
+AutowiredAnnotationBeanPostProcessor
+CommonAnnotationBeanPostProcessor
+
+-------------
+
+4.11 Using JSR 330 Standard Annotations
+
+@Autowired      @Inject
+@Component      @Named
+@Scope("singleton")     @Singleton      // JSR-330 default scope is "prototype",
+                                        // but Spring's default scope is "singleton".
+@Qualifier              @Named
+@Value                  --
+@Required               --
+@Lazy                   --
+
+-------------
+
+4.12 Java-based container configuration
+
+@Configuration, @Bean, @Import, @DependsOn
+@ImportResource
+
+ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+
