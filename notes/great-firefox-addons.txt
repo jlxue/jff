@@ -13,6 +13,7 @@ FoxProxy
 Ghostery
 Greasemonkey
     http://userscripts.org/scripts/show/9310    GoogleMonkeyR
+jsonview
 NoScript
 ReminderFox
 Remove It Permanently
