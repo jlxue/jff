@@ -1,3 +1,4 @@
+========================================================================
 http://static.springsource.org/spring/docs/3.1.x/spring-framework-reference/html/beans.html
 
 org.springframework.beans.factory.BeanFactory
@@ -236,4 +237,29 @@ CommonAnnotationBeanPostProcessor
 @ImportResource
 
 ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+
+========================================================================
+http://static.springsource.org/spring/docs/3.1.x/spring-framework-reference/html/aop.html
+
+8.2.1 Enabling @AspectJ support
+<aop:aspectj-autoproxy/>
+
+Force CGLIB proxy: <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+Limit subset:
+<aop:aspectj-autoproxy>
+    <aop:include name="thisBean"/>
+    <aop:include name="thatBean"/>
+</aop:aspectj-autoproxy>
+
+-------------
+
+AOP mechanisms:
+    proxy-based: object must be created by Spring
+                 self-invocation isn't advised!!!
+                 can only advise public method!!!
+        JDK dynamic proxy(preferred): target object must implement some interface
+        CGLIB proxy: target object doesn't have to implement any interface
+                     use subclass to implement, thus "final" method can't be advised, and constructor will be called twice
+    aspectj: bytecode transform
 

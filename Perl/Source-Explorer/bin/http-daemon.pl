@@ -13,7 +13,6 @@ use warnings;
 
 my $pm = Parallel::Prefork->new({
         max_workers     => 10,
-        fork_delay      => 1,
         trap_signals    => {
             HUP     => 'TERM',
             TERM    => 'TERM',
@@ -22,7 +21,7 @@ my $pm = Parallel::Prefork->new({
     });
 
 my $master = new HTTP::Daemon(
-        Listen      => 5,
+        Listen      => SOMAXCONN,
         LocalAddr   => 'localhost',
         LocalPort   => 9999) || die "$!\n";
 
