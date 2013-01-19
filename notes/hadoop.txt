@@ -1,0 +1,66 @@
+Phases:
+    map -> sort [->combine] -> partition -> shuffle -> merge -> reduce
+
+input data type:
+    Key -> WritableComparable
+    Value -> Writable
+
+        BooleanWritable, ByteWritable, DoubleWritable, FloatWritable,
+        IntWritable, LongWritable, Text, NullWritable
+
+mapper: extends MapReduceBase implements Mapper
+    IdentityMapper, InverseMapper, RegexMaper, TokenCountMapper
+
+reducer: extends MapReduceBase implements Reducer
+    IdentityReducer, LongSumReducer
+
+parititioner: implements Partitioner
+    HashPartitioner
+
+combiner: local reducer
+
+input format:   implements InputFormat
+    TextInputFormat, KeyValueTextInputFormat, SequenceFileInputFormat,
+    NLineInputFormat
+
+customized input format: extends FileInputFormat
+    wrap LineRecordReader or KeyValueLineRecordReader
+
+output format: implements OutputFormat
+    extends FileOutputFormat
+
+    TextOutputFormat, SequenceFileOutputFormat, NullOutputFormat
+
+GenericOptionsParser
+    -conf <configuration file>
+    -D <property=value>
+    -fs <local|namenode:port>
+    -jt <local|jobtracker:port>
+    -files <list of files>
+    -libjars <list of jars>
+    -archives <list of archives>
+
+See http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/DeprecatedProperties.html
+    -Dmapred.reduce.tasks=0
+    -Dmapreduce.job.reduces=0       // new name
+
+    -Dmapred.reduce.tasks=1
+    -Dmapreduce.job.reduces=1       // new name
+
+    -Dmapred.map.tasks=4
+    -Dmapreduce.job.maps=4          // new name
+
+    -Dkey.value.separator.in.input.line=,
+    -Dmapreduce.input.keyvaluelinerecordreader.key.value.separator=,
+
+Hadoop Streaming
+    $ hadoop jar share/hadoop/tools/lib/hadoop-streaming-*.jar \
+        -input xxx.txt  \
+        -output out     \
+        -file some-script   \
+        -mapper "...shell command..."   \
+        -reducer "...shell command..." | aggregate
+
+    aggregate: http://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/lib/aggregate/package-summary.html
+        reducer outputs "function:key\tvalue", eg.  "DoubleValueSum:33  55.66"
+
