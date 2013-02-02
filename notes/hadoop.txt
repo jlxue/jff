@@ -1,3 +1,6 @@
+===============================================================
+Hadoop
+===============================================================
 Phases:
     map -> sort [->combine] -> partition -> shuffle -> merge -> reduce
 
@@ -176,4 +179,50 @@ Speculative execution:
 
     -Dmapred.map.tasks.speculative.execution=false
     -Dmapred.map.tasks.speculative.execution=false
+
+Multiple outputs:
+    MultipleOutputFormat: separate different rows to different files
+    MultipleOutputs: separate different rows or columns to different files
+
+Check quota:
+    $ hadoop fs -count -q <directory>...
+
+Trash bin:
+    core-site.xml:      fs.trash.interval   => 1440  (minutes)
+
+===============================================================
+PIG
+===============================================================
+Running:    pig -x local|mapreduce
+
+http://wiki.apache.org/pig/PiggyBank
+
+===============================================================
+Oozie
+japl    http://code.google.com/p/jaql/
+Hive
+HBase
+Chukwa      http://incubator.apache.org/chukwa
+Cascading
+Cascalog    https://github.com/nathanmarz/cascalog
+CloudBase   http://cloudbase.sourceforget.net
+Hama        http://hama.apache.org
+    a pure BSP (Bulk Synchronous Parallel) computing framework on top of
+    HDFS (Hadoop Distributed File System) for massive scientific
+    computations such as matrix, graph and network algorithms.
+Mahout
+Sqoop       http://sqoop.apache.org
+    transfer bulk data between HDFS and structured datastores such as
+    relational databases
+OpenNLP     http://opennlp.apache.org
+Nutch
+Lucene
+Solr
+Katta       http://katta.sourceforget.net
+Tika        http://tika.apache.org
+    meta data and content extraction
+Flume       http://flume.apache.org
+    log collecting
+Spark       http://spark-project.org/
+http://search-hadoop.com
 

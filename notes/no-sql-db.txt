@@ -7,7 +7,25 @@ TokyoTyrant
 HyperTable
 OrientDB
 
-Neo4J
+hypergraphdb    http://www.hypergraphdb.org/
+infogrid        http://infogrid.org/
+Titan           http://thinkaurelius.github.com/titan/
+
+Memory-based graphs:
+    iGraph          http://igraph.sourceforge.net/
+    NetworkX        http://networkx.lanl.org/
+    JUNG            http://jung.sourceforge.net/
+Disk-based graphs:
+    Neo4J           http://www.neo4j.org/
+    OrientDB        http://orientdb.org/
+    InfiniteGraph   http://objectivity.com/
+    dex             http://www.sparsity-technologies.com/dex
+Cluster-based graphs(Bulk Synchronous Parallel Processing)
+    Google Pregel
+    Hama            http://hama.apache.org/
+    giraph          http://incubator.apache.org/giraph/
+    GoldenOrb       http://goldenorbos.org/
+    GraphLab        http://graphlab.org/
 
 Affinity (http://affinity.cloudfoundry.com/ by VMware Inc.)
 
