@@ -1,5 +1,6 @@
-http://meteor.com/
+http://angularjs.org/
 http://emberjs.com/
+
 http://documentcloud.github.com/backbone/
 http://phonegap.com/
 

@@ -1,0 +1,6 @@
+Xapian      http://xapian.org/
+Sphinx      http://sphinxsearch.com/
+Solr
+Katta
+ElasticSearch
+

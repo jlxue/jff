@@ -1,3 +1,6 @@
+http://meteor.com/
+http://derbyjs.com/
+
 http://nodejs.org/
 http://ringojs.org/
 http://narwhaljs.org/
