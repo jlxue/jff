@@ -198,6 +198,7 @@ Running:    pig -x local|mapreduce
 http://wiki.apache.org/pig/PiggyBank
 
 ===============================================================
+HCatalog
 Oozie
 japl    http://code.google.com/p/jaql/
 Hive
@@ -224,5 +225,13 @@ Tika        http://tika.apache.org
 Flume       http://flume.apache.org
     log collecting
 Spark       http://spark-project.org/
+Drill       http://wiki.apache.org/incubator/DrillProposal
+Impala      http://github.com/cloudera/impala
 http://search-hadoop.com
+
+Hadoop HDFS proxy: readonly
+Hoop/HttpFS: standalone service, Hoop is integrated into Hadoop 0.23.1 as HttpFS
+WebHDFS: part of NameNode and DataNode, new in Hadoop 1.0, provide data locality;
+         client must be able to directly access all data nodes.
+
 

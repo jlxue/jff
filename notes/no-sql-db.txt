@@ -10,6 +10,10 @@ OrientDB
 hypergraphdb    http://www.hypergraphdb.org/
 infogrid        http://infogrid.org/
 Titan           http://thinkaurelius.github.com/titan/
+flockdb
+Spark
+Haloop
+Twister         http://www.iterativemapreduce.org/
 
 Memory-based graphs:
     iGraph          http://igraph.sourceforge.net/
