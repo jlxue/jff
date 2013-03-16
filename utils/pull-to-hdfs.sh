@@ -22,7 +22,7 @@
 #   The maximum number of concurrent jobs is controlled by "pgrep -f $0", so
 #       a) don't copy this script to another name and run both against *same* set of hosts,
 #          since that breaks bandwidth limit;
-#       b) run against *different* sets of hosts on same collector box is fine
+#       b) but it's fine to copy and run against *different* sets of hosts on same collector box
 #
 #   On each host there is at most one "ssh cat" process to pull data, this
 #   is implemented by lock file /tmp/$(basename $0 .sh).lck, notice the
@@ -31,7 +31,7 @@
 #   users.
 #
 # Dependencies:
-#   ssh, curl, util-linux, perl modules List::Util and XML::Simple
+#   ssh, curl, coreutils, findutils, util-linux, perl modules List::Util and XML::Simple
 #
 # Features:
 #   * no agent on collected hosts,  pull mode to fetch files
@@ -51,7 +51,7 @@
 # TODO:
 #   * pluggble storage backend, not limit to HDFS, such as local or remote disk
 #   * calculate md5sum during "ssh cat | curl" and upload it to grid
-#     (actually can be bypased by a MANIFEST and MANIFEST.MD5 file)
+#     (actually can be bypassed by a MANIFEST and MANIFEST.MD5 file)
 #
 # Author:
 #   Yubao Liu <yubao.liu@gmail.com>     2013-03-16
@@ -59,12 +59,12 @@
 ########################################################################
 pull_to_hdfs () {
     local host=$1 find_dir find_args
-    local file_paths file_sizes file_info retries=0 s i t
+    local file_paths file_sizes path_size retries=0 s i t
     shift
 
     declare -a file_paths
     declare -a file_sizes
-    declare -a file_info
+    declare -a path_size
 
     while [ "$2" ]; do
         find_dir="$1"
@@ -76,14 +76,14 @@ pull_to_hdfs () {
         file_sizes=()
 
         while read s; do
-            file_info=($s)
-            [ "${file_info[8]}" ] || continue
-            [ "${file_info[4]}" ] || continue
-            [ "${file_info[4]}" != 0 ] || continue
+            path_size=($s)
+            [ "${path_size[0]}" ] || continue
+            [ "${path_size[1]}" ] || continue
+            [ "${path_size[1]}" != 0 ] || continue
 
-            file_paths[${#file_paths[@]}]=${file_info[8]}
-            file_sizes[${#file_sizes[@]}]=${file_info[4]}
-        done < <(ssh $SSH_OPTS $host find $find_dir $find_args -exec ls -l '{}' '\;')
+            file_paths[${#file_paths[@]}]=${path_size[0]}
+            file_sizes[${#file_sizes[@]}]=${path_size[1]}
+        done < <(ssh $SSH_OPTS $host find $find_dir $find_args -exec stat -c '%n %s' '{}' '\;')
 
         for (( i=0; i < ${#file_paths[@]}; ++i )); do
             t=$(date +%s)
