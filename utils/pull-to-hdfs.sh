@@ -83,7 +83,7 @@ pull_to_hdfs () {
 
             file_paths[${#file_paths[@]}]=${path_size[0]}
             file_sizes[${#file_sizes[@]}]=${path_size[1]}
-        done < <(ssh $SSH_OPTS $host find $find_dir $find_args -exec stat -c '%n %s' '{}' '\;')
+        done < <(ssh $SSH_OPTS $host find $find_dir $find_args -exec stat -c '"%n %s"' '{}' '\;')
 
         for (( i=0; i < ${#file_paths[@]}; ++i )); do
             t=$(date +%s)
