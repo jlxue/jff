@@ -46,7 +46,7 @@
 #   * aim to batch collecting, not real-time collecting, that's doable but hard to be reliable
 #   * many hits to HDFS proxy in a run of synchronization, roughly num_collectors x num_files x 5,
 #     to collect five hourly log files in a week on 80 boxes with 1 collector, it's
-#     1 x (7 * 24 * 5) * 5 = 4200 hits, luckily the QPS is very low
+#     1 x (7 * 24 * 5 * 80) * 5 = 336000 hits, luckily the QPS is very low and that is upper limit.
 #
 # TODO:
 #   * pluggble storage backend, not limit to HDFS, such as local or remote disk
