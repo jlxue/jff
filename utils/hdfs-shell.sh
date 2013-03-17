@@ -1,10 +1,15 @@
-#!/bin/bash
+#!/bin/bash -i
 
 CMDS=" $(hadoop fs 2>&1 | fgrep '[-' | sed -e 's/^\s*\[-//' -e 's/\W.*//' | perl -e 'chomp(@a=<STDIN>); print qq{@a}') "
 D="/user/`id -un`"
+HISTFILE=$HOME/.hdfs_history
+
+set -o emacs
+#set -o histexpand
+#set -o history
 
 while read -p "D=$D PWD=$PWD$ " -e cmd args; do
-    if [ "${cmd:0:1}" = "!" ]; then
+    if [ "${cmd:0:1}" = '!' ]; then
         eval ${cmd:1} $args
     elif [[ "$CMDS" =~ " $cmd " ]]; then
         eval hadoop fs -$cmd $args
