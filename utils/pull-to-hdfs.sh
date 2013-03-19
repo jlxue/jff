@@ -93,7 +93,7 @@ pull_to_hdfs () {
                 0) t=$(( $(date +%s) - t ))
                    [ $t -le 0 ] && t=1
                    log_info "successfully upload: $host:${file_paths[$i]} ${file_sizes[$i]} bytes, $t seconds," \
-                        $(perl -le "printf '%.3f KBps', ${file_sizes[$i]} / $t")
+                        $(perl -le "printf '%.4f MBps', ${file_sizes[$i]} / $t / 1024.0 / 1024.0")
                    ;;
                 1) log_info "already exists: $host:${file_paths[$i]} ${file_sizes[$i]} bytes"
                    ;;
