@@ -229,6 +229,18 @@ query_hdfs_httpfs () {
     curl -s -k --negotiate -u : "$HDFS/$DEST_DIR/$filename" "$@"
 }
 
+on_exit () {
+    [ "$BASH_SUBSHELL" != 0 ] && return
+
+    local pids="$(pgrep -P $$)"
+    [ "$pids" ] && kill $pids
+
+    sleep 2
+
+    pids="$(pgrep -P $$)"
+    [ "$pids" ] && kill -9 $pids
+}
+
 log_info () {
     [ "$QUIET" ] || echo [$(date "+%Y-%m-%d %H:%M:%S")] INFO "$@"
 }
@@ -273,6 +285,8 @@ LOCK_FILE=/tmp/$(basename $0 .sh).lck
 # try to avoid multiple uploaders pulling files from same host
 HOSTS=( $(perl -le 'use List::Util "shuffle"; chomp(@a=<STDIN>); @a=shuffle @a; print "@a"') )
 [ ${#HOSTS[@]} -eq 0 ] && exit 0
+
+trap on_exit EXIT
 
 log_info "start to collect files from ${HOSTS[*]}"
 
