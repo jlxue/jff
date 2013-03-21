@@ -59,7 +59,7 @@
 ########################################################################
 pull_to_hdfs () {
     local host=$1 find_dir find_args
-    local file_paths file_sizes path_size retries=0 s i t
+    local file_paths file_sizes path_size path size retries=0 s i t
     shift
 
     declare -a file_paths
@@ -77,12 +77,18 @@ pull_to_hdfs () {
 
         while read s; do
             path_size=($s)
-            [ "${path_size[0]}" ] || continue
-            [ "${path_size[1]}" ] || continue
-            [ "${path_size[1]}" != 0 ] || continue
+            path="${path_size[0]}"
+            size="${path_size[1]}"
 
-            file_paths[${#file_paths[@]}]=${path_size[0]}
-            file_sizes[${#file_sizes[@]}]=${path_size[1]}
+            [ "$path" ] && [ "$size" ] && [ "$size" != 0 ] &&
+                [ "${path:0:${#find_dir}}" = "$find_dir" ] &&
+                [[ ! "$size" =~ [^0-9] ]] || {
+                    echo "$s" >&2
+                    continue
+            }
+
+            file_paths[${#file_paths[@]}]="$path"
+            file_sizes[${#file_sizes[@]}]="$size"
         done < <(ssh $SSH_OPTS $host find $find_dir $find_args -exec stat -c '"%n %s"' '{}' '\;')
 
         for (( i=0; i < ${#file_paths[@]}; ++i )); do
