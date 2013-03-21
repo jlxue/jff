@@ -232,13 +232,15 @@ query_hdfs_httpfs () {
 on_exit () {
     [ "$BASH_SUBSHELL" != 0 ] && return
 
-    local pids="$(pgrep -P $$)"
-    [ "$pids" ] && kill $pids
+    local pids
 
     sleep 2
-
     pids="$(pgrep -P $$)"
-    [ "$pids" ] && kill -9 $pids
+    [ "$pids" ] && kill $pids >/dev/null 2>&1
+
+    sleep 2
+    pids="$(pgrep -P $$)"
+    [ "$pids" ] && kill -9 $pids >/dev/null 2>&1
 }
 
 log_info () {
