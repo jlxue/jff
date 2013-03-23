@@ -63,10 +63,10 @@ dir=/srv/www/bugzilla
         new_module=1
     }
 
-    [ -e $dir/lib/Apache2/SizeLimit.pm ] || {
-        /usr/bin/perl install-module.pl Apache2::SizeLimit
-        new_module=1
-    }
+    #[ -e $dir/lib/Apache2/SizeLimit.pm ] || {
+    #    /usr/bin/perl install-module.pl Apache2::SizeLimit
+    #    new_module=1
+    #}
 
     [ -z "$new_module" ] || {
         my_etckeeper commit "save after installing modules"
@@ -75,8 +75,8 @@ dir=/srv/www/bugzilla
     [ -e $dir/lib/PatchReader.pm ] &&
         [ -e $dir/lib/Email/MIME/Attachment/Stripper.pm ] &&
         [ -e $dir/lib/Email/Reply.pm ] &&
-        [ -e $dir/lib/Daemon/Generic.pm ] &&
-        [ -e $dir/lib/Apache2/SizeLimit.pm ]
+        [ -e $dir/lib/Daemon/Generic.pm ] # &&
+        #[ -e $dir/lib/Apache2/SizeLimit.pm ]
 
     cd "$pwd"
 }

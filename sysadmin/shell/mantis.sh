@@ -13,15 +13,15 @@ my_etckeeper () {
 }
 
 
-pkg=mantisbt-1.2.8
+pkg=mantisbt-1.2.14
 dir=/srv/www/mantisbt
 
 [ -d $dir ] || {
     [ ! -e /srv/www/$pkg ] || mv /srv/www/$pkg /srv/www/$pkg-`date +%Y%m%d-%H%M%S`
     rm -f /tmp/$pkg.tar.gz
-    wget -O /tmp/$pkg.tar.gz 'http://sourceforge.net/projects/mantisbt/files/mantis-stable/1.2.8/mantisbt-1.2.8.tar.gz/download'
-    [ 054035ba0ebfc8997e10e2bc75d39483 = `md5sum /tmp/$pkg.tar.gz` ] &&
-        [ 6cff6fd7d709e25c620c9717d6bf079ce52b73c5 = `sha1sum /tmp/$pkg.tar.gz` ]
+    wget -O /tmp/$pkg.tar.gz 'http://sourceforge.net/projects/mantisbt/files/mantis-stable/1.2.14/mantisbt-1.2.14.tar.gz/download'
+    [ 71ab7c0a8d3697c9d094e104e80add21 = `md5sum /tmp/$pkg.tar.gz` ] &&
+        [ 3ae652e721da519e706e072fd1b1209b0810c7b6 = `sha1sum /tmp/$pkg.tar.gz` ]
 
     tar --no-same-owner -C /srv/www -zxvf /tmp/$pkg.tar.gz || {
         /bin/rm -rf /srv/www/$pkg

@@ -8,8 +8,8 @@
 # hours, then retries every 6 hours until 4 days have passed since the first
 # failed delivery.
 
-# Please note that these rules only limit the frequenzy of retries, the
-# effective retry-time depends on the frequenzy of queue-running, too.
+# Please note that these rules only limit the frequency of retries, the
+# effective retry-time depends on the frequency of queue-running, too.
 # See QUEUEINTERVAL in /etc/default/exim4.
 
 # Address or Domain    Error       Retries

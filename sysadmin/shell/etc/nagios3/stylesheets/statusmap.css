@@ -1,23 +1,14 @@
+/* exfoliation: a nagios makeover                                          */
+/* Copyright 2010 Matthew Wall, all rights reserved                        */
+/*                                                                         */
+/* Permission to use, copy, modify, and distribute this software for any   */
+/* purpose with or without fee is hereby granted, provided that the above  */
+/* copyright notice and this permission notice appear in all copies.       */
 
-.statusmap { font-family: arial,serif;  background-color: white;  color: black; }
+.statusmap { }
 
-.errorMessage { font-family: arial,serif;  text-align: center;  color: red;  font-weight: bold;  font-size: 12pt; }
-.errorDescription { font-family: arial,serif;  text-align: center;  font-weight: bold;  font-size: 12pt; }
-.warningMessage { text-align: center;  color: red;  font-weight: bold;  font-size: 10pt; }
+.imageInfo { font-size: 8pt; font-weight: bold; text-align: center; }
 
-.infoBox { font-family: arial,serif;  font-size: 8pt;  background-color: #C4C2C2;  padding: 2px; }
-.infoBoxTitle { font-family: arial,serif;  font-size: 10pt;  font-weight: bold; }
-.infoBoxBadProcStatus { color: red; }
-A.homepageURL:Hover { font-family: arial,serif;  color: red; }
+.zoomTitle { font-size: 8pt; font-weight: bold; }
 
-.linkBox { font-family: arial,serif;  font-size: 8pt;  background-color: #DBDBDB;  padding: 1px; }
-
-.optBox { font-family: arial narrow,serif;  font-size: 10pt;  font-weight: bold; }
-.optBoxItem { font-family: arial,serif;  font-size: 8pt;  font-weight: bold;  color: red; }
-
-.imageInfo { font-family: arial,serif;  font-size: 8pt;  font-weight: bold;  text-align: center; }
-
-.zoomTitle { font-family: arial,serif;  font-size: 12pt;  font-weight: bold; }
-
-.popupText { font-family: arial,serif;  font-size: 8pt;  font-weight: bold; }
-
+.popupText { font-size: 8pt; background-color: #eeeeaa; border: 1px solid #777777; padding: 0 5 0 5; }

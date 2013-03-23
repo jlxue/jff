@@ -1,23 +1,11 @@
+/* exfoliation: a nagios makeover                                          */
+/* Copyright 2010 Matthew Wall, all rights reserved                        */
+/*                                                                         */
+/* Permission to use, copy, modify, and distribute this software for any   */
+/* purpose with or without fee is hereby granted, provided that the above  */
+/* copyright notice and this permission notice appear in all copies.       */
 
-.config { font-family: arial,serif;  background-color: white;  color: black; }
+.config { }
 
-.errorMessage { font-family: arial,serif;  text-align: center;  color: red;  font-weight: bold;  font-size: 12pt; }
-.errorDescription { font-family: arial,serif;  text-align: center;  font-weight: bold;  font-size: 12pt; }
-.warningMessage { font-family: arial,serif;  text-align: center;  color: red;  font-weight: bold;  font-size: 10pt; }
-
-.infoBox { font-family: arial,serif;  font-size: 8pt;  background-color: #C4C2C2;  padding: 2px; }
-.infoBoxTitle { font-family: arial,serif;  font-size: 10pt;  font-weight: bold; }
-.infoBoxBadProcStatus { font-family: arial,serif;  color: red; }
-A.homepageURL:Hover { font-family: arial,serif;  color: red; }
-
-.dataTitle { font-family: arial,serif;  text-align: center;  font-weight: bold;  font-size: 12pt; }
-
-TABLE.data { font-family: arial,serif;  font-size: 8pt;  background-color: white;  padding: 2px; }
-TH.data { font-family: arial,serif;  font-size: 8pt;  background-color: white;  text-align: left;  background-color: #999797;  color: #DCE5C1; }
-.dataOdd { font-family: arial,serif;  font-size: 8pt;  background-color: #DBDBDB; }
-.dataEven { font-family: arial,serif;  font-size: 8pt;  background-color: #C4C2C2; }
-
-.reportSelectTitle { font-family: arial,serif;  text-align: center;  font-weight: bold;  font-size: 12pt; }
-.reportSelectSubTitle { font-family: arial,serif;  text-align: left;  font-weight: bold;  font-size: 10pt; }
-.reportSelectItem { font-family: arial,serif;  text-align: left;  font-size: 8pt; }
-
+.reportSelectSubTitle { font-size:  9pt; text-align: left; }
+.reportSelectItem     { font-size:  9pt; }

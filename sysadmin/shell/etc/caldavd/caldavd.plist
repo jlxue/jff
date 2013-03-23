@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-    Copyright (c) 2006-2007 Apple Inc. All rights reserved.
+    Copyright (c) 2006-2011 Apple Inc. All rights reserved.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
     limitations under the License.
   -->
 
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
   <dict>
 
@@ -43,6 +43,9 @@
     <!--
     <key>SSLPort</key>
     <integer>8443</integer>
+
+    <key>EnableSSL</key>
+    <true/>
     -->
 
     <!-- Redirect non-SSL ports to an SSL port (if configured for SSL) -->
@@ -77,13 +80,36 @@
         Data Store
       -->
 
+    <!-- Server root -->
+    <key>ServerRoot</key>
+    <string>/var/lib/caldavd</string>
+
+    <!-- Database connection -->
+    <key>UseDatabase</key>
+    <false/>
+
+    <!--
+    <key>DBType</key>
+    <string>postgres</string>
+    <key>DSN</key>
+    <string>127.0.0.1:caldav:caldav:password::</string>
+     -->
+
     <!-- Data root -->
     <key>DataRoot</key>
-    <string>/var/lib/caldavd/</string>
+    <string>/var/lib/caldavd</string>
 
     <!-- Document root -->
     <key>DocumentRoot</key>
-    <string>/var/spool/caldavd/</string>
+    <string>/var/spool/caldavd</string>
+
+    <!-- Configuration root -->
+    <key>ConfigRoot</key>
+    <string>/etc/caldavd</string>
+
+    <!-- Run root -->
+    <key>RunRoot</key>
+    <string>/var/run/caldavd</string>
 
     <!-- Child aliases -->
     <key>Aliases</key>
@@ -97,24 +123,75 @@
        -->
     </dict>
 
-    <!-- User quota (in bytes) -->
-    <key>UserQuota</key>
-    <integer>104857600</integer><!-- 100Mb -->
 
-    <!-- Attachment size limit (in bytes) -->
-    <key>MaximumAttachmentSize</key>
-    <integer>1048576</integer><!-- 1Mb -->
+    <!--
+        Quotas and limits
+      -->
+
+    <!-- User quota (in bytes) [0 = no quota] applies to attachments only -->
+    <key>UserQuota</key>
+    <integer>104857600</integer> <!-- 100Mb -->
+
+    <!-- Maximum number of calendars/address books allowed in a home -->
+    <!-- 0 for no limit -->
+    <key>MaxCollectionsPerHome</key>
+    <integer>50</integer>
+
+    <!-- Maximum number of resources in a calendar/address book -->
+    <!-- 0 for no limit -->
+    <key>MaxResourcesPerCollection</key>
+    <integer>10000</integer>
+
+    <!-- Maximum resource size (in bytes) -->
+    <key>MaxResourceSize</key>
+    <integer>1048576</integer> <!-- 1Mb -->
 
     <!-- Maximum number of unique attendees per entire event -->
     <!-- 0 for no limit -->
     <key>MaxAttendeesPerInstance</key>
     <integer>100</integer>
 
+    <!-- Maximum number of instances allowed during expansion -->
+    <!-- 0 for no limit -->
+    <key>MaxAllowedInstances</key>
+    <integer>3000</integer>
+
     <!-- Maximum number of instances allowed for a single RRULE -->
     <!-- 0 for no limit -->
     <key>MaxInstancesForRRULE</key>
     <integer>400</integer>
 
+
+    <!-- NSS Directory Service -->
+    <!-- Groups starting with groupPrefix are considered calendarserver groups -->
+    <!-- Don't treat user id's smaller than firstValidUid as calendarserver users -->
+    <!-- Don't treat group id's smaller than firstValidGid as calendarserver groups -->
+    <!-- use shortName@mailDomain as calender user mail addresses -->
+    <key>DirectoryService</key>
+    <dict>
+      <key>type</key>
+      <string>twistedcaldav.directory.nss.NssDirectoryService</string>
+
+      <key>params</key>
+      <dict>
+        <key>realmName</key>
+        <string>CORP.EXAMPLE.COM</string>
+        <key>groupPrefix</key>
+        <string>caldavd-</string>
+        <key>firstValidUid</key>
+        <integer>1000</integer>
+        <key>lastValidUid</key>
+        <integer>65533</integer>
+        <key>firstValidGid</key>
+        <integer>1000</integer>
+        <key>lastValidGid</key>
+        <integer>65533</integer>
+        <key>mailDomain</key>
+        <string>corp.example.com</string>
+        <key>cacheTimeout</key>
+        <integer>30</integer>
+      </dict>
+    </dict>
 
     <!--
         Directory service
@@ -151,46 +228,11 @@
       <dict>
         <key>node</key>
         <string>/Search</string>
-        <key>restrictEnabledRecords</key>
-        <false/>
-        <key>restrictToGroup</key>
-        <string></string>
         <key>cacheTimeout</key>
         <integer>30</integer>
       </dict>
     </dict>
      -->
-
-    <!-- NSS Directory Service -->
-    <!-- Groups starting with groupPrefix are considered calendarserver groups -->
-    <!-- Don't treat user id's smaller than firstValidUid as calendarserver users -->
-    <!-- Don't treat group id's smaller than firstValidGid as calendarserver groups -->
-    <!-- use shortName@mailDomain as calender user mail addresses -->
-    <key>DirectoryService</key>
-    <dict>
-      <key>type</key>
-      <string>twistedcaldav.directory.nss.NssDirectoryService</string>
-
-      <key>params</key>
-      <dict>
-        <key>realmName</key>
-        <string>CORP.EXAMPLE.COM</string>
-        <key>groupPrefix</key>
-        <string>caldavd-</string>
-        <key>firstValidUid</key>
-        <integer>1000</integer>
-        <key>lastValidUid</key>
-        <integer>65533</integer>
-        <key>firstValidGid</key>
-        <integer>1000</integer>
-        <key>lastValidGid</key>
-        <integer>65533</integer>
-        <key>mailDomain</key>
-        <string>corp.example.com</string>
-        <key>cacheTimeout</key>
-        <integer>30</integer>
-      </dict>
-    </dict>
 
     <!--  OpenLDAP Directory Service -->
     <!--
@@ -201,12 +243,14 @@
 
       <key>params</key>
       <dict>
+        <key>restrictEnabledRecords</key>
+        <false/>
+        <key>restrictToGroup</key>
+        <string></string>
         <key>cacheTimeout</key>
         <integer>30</integer>
-        <key>realmName</key>
-        <string>Test Realm</string>
         <key>uri</key>
-        <string>ldap://localhost:389/</string>
+        <string>ldap://example.com/</string>
         <key>tls</key>
         <false/>
         <key>tlsCACertFile</key>
@@ -214,7 +258,7 @@
         <key>tlsCACertDir</key>
         <string></string>
         <key>tlsRequireCert</key>
-        <string>demand</string>
+        <string>never</string>
         <key>credentials</key>
         <dict>
           <key>dn</key>
@@ -223,7 +267,7 @@
           <string></string>
         </dict>
         <key>authMethod</key>
-        <string>PAM</string>
+        <string>LDAP</string>
         <key>rdnSchema</key>
         <dict>
           <key>base</key>
@@ -239,7 +283,24 @@
             <key>emailSuffix</key>
             <string></string>
             <key>filter</key>
-            <string>(objectClass=inetOrgPerson)</string>
+            <string></string>
+            <key>loginEnabledAttr</key>
+            <string></string>
+            <key>loginEnabledValue</key>
+            <string>yes</string>
+            <key>mapping</key>
+            <dict>
+              <key>recordName</key>
+              <string>uid</string>
+              <key>fullName</key>
+              <string>cn</string>
+              <key>emailAddresses</key>
+              <string>mail</string>
+              <key>firstName</key>
+              <string>givenName</string>
+              <key>lastName</key>
+              <string>sn</string>
+            </dict>
           </dict>
           <key>groups</key>
           <dict>
@@ -251,40 +312,62 @@
             <string></string>
             <key>filter</key>
             <string></string>
-          </dict>
-          <key>locations</key>
-          <dict>
-            <key>rdn</key>
-            <string>ou=Locations</string>
-            <key>attr</key>
-            <string>cn</string>
-            <key>emailSuffix</key>
-            <string></string>
-            <key>filter</key>
-            <string></string>
-          </dict>
-          <key>resources</key>
-          <dict>
-            <key>rdn</key>
-            <string>ou=Resources</string>
-            <key>attr</key>
-            <string>cn</string>
-            <key>emailSuffix</key>
-            <string></string>
-            <key>filter</key>
-            <string></string>
+            <key>mapping</key>
+            <dict>
+              <key>recordName</key>
+              <string>cn</string>
+              <key>fullName</key>
+              <string>cn</string>
+              <key>emailAddresses</key>
+              <string>mail</string>
+              <key>firstName</key>
+              <string>givenName</string>
+              <key>lastName</key>
+              <string>sn</string>
+            </dict>
           </dict>
         </dict>
         <key>groupSchema</key>
         <dict>
           <key>membersAttr</key>
           <string>member</string>
+          <key>nestedGroupsAttr</key>
+          <string></string>
           <key>memberIdAttr</key>
+          <string></string>
+        </dict>
+        <key>resourceSchema</key>
+        <dict>
+          <key>resourceInfoAttr</key>
+          <string></string>
+          <key>autoScheduleAttr</key>
+          <string></string>
+          <key>autoScheduleEnabledValue</key>
+          <string>yes</string>
+          <key>proxyAttr</key>
+          <string></string>
+          <key>readOnlyProxyAttr</key>
           <string></string>
         </dict>
       </dict>
     </dict>
-     -->
+    -->
+
+    <!-- Resource and Location Service -->
+    <key>ResourceService</key>
+    <dict>
+      <key>Enabled</key>
+      <true/>
+      <key>type</key>
+      <string>twistedcaldav.directory.xmlfile.XMLDirectoryService</string>
+
+      <key>params</key>
+      <dict>
+        <key>xmlFile</key>
+        <string>/etc/caldavd/resources.xml</string>
+      </dict>
+    </dict>
+
 
     <!--
         Special principals
@@ -304,10 +387,6 @@
     <array>
       <!-- <string>/principals/__uids__/983C8238-FB6B-4D92-9242-89C0A39E5F81/</string> -->
     </array>
-
-    <!-- Principals that can pose as other principals -->
-    <key>SudoersFile</key>
-    <string>/etc/caldavd/sudoers.plist</string>
 
     <!-- Create "proxy access" principals -->
     <key>EnableProxyPrincipals</key>
@@ -376,15 +455,19 @@
         Logging
       -->
 
+    <!-- Log root -->
+    <key>LogRoot</key>
+    <string>/var/log/caldavd</string>
+
     <!-- Apache-style access log -->
     <key>AccessLogFile</key>
-    <string>/var/log/caldavd/access.log</string>
+    <string>access.log</string>
     <key>RotateAccessLog</key>
     <true/>
 
     <!-- Server activity log -->
     <key>ErrorLogFile</key>
-    <string>/var/log/caldavd/error.log</string>
+    <string>error.log</string>
 
     <!-- Log levels -->
     <key>DefaultLogLevel</key>
@@ -392,15 +475,11 @@
 
     <!-- Global server stats --> 
     <key>GlobalStatsSocket</key> 
-    <string>/var/run/caldavd/caldavd-stats.sock</string> 
-
-    <!-- Server statistics file -->
-    <key>ServerStatsFile</key>
-    <string>/var/run/caldavd/stats.plist</string>
+    <string>caldavd-stats.sock</string> 
 
     <!-- Server process ID file -->
     <key>PIDFile</key>
-    <string>/var/run/caldavd/caldavd.pid</string>
+    <string>caldavd.pid</string>
 
 
     <!--
@@ -409,11 +488,15 @@
 
     <!-- Public key -->
     <key>SSLCertificate</key>
+    <string>/etc/ssl/certs/ssl-cert-snakeoil.pem</string>
+
+    <!-- SSL authority chain (for intermediate certs) -->
+    <key>SSLAuthorityChain</key>
     <string></string>
 
     <!-- Private key -->
     <key>SSLPrivateKey</key>
-    <string></string>
+    <string>/etc/ssl/private/ssl-cert-snakeoil.key</string>
 
 
     <!--
@@ -432,7 +515,7 @@
     <key>MultiProcess</key>
     <dict>
       <key>ProcessCount</key>
-      <integer>1</integer> <!-- 0 = larger of: 4 or (2 * CPU count) -->
+      <integer>0</integer> <!-- 0 = larger of: 4 or (2 * CPU count) -->
     </dict>
 
 
@@ -580,6 +663,13 @@
     <key>EnablePrivateEvents</key>
     <true/>
 
+    <!-- Shared Calendars & Address Books -->
+    <key>Sharing</key>
+    <dict>
+      <key>Enabled</key>
+      <true/>
+    </dict>
+
 
     <!--
         Miscellaneous items
@@ -589,32 +679,19 @@
     <key>EnableWebAdmin</key>
     <true/>
 
-    <!-- Twisted -->
-    <key>Twisted</key>
-    <dict>
-      <key>twistd</key>
-      <string>/usr/lib/twisted-calendarserver/bin/twistd</string>
-    </dict>
-
-    <!-- Python Director -->
-    <key>PythonDirector</key>
-    <dict>
-      <key>pydir</key>
-      <string>/usr/share/pydirector/pydir.py</string>
-      <key>ControlSocket</key>
-      <string>/var/run/caldavd/caldavd-pydir.sock</string>
-    </dict>
-
-    <!-- Control Socket -->
-    <key>ControlSocket</key>
-    <string>/var/run/caldavd/caldavd.sock</string>
-
     <!-- Memcached -->
     <key>Memcached</key>
     <dict>
-      <key>ServerEnabled</key>
-      <false/>
+      <key>Pools</key>
+      <dict>
+        <key>Default</key>
+        <dict>
+          <key>ServerEnabled</key>
+          <false/>
+        </dict>
+      </dict>
     </dict>
+
 
   </dict>
 </plist>

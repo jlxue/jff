@@ -1,53 +1,59 @@
 options {
-    directory "/var/cache/bind";
+	directory "/var/cache/bind";
 
-    auth-nxdomain no;    # conform to RFC1035
-    listen-on-v6 { any; };
+	// If there is a firewall between you and nameservers you want
+	// to talk to, you may need to fix the firewall to allow multiple
+	// ports to talk.  See http://www.kb.cert.org/vuls/id/800113
 
-    // If there is a firewall between you and nameservers you want
-    // to talk to, you may need to fix the firewall to allow multiple
-    // ports to talk.  See http://www.kb.cert.org/vuls/id/800113
+	// If your ISP provided one or more IP addresses for stable 
+	// nameservers, you probably want to use them as forwarders.  
+	// Uncomment the following block, and insert the addresses replacing 
+	// the all-0's placeholder.
 
-    // If your ISP provided one or more IP addresses for stable 
-    // nameservers, you probably want to use them as forwarders.  
-    // Uncomment the following block, and insert the addresses replacing 
-    // the all-0's placeholder.
+	// forwarders {
+	// 	0.0.0.0;
+	// };
 
-    // forwarders {
-    //  0.0.0.0;
-    // };
+	recursion yes;
+	allow-recursion { localnets; };
 
-    recursion yes;
-    allow-recursion { localnets; };
+	max-cache-size 50M;
+	recursive-clients 1000;
 
-    max-cache-size 50M;
-    recursive-clients 1000;
+	#avoid-v4-udp-ports { };
+	#avoid-v6-udp-ports { };
 
-    #avoid-v4-udp-ports { };
-    #avoid-v6-udp-ports { };
+	allow-query { localnets; };
+	allow-transfer { localnets; };
+	#black-hole { };
 
-    allow-query { localnets; };
-    allow-transfer { localnets; };
-    #black-hole { };
+	# http://wiki.debian.org/DNSSEC
+	dnssec-enable yes;
+	dnssec-validation yes;
+	dnssec-lookaside auto;
 
-    # http://wiki.debian.org/DNSSEC
-    dnssec-enable yes;
-    dnssec-validation yes;
-    dnssec-lookaside auto;
+	ixfr-from-differences yes;
 
-    ixfr-from-differences yes;
+	# http://www.isc.org/software/bind/delegation-only
+	root-delegation-only exclude {
+		"ad"; "af"; "ar"; "biz";
+		"ch"; "cr"; "cu"; "de"; "dm"; "fi";
+		"fr"; "gu"; "id"; "il"; "li"; "lu";
+		"lv"; "md"; "mp"; "ms"; "museum"; "name";
+		"nf"; "no"; "pa"; "pf"; "pl"; "pro";
+		"re"; "se"; "sr"; "tel"; "to"; "tw";
+		"us"; "uy"; "uz";
+	};
 
-    # http://www.isc.org/software/bind/delegation-only
-    root-delegation-only exclude {
-        "ad"; "af"; "ar"; "biz";
-        "ch"; "cr"; "cu"; "de"; "dm"; "fi";
-        "fr"; "gu"; "id"; "il"; "li"; "lu";
-        "lv"; "md"; "mp"; "ms"; "museum"; "name";
-        "nf"; "no"; "pa"; "pf"; "pl"; "pro";
-        "re"; "se"; "sr"; "tel"; "to"; "tw";
-        "us"; "uy"; "uz";
-    };
+	version "I don't know!";
 
-    version "I don't know!";
+	//========================================================================
+	// If BIND logs error messages about the root key being expired,
+	// you will need to update your keys.  See https://www.isc.org/bind-keys
+	//========================================================================
+	#dnssec-validation auto;
+
+	auth-nxdomain no;    # conform to RFC1035
+	listen-on-v6 { any; };
 };
 

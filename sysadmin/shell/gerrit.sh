@@ -35,13 +35,13 @@ add_system_user_group "Gerrit account" /srv/gerrit gerrit gerrit
 
 
 ## download gerrit
-ver=2.3         # also used by "my_etckeeper commit/tag..." below
+ver=2.6-rc0	# also used by "my_etckeeper commit/tag..." below
 war=gerrit-$ver.war
 [ -e /srv/gerrit/$war ] || {
     rm -f /tmp/$war
-    wget -O /tmp/$war 'http://gerrit.googlecode.com/files/gerrit-2.3.war'
-    [ 0b2181bdc9519d30181185dc9a09433c = `md5sum /tmp/$war` ] &&
-        [ 9034d2f21676b85c8b4633a98c524a6d7fa18571 = `sha1sum /tmp/$war` ]
+    wget -O /tmp/$war 'http://gerrit.googlecode.com/files/gerrit-2.6-rc0.war'
+    [ 2e45287c38875528af8ced2497995f51 = `md5sum /tmp/$war` ] &&
+        [ 28af453c062b222f51ed02f8b8807f928030e567 = `sha1sum /tmp/$war` ]
     mv /tmp/$war /srv/gerrit/$war
 }
 [ -e /srv/gerrit/gerrit.war ] || ln -s /srv/gerrit/$war /srv/gerrit/gerrit.war

@@ -36,3 +36,6 @@ dkim_strict = DKIM_STRICT
 .ifdef DKIM_SIGN_HEADERS
 dkim_sign_headers = DKIM_SIGN_HEADERS
 .endif
+.ifdef TLS_DH_MIN_BITS
+tls_dh_min_bits = TLS_DH_MIN_BITS
+.endif

@@ -15,7 +15,7 @@ dummy='@@REDIMINE_DB_PASSWORD@@'
 isnew=
 set +x
 parse_password_by_pattern "dbc_dbpass\\s*=\\s*['\"]([^'\"]+)" $f $dummy db_passwd isnew
-[ ! "$isnew" ] || pg_set_role_password redmine "$db_passwd"
+[ ! "$isnew" ] || pg_set_role_password redmine_default "$db_passwd"
 
 substitude_template "$tmpl" "$f" 600 root:root CONF_CHANGED -e "s/$dummy/$db_passwd/"
 

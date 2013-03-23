@@ -771,10 +771,10 @@ acl_check_rcpt:
     log_message = SPF check failed.
     !acl = acl_local_deny_exceptions
     condition = ${run{/usr/bin/spfquery.mail-spf-perl --ip \
-                   \"$sender_host_address\" --identity \
+                   ${quote:$sender_host_address} --identity \
                    ${if def:sender_address_domain \
-                       {--scope mfrom  --identity \"$sender_address\"}\
-                       {--scope helo --identity  \"$sender_helo_name\"}}}\
+                       {--scope mfrom  --identity ${quote:$sender_address}}\
+                       {--scope helo --identity ${quote:$sender_helo_name}}}}\
                    {no}{${if eq {$runrc}{1}{yes}{no}}}}
 
   defer
@@ -1630,6 +1630,9 @@ dkim_strict = DKIM_STRICT
 .ifdef DKIM_SIGN_HEADERS
 dkim_sign_headers = DKIM_SIGN_HEADERS
 .endif
+.ifdef TLS_DH_MIN_BITS
+tls_dh_min_bits = TLS_DH_MIN_BITS
+.endif
 #####################################################
 ### end transport/30_exim4-config_remote_smtp
 #####################################################
@@ -1664,6 +1667,9 @@ remote_smtp_smarthost:
 .endif
 .ifdef REMOTE_SMTP_HELO_DATA
   helo_data=REMOTE_SMTP_HELO_DATA
+.endif
+.ifdef TLS_DH_MIN_BITS
+tls_dh_min_bits = TLS_DH_MIN_BITS
 .endif
 #####################################################
 ### end transport/30_exim4-config_remote_smtp_smarthost
@@ -1714,8 +1720,8 @@ begin retry
 # hours, then retries every 6 hours until 4 days have passed since the first
 # failed delivery.
 
-# Please note that these rules only limit the frequenzy of retries, the
-# effective retry-time depends on the frequenzy of queue-running, too.
+# Please note that these rules only limit the frequency of retries, the
+# effective retry-time depends on the frequency of queue-running, too.
 # See QUEUEINTERVAL in /etc/default/exim4.
 
 # Address or Domain    Error       Retries
