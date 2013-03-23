@@ -27,3 +27,6 @@ remote_smtp_smarthost:
 .ifdef REMOTE_SMTP_HELO_DATA
   helo_data=REMOTE_SMTP_HELO_DATA
 .endif
+.ifdef TLS_DH_MIN_BITS
+tls_dh_min_bits = TLS_DH_MIN_BITS
+.endif

@@ -265,10 +265,10 @@ acl_check_rcpt:
     log_message = SPF check failed.
     !acl = acl_local_deny_exceptions
     condition = ${run{/usr/bin/spfquery.mail-spf-perl --ip \
-                   \"$sender_host_address\" --identity \
+                   ${quote:$sender_host_address} --identity \
                    ${if def:sender_address_domain \
-                       {--scope mfrom  --identity \"$sender_address\"}\
-                       {--scope helo --identity  \"$sender_helo_name\"}}}\
+                       {--scope mfrom  --identity ${quote:$sender_address}}\
+                       {--scope helo --identity ${quote:$sender_helo_name}}}}\
                    {no}{${if eq {$runrc}{1}{yes}{no}}}}
 
   defer

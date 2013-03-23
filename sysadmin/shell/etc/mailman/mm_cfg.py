@@ -58,15 +58,14 @@ MAILMAN_SITE_LIST = 'mailman'
 # If you change these, you have to configure your http server
 # accordingly (Alias and ScriptAlias directives in most httpds)
 DEFAULT_URL_PATTERN = 'http://%s/cgi-bin/mailman/'
-PRIVATE_ARCHIVE_URL = '/cgi-bin/mailman/private'
 IMAGE_LOGOS         = '/images/mailman/'
 
 #-------------------------------------------------------------
 # Default domain for email addresses of newly created MLs
-DEFAULT_EMAIL_HOST = 'corp.example.com'
+DEFAULT_EMAIL_HOST = 'gold.corp.example.com'
 #-------------------------------------------------------------
 # Default host for web interface of newly created MLs
-DEFAULT_URL_HOST   = 'corp.example.com'
+DEFAULT_URL_HOST   = 'gold.corp.example.com'
 #-------------------------------------------------------------
 # Required when setting any of its arguments.
 add_virtualhost(DEFAULT_URL_HOST, DEFAULT_EMAIL_HOST)

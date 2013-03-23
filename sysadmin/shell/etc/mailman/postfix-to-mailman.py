@@ -58,7 +58,7 @@
 #   lists.example.com   mailman:
 #
 # /etc/mailman/mm_cfg.py
-#    MTA = Postfix # So that mailman generates the recipients table
+#    MTA = None # So that mailman skips aliases generation
 #    POSTFIX_STYLE_VIRTUAL_DOMAINS = ['lists.example.com']
 #    # alias for postmaster, abuse and mailer-daemon
 #    DEB_LISTMASTER = 'postmaster@example.com'
