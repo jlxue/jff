@@ -1,107 +1,84 @@
+/* exfoliation: a nagios makeover                                          */
+/* Copyright 2010 Matthew Wall, all rights reserved                        */
+/*                                                                         */
+/* Permission to use, copy, modify, and distribute this software for any   */
+/* purpose with or without fee is hereby granted, provided that the above  */
+/* copyright notice and this permission notice appear in all copies.       */
 
-.extinfo { font-family: arial,serif;  background-color: white;  color: black;  font-size: 10pt; }
+.extinfo { }
 
-.errorMessage { font-family: arial,serif;  text-align: center;  color: red;  font-weight: bold;  font-size: 12pt; }
-.errorDescription { font-family: arial,serif;  text-align: center;  font-weight: bold;  font-size: 12pt; }
-.warningMessage { font-family: arial,serif;  text-align: center;  color: red;  font-weight: bold;  font-size: 10pt; }
+.perfTypeTitle { font-size: 10pt; text-align: right; font-weight: bold; }
 
-.infoBox { font-family: arial,serif;  font-size: 8pt;  background-color: #C4C2C2;  padding: 2px; }
-.infoBoxTitle { font-family: arial,serif;  font-size: 10pt;  font-weight: bold; }
-.infoBoxBadProcStatus { font-family: arial,serif;  color: red; }
-A.homepageURL:Hover { font-family: arial,serif;  color: red; }
+.stateInfoPanel { font-size: 9pt; }
+.stateStatisticsPanel { }
+.stateInfoTable1 { background-color: #f4f2f2; border: 1px solid #d0d0d0; }
+.stateInfoTable2 { background-color: #f4f2f2; border: 1px solid #d0d0d0; }
 
-.linkBox { font-family: arial,serif;  font-size: 8pt;  background-color: #DBDBDB;  padding: 1px; }
+.dataVar { font-size: 9pt; font-weight: bold; }
+.dataVal { font-size: 9pt; }
 
-DIV.dataTitle { font-family: arial,serif;  text-align: center;  font-weight: bold;  font-size: 12pt; }
-DIV.data { font-family: arial,serif;  text-align: center;  font-size: 12pt; }
+/* FIXME: override the defaults until php/html is fixed */
+/* .data      { font-size: 10pt; font-weight: bold; } */
+div.data   { font-size: 10pt; font-weight: normal; }
+.dataTitle { font-size: 10pt; font-weight: bold; padding-bottom: 5; }
 
-DIV.perfTypeTitle { font-family: arial,serif;  text-align: right;  font-weight: bold;  font-size: 10pt; }
+.commandTitle { font-size: 10pt; text-align: center; font-weight: bold; padding-bottom: 5; }
+TABLE.command { background-color: #f4f2f2; border: 1px solid #d0d0d0; }
+.command      { font-size: 9pt; }
+.commandPanel { }
+.commentPanel { }
 
-TABLE.data { font-family: arial,serif;  font-size: 10pt;  background-color: white;  padding: 2px; }
-TH.data { font-family: arial,serif;  font-size: 10pt;  background-color: white;  text-align: left;  background-color: #999797;  color: #DCE5C1; }
-.dataOdd { font-family: arial,serif;  font-size: 10pt;  background-color: #DBDBDB; }
-.dataEven { font-family: arial,serif;  font-size: 10pt;  background-color: #C4C2C2; }
+.commentTitle  { font-size: 10pt; text-align: center; font-weight: bold; }
+DIV.commentNav { font-size: 10pt; text-align: center; }
+A.commentNav   { font-size: 10pt; }
 
-.optionBoxTitle { font-family: arial,serif;  text-align: center;  font-weight: bold;  font-size: 10pt; }
-.optionBox { font-family: arial,serif;  font-size: 10pt;  background-color: #DBDBDB;  padding: 2px; }
+TABLE.comment { font-size: 10pt; background-color: white; padding: 2; }
+TH.comment    { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border-bottom: 1px solid #777777; color: #333333; }
+.commentOdd   { font-size: 9pt; background-color: #e7e7e7; }
+.commentEven  { font-size: 9pt; background-color: #f4f2f2; }
+DIV.comment,A.comment { font-size: 10pt; background-color: white; text-align: center; }
 
-.commandTitle { font-family: arial,serif;  text-align: center;  font-weight: bold;  font-size: 12pt; }
+.downtimeTitle  { font-size: 12pt; text-align: center; font-weight: bold; }
+DIV.downtimeNav { font-size: 10pt; text-align: center; }
+A.downtimeNav   { font-size: 10pt; }
 
-TABLE.command { font-family: arial,serif;  font-size: 10pt;  background-color: #DBDBDB; padding: 3px; }
-.command { font-family: arial,serif;  font-size: 10pt; padding: 2px; }
+TABLE.downtime { font-size: 10pt; background-color: white; padding: 2; }
+TH.downtime    { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border-bottom: 1px solid #777777; color: #333333; }
+.downtimeOdd   { font-size: 9pt; background-color: #e7e7e7; }
+.downtimeEven  { font-size: 9pt; background-color: #f4f2f2; }
 
-.commentTitle { font-family: arial,serif;  text-align: center;  font-weight: bold;  font-size: 12pt; }
-DIV.commentNav { font-family: arial,serif;  font-size: 10pt;  text-align: center; }
-A.commentNav { font-family: arial,serif;  font-size: 10pt; }
+.notflapping           { background-color: #88d066; border: 1px solid #777777; font-weight: bold; float: left; }
+.flapping              { background-color: #f88888; border: 1px solid #777777; font-weight: bold; float: left; }
+.notificationsENABLED  { background-color: #88d066; border: 1px solid #777777; font-weight: bold; }
+.notificationsDISABLED { background-color: #f88888; border: 1px solid #777777; font-weight: bold; }
+.checksENABLED         { background-color: #88d066; border: 1px solid #777777; font-weight: bold; }
+.checksDISABLED        { background-color: #f88888; border: 1px solid #777777; font-weight: bold; }
+.eventhandlersENABLED  { background-color: #88d066; border: 1px solid #777777; font-weight: bold; }
+.eventhandlersDISABLED { background-color: #f88888; border: 1px solid #777777; font-weight: bold; }
+.flapdetectionENABLED  { background-color: #88d066; border: 1px solid #777777; font-weight: bold; }
+.flapdetectionDISABLED { background-color: #f88888; border: 1px solid #777777; font-weight: bold; }
+.downtimeACTIVE        { background-color: #f88888; border: 1px solid #777777; font-weight: bold; float: left; }
+.downtimeINACTIVE      { background-color: #88d066; border: 1px solid #777777; font-weight: bold; float: left; }
+.processOK             { background-color: #88d066; border: 1px solid #777777; font-weight: bold; }
+.processUNKNOWN        { background-color: #ffbb55; border: 1px solid #777777; font-weight: bold; }
+.processWARNING        { background-color: #ffff00; border: 1px solid #777777; font-weight: bold; }
+.processCRITICAL       { background-color: #f88888; border: 1px solid #777777; font-weight: bold; }
+.modeACTIVE            { background-color: #88d066; border: 1px solid #777777; font-weight: bold; }
+.modeSTANDBY           { background-color: #ffff00; border: 1px solid #777777; font-weight: bold; }
 
-TABLE.comment { font-family: arial,serif;  font-size: 10pt;  background-color: white;  padding: 2px; }
-TH.comment { font-family: arial,serif;  font-size: 10pt;  background-color: white;  text-align: left;  background-color: #999797;  color: #DCE5C1; }
-.commentOdd { font-family: arial,serif;  font-size: 9pt;  background-color: #DBDBDB; }
-.commentEven { font-family: arial,serif;  font-size: 9pt;  background-color: #C4C2C2; }
-DIV.comment,A.comment { font-family: arial,serif;  font-size: 10pt;  background-color: white;  text-align: center; }
+.hostUP           { background-color: #88d066; border: 1px solid #777777; font-weight: bold; float: left; }
+.hostDOWN         { background-color: #f88888; border: 1px solid #777777; font-weight: bold; float: left; }
+.hostUNREACHABLE  { background-color: #f88888; border: 1px solid #777777; font-weight: bold; float: left; }
 
-.downtimeTitle { font-family: arial,serif;  text-align: center;  font-weight: bold;  font-size: 12pt; }
-DIV.downtimeNav { font-family: arial,serif;  font-size: 10pt;  text-align: center; }
-A.downtimeNav { font-family: arial,serif;  font-size: 10pt; }
+.serviceOK        { background-color: #88d066; border: 1px solid #777777; font-weight: bold; float: left; }
+.serviceWARNING   { background-color: #ffff00; border: 1px solid #777777; font-weight: bold; float: left; }
+.serviceUNKNOWN   { background-color: #ffbb55; border: 1px solid #777777; font-weight: bold; float: left; }
+.serviceCRITICAL  { background-color: #f88888; border: 1px solid #777777; font-weight: bold; float: left; }
 
-TABLE.downtime { font-family: arial,serif;  font-size: 10pt;  background-color: white;  padding: 2px; }
-TH.downtime { font-family: arial,serif;  font-size: 10pt;  background-color: white;  text-align: left;  background-color: #999797;  color: #DCE5C1; }
-.downtimeOdd { font-family: arial,serif;  font-size: 9pt;  background-color: #DBDBDB; }
-.downtimeEven { font-family: arial,serif;  font-size: 9pt;  background-color: #C4C2C2; }
-
-.notificationsENABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #33FF00;  font-weight: bold; }
-.notificationsDISABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #F83838;  font-weight: bold; }
-
-.checksENABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #33FF00;  font-weight: bold; }
-.checksDISABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #F83838;  font-weight: bold; }
-
-.eventhandlersENABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #33FF00;  font-weight: bold; }
-.eventhandlersDISABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #F83838;  font-weight: bold; }
-
-.flapdetectionENABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #33FF00;  font-weight: bold; }
-.flapdetectionDISABLED { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #F83838;  font-weight: bold; }
-
-.notflapping { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #33FF00;  font-weight: bold; float: left; }
-.flapping { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #F83838;  font-weight: bold; float: left; }
-
-.downtimeACTIVE { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #F83838;  font-weight: bold; float: left; }
-.downtimeINACTIVE { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #33FF00;  font-weight: bold; float: left; }
-
-.processOK { font-family: arial,serif;  font-size: 10pt;  background-color: #33FF00;  font-weight: bold; }
-.processUNKNOWN { font-family: arial,serif;  font-size: 10pt;  background-color: #FF9900;  font-weight: bold; }
-.processWARNING { font-family: arial,serif;  font-size: 10pt;  background-color: #FFFF00;  font-weight: bold; }
-.processCRITICAL { font-family: arial,serif;  font-size: 10pt;  background-color: #F83838;  font-weight: bold; }
-
-.modeACTIVE { font-family: arial,serif;  font-size: 10pt;  background-color: #33FF00;  font-weight: bold; }
-.modeSTANDBY { font-family: arial,serif;  font-size: 10pt;  background-color: #FFFF00;  font-weight: bold; }
-
-.hostUP { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #33FF00;  font-weight: bold; float: left; }
-.hostDOWN { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #F83838;  font-weight: bold; float: left; }
-.hostUNREACHABLE { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #F83838;  font-weight: bold; float: left; }
-
-.serviceOK { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #33FF00;  font-weight: bold; float: left; }
-.serviceWARNING { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #FFFF00;  font-weight: bold; float: left; }
-.serviceUNKNOWN { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #FF9900;  font-weight: bold; float: left; }
-.serviceCRITICAL { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #F83838;  font-weight: bold; float: left; }
-
-.commandPanel { font-family: arial,serif;  background-color: white; }
-.commentPanel { font-family: arial,serif;  background-color: white; }
-
-.stateInfoPanel { font-family: arial,serif;  background-color: white; }
-.stateStatisticsPanel { font-family: arial,serif;  background-color: white; }
-.stateInfoTable1 { font-family: arial,serif;  font-size: 10pt;  background-color: #DBDBDB; }
-.stateInfoTable2 { font-family: arial,serif;  font-size: 10pt;  background-color: #C4C2C2; }
-
-.dataVar { font-family: arial,serif;  font-size: 10pt; }
-.dataVal { font-family: arial,serif;  font-size: 10pt; }
-
-.queueTitle { font-family: arial,serif;  text-align: center;  font-weight: bold;  font-size: 12pt; }
-
-TABLE.queue { font-family: arial,serif;  font-size: 10pt;  background-color: white;  padding: 2px; }
-TH.queue { font-family: arial,serif;  font-size: 10pt;  background-color: white;  text-align: left;  background-color: #999797;  color: #DCE5C1; }
-.queueOdd { font-family: arial,serif;  font-size: 9pt;  background-color: #DBDBDB; }
-.queueEven { font-family: arial,serif;  font-size: 9pt;  background-color: #C4C2C2; }
-.queueENABLED { font-family: arial,serif;  font-size: 9pt;  background-color: #33FF00; }
-.queueDISABLED { font-family: arial,serif;  font-size: 9pt;  background-color: #F83838; }
-
-
+.queueTitle    { font-size: 12pt; text-align: center; font-weight: bold; }
+TABLE.queue    { font-size: 9pt; padding: 0; }
+TH.queue       { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border-bottom: 1px solid #777777; color: #333333; }
+.queueOdd      { font-size: 9pt; background-color: #e7e7e7; padding: 0 4 0 4; }
+.queueEven     { font-size: 9pt; background-color: #f4f2f2; padding: 0 4 0 4; }
+.queueENABLED  { font-size: 9pt; background-color: #88d066; border: 1px solid #777777; padding: 0 4 0 4; }
+.queueDISABLED { font-size: 9pt; background-color: #f88888; border: 1px solid #777777; padding: 0 4 0 4; }

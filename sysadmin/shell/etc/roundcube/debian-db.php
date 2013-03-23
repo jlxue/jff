@@ -3,7 +3,7 @@
 ## database access settings in php format
 ## automatically generated from /etc/dbconfig-common/roundcube.conf
 ## by /usr/sbin/dbconfig-generate-include
-## Sat, 11 Feb 2012 20:24:51 +0800
+## Sat, 23 Mar 2013 17:50:10 +0800
 ##
 ## by default this file is managed via ucf, so you shouldn't have to
 ## worry about manual changes being silently discarded.  *however*,

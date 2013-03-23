@@ -3,6 +3,6 @@ production:
   database: redmine_default
   host: localhost
   port: 
-  username: redmine
+  username: redmine_default
   password: @@REDIMINE_DB_PASSWORD@@
   encoding: utf8

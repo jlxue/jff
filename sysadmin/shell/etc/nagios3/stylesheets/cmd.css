@@ -1,24 +1,14 @@
+/* exfoliation: a nagios makeover                                          */
+/* Copyright 2010 Matthew Wall, all rights reserved                        */
+/*                                                                         */
+/* Permission to use, copy, modify, and distribute this software for any   */
+/* purpose with or without fee is hereby granted, provided that the above  */
+/* copyright notice and this permission notice appear in all copies.       */
 
-.cmd { font-family: arial,serif;  background-color: white;  color: black;  font-size: 10pt; }
+.cmd { }
 
-.errorMessage { font-family: arial,serif;  text-align: center;  color: red;  font-weight: bold;  font-size: 12pt; }
-.errorDescription { font-family: arial,serif;  text-align: center;  font-weight: bold;  font-size: 12pt; }
-.warningMessage { font-family: arial,serif;  text-align: center;  color: red;  font-weight: bold;  font-size: 10pt; }
-.infoMessage { font-family: arial,serif;  text-align: center;  font-weight: bold;  font-size: 10pt; }
-
-.infoBox { font-family: arial,serif;  font-size: 8pt;  background-color: #C4C2C2;  padding: 2px; }
-.infoBoxTitle { font-family: arial,serif;  font-size: 10pt;  font-weight: bold; }
-.infoBoxBadProcStatus { color: red; }
-A.homepageURL:Hover { font-family: arial,serif;  color: red; }
-
-.cmdType { font-family: arial,serif;  font-size: 10pt;  font-weight: bold;  text-align: center;  color: red; }
-
-.commandDescription { font-family: arial,serif;  font-size: 8pt;  text-align: center;  background-color: #DBDBDB;  padding: 5px; }
-.descriptionTitle { font-family: arial,serif;  font-size: 10pt;  text-align: center;  font-weight: bold; }
-
-.optBox { font-family: arial,serif;  font-size: 8pt;  text-align: left;  padding: 5px;  background-color: #C4C2C2;  padding: 5; }
-.optBoxTitle { font-family: arial,serif;  font-size: 10pt;  text-align: center;  font-weight: bold; }
-.optBoxItem { font-family: arial,serif;  font-size: 10pt;  text-align: left;  background-color: #C4C2C2; }
-.optBoxRequiredItem { font-family: arial,serif;  font-size: 10pt;  text-align: left;  color: red;  background-color: #C4C2C2; }
-
-
+.cmdType            { font-size: 12pt; font-weight: bold; color: #aa0000; padding-bottom: 40; }
+.commandDescription { font-size:  8pt; background-color: #f4f2f2; border: 1px solid #d0d0d0; margin: 4 0 0 0; padding: 4 4 4 4; }
+.descriptionTitle   { font-size: 10pt; font-weight: bold; }
+.infoMessage        { font-size:  8pt; background-color: #efefaa; border: 1px solid #777777; margin: 40 20% 0 20%; padding: 5 5 5 5; }
+.optBox             { font-size:  9pt; padding: 5 5 5 5; }

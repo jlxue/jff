@@ -1,42 +1,29 @@
+/* exfoliation: a nagios makeover                                          */
+/* Copyright 2010 Matthew Wall, all rights reserved                        */
+/*                                                                         */
+/* Permission to use, copy, modify, and distribute this software for any   */
+/* purpose with or without fee is hereby granted, provided that the above  */
+/* copyright notice and this permission notice appear in all copies.       */
 
-.notifications { font-family: arial,serif;  background-color: white;  color: black; }
+.notifications { }
 
-.errorMessage { font-family: arial,serif;  text-align: center;  color: red;  font-weight: bold;  font-size: 12pt; }
-.errorDescription { font-family: arial,serif;  text-align: center;  font-weight: bold;  font-size: 12pt; }
-.warningMessage { font-family: arial,serif;  text-align: center;  color: red;  font-weight: bold;  font-size: 10pt; }
+TABLE.notifications { padding: 0; margin: 0; }
+TH.notifications    { font-size: 9pt; text-align: left; padding: 0 3px 0 3px; border-bottom: 1px solid #777777; color: #333333; }
+.notificationsOdd   { font-size: 8pt; background-color: #e7e7e7; padding: 0 4 0 4; }
+.notificationsEven  { font-size: 8pt; background-color: #f4f2f2; padding: 0 4 0 4; }
 
-.infoBox { font-family: arial,serif;  font-size: 8pt;  background-color: #C4C2C2;  padding: 2px; }
-.infoBoxTitle { font-family: arial,serif;  font-size: 10pt;  font-weight: bold; }
-.infoBoxBadProcStatus { color: red; }
-A.homepageURL:Hover { font-family: arial,serif;  color: red; }
+/* these are dark colors */
+.notificationsOK              { background-color: #88d066; border: 1px solid #777777; padding: 0 4 0 4; }
+.notificationsUNKNOWN         { background-color: #ffbb55; border: 1px solid #777777; padding: 0 4 0 4; }
+.notificationsWARNING         { background-color: #ffff00; border: 1px solid #777777; padding: 0 4 0 4; }
+.notificationsCRITICAL        { background-color: #f88888; border: 1px solid #777777; padding: 0 4 0 4; }
+.notificationsACKNOWLEDGEMENT { background-color: #aaaaaa; border: 1px solid #777777; padding: 0 4 0 4; }
+.notificationsCUSTOM          { background-color: #778899; border: 1px solid #777777; padding: 0 4 0 4; }
 
-.linkBox { font-family: arial,serif;  font-size: 8pt;  background-color: #DBDBDB;  padding: 1px; }
-
-.dataTitle { font-family: arial,serif;  text-align: center;  font-weight: bold;  font-size: 12pt; }
-
-.navBoxTitle { font-family: arial narrow,serif;  font-size: 10pt;  font-weight: bold; }
-.navBoxItem { font-family: arial,serif;  font-size: 8pt;  font-weight: bold;  color: red; }
-.navBoxDate { font-family: arial,serif;  font-size: 8pt;  font-weight: bold; }
-.navBoxFile { font-family: arial,serif;  font-size: 8pt;  font-weight: bold;  text-align: center; }
-
-.optBox { font-family: arial narrow,serif;  font-size: 10pt;  font-weight: bold; }
-.optBoxItem { font-family: arial,serif;  font-size: 8pt;  font-weight: bold;  color: red; }
-
-TABLE.notifications { font-family: arial,serif;  font-size: 10pt;  background-color: white;  padding: 5px; }
-TH.notifications { font-family: arial,serif;  font-size: 10pt;  background-color: white;  text-align: left;  background-color: #999797;  color: #DCE5C1; }
-.notificationsOdd { font-family: arial,serif;  font-size: 8pt;  background-color: #DBDBDB; }
-.notificationsEven { font-family: arial,serif;  font-size: 8pt;  background-color: #C4C2C2; }
-
-.notificationsOK { font-family: arial,serif;  font-size: 8pt;  background-color: #33FF00; }
-.notificationsUNKNOWN { font-family: arial,serif;  font-size: 8pt;  background-color: #FF9900; }
-.notificationsWARNING { font-family: arial,serif;  font-size: 8pt;  background-color: #FFFF00; }
-.notificationsCRITICAL { font-family: arial,serif;  font-size: 8pt;  background-color: #F83838; }
-.notificationsACKNOWLEDGEMENT { font-family: arial,serif;  font-size: 8pt;  background-color: #AAAAAA; }
-.notificationsCUSTOM { font-family: arial,serif;  font-size: 8pt;  background-color: #778899; }
-
-.notificationsHOSTUP { font-family: arial,serif;  font-size: 8pt;  background-color: #33FF00; }
-.notificationsHOSTDOWN { font-family: arial,serif;  font-size: 8pt;  background-color: #F83838; }
-.notificationsHOSTUNREACHABLE { font-family: arial,serif;  font-size: 8pt;  background-color: #F83838; }
-.notificationsHOSTACKNOWLEDGEMENT { font-family: arial,serif;  font-size: 8pt;  background-color: #AAAAAA; }
-.notificationsHOSTCUSTOM { font-family: arial,serif;  font-size: 8pt;  background-color: #778899; }
+/* these are dark colors */
+.notificationsHOSTUP              { background-color: #88d066; border: 1px solid #777777; padding: 0 4 0 4; }
+.notificationsHOSTDOWN            { background-color: #f88888; border: 1px solid #777777; padding: 0 4 0 4; }
+.notificationsHOSTUNREACHABLE     { background-color: #ffbb55; border: 1px solid #777777; padding: 0 4 0 4; }
+.notificationsHOSTACKNOWLEDGEMENT { background-color: #aaaaaa; border: 1px solid #777777; padding: 0 4 0 4; }
+.notificationsHOSTCUSTOM          { background-color: #778899; border: 1px solid #777777; padding: 0 4 0 4; }
 

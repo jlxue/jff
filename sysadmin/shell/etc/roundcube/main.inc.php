@@ -247,7 +247,7 @@ $rcmail_config['x_frame_options'] = 'sameorigin';
 // this key is used to encrypt the users imap password which is stored
 // in the session record (and the client cookie if remember password is enabled).
 // please provide a string of exactly 24 chars.
-$rcmail_config['des_key'] = 'XMhRaSVQQysd[][QIxeIPAVy';
+$rcmail_config['des_key'] = 'EI3QNJwP0KE36utfmA91HqE[';
 
 // Automatically add this domain to user names for login
 // Only for IMAP servers that require full e-mail addresses for login
@@ -616,6 +616,7 @@ $rcmail_config['ldap_public']['Verisign'] = array(
 // -> in this case, assure that groups and contacts are separated due to the concernig filters! 
 'groups'        => array(
 'base_dn'     => '',
+'scope'       => 'sub',   // search mode: sub|base|list
 'filter'      => '(objectClass=groupOfNames)',
 'object_classes' => array("top", "groupOfNames"),
 'member_attr'  => 'member',   // name of the member attribute, e.g. uniqueMember
@@ -665,6 +666,16 @@ $rcmail_config['skin'] = 'default';
 
 // show up to X items in list view
 $rcmail_config['pagesize'] = 40;
+
+// sort contacts by this col (preferably either one of name, firstname, surname)
+$rcmail_config['addressbook_sort_col'] = 'surname';
+
+// the way how contact names are displayed in the list
+// 0: display name
+// 1: (prefix) firstname middlename surname (suffix)
+// 2: (prefix) surname firstname middlename (suffix)
+// 3: (prefix) surname, firstname middlename (suffix)
+$rcmail_config['addressbook_name_listing'] = 0;
 
 // use this timezone to display date/time
 $rcmail_config['timezone'] = 'auto';
