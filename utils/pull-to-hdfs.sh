@@ -260,7 +260,7 @@ RATE=${RATE:-1m}                    # 1 MB/s bandwidth limit
 SSH_OPTS=${SSH_OPTS:-"-o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=20 -o ServerAliveInterval=30 -o TCPKeepAlive=yes"}
 RETRIES_ON_READ=${RETRIES_ON_READ:-10}
 
-while getopts "a:c:d:r:s:hq" opt; do
+while getopts "c:d:r:s:hq" opt; do
     case $opt in
         c) CONCURRENCY=$OPTARG ;;
         d) DEST_DIR=$OPTARG ;;
