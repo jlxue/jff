@@ -10,7 +10,7 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 
 
 cmp_dir $SCRIPT_DIR/etc/dovecot /etc/dovecot --exclude master-users || {
-    overwrite_dir $SCRIPT_DIR/etc/dovecot /etc/dovecot --exclude master-users
+    overwrite_dir $SCRIPT_DIR/etc/dovecot /etc/dovecot --exclude master-users --exclude dovecot.pem
     service dovecot reload
 }
 
@@ -24,6 +24,9 @@ ensure_mode_user_group /etc/dovecot/dovecot-dict-sql.conf.ext   640 root dovecot
 ensure_mode_user_group /etc/dovecot/dovecot-sql.conf.ext    640 root dovecot
 ensure_mode_user_group /etc/dovecot/dovecot-ldap.conf.ext   600 root root
 ensure_mode_user_group /etc/dovecot/master-users            640 root dovecot
+ensure_mode_user_group /etc/dovecot/dovecot.pem             644 root dovecot
+ensure_mode_user_group /etc/dovecot/private                 700 root root
+ensure_mode_user_group /etc/dovecot/private/dovecot.pem     600 root dovecot
 
 
 ensure_service_started dovecot dovecot
