@@ -7,7 +7,8 @@ SCRIPT_DIR=$(readlink -f $(dirname $0))
 
 
 [ -e /usr/local/bin/rb-site -a -e /usr/local/bin/rbssh ] ||
-    easy_install --no-user-cfg ReviewBoard
+    easy_install ReviewBoard
+    #easy_install --no-user-cfg ReviewBoard
 
 ensure_service_started postgresql postgres
 
