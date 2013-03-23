@@ -13,15 +13,15 @@ my_etckeeper () {
 }
 
 
-pkg=Foswiki-1.1.4
+pkg=Foswiki-1.1.8
 dir=/srv/www/foswiki
 
 [ -d $dir ] || {
     [ ! -e /srv/www/$pkg ] || mv /srv/www/$pkg /srv/www/$pkg-`date +%Y%m%d-%H%M%S`
     rm -f /tmp/$pkg.tgz
-    wget -O /tmp/$pkg.tgz 'http://sourceforge.net/projects/foswiki/files/foswiki/1.1.4/Foswiki-1.1.4.tgz'
-    [ 19d6f20afd06d8eb321f583f417176df = `md5sum /tmp/$pkg.tgz` ] &&
-        [ 7ed7c2bf2777a59d1a09c68747b72a2c52499276 = `sha1sum /tmp/$pkg.tgz` ]
+    wget -O /tmp/$pkg.tgz 'http://sourceforge.net/projects/foswiki/files/foswiki/1.1.8/Foswiki-1.1.8.tgz'
+    [ f49e6dec6da4c5124ef96a1009d196ed = `md5sum /tmp/$pkg.tgz` ] &&
+        [ 596c32f972a09d3c5ef035ccbdc0fb4688144aeb = `sha1sum /tmp/$pkg.tgz` ]
 
     tar --no-same-owner -C /srv/www -zxvf /tmp/$pkg.tgz || {
         /bin/rm -rf /srv/www/$pkg

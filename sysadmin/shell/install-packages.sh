@@ -17,9 +17,6 @@ i () {
 [ ! -e /etc/init.d/postgresql ] || ensure_service_started postgresql postgres
 
 ###########################################################
-# ~pstandard includes exim4-daemon-light, but we want exim4-daemon-heavy
-#i "?or(~prequired,~pstandard,~pimportant)"
-
 i resolvconf
 #i unattended-upgrades
 
@@ -190,7 +187,7 @@ i viewvc
 # svnserve is preferred than svn apache module
 #i libapache2-svn
 
-# dependencies for bugzilla 4.2
+# dependencies for bugzilla 4.2.x
 i libtimedate-perl libdatetime-perl libdatetime-timezone-perl \
   libdbi-perl libtemplate-perl libemail-send-perl libemail-mime-perl \
   liburi-perl liblist-moreutils-perl libmath-random-isaac-perl \
@@ -207,7 +204,7 @@ i libtimedate-perl libdatetime-perl libdatetime-timezone-perl \
 
 i build-essential # required by bugzilla's install-modle.pl
 
-# dependencies for foswiki 1.1.4
+# dependencies for foswiki 1.1.x
 i rcs libapache-htpasswd-perl libcgi-session-perl \
   liblocale-maketext-lexicon-perl libcrypt-passwdmd5-perl \
   libarchive-zip-perl libnet-smtp-ssl-perl \
@@ -231,7 +228,7 @@ i trac trac-announcer trac-bitten trac-customfieldadmin \
   trac-wysiwyg
 
 # Redmine
-i redmine redmine-pgsql libfcgi-ruby1.8
+i redmine redmine-pgsql libfcgi-ruby1.9.1
 
 # Drupal 7
 i drupal7
