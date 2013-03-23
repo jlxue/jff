@@ -1,3 +1,10 @@
+key, secret, seed, pass
+
+handle "des_key" in /etc/roundcube/main.inc.php
+handle secret in /etc/redmine/default/session.yml
+
+
+
 /etc/security/access.conf
 
 https:// for all virtual hosts

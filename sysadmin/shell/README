@@ -98,6 +98,8 @@ nameserver 127.0.0.1
     # /usr/sbin/ldapinit
     # /usr/sbin/ldapaddgroup jack
     # /usr/sbin/ldapadduser jack jack
+    # service nslcd restart
+    # service nscd restart
     # mkdir /home/jack; chown jack:jack /home/jack  # required by Dovecot
     # kdestroy
     # getent passwd | grep jack

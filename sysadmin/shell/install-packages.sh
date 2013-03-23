@@ -65,7 +65,7 @@ i ldapscripts smbldap-tools shelldap ldapvi
 
 # antivirus
 # XXX: http://web.nvd.nist.gov/view/vuln/search-results?query=clamav&search_type=all&cves=on
-i clamav clamav-unofficial-sigs
+i clamav clamav-daemon clamav-unofficial-sigs
 #i amavisd-new
 
 # antispam: http://www.maretmanu.org/homepage/inform/exim-spam.php#spam
@@ -116,7 +116,7 @@ i libapache2-mod-fcgid libapache2-mod-wsgi
 # libapache2-mpm-prefork, but I want more efficient worker mpm and all
 # dynamic web contents running in seperate processes for maximum
 # security, that's to say, FastCGI mode or separate WSGI/PSGI mode.
-i php5 php5-suhosin php5-cgi php5-sasl
+i php5 php5-cgi php5-sasl
 
 
 # SQL database, Sympa, Roundcube etc require mysql | postgresql
@@ -212,7 +212,7 @@ i rcs libapache-htpasswd-perl libcgi-session-perl \
   libfcgi-perl libgraphics-magick-perl
 
 # MoinMoin wiki
-i python-moinmoin python-flup python-docutils python-xml \
+i python-moinmoin python-flup python-docutils \
     antiword catdoc poppler-utils
 
 i ejabberd imagemagick  # imagemagick is required for CAPTCHA
@@ -224,7 +224,7 @@ i samba smbclient samba-tools
 i trac trac-announcer trac-bitten trac-customfieldadmin \
   trac-datefieldplugin trac-git trac-icalviewplugin \
   trac-jsgantt trac-mastertickets trac-odtexport \
-  trac-subtickets trac-tags trac-wikiprint trac-wikirename \
+  trac-subtickets trac-tags trac-wikiprint \
   trac-wysiwyg
 
 # Redmine
