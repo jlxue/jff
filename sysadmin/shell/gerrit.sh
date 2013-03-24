@@ -111,6 +111,7 @@ EOF
     echo cache/
     echo git/
     echo logs/
+    echo tmp/
 } > /srv/gerrit/site/.gitignore
 
 [ -e /srv/gerrit/site/.git ] || {

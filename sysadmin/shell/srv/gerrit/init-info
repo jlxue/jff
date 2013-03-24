@@ -95,3 +95,6 @@ n
 # Listen on port                 [8081]:
 2080
 
+# Canonical URL                  [http://127.0.0.1/]:
+http://gerrit.corp.example.com/
+

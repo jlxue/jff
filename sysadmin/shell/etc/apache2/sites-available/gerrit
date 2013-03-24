@@ -20,7 +20,9 @@
         Allow from all
     </Proxy>
 
-    <Location /login/>
+    # seems gerrit-2.6-rc0 requires auth for / now, not only /login
+    #<Location /login/>
+    <Location />
         AuthType Kerberos
         Require valid-user
 
