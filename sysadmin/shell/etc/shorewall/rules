@@ -23,6 +23,7 @@ IMAP(ACCEPT)	net		$FW
 HTTP(ACCEPT)	net		$FW
 HTTPS(ACCEPT)	net		$FW
 JabberPlain(ACCEPT)	net	$FW
+JabberSecure(ACCEPT)	net	$FW
 SMB(ACCEPT)	net		$FW
 SVN(ACCEPT)	net		$FW
 
