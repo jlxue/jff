@@ -72,6 +72,10 @@ have obtained Kerberos ticket and setup Negotiate authentication in Firefox.
 Putty on Windows support GSSAPI authentication, KFW is required.
 Only pubkey and GSSAPI authentication is allowed for SSH service.
 
+SSH on MacOS X disables GSSAPIAuthentication by default, you need
+add "GSSAPIAuthentication yes" to ~/.ssh/config or add "-o GSSAPIAuthentication=yes"
+to ssh or scp at command line.
+
 Host is "gold.corp.example.com".
 
 

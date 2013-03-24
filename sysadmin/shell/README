@@ -169,7 +169,7 @@ find you can login without password.
 
 ++ Mantis Configuration ++
 
-10.1) Comment "$g_login_method = BASIC_AUTH" in /srv/www/mantis/config_inc.php
+10.1) Comment "$g_login_method = BASIC_AUTH" in /srv/www/mantisbt/config_inc.php
       then restart Apache2.
 
 10.2) Access "http://bug.corp.example.com/admin/install.php" to finish
